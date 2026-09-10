@@ -1,0 +1,402 @@
+/* Reusable Stellic components. Geometry matches the Figma component specs.
+ *
+ * Figma paints strokes *inside* the frame, so a Figma "16px padding, 1px
+ * stroke" box measures 16px from the outer edge to the content. A CSS border
+ * sits outside the padding box, so every bordered container subtracts the
+ * border width back out of its padding. That is what the calc() paddings are. */
+
+/* ============================================================ Icon */
+.icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: currentColor;
+}
+.icon--8 { width: 8px; height: 8px; }
+.icon--12 { width: 12px; height: 12px; }
+.icon--14 { width: 14px; height: 14px; }
+.icon--16 { width: 16px; height: 16px; }
+.icon--20 { width: 20px; height: 20px; }
+.icon--24 { width: 24px; height: 24px; }
+
+.icon--muted { color: var(--color-gray-80); }
+.icon--success { color: var(--color-success-100); }
+.icon--warning { color: var(--color-warning-50); }
+.icon--primary { color: var(--color-primary-100); }
+
+/* ============================================================ Button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--size-9);
+  padding: var(--space-2) calc(var(--space-4) - var(--border-width));
+  border-radius: var(--radius-md);
+  font: var(--weight-medium) var(--text-13) / var(--leading-13) var(--font-sans);
+  letter-spacing: var(--tracking-0);
+  white-space: nowrap;
+}
+
+/* Tertiary — the workhorse outline button. */
+.btn--tertiary {
+  background: var(--base-surface);
+  border: var(--border-width) solid var(--base-input);
+  color: var(--base-foreground);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn--primary {
+  background: var(--base-primary);
+  color: var(--base-primary-foreground);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn--sm {
+  height: var(--size-8);
+  padding: var(--space-2) calc(var(--space-3) - var(--border-width));
+}
+
+.btn--icon {
+  width: var(--size-9);
+  height: var(--size-9);
+  padding: var(--space-2) calc(var(--space-4) - var(--border-width));
+}
+
+/* Selected segmented-control state: 3px ring, ring-coloured hairline, no lift. */
+.btn--selected {
+  border-color: var(--base-ring);
+  box-shadow: var(--ring-selected);
+  overflow: hidden;
+}
+
+/* ============================================================ Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: calc(var(--space-0-5) - var(--border-width)) calc(var(--space-2) - var(--border-width));
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font: var(--weight-regular) var(--text-12) / var(--leading-16) var(--font-sans);
+  letter-spacing: var(--tracking-02);
+  white-space: nowrap;
+}
+.badge--secondary { background: var(--color-gray-5); color: var(--color-gray-100); }
+.badge--success { background: var(--color-success-5); color: var(--color-success-100); }
+.badge--danger { background: var(--color-alert-5); color: var(--color-alert-100); }
+.badge--warning { background: var(--color-warning-5); color: var(--color-warning-50); }
+.badge--quiet { background: transparent; color: var(--color-gray-80); }
+
+/* ============================================================ Status pill
+   The REVIEWED / UNREVIEWED marker on a semester card. */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) 6px;
+  border-radius: var(--radius-md);
+  font: var(--weight-medium) var(--text-11) / var(--leading-16) var(--font-sans);
+  letter-spacing: var(--tracking-05);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.status-pill--reviewed { background: var(--color-success-5); color: var(--color-success-100); }
+.status-pill--unreviewed { background: var(--color-gray-5); color: var(--color-gray-100); }
+
+/* ============================================================ Audit icon
+   16x16 square marking a course group's audit state. */
+.audit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-4);
+  height: var(--size-4);
+  flex: none;
+  border-radius: var(--radius-md);
+}
+.audit-icon--registered {
+  background: var(--color-warning-50);
+  color: var(--color-white);
+}
+.audit-icon--registered .icon {
+  width: 10.667px;
+  height: 10.667px;
+}
+.audit-icon--planned {
+  background: var(--color-warning-5);
+  border: 0.667px solid var(--color-warning-50);
+  color: var(--color-warning-50);
+}
+.audit-icon--planned .icon {
+  width: 9.333px;
+  height: 9.333px;
+}
+
+/* ============================================================ Input */
+.input {
+  position: relative;
+  width: 312px;
+  height: var(--size-9);
+  flex: none;
+  background: var(--base-surface);
+  border: var(--border-width) solid var(--base-input);
+  border-radius: var(--radius-md);
+}
+.input__content {
+  position: absolute;
+  top: 5px;
+  right: 11px;
+  left: 11px;
+  height: 24px;
+  overflow: hidden;
+}
+.input__icon {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-gray-60);
+}
+.input__placeholder {
+  position: absolute;
+  top: 0;
+  right: var(--space-1);
+  left: 28px;
+  font: var(--weight-regular) var(--text-15) / 24px var(--font-sans);
+  color: var(--color-gray-80);
+}
+
+/* ============================================================ Avatar */
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-40);
+  color: var(--color-gray-0);
+  font: var(--weight-regular) var(--text-15) / 24px var(--font-sans);
+}
+
+/* ============================================================ Alert */
+/* The design pins the registration banner to 92px and lets the vertically
+   centred body spill into the padding; auto height would render it 100px. */
+.alert {
+  display: flex;
+  align-items: center;
+  height: 92px;
+  gap: var(--space-2);
+  width: 100%;
+  padding: calc(var(--space-4) - var(--border-width));
+  background: var(--color-primary-0);
+  border: var(--border-width) solid var(--color-primary-100);
+  border-radius: var(--radius-md);
+}
+.alert__body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.alert__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding-bottom: var(--space-2);
+}
+.alert__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.alert__title .icon {
+  margin-top: 2px;
+}
+
+/* ============================================================ Dashed drop slot */
+.add-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: calc(var(--space-4) - var(--border-width));
+  background: var(--base-surface);
+  border: var(--border-width) dashed var(--base-input);
+  border-radius: var(--radius-md);
+  font: var(--weight-regular) var(--text-12) / var(--leading-16) var(--font-sans);
+  letter-spacing: var(--tracking-02);
+  color: var(--color-gray-60);
+}
+
+/* ============================================================ Audit row
+   One planned or registered course inside a semester card. */
+.audit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: calc(var(--space-2) - var(--border-width)) calc(var(--space-4) - var(--border-width));
+  background: var(--base-surface);
+  border: var(--border-width) solid var(--color-gray-40);
+  border-radius: var(--radius-md);
+}
+/* Draggable rows tighten to a uniform 8px inset to seat the handle. */
+.audit-row--draggable {
+  padding: calc(var(--space-2) - var(--border-width));
+}
+.audit-row__handle {
+  color: var(--base-foreground);
+}
+.audit-row__body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.audit-row__code {
+  font: var(--weight-regular) var(--text-13) / var(--leading-20) var(--font-sans);
+  color: var(--color-gray-80);
+}
+.audit-row__name {
+  font: var(--weight-semibold) var(--text-13) / var(--leading-20) var(--font-sans);
+  color: var(--base-foreground);
+}
+.audit-row__section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--weight-regular) var(--text-13) / var(--leading-20) var(--font-sans);
+  color: var(--base-foreground);
+}
+
+/* ============================================================ Semester card */
+.semester-card {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-self: stretch;
+  padding: calc(var(--space-6) - var(--border-width));
+  background: var(--base-surface);
+  border: var(--border-width) solid var(--color-gray-40);
+  border-radius: var(--radius-md);
+}
+.semester-card__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+.semester-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+/* Terms whose next block is an alert or an empty slot carry the gap themselves. */
+.semester-card__head--gap {
+  padding-bottom: var(--space-4);
+}
+.semester-card__titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.semester-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--weight-semibold) var(--text-15) / var(--leading-20) var(--font-sans);
+  color: var(--color-gray-100);
+}
+.semester-card__title .icon {
+  color: var(--color-gray-80);
+}
+.semester-card__meta {
+  font: var(--weight-regular) var(--text-13) / var(--leading-20) var(--font-sans);
+  color: var(--color-gray-80);
+}
+/* Group heading: "In Progress (27 Credits)", "Planned (27 Credits)". */
+.credit-group--tall {
+  height: 24px;
+}
+.credit-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--weight-semibold) var(--text-13) / var(--leading-20) var(--font-sans);
+  color: var(--color-gray-80);
+}
+.credit-group__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: var(--space-4);
+}
+.credit-group__deltas {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* ============================================================ Timeline rail */
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  flex: none;
+}
+.rail--wide { width: 24px; }
+.rail--centered { justify-content: center; }
+.rail__lead { height: 12px; }
+.rail__pad-top { padding-top: var(--space-1); }
+.rail__node { flex: none; }
+.rail__line {
+  flex: 1;
+  width: 2px;
+  min-height: 0;
+}
+.rail--active .rail__node { color: var(--color-warning-50); }
+.rail--active .rail__line { background: var(--color-warning-50); }
+.rail--future .rail__node { color: var(--color-gray-60); }
+.rail--future .rail__line { background: var(--color-gray-60); }
+.rail--done .rail__node { color: var(--color-success-100); }
+.rail--empty .rail__node { color: var(--color-gray-40); }
+
+/* ============================================================ FAB */
+.fab {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-100);
+  color: var(--color-white);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* ============================================================ Faux scrollbar
+   Present in the design as a 4px track pinned to the content edge. */
+.scrollrail {
+  width: 4px;
+  flex: none;
+  background: var(--color-gray-40);
+}

@@ -1,0 +1,135 @@
+/* Plan Your Path — the multi-year planner canvas. */
+
+.page {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+
+/* ============================================================ Plan header */
+.plan-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.plan-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.plan-header__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--weight-semibold) var(--text-18) / var(--leading-20) var(--font-sans);
+  color: var(--color-gray-100);
+}
+.plan-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.plan-facet {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.plan-facet__label {
+  font: var(--weight-semibold) var(--text-13) / var(--leading-20) var(--font-sans);
+  color: var(--base-foreground);
+}
+.plan-facet__add {
+  font: var(--weight-regular) var(--text-13) / var(--leading-20) var(--font-sans);
+  color: var(--color-gray-80);
+  text-decoration: underline;
+  text-underline-position: from-font;
+}
+
+.plan-header__tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+/* ============================================================ Year row
+   Every year sits on the shared timeline rail: rail column, 16px, content. */
+.year {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+.year__body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-bottom: var(--space-8);
+}
+.year__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-bottom: var(--space-4);
+  margin-bottom: -1px;
+}
+.year__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--weight-semibold) var(--text-16) / var(--leading-24) var(--font-sans);
+  color: var(--color-gray-100);
+}
+.year__terms {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+/* Collapsed year: title on the left, roll-up counts on the right. */
+.year-summary {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--space-4);
+}
+.year-summary__stats {
+  font: var(--weight-regular) var(--text-12) / var(--leading-16) var(--font-sans);
+  letter-spacing: var(--tracking-02);
+  color: var(--color-gray-100);
+}
+
+/* ============================================================ Add year */
+.add-year {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+.add-year__slot {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--space-4) - var(--border-width));
+  background: var(--base-surface);
+  border: var(--border-width) dashed var(--base-input);
+  border-radius: var(--radius-md);
+}
+.add-year__label {
+  width: 100%;
+  font: var(--weight-semibold) var(--text-16) / var(--leading-24) var(--font-sans);
+  letter-spacing: var(--tracking-0);
+  color: var(--color-gray-80);
+  text-align: left;
+}

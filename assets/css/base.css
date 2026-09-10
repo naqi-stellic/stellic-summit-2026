@@ -1,0 +1,76 @@
+/* Reset + document ground. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--base-background);
+  color: var(--base-foreground);
+  font: var(--weight-regular) var(--text-13) / var(--leading-20) var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+}
+
+/* Sprite glyphs take their colour from the element that hosts them. */
+svg {
+  fill: currentColor;
+}
+
+/* The sprite host injected by icons.js. */
+.svg-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Occupies layout but paints nothing — mirrors Figma's opacity-0 placeholders. */
+.u-invisible {
+  opacity: 0;
+}

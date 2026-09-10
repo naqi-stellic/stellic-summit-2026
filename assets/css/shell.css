@@ -1,0 +1,209 @@
+/* App chrome: the frame every Stellic page sits inside. */
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app__main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.app__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  background: var(--base-background);
+}
+
+/* ============================================================ Sidebar */
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: var(--sidebar-width);
+  height: 100vh;
+  flex: none;
+  background: var(--color-gray-100);
+  color: var(--color-white);
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: flex-start;
+  height: var(--topbar-height);
+  padding: 20px;
+  flex: none;
+  background: var(--color-parchment);
+  border-bottom: var(--border-width) solid var(--color-gray-40);
+}
+.sidebar__brand-inner {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar__wordmark {
+  width: 139.156px;
+  height: 32px;
+  flex: none;
+}
+.sidebar__collapse {
+  width: 28px;
+  height: 20px;
+  flex: none;
+  color: var(--color-gray-100);
+}
+
+.sidebar__content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: var(--space-6);
+  overflow-y: auto;
+}
+
+/* ---- Nav ---- */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: none;
+  padding-bottom: calc(var(--space-4) - var(--border-width));
+  border-bottom: var(--border-width) solid var(--color-gray-60);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: var(--sidebar-width);
+  height: var(--size-9);
+  flex: none;
+  padding: var(--space-2) var(--space-6);
+  color: var(--color-white);
+}
+.nav-item--spread {
+  justify-content: space-between;
+}
+.nav-item--active {
+  background: var(--color-gray-80);
+}
+.nav-item__name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-item--sub .nav-item__name {
+  padding-left: var(--space-6);
+}
+.nav-item__label {
+  font: var(--weight-medium) var(--text-13) / var(--leading-20) var(--font-sans);
+  white-space: nowrap;
+}
+.nav-item__label--strong {
+  font-weight: var(--weight-semibold);
+}
+
+/* 16x16 ringed disc holding an 8x8 Stellic glyph. */
+.nav-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-4);
+  height: var(--size-4);
+  flex: none;
+  border: var(--border-width) solid var(--color-white);
+  border-radius: var(--radius-full);
+}
+.nav-glyph--hidden {
+  opacity: 0;
+}
+
+/* ---- Quick links ---- */
+.quick-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  flex: none;
+  padding: 0 var(--space-6);
+}
+.quick-links__title {
+  font: var(--weight-medium) var(--text-11) / var(--leading-16) var(--font-sans);
+  letter-spacing: var(--tracking-02);
+  color: var(--color-gray-80);
+}
+.quick-links__link {
+  font: var(--weight-regular) var(--text-13) / var(--leading-20) var(--font-sans);
+  white-space: nowrap;
+}
+
+/* ---- Footer help block ---- */
+.sidebar__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  flex: none;
+  padding: var(--space-6);
+}
+.sidebar__footer-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.sidebar__refreshed {
+  width: 156px;
+  font: var(--weight-regular) var(--text-12) / normal var(--font-sans);
+  letter-spacing: -0.1714px;
+}
+.sidebar__logo {
+  width: 92px;
+  height: 17.808px;
+}
+.sidebar__help {
+  display: flex;
+  padding: 10.341px;
+  border-radius: 96.951px;
+  background: var(--color-primary-50);
+  overflow: hidden;
+}
+.sidebar__help img {
+  width: 32.317px;
+  height: 32.317px;
+}
+
+/* ============================================================ Top bar */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--topbar-height);
+  flex: none;
+  padding: 0 var(--space-6);
+  background: var(--base-surface);
+  border-bottom: var(--border-width) solid var(--color-gray-40);
+}
+.topbar__title {
+  font: var(--weight-semibold) var(--text-15) / var(--leading-20) var(--font-sans);
+  color: var(--color-gray-100);
+}
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: 40px;
+}
+.topbar__icon {
+  color: var(--color-gray-100);
+}

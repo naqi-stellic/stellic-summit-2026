@@ -1,0 +1,133 @@
+/* Stellic design tokens — mirrored 1:1 from the Figma variable collections. */
+
+:root {
+  /* ---------- Palette: stellic colors ---------- */
+  --color-white: #ffffff;
+  --color-gray-0: #f9f9f9;
+  --color-gray-5: #f1f3f4;
+  --color-gray-40: #d3d8de;
+  --color-gray-60: #8891a6;
+  --color-gray-80: #6f7782;
+  --color-gray-100: #151b26;
+  --color-stellic-blue: #1e2129;
+
+  --color-primary-0: #ebf5ff;
+  --color-primary-50: #008dff;
+  --color-primary-100: #006cbc;
+
+  --color-success-5: #eafcf7;
+  --color-success-100: #008259;
+
+  --color-warning-5: #fff6e4;
+  --color-warning-50: #e8672a;
+
+  --color-alert-5: #ffeaea;
+  --color-alert-100: #bd0303;
+
+  /* Sidebar masthead ground. Not a Figma variable — sampled from the frame. */
+  --color-parchment: #f5f4ed;
+
+  /* ---------- Semantic (base/*) ---------- */
+  --base-background: var(--color-gray-0);
+  --base-surface: var(--color-white);
+  --base-foreground: var(--color-gray-100);
+  --base-muted-foreground: var(--color-gray-80);
+  --base-input: var(--color-gray-40);
+  --base-ring: var(--color-gray-0);
+  --base-primary: var(--color-primary-50);
+  --base-primary-foreground: var(--color-gray-0);
+  --base-primary-selected: var(--color-primary-100);
+
+  /* ---------- Type ---------- */
+  --font-sans: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+
+  --text-11: 11px;
+  --text-12: 12px;
+  --text-13: 13px;
+  --text-15: 15px;
+  --text-16: 16px;
+  --text-18: 18px;
+
+  --leading-13: 13px;
+  --leading-16: 16px;
+  --leading-20: 20px;
+  --leading-24: 24px;
+
+  --tracking-0: 0;
+  --tracking-02: 0.2px;
+  --tracking-05: 0.5px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* ---------- Spacing ---------- */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ---------- Sizing ---------- */
+  --size-3: 12px;
+  --size-4: 16px;
+  --size-8: 32px;
+  --size-9: 36px;
+
+  --sidebar-width: 240px;
+  --topbar-height: 72px;
+
+  /* ---------- Radius / borders ---------- */
+  --radius-md: 4px;
+  --radius-full: 100px;
+  --border-width: 1px;
+
+  /* ---------- Elevation ---------- */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-secondary: 0 6px 16px 0 rgba(0, 0, 0, 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --ring-selected: 0 0 0 3px var(--base-primary-selected);
+}
+
+/* ---------- Type roles ----------
+   Each role is one Figma text style. Compose with `font:` shorthand order. */
+.t-h400 {
+  font: var(--weight-semibold) var(--text-18) / var(--leading-20) var(--font-sans);
+  letter-spacing: var(--tracking-0);
+}
+.t-h300 {
+  font: var(--weight-semibold) var(--text-16) / var(--leading-24) var(--font-sans);
+  letter-spacing: var(--tracking-0);
+}
+.t-caption-lg {
+  font: var(--weight-semibold) var(--text-15) / var(--leading-20) var(--font-sans);
+  letter-spacing: var(--tracking-0);
+}
+.t-caption-md {
+  font: var(--weight-semibold) var(--text-13) / var(--leading-20) var(--font-sans);
+  letter-spacing: var(--tracking-0);
+}
+.t-body-md {
+  font: var(--weight-regular) var(--text-13) / var(--leading-20) var(--font-sans);
+  letter-spacing: var(--tracking-0);
+}
+.t-button-md {
+  font: var(--weight-medium) var(--text-13) / var(--leading-13) var(--font-sans);
+  letter-spacing: var(--tracking-0);
+}
+.t-label-md {
+  font: var(--weight-regular) var(--text-12) / var(--leading-16) var(--font-sans);
+  letter-spacing: var(--tracking-02);
+}
+.t-label-sm {
+  font: var(--weight-regular) var(--text-11) / var(--leading-16) var(--font-sans);
+  letter-spacing: var(--tracking-02);
+}
+.t-overline {
+  font: var(--weight-medium) var(--text-11) / var(--leading-16) var(--font-sans);
+  letter-spacing: var(--tracking-05);
+  text-transform: uppercase;
+}
