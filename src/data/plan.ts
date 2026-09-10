@@ -90,12 +90,7 @@ export const INITIAL_YEARS: Year[] = [
         meta: "Jan - May • 18 credits • Main campus",
         reviewed: false,
         alert: "registration",
-        group: {
-          state: "planned",
-          label: "Planned",
-          credits: 27,
-          deltas: { added: 3, removed: 1 },
-        },
+        group: { state: "planned", label: "Planned", credits: 27 },
         courses: [
           {
             id: "c5",

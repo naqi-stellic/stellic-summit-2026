@@ -90,7 +90,8 @@ function CreditGroup({ group }: { group: NonNullable<Term["group"]> }) {
       <p
         className={cn(
           "flex items-center gap-2 text-body-md font-semibold text-gray-80",
-          group.deltas && "h-6"
+          /* The design gives planned groups a 24px band; registered hug at 20. */
+          group.state === "planned" && "h-6"
         )}
       >
         <AuditIcon state={group.state} />
