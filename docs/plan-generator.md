@@ -24,6 +24,20 @@ no target and the course snaps back.
 `moveCourse` and `removeCourse` own the state transitions and re-check `locked`
 themselves, so the rule holds even if a future caller skips the UI.
 
+## Sample data
+
+Figma is the source for layout, not content — its placeholder data contradicts
+itself — so the sample plan is invented to hold together. The story: a student
+who started Fall 2026 on a 120-credit, 40-requirement Business Administration
+B.S. with a Finance concentration. They finished 2026-2027 (8 courses, 24
+credits), are partway through Fall 2027, have started planning Spring 2028, and
+the plan runs out to 2030-2031. Courses are 3 credits each.
+
+Anything visibly derived from that — year filter tabs, the "+ Add Year N"
+label, expected graduation, the registration deadline — comes from the plan
+rather than being written down separately. Adjust `DEGREE`, `COMPLETED` and
+`INITIAL_YEARS` in `src/data/plan.ts` and the rest follows.
+
 ## Numbers
 
 Every figure on screen derives from the plan rather than being written down

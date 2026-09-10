@@ -25,7 +25,7 @@ export type Term = {
   state: "registered" | "planned"
   courses: PlannedCourse[]
   /** Banner slotted between the header and the course list. */
-  alert?: "registration"
+  alert?: { kind: "registration"; closes: string }
 }
 
 export type Year = {
@@ -88,6 +88,7 @@ export const INITIAL_YEARS: Year[] = [
         id: "fall-2027",
         name: "Fall 2027",
         window: "Sep - Dec",
+        campus: "Main campus",
         reviewed: true,
         locked: true,
         state: "registered",
@@ -123,7 +124,9 @@ export const INITIAL_YEARS: Year[] = [
         window: "Jan - May",
         campus: "Main campus",
         reviewed: false,
-        alert: "registration",
+        /* Registration for Spring opens during the Fall term and closes at the
+           start of Spring — the frame's "Jan 18, 2026" predates the term. */
+        alert: { kind: "registration", closes: "Mon Jan 17, 2028 • 11:59pm EST" },
         state: "planned",
         courses: [
           {
@@ -267,4 +270,9 @@ export type PlanStanding = ReturnType<typeof planStanding>
 export function expectedGraduation(years: Year[]): string {
   const lastYear = years.at(-1)
   return lastYear?.terms.at(-1)?.name ?? "—"
+}
+
+/** Academic year number of the next year to add — the completed year counts. */
+export function nextYearNumber(years: Year[]): number {
+  return 1 + years.length + 1
 }

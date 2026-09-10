@@ -32,20 +32,30 @@ import {
   expectedGraduation,
   findCourse,
   moveCourse,
+  nextYearNumber,
   planStanding,
   removeCourse,
   type Term,
+  type Year,
 } from "@/data/plan"
 
 type YearTab = { label: string; icon?: IconName; tone?: string; selected?: boolean }
 
-const YEAR_TABS: YearTab[] = [
-  { label: "All Years", icon: "grid-view", selected: true },
-  { label: "2026-2027", icon: "check-circle", tone: "text-success-100" },
-  { label: "2027-2028", icon: "timelapse", tone: "text-warning-50" },
-  { label: "2028-2029" },
-  { label: "2029-2030" },
-]
+const PHASE_TAB = {
+  complete: { icon: "check-circle", tone: "text-success-100" },
+  active: { icon: "timelapse", tone: "text-warning-50" },
+  future: {},
+} as const
+
+/* One tab per year the plan actually covers, completed year included, so the
+   filter can never omit a year that is on screen. */
+function yearTabs(years: Year[]): YearTab[] {
+  return [
+    { label: "All Years", icon: "grid-view", selected: true },
+    { label: COMPLETED.label, ...PHASE_TAB.complete },
+    ...years.map((year) => ({ label: year.label, ...PHASE_TAB[year.phase] })),
+  ]
+}
 
 type PlanAction = { label: string; icon: IconName; toggles?: boolean }
 
@@ -55,7 +65,7 @@ const PLAN_ACTIONS: PlanAction[] = [
   { label: "Plan details", icon: "remove-red-eye" },
 ]
 
-function RegistrationAlert() {
+function RegistrationAlert({ closes }: { closes: string }) {
   /* 92px is the design's height; a minimum rather than a fixed value so the
      banner can grow when the closing date wraps to a second line. */
   return (
@@ -66,7 +76,7 @@ function RegistrationAlert() {
             <Icon name="shopping-cart" size={16} className="mt-0.5 text-primary-100" />
             Registration is now open!
           </AlertTitle>
-          <AlertDescription>Closes: Mon Jan 18, 2026 • 11:59pm EST</AlertDescription>
+          <AlertDescription>Closes: {closes}</AlertDescription>
         </AlertHeader>
         <Button variant="primary" size="sm">
           Register Now
@@ -95,7 +105,7 @@ function PlanFacet({ label, value }: { label: string; value: string }) {
 }
 
 function renderAlert(term: Term) {
-  return term.alert === "registration" ? <RegistrationAlert /> : null
+  return term.alert ? <RegistrationAlert closes={term.alert.closes} /> : null
 }
 
 export function PlanYourPath() {
@@ -194,7 +204,7 @@ export function PlanYourPath() {
             <PlanFacet label="Pathway:" value="Business Administration: Fall Start 2026 [BSc]" />
 
             <div className="flex flex-wrap items-center gap-2 pt-2">
-              {YEAR_TABS.map((tab) => (
+              {yearTabs(years).map((tab) => (
                 <Button key={tab.label} size="sm" selected={tab.selected}>
                   {tab.icon && <Icon name={tab.icon} size={16} className={tab.tone} />}
                   {tab.label}
@@ -231,7 +241,7 @@ export function PlanYourPath() {
             <div className="flex w-6 shrink-0 flex-col items-center justify-center self-stretch">
               <Icon name="fiber-manual-record" size={24} className="text-gray-40" />
             </div>
-            <AddSlot tone="year">+ Add Year 5</AddSlot>
+            <AddSlot tone="year">+ Add Year {nextYearNumber(years)}</AddSlot>
           </section>
         </main>
 
