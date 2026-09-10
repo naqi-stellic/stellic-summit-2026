@@ -10,9 +10,10 @@ npm run build   # tsc -b && vite build
 ```
 
 The dev server watches by polling (`server.watch.usePolling` in
-`vite.config.ts`). macOS does not deliver file-system events for this project
-path, so without it the watcher never fires and Vite quietly serves stale
-modules — edits appear to do nothing no matter how hard you reload.
+`vite.config.ts`), because fsevents delivery here has proved unreliable — a
+stale `fseventsd` stops sending events and Vite then serves the modules it read
+at startup, so edits appear to do nothing no matter how hard you reload.
+Polling sidesteps the daemon; drop it if `fseventsd` is behaving.
 
 ## Prototypes
 
