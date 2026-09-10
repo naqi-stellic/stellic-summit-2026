@@ -24,8 +24,24 @@ no target and the course snaps back.
 `moveCourse` and `removeCourse` own the state transitions and re-check `locked`
 themselves, so the rule holds even if a future caller skips the UI.
 
-Credit counts are static term data and do not recompute when a course moves —
-the design's numbers don't decompose per course, so there is nothing to sum yet.
+## Numbers
+
+Every figure on screen derives from the plan rather than being written down
+twice. Courses carry `credits`; a term's credit heading and its "Sep - Dec ·
+12 credits" line sum their own courses; and the Generate Plan panel's standing
+comes from `planStanding()` — completed from the finished `COMPLETED` year,
+planned from everything currently sitting in the editable plan (registered
+terms included, since those credits are not earned yet), remaining as the
+balance against `DEGREE`. Requirements are one per course, which is what makes
+"6 reqs · 18 credits" read consistently.
+
+So the panel tracks edits: drop a 3-credit course and Planned falls from 18 to
+15 credits, Remaining rises to 81, the term heading and its meta line drop by
+3, and the bar's orange segment narrows. The bar's segments are shares of the
+degree's credits rather than the design's fixed pixel widths — the one place
+the numbers being real costs a literal match to the frame.
+
+Expected graduation is the last term the plan reaches, not a stored date.
 
 ## Generate Plan panel
 

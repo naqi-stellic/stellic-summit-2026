@@ -3,43 +3,43 @@ import { cn } from "cn"
 import { Icon, type IconName } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { DEGREE, type PlanStanding } from "@/data/plan"
 
 /* The Generate Plan wizard that opens beside the planner. Padding subtracts
  * the border width where a container is stroked (see button.tsx for why). */
 
 const TOTAL_STEPS = 5
 
-type Standing = {
+const BUCKETS = [
+  { key: "completed", icon: "check", tone: "text-success-50", label: "Completed" },
+  { key: "planned", icon: "check", tone: "text-warning-25", label: "Planned" },
+  { key: "remaining", icon: "crop-square", tone: "text-alert-50", label: "Remaining" },
+] as const satisfies ReadonlyArray<{
+  key: keyof Omit<PlanStanding, "total">
   icon: IconName
   tone: string
   label: string
-  detail: string
-}
-
-const STANDING: Standing[] = [
-  { icon: "check", tone: "text-success-50", label: "Completed", detail: "5 reqs · 15 credits" },
-  { icon: "check", tone: "text-warning-25", label: "Planned", detail: "8 reqs · 24 credits" },
-  {
-    icon: "crop-square",
-    tone: "text-alert-50",
-    label: "Remaining",
-    detail: "27 reqs · 81 credits",
-  },
-]
-
-const PLANNING = [
-  { label: "Programs", value: "Business Administration, B.S." },
-  { label: "Concentration", value: "Finance" },
-  { label: "Expected Graduation", value: "Spring 2031" },
-]
+}>
 
 export function GeneratePlanPanel({
+  standing,
+  graduation,
   step = 1,
   onClose,
 }: {
+  standing: PlanStanding
+  graduation: string
   step?: number
   onClose: () => void
 }) {
+  const share = (credits: number) => `${(credits / standing.total.credits) * 100}%`
+
+  const planning = [
+    { label: "Programs", value: DEGREE.program },
+    { label: "Concentration", value: DEGREE.concentration },
+    { label: "Expected Graduation", value: graduation },
+  ]
+
   /* @container so the wizard reflows to the panel width the user drags to,
      not to the viewport. */
   return (
@@ -84,33 +84,44 @@ export function GeneratePlanPanel({
         <Card className="w-full gap-2 rounded-md border-gray-40 p-[15px] shadow-none">
           <p className="text-body-md font-semibold text-gray-100">Where you are today</p>
 
-          {/* Fixed segments with a flexing remainder, exactly as the design
-              lays it out — widening the panel grows only the grey tail. */}
+          {/* Segments are shares of the degree's credits rather than the
+              design's fixed pixel widths, so the bar tracks the plan. */}
           <div className="flex h-2 w-full items-start">
-            <div className="h-full w-[79px] rounded-l-full border-r border-white bg-success-50" />
-            <div className="h-full w-[42px] border-r border-white bg-warning-75" />
+            <div
+              className="h-full rounded-l-full border-r border-white bg-success-50"
+              style={{ width: share(standing.completed.credits) }}
+            />
+            <div
+              className="h-full border-r border-white bg-warning-75"
+              style={{ width: share(standing.planned.credits) }}
+            />
             <div className="h-full min-w-0 flex-1 rounded-r-full bg-gray-5" />
           </div>
 
-          {STANDING.map((row) => (
-            <div
-              key={row.label}
-              className="flex w-full flex-wrap items-center justify-between gap-x-2"
-            >
-              <span className="flex items-center gap-1 text-body-md text-gray-80">
-                <Icon name={row.icon} size={16} className={row.tone} />
-                {row.label}
-              </span>
-              <span className="text-body-md whitespace-nowrap text-gray-80">{row.detail}</span>
-            </div>
-          ))}
+          {BUCKETS.map((bucket) => {
+            const { reqs, credits } = standing[bucket.key]
+            return (
+              <div
+                key={bucket.key}
+                className="flex w-full flex-wrap items-center justify-between gap-x-2"
+              >
+                <span className="flex items-center gap-1 text-body-md text-gray-80">
+                  <Icon name={bucket.icon} size={16} className={bucket.tone} />
+                  {bucket.label}
+                </span>
+                <span className="text-body-md whitespace-nowrap text-gray-80">
+                  {reqs} reqs · {credits} credits
+                </span>
+              </div>
+            )
+          })}
         </Card>
 
         <div className="flex w-full flex-col gap-2">
           <div className="flex items-center pb-2">
             <h4 className="text-body-md font-semibold text-gray-100">What we&rsquo;re planning</h4>
           </div>
-          {PLANNING.map((row) => (
+          {planning.map((row) => (
             <div
               key={row.label}
               className="flex w-full flex-col gap-x-2 @xs:flex-row @xs:items-start"

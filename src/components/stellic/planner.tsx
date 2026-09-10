@@ -9,7 +9,15 @@ import { AddSlot, AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import type { PlannedCourse, Term, Year, YearPhase } from "@/data/plan"
+import {
+  CREDIT_GROUP_LABEL,
+  termCredits,
+  termMeta,
+  type PlannedCourse,
+  type Term,
+  type Year,
+  type YearPhase,
+} from "@/data/plan"
 
 /* ============================================================ AuditRow
    One course inside a semester card. Padding subtracts the border width
@@ -101,28 +109,23 @@ function SortableAuditRow({
 }
 
 /* ============================================================ CreditGroup
-   "In Progress (27 Credits)" / "Planned (27 Credits)", with optional deltas.
-   The design gives the Planned row a 24px band; In Progress hugs at 20px. */
+   "In Progress (12 Credits)" / "Planned (6 Credits)" — summed from the term's
+   own courses, so the heading can never drift from the list beneath it. */
 
-function CreditGroup({ group }: { group: NonNullable<Term["group"]> }) {
+function CreditGroup({ term }: { term: Term }) {
+  const credits = termCredits(term)
   return (
     <div className="flex w-full items-center justify-between pt-4">
       <p
         className={cn(
           "flex items-center gap-2 text-body-md font-semibold text-gray-80",
           /* The design gives planned groups a 24px band; registered hug at 20. */
-          group.state === "planned" && "h-6"
+          term.state === "planned" && "h-6"
         )}
       >
-        <AuditIcon state={group.state} />
-        {group.label} ({group.credits} Credits)
+        <AuditIcon state={term.state} />
+        {CREDIT_GROUP_LABEL[term.state]} ({credits} Credit{credits === 1 ? "" : "s"})
       </p>
-      {group.deltas && (
-        <div className="flex items-center gap-1">
-          <Badge variant="success">+{group.deltas.added}</Badge>
-          <Badge variant="danger">-{group.deltas.removed}</Badge>
-        </div>
-      )}
     </div>
   )
 }
@@ -170,7 +173,7 @@ export function SemesterCard({
               {term.name}
               <Icon name="chevron-right" size={16} className="text-gray-80" />
             </h4>
-            <p className="text-body-md text-gray-80">{term.meta}</p>
+            <p className="text-body-md text-gray-80">{termMeta(term)}</p>
           </div>
           <StatusPill
             status={term.reviewed ? "reviewed" : "unreviewed"}
@@ -182,7 +185,7 @@ export function SemesterCard({
 
         {alert}
 
-        {term.group && <CreditGroup group={term.group} />}
+        {term.courses.length > 0 && <CreditGroup term={term} />}
 
         <SortableContext
           items={term.courses.map((c) => c.id)}

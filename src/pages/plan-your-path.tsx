@@ -26,7 +26,16 @@ import {
 } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { INITIAL_YEARS, findCourse, moveCourse, removeCourse, type Term } from "@/data/plan"
+import {
+  COMPLETED,
+  INITIAL_YEARS,
+  expectedGraduation,
+  findCourse,
+  moveCourse,
+  planStanding,
+  removeCourse,
+  type Term,
+} from "@/data/plan"
 
 type YearTab = { label: string; icon?: IconName; tone?: string; selected?: boolean }
 
@@ -101,6 +110,7 @@ export function PlanYourPath() {
   )
 
   const dragging = draggingId ? findCourse(years, draggingId) : null
+  const standing = planStanding(years)
 
   function handleDragStart(event: DragStartEvent) {
     setDraggingId(String(event.active.id))
@@ -127,7 +137,15 @@ export function PlanYourPath() {
   return (
     <AppShell
       title="Plan Your Path"
-      panel={generateOpen && <GeneratePlanPanel onClose={() => setGenerateOpen(false)} />}
+      panel={
+        generateOpen && (
+          <GeneratePlanPanel
+            standing={standing}
+            graduation={expectedGraduation(years)}
+            onClose={() => setGenerateOpen(false)}
+          />
+        )
+      }
     >
       <DndContext
         sensors={sensors}
@@ -190,11 +208,11 @@ export function PlanYourPath() {
             <TimelineRail phase="complete" nodes={1} />
             <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-4">
               <h3 className="flex items-center gap-1 text-h300 font-semibold text-gray-100">
-                2026-2027
+                {COMPLETED.label}
                 <Icon name="unfold-more" size={16} />
               </h3>
               <p className="text-label-md text-gray-100">
-                8 courses, 20 credits complete, 21 credits earned
+                {COMPLETED.courses} courses, {COMPLETED.credits} credits earned
               </p>
             </div>
           </section>
