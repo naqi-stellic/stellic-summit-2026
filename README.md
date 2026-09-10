@@ -1,7 +1,7 @@
-# plan-generator-summit
+# stellic-summit-2026
 
-Prototype of the Stellic Plan Generator, built page by page from Figma on a
-shadcn/ui foundation.
+Prototypes for Stellic Summit 2026, built from Figma on a shadcn/ui foundation.
+One app, one shared design system, a prototype per surface.
 
 ```bash
 npm install
@@ -14,6 +14,28 @@ The dev server watches by polling (`server.watch.usePolling` in
 path, so without it the watcher never fires and Vite quietly serves stale
 modules — edits appear to do nothing no matter how hard you reload.
 
+## Prototypes
+
+| Prototype | Figma | Entry |
+| --- | --- | --- |
+| [Plan Generator](#plan-generator) — Plan Your Path | [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392) | `src/pages/plan-your-path.tsx` |
+
+### Adding one
+
+A prototype is a page under `src/pages/`, its data under `src/data/`, and any
+components only it needs under `src/components/stellic/`. Everything in
+[Shared foundation](#shared-foundation) it gets for free — tokens, the app
+shell, the icon set, the retuned shadcn primitives.
+
+Once a second prototype lands it is probably worth folding each one into its own
+`src/prototypes/<name>/` directory and routing between them. Not done yet: with
+one prototype it would be churn, and the second will say more about where the
+seam belongs than guessing now does.
+
+---
+
+# Shared foundation
+
 ## Stack
 
 Vite · React 19 · TypeScript · Tailwind v4 · shadcn/ui (Radix).
@@ -24,23 +46,19 @@ Tailwind v4 is CSS-first — there is no `tailwind.config.js`. Tokens live in
 ## Layout
 
 ```
-src/index.css                 design tokens + Tailwind theme
-src/components/ui/*           shadcn primitives (owned, editable)
-src/components/stellic/*      Stellic components with no shadcn equivalent
-src/components/layout/*       app chrome (shell, sidebar, top bar)
-src/components/icon.tsx       Material + Stellic icon set
-src/data/plan.ts              page data
-src/pages/*.tsx               one file per page
-src/lib/cn.ts                 class merger (see below)
-public/brand/                 brand art exported from Figma
-reference/                    the pixel-verified static HTML baseline
+src/index.css                 design tokens + Tailwind theme        shared
+src/components/ui/*           shadcn primitives (owned, editable)   shared
+src/components/layout/*       app chrome (shell, sidebar, top bar)  shared
+src/components/icon.tsx       Material + Stellic icon set           shared
+src/lib/cn.ts                 class merger (see below)              shared
+public/brand/                 brand art exported from Figma         shared
+
+src/components/stellic/*      components with no shadcn equivalent  per prototype
+src/data/*                    prototype data                        per prototype
+src/pages/*.tsx               one file per page                     per prototype
+
+reference/                    pixel-verified static HTML baseline
 ```
-
-## Pages
-
-| Page | Figma node | File |
-| --- | --- | --- |
-| Plan Your Path | [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392) | `src/pages/plan-your-path.tsx` |
 
 ## Design system
 
@@ -63,8 +81,9 @@ npx shadcn@latest add <component>
 
 Components land in `src/components/ui/` and are yours to edit. `button`,
 `badge` and `alert` have already been retuned to the Figma spec — Button gained
-a `selected` prop for segmented controls, Badge swapped the pill radius for 4px
-and carries the Stellic status pairs, Alert became a flex banner.
+a `selected` prop for segmented controls and an `aria-pressed` toggled state,
+Badge swapped the pill radius for 4px and carries the Stellic status pairs,
+Alert became a flex banner.
 
 ### Two things to know
 
@@ -82,50 +101,11 @@ specifier is aliased to it (`vite.config.ts` + `tsconfig`) so CLI-added
 components get the fix without being edited. **Add any new `--text-*` token to
 that list.**
 
-## Generate Plan panel
+## App shell
 
-"Generate plan" toggles a side-by-side wizard (`src/components/stellic/generate-plan-panel.tsx`).
-The split uses shadcn's `resizable` (react-resizable-panels), and the drag handle
-*is* the 4px rail the design already draws between the two columns rather than an
-extra divider. Sizes are pixels in v4, so they are the design's own numbers: the
-panel opens at 434px, clamps between 340 and 720, and the planner keeps 520px.
-
-Two things the shell depends on:
-
-- It is `h-screen overflow-hidden`, so the sidebar and top bar stay put and each
-  column scrolls on its own. The panel group needs a bounded height anyway.
-- The panel group is always mounted. Swapping the wrapper when the panel opens
-  would remount the whole planner and throw away its scroll position and drag
-  state.
-
-## Responsive
-
-The planner reflows to *its own* width, not the viewport's — the panel opening
-matters as much as the window shrinking — so it uses container queries rather
-than media queries. `main` is the `@container`; term cards sit side by side above
-`@3xl` (768px) and stack below it. The wizard is its own container too, so its
-label/value rows stack once the user drags the panel under 320px.
-
-The sidebar stays a fixed 240px at every width; collapsing it is not wired up yet.
-
-## Drag and drop
-
-Planned courses can be picked up and dropped into any other planned term
-(`@dnd-kit`). Registered terms are locked — `Term.locked` in `src/data/plan.ts`
-— so their courses have no handle and can't be moved, and nothing can be
-dropped into them.
-
-Collision detection is `pointerWithin` rather than `closestCorners` on purpose:
-`closestCorners` always resolves to *some* droppable, so releasing over a locked
-term would quietly drop the course into a neighbouring one. `pointerWithin` only
-reports droppables the cursor is actually inside, so an invalid drop resolves to
-no target and the course snaps back.
-
-`moveCourse` in `src/data/plan.ts` owns the state transition and re-checks both
-ends for `locked`, so the rule holds even if a future caller skips the UI.
-
-Credit counts are static term data and do not recompute when a course moves —
-the design's numbers don't decompose per course, so there is nothing to sum yet.
+`AppShell` owns the viewport: `h-screen overflow-hidden`, so the sidebar and top
+bar stay put and each content column scrolls on its own. Pass a `panel` and the
+content area becomes a resizable two-column split.
 
 ## Icons
 
@@ -140,8 +120,56 @@ Sizes are explicit rather than inherited, because the design uses several sizes
 of the same glyph. The Figma file mixes Material's Filled and Outlined sets, so
 each entry carries the variant the design actually uses, verified glyph by
 glyph against the Figma exports. `s-` prefixed names (home, check, navigation,
-arrow-down-fill, notification, help, search, menu-collapse) are Stellic's own
-and keep their native viewBox.
+arrow-down-fill, notification, help, search, menu-collapse, close) are Stellic's
+own and keep their native viewBox.
+
+---
+
+# Plan Generator
+
+A term-by-term degree planner. `src/pages/plan-your-path.tsx`, with the plan
+model and its moves in `src/data/plan.ts`.
+
+## Drag and drop
+
+Planned courses can be picked up and dropped into any other planned term
+(`@dnd-kit`). Registered terms are locked — `Term.locked` — so their courses
+have no handle and can't be moved, and nothing can be dropped into them. Hovering
+a movable course reveals a × that removes it.
+
+Collision detection is `pointerWithin` rather than `closestCorners` on purpose:
+`closestCorners` always resolves to *some* droppable, so releasing over a locked
+term would quietly drop the course into a neighbouring one. `pointerWithin` only
+reports droppables the cursor is actually inside, so an invalid drop resolves to
+no target and the course snaps back.
+
+`moveCourse` and `removeCourse` own the state transitions and re-check `locked`
+themselves, so the rule holds even if a future caller skips the UI.
+
+Credit counts are static term data and do not recompute when a course moves —
+the design's numbers don't decompose per course, so there is nothing to sum yet.
+
+## Generate Plan panel
+
+"Generate plan" toggles a side-by-side wizard (`src/components/stellic/generate-plan-panel.tsx`).
+The split uses shadcn's `resizable` (react-resizable-panels), and the drag handle
+*is* the 4px rail the design already draws between the two columns rather than an
+extra divider. Sizes are pixels in v4, so they are the design's own numbers: the
+panel opens at 434px, clamps between 340 and 720, and the planner keeps 520px.
+
+The panel group is always mounted. Swapping the wrapper when the panel opens
+would remount the whole planner and throw away its scroll position and drag
+state.
+
+## Responsive
+
+The planner reflows to *its own* width, not the viewport's — the panel opening
+matters as much as the window shrinking — so it uses container queries rather
+than media queries. `main` is the `@container`; term cards sit side by side above
+`@3xl` (768px) and stack below it. The wizard is its own container too, so its
+label/value rows stack once the user drags the panel under 320px.
+
+The sidebar stays a fixed 240px at every width; collapsing it is not wired up yet.
 
 ## Fidelity
 
@@ -153,6 +181,8 @@ antialiasing between Figma's renderer and Chrome's.
 `reference/index.html` is the original static build, kept as the baseline the
 React app was verified against. It has no dependencies — open it directly.
 
-Two deliberate departures from the frame: the sidebar's help block is pinned to
-the bottom of the viewport (in Figma the nav column overruns the artboard, so it
-falls below the fold), and the 4px scroll track on the right edge is decorative.
+Deliberate departures from the frame: the sidebar's help block is pinned to the
+bottom of the viewport (in Figma the nav column overruns the artboard, so it
+falls below the fold); the 4px scroll track on the right edge doubles as the
+resize handle; and the FAB keeps a 40px right margin in both states rather than
+shifting 10px when the panel opens.
