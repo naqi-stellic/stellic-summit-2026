@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { INITIAL_YEARS, findCourse, moveCourse, type Term } from "@/data/plan"
+import { INITIAL_YEARS, findCourse, moveCourse, removeCourse, type Term } from "@/data/plan"
 
 type YearTab = { label: string; icon?: IconName; tone?: string; selected?: boolean }
 
@@ -114,6 +114,10 @@ export function PlanYourPath() {
     )
   }
 
+  function handleRemoveCourse(courseId: string) {
+    setYears((current) => removeCourse(current, courseId))
+  }
+
   return (
     <AppShell title="Plan Your Path">
       <DndContext
@@ -181,7 +185,12 @@ export function PlanYourPath() {
           </section>
 
           {years.map((year) => (
-            <YearSection key={year.label} year={year} renderAlert={renderAlert} />
+            <YearSection
+              key={year.label}
+              year={year}
+              renderAlert={renderAlert}
+              onRemoveCourse={handleRemoveCourse}
+            />
           ))}
 
           {/* ---------------------------------- Add year */}

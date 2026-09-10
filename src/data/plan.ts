@@ -158,3 +158,19 @@ export function moveCourse(
     }),
   }))
 }
+
+/** Drops a course from the plan. Registered terms are fixed, so their courses
+ *  can't be removed either. */
+export function removeCourse(years: Year[], courseId: string): Year[] {
+  const found = findCourse(years, courseId)
+  if (!found || found.term.locked) return years
+
+  return years.map((year) => ({
+    ...year,
+    terms: year.terms.map((term) =>
+      term.id === found.term.id
+        ? { ...term, courses: term.courses.filter((c) => c.id !== courseId) }
+        : term
+    ),
+  }))
+}

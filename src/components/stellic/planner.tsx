@@ -23,19 +23,33 @@ type AuditRowProps = {
   ghosted?: boolean
   /** The copy under the cursor. */
   overlay?: boolean
+  /** Present only where the course can leave the plan; reveals the × on hover. */
+  onRemove?: () => void
 }
 
-export function AuditRow({ course, locked, ghosted, overlay }: AuditRowProps) {
+export function AuditRow({ course, locked, ghosted, overlay, onRemove }: AuditRowProps) {
   return (
     <div
       className={cn(
-        "flex w-full items-center gap-2 rounded-md border border-gray-40 bg-card",
+        "group relative flex w-full items-center gap-2 rounded-md border border-gray-40 bg-card",
         locked ? "px-[15px] py-[7px]" : "p-[7px]",
         !locked && "cursor-grab transition-colors hover:bg-gray-5",
         ghosted && "opacity-40",
         overlay && "cursor-grabbing shadow-secondary"
       )}
     >
+      {onRemove && (
+        <button
+          type="button"
+          aria-label={`Remove ${course.name}`}
+          /* Keep the drag sensor out of it, or the press starts a drag. */
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={onRemove}
+          className="absolute top-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md text-gray-80 opacity-0 transition-opacity hover:bg-gray-40 hover:text-gray-100 focus-visible:opacity-100 group-hover:opacity-100"
+        >
+          <Icon name="close" size={12} />
+        </button>
+      )}
       {!locked && <Icon name="drag-indicator" size={16} className="text-foreground" />}
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
@@ -61,7 +75,13 @@ export function AuditRow({ course, locked, ghosted, overlay }: AuditRowProps) {
   )
 }
 
-function SortableAuditRow({ course }: { course: PlannedCourse }) {
+function SortableAuditRow({
+  course,
+  onRemove,
+}: {
+  course: PlannedCourse
+  onRemove: () => void
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
   })
@@ -75,7 +95,7 @@ function SortableAuditRow({ course }: { course: PlannedCourse }) {
       {...attributes}
       {...listeners}
     >
-      <AuditRow course={course} ghosted={isDragging} />
+      <AuditRow course={course} ghosted={isDragging} onRemove={onRemove} />
     </div>
   )
 }
@@ -113,9 +133,11 @@ function CreditGroup({ group }: { group: NonNullable<Term["group"]> }) {
 export function SemesterCard({
   term,
   alert,
+  onRemoveCourse,
 }: {
   term: Term
   alert?: ReactNode
+  onRemoveCourse: (courseId: string) => void
 }) {
   const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
 
@@ -165,7 +187,11 @@ export function SemesterCard({
               term.locked ? (
                 <AuditRow key={course.id} course={course} locked />
               ) : (
-                <SortableAuditRow key={course.id} course={course} />
+                <SortableAuditRow
+                  key={course.id}
+                  course={course}
+                  onRemove={() => onRemoveCourse(course.id)}
+                />
               )
             )}
             <AddSlot>+ Add to Term</AddSlot>
@@ -215,9 +241,11 @@ export function TimelineRail({ phase, nodes }: { phase: YearPhase; nodes: 1 | 2 
 export function YearSection({
   year,
   renderAlert,
+  onRemoveCourse,
 }: {
   year: Year
   renderAlert?: (term: Term) => ReactNode
+  onRemoveCourse: (courseId: string) => void
 }) {
   return (
     <section className="flex items-start gap-4">
@@ -235,7 +263,12 @@ export function YearSection({
         </div>
         <div className="flex w-full items-start gap-4">
           {year.terms.map((term) => (
-            <SemesterCard key={term.id} term={term} alert={renderAlert?.(term)} />
+            <SemesterCard
+              key={term.id}
+              term={term}
+              alert={renderAlert?.(term)}
+              onRemoveCourse={onRemoveCourse}
+            />
           ))}
         </div>
       </div>
