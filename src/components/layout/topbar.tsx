@@ -2,7 +2,7 @@ import { Icon } from "@/components/icon"
 
 export function Topbar({ title }: { title: string }) {
   return (
-    <header className="flex h-18 shrink-0 items-center justify-between border-b border-gray-40 bg-card px-6">
+    <header className="sticky top-0 z-30 flex h-18 shrink-0 items-center justify-between border-b border-gray-40 bg-card px-6">
       {/* Pinned to a 24px top inset rather than optically centred, as designed. */}
       <h1 className="self-stretch pt-6 text-caption-lg font-semibold text-gray-100">{title}</h1>
 
