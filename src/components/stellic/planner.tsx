@@ -1,26 +1,42 @@
+import { useDroppable } from "@dnd-kit/core"
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { cn } from "cn"
-import * as React from "react"
+import type { ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
 import { AddSlot, AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import type { PlannedCourse, Term, YearPhase } from "@/data/plan"
+import type { PlannedCourse, Term, Year, YearPhase } from "@/data/plan"
 
 /* ============================================================ AuditRow
-   One registered or planned course inside a semester card. Padding subtracts
-   the border width (see button.tsx for why). */
+   One course inside a semester card. Padding subtracts the border width
+   (see button.tsx for why). */
 
-export function AuditRow({ course }: { course: PlannedCourse }) {
+type AuditRowProps = {
+  course: PlannedCourse
+  /** Registered courses are fixed in place: no handle, no hover affordance. */
+  locked?: boolean
+  /** The row left behind while its course rides the drag overlay. */
+  ghosted?: boolean
+  /** The copy under the cursor. */
+  overlay?: boolean
+}
+
+export function AuditRow({ course, locked, ghosted, overlay }: AuditRowProps) {
   return (
     <div
       className={cn(
         "flex w-full items-center gap-2 rounded-md border border-gray-40 bg-card",
-        course.draggable ? "p-[7px]" : "px-[15px] py-[7px]"
+        locked ? "px-[15px] py-[7px]" : "p-[7px]",
+        !locked && "cursor-grab transition-colors hover:bg-gray-5",
+        ghosted && "opacity-40",
+        overlay && "cursor-grabbing shadow-secondary"
       )}
     >
-      {course.draggable && <Icon name="drag-indicator" size={16} className="text-foreground" />}
+      {!locked && <Icon name="drag-indicator" size={16} className="text-foreground" />}
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
         <div>
@@ -45,51 +61,79 @@ export function AuditRow({ course }: { course: PlannedCourse }) {
   )
 }
 
+function SortableAuditRow({ course }: { course: PlannedCourse }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: course.id,
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      /* touch-none stops the browser from claiming the gesture as a scroll. */
+      className="touch-none outline-none"
+      {...attributes}
+      {...listeners}
+    >
+      <AuditRow course={course} ghosted={isDragging} />
+    </div>
+  )
+}
+
 /* ============================================================ CreditGroup
    "In Progress (27 Credits)" / "Planned (27 Credits)", with optional deltas.
    The design gives the Planned row a 24px band; In Progress hugs at 20px. */
 
-function CreditGroup({
-  state,
-  label,
-  credits,
-  deltas,
-}: {
-  state: "registered" | "planned"
-  label: string
-  credits: number
-  deltas?: { added: number; removed: number }
-}) {
+function CreditGroup({ group }: { group: NonNullable<Term["group"]> }) {
   return (
     <div className="flex w-full items-center justify-between pt-4">
       <p
         className={cn(
           "flex items-center gap-2 text-body-md font-semibold text-gray-80",
-          deltas && "h-6"
+          group.deltas && "h-6"
         )}
       >
-        <AuditIcon state={state} />
-        {label} ({credits} Credits)
+        <AuditIcon state={group.state} />
+        {group.label} ({group.credits} Credits)
       </p>
-      {deltas && (
+      {group.deltas && (
         <div className="flex items-center gap-1">
-          <Badge variant="success">+{deltas.added}</Badge>
-          <Badge variant="danger">-{deltas.removed}</Badge>
+          <Badge variant="success">+{group.deltas.added}</Badge>
+          <Badge variant="danger">-{group.deltas.removed}</Badge>
         </div>
       )}
     </div>
   )
 }
 
-/* ============================================================ SemesterCard */
+/* ============================================================ SemesterCard
+   Also the drop target: the whole card accepts a course unless it is locked. */
 
-export function SemesterCard({ term }: { term: Term }) {
+export function SemesterCard({
+  term,
+  alert,
+}: {
+  term: Term
+  alert?: ReactNode
+}) {
+  const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
+
+  /* Only light up while something is actually being dragged. */
+  const isTarget = isOver && active != null
+
   /* The design only gives the header a bottom gap when something follows it
    * other than the course list. */
   const headerHasGap = term.alert != null || term.courses.length === 0
 
   return (
-    <Card className="min-w-0 flex-1 self-stretch gap-0 rounded-md border-gray-40 p-[23px] shadow-none">
+    <Card
+      ref={setNodeRef}
+      data-term={term.id}
+      className={cn(
+        "min-w-0 flex-1 self-stretch gap-0 rounded-md border-gray-40 p-[23px] shadow-none transition-colors",
+        isTarget && "border-primary bg-primary-0/40"
+      )}
+    >
       <div className="flex w-full flex-col gap-2">
         <div className={cn("flex w-full items-center justify-between", headerHasGap && "pb-4")}>
           <div className="flex flex-col gap-1">
@@ -107,22 +151,25 @@ export function SemesterCard({ term }: { term: Term }) {
           </StatusPill>
         </div>
 
-        {term.alert}
+        {alert}
 
-        {term.group && (
-          <CreditGroup
-            state={term.group.state}
-            label={term.group.label}
-            credits={term.group.credits}
-            deltas={term.group.deltas}
-          />
-        )}
+        {term.group && <CreditGroup group={term.group} />}
 
-        {term.courses.map((course, i) => (
-          <AuditRow key={`${course.name}-${i}`} course={course} />
-        ))}
-
-        <AddSlot>+ Add to Term</AddSlot>
+        <SortableContext
+          items={term.courses.map((c) => c.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col gap-2">
+            {term.courses.map((course) =>
+              term.locked ? (
+                <AuditRow key={course.id} course={course} locked />
+              ) : (
+                <SortableAuditRow key={course.id} course={course} />
+              )
+            )}
+            <AddSlot>+ Add to Term</AddSlot>
+          </div>
+        </SortableContext>
       </div>
     </Card>
   )
@@ -165,23 +212,19 @@ export function TimelineRail({ phase, nodes }: { phase: YearPhase; nodes: 1 | 2 
 /* ============================================================ YearSection */
 
 export function YearSection({
-  label,
-  phase,
-  terms,
-  children,
+  year,
+  renderAlert,
 }: {
-  label: string
-  phase: YearPhase
-  terms: Term[]
-  children?: React.ReactNode
+  year: Year
+  renderAlert?: (term: Term) => ReactNode
 }) {
   return (
     <section className="flex items-start gap-4">
-      <TimelineRail phase={phase} nodes={2} />
+      <TimelineRail phase={year.phase} nodes={2} />
       <div className="flex min-w-0 flex-1 flex-col items-start pb-8">
         <div className="-mb-px flex w-full items-center justify-between pb-4">
           <h3 className="flex items-center gap-1 text-h300 font-semibold text-gray-100">
-            {label}
+            {year.label}
             <Icon name="unfold-less" size={16} />
           </h3>
           <Button>
@@ -190,11 +233,10 @@ export function YearSection({
           </Button>
         </div>
         <div className="flex w-full items-start gap-4">
-          {terms.map((term) => (
-            <SemesterCard key={term.name} term={term} />
+          {year.terms.map((term) => (
+            <SemesterCard key={term.id} term={term} alert={renderAlert?.(term)} />
           ))}
         </div>
-        {children}
       </div>
     </section>
   )

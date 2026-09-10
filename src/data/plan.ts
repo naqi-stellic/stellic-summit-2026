@@ -1,21 +1,23 @@
-import type { ReactNode } from "react"
-
 export type YearPhase = "complete" | "active" | "future"
 
 export type PlannedCourse = {
+  /** Stable across moves — drag and drop identifies courses by this. */
+  id: string
   code: string
   name: string
   section?: string
   /** Note count shown as an inline tally. */
   notes?: number
-  /** Registered courses are fixed; planned ones can be reordered. */
-  draggable?: boolean
 }
 
 export type Term = {
+  id: string
   name: string
   meta: string
   reviewed: boolean
+  /** A term the student is already registered for. Its courses can't be moved
+   *  out and nothing can be dropped in. */
+  locked?: boolean
   group?: {
     state: "registered" | "planned"
     label: string
@@ -23,8 +25,8 @@ export type Term = {
     deltas?: { added: number; removed: number }
   }
   courses: PlannedCourse[]
-  /** Slotted between the header and the course list. */
-  alert?: ReactNode
+  /** Banner slotted between the header and the course list. */
+  alert?: "registration"
 }
 
 export type Year = {
@@ -33,60 +35,22 @@ export type Year = {
   terms: Term[]
 }
 
-const BIOLOGY: PlannedCourse = {
-  code: "CRS-CODE",
-  name: "Introduction to Biology",
-  section: "Lec-01",
-}
-
-export const FALL_2027: Term = {
-  name: "Fall 2027",
-  meta: "Sep - Dec • 30 credits",
-  reviewed: true,
-  group: { state: "registered", label: "In Progress", credits: 27 },
-  courses: [
-    { code: "CRS-CODE", name: "Calculus I", section: "Lec-01" },
-    BIOLOGY,
-    BIOLOGY,
-    { ...BIOLOGY, notes: 1 },
-  ],
-}
-
-export const SPRING_2028: Term = {
-  name: "Spring 2028",
-  meta: "Jan - May • 18 credits • Main campus",
-  reviewed: false,
-  group: {
-    state: "planned",
-    label: "Planned",
-    credits: 27,
-    deltas: { added: 3, removed: 1 },
-  },
-  courses: [
-    {
-      code: "CRS-CODE",
-      name: "Materials & Manufacturing II",
-      section: "Lec-01",
-      draggable: true,
-    },
-    { code: "CRS-CODE", name: "Special Studies", draggable: true },
-  ],
-}
-
-/** Years 3-5 are empty shells the student has not planned into yet. */
-function emptyYear(label: string, fall: string, spring: string): Year {
+/** Years the student has not planned into yet: two empty terms, nothing locked. */
+function emptyYear(start: number): Year {
   return {
-    label,
+    label: `${start}-${start + 1}`,
     phase: "future",
     terms: [
       {
-        name: fall,
+        id: `fall-${start}`,
+        name: `Fall ${start}`,
         meta: "Sep - Dec • 12 credits • Main campus",
         reviewed: false,
         courses: [],
       },
       {
-        name: spring,
+        id: `spring-${start + 1}`,
+        name: `Spring ${start + 1}`,
         meta: "Jan - May • 15 credits • Main campus",
         reviewed: false,
         courses: [],
@@ -95,8 +59,107 @@ function emptyYear(label: string, fall: string, spring: string): Year {
   }
 }
 
-export const FUTURE_YEARS: Year[] = [
-  emptyYear("2028-2029", "Fall 2028", "Spring 2029"),
-  emptyYear("2029-2030", "Fall 2029", "Spring 2030"),
-  emptyYear("2030-2031", "Fall 2030", "Spring 2031"),
+export const INITIAL_YEARS: Year[] = [
+  {
+    label: "2027-2028",
+    phase: "active",
+    terms: [
+      {
+        id: "fall-2027",
+        name: "Fall 2027",
+        meta: "Sep - Dec • 30 credits",
+        reviewed: true,
+        locked: true,
+        group: { state: "registered", label: "In Progress", credits: 27 },
+        courses: [
+          { id: "c1", code: "CRS-CODE", name: "Calculus I", section: "Lec-01" },
+          { id: "c2", code: "CRS-CODE", name: "Introduction to Biology", section: "Lec-01" },
+          { id: "c3", code: "CRS-CODE", name: "Introduction to Biology", section: "Lec-01" },
+          {
+            id: "c4",
+            code: "CRS-CODE",
+            name: "Introduction to Biology",
+            section: "Lec-01",
+            notes: 1,
+          },
+        ],
+      },
+      {
+        id: "spring-2028",
+        name: "Spring 2028",
+        meta: "Jan - May • 18 credits • Main campus",
+        reviewed: false,
+        alert: "registration",
+        group: {
+          state: "planned",
+          label: "Planned",
+          credits: 27,
+          deltas: { added: 3, removed: 1 },
+        },
+        courses: [
+          {
+            id: "c5",
+            code: "CRS-CODE",
+            name: "Materials & Manufacturing II",
+            section: "Lec-01",
+          },
+          { id: "c6", code: "CRS-CODE", name: "Special Studies" },
+        ],
+      },
+    ],
+  },
+  emptyYear(2028),
+  emptyYear(2029),
+  emptyYear(2030),
 ]
+
+/* ---------------------------------------------------------------- moves */
+
+export function findCourse(years: Year[], courseId: string) {
+  for (const year of years) {
+    for (const term of year.terms) {
+      const index = term.courses.findIndex((c) => c.id === courseId)
+      if (index !== -1) return { term, index, course: term.courses[index] }
+    }
+  }
+  return null
+}
+
+export function findTerm(years: Year[], termId: string) {
+  for (const year of years) {
+    const term = year.terms.find((t) => t.id === termId)
+    if (term) return term
+  }
+  return null
+}
+
+/** Moves a course to `toTermId`, at `toIndex` when given, otherwise appending.
+ *  Returns the input untouched if either end is locked. */
+export function moveCourse(
+  years: Year[],
+  courseId: string,
+  toTermId: string,
+  toIndex?: number
+): Year[] {
+  const from = findCourse(years, courseId)
+  const to = findTerm(years, toTermId)
+  if (!from || !to || from.term.locked || to.locked) return years
+
+  const sameTerm = from.term.id === to.id
+  if (sameTerm && (toIndex === undefined || toIndex === from.index)) return years
+
+  return years.map((year) => ({
+    ...year,
+    terms: year.terms.map((term) => {
+      if (term.id !== from.term.id && term.id !== to.id) return term
+
+      let courses = term.courses
+      if (term.id === from.term.id) courses = courses.filter((c) => c.id !== courseId)
+      if (term.id === to.id) {
+        const at = toIndex ?? courses.length
+        courses = [...courses.slice(0, at), from.course, ...courses.slice(at)]
+      }
+      return { ...term, courses }
+    }),
+  }))
+}

@@ -77,6 +77,25 @@ specifier is aliased to it (`vite.config.ts` + `tsconfig`) so CLI-added
 components get the fix without being edited. **Add any new `--text-*` token to
 that list.**
 
+## Drag and drop
+
+Planned courses can be picked up and dropped into any other planned term
+(`@dnd-kit`). Registered terms are locked — `Term.locked` in `src/data/plan.ts`
+— so their courses have no handle and can't be moved, and nothing can be
+dropped into them.
+
+Collision detection is `pointerWithin` rather than `closestCorners` on purpose:
+`closestCorners` always resolves to *some* droppable, so releasing over a locked
+term would quietly drop the course into a neighbouring one. `pointerWithin` only
+reports droppables the cursor is actually inside, so an invalid drop resolves to
+no target and the course snaps back.
+
+`moveCourse` in `src/data/plan.ts` owns the state transition and re-checks both
+ends for `locked`, so the rule holds even if a future caller skips the UI.
+
+Credit counts are static term data and do not recompute when a course moves —
+the design's numbers don't decompose per course, so there is nothing to sum yet.
+
 ## Icons
 
 Material Design icons, plus Stellic's own set for the glyphs Material does not
