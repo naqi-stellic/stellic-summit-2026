@@ -61,7 +61,8 @@ export function AppShell({
 
       <div className="fixed right-10 bottom-10 flex items-center gap-[10px]">
         {panel && (
-          <Button size="sm" className="shadow-secondary">
+          /* A pill in the design, not the usual 4px button radius. */
+          <Button size="sm" className="rounded-full">
             Generate with Assistant
           </Button>
         )}
