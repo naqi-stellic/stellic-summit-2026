@@ -9,6 +9,11 @@ npm run dev     # http://localhost:5173
 npm run build   # tsc -b && vite build
 ```
 
+The dev server watches by polling (`server.watch.usePolling` in
+`vite.config.ts`). macOS does not deliver file-system events for this project
+path, so without it the watcher never fires and Vite quietly serves stale
+modules — edits appear to do nothing no matter how hard you reload.
+
 ## Stack
 
 Vite · React 19 · TypeScript · Tailwind v4 · shadcn/ui (Radix).
