@@ -173,7 +173,7 @@ export function PlanYourPath() {
               label="Programs:"
               value="BSc in Business Administration (concentration: Finance)"
             />
-            <PlanFacet label="Pathway:" value="Biology: Fall Start 2026 [BSc]" />
+            <PlanFacet label="Pathway:" value="Business Administration: Fall Start 2026 [BSc]" />
 
             <div className="flex flex-wrap items-center gap-2 pt-2">
               {YEAR_TABS.map((tab) => (

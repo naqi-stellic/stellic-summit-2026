@@ -28,9 +28,9 @@ const STANDING: Standing[] = [
 ]
 
 const PLANNING = [
-  { label: "Programs", value: "Computer Science, B.S." },
-  { label: "Concentration", value: "Systems" },
-  { label: "Expected Graduation", value: "Spring 2028" },
+  { label: "Programs", value: "Business Administration, B.S." },
+  { label: "Concentration", value: "Finance" },
+  { label: "Expected Graduation", value: "Spring 2031" },
 ]
 
 export function GeneratePlanPanel({

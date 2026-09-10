@@ -72,13 +72,18 @@ export const INITIAL_YEARS: Year[] = [
         locked: true,
         group: { state: "registered", label: "In Progress", credits: 27 },
         courses: [
-          { id: "c1", code: "CRS-CODE", name: "Calculus I", section: "Lec-01" },
-          { id: "c2", code: "CRS-CODE", name: "Introduction to Biology", section: "Lec-01" },
-          { id: "c3", code: "CRS-CODE", name: "Introduction to Biology", section: "Lec-01" },
+          { id: "c1", code: "FIN 301", name: "Corporate Finance", section: "Lec-01" },
+          { id: "c2", code: "ACCT 202", name: "Managerial Accounting", section: "Lec-01" },
+          {
+            id: "c3",
+            code: "ECON 202",
+            name: "Principles of Macroeconomics",
+            section: "Lec-01",
+          },
           {
             id: "c4",
-            code: "CRS-CODE",
-            name: "Introduction to Biology",
+            code: "STAT 210",
+            name: "Business Statistics",
             section: "Lec-01",
             notes: 1,
           },
@@ -94,11 +99,11 @@ export const INITIAL_YEARS: Year[] = [
         courses: [
           {
             id: "c5",
-            code: "CRS-CODE",
-            name: "Materials & Manufacturing II",
+            code: "FIN 340",
+            name: "Investments & Portfolio Management",
             section: "Lec-01",
           },
-          { id: "c6", code: "CRS-CODE", name: "Special Studies" },
+          { id: "c6", code: "FIN 415", name: "Financial Modeling & Valuation" },
         ],
       },
     ],
