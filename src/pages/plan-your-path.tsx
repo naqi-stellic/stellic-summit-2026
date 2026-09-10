@@ -14,6 +14,7 @@ import { useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
+import { GeneratePlanPanel } from "@/components/stellic/generate-plan-panel"
 import { AuditRow, TimelineRail, YearSection } from "@/components/stellic/planner"
 import { AddSlot } from "@/components/stellic/primitives"
 import {
@@ -37,11 +38,13 @@ const YEAR_TABS: YearTab[] = [
   { label: "2029-2030" },
 ]
 
-const PLAN_ACTIONS = [
+type PlanAction = { label: string; icon: IconName; toggles?: boolean }
+
+const PLAN_ACTIONS: PlanAction[] = [
   { label: "Request review", icon: "assignment" },
-  { label: "Generate plan", icon: "design-services" },
+  { label: "Generate plan", icon: "design-services", toggles: true },
   { label: "Plan details", icon: "remove-red-eye" },
-] as const
+]
 
 function RegistrationAlert() {
   return (
@@ -87,6 +90,7 @@ function renderAlert(term: Term) {
 export function PlanYourPath() {
   const [years, setYears] = useState(INITIAL_YEARS)
   const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [generateOpen, setGenerateOpen] = useState(false)
 
   const sensors = useSensors(
     /* A few pixels of travel before a drag starts, so rows stay clickable. */
@@ -119,7 +123,10 @@ export function PlanYourPath() {
   }
 
   return (
-    <AppShell title="Plan Your Path">
+    <AppShell
+      title="Plan Your Path"
+      panel={generateOpen && <GeneratePlanPanel onClose={() => setGenerateOpen(false)} />}
+    >
       <DndContext
         sensors={sensors}
         /* pointerWithin only reports droppables the cursor is actually inside,
@@ -130,17 +137,23 @@ export function PlanYourPath() {
         onDragEnd={handleDragEnd}
         onDragCancel={() => setDraggingId(null)}
       >
-        <main className="flex min-w-0 flex-1 flex-col gap-6 p-6">
+        {/* @container so the planner reflows to its own width — the panel
+            opening matters as much as the viewport shrinking. */}
+        <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
           {/* ---------------------------------- Plan header */}
           <section className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
               <h2 className="flex items-center gap-1 text-h400 font-semibold text-gray-100">
                 Primary Plan
                 <Icon name="expand-more" size={16} />
               </h2>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {PLAN_ACTIONS.map((action) => (
-                  <Button key={action.label}>
+                  <Button
+                    key={action.label}
+                    aria-pressed={action.toggles ? generateOpen : undefined}
+                    onClick={action.toggles ? () => setGenerateOpen((open) => !open) : undefined}
+                  >
                     <Icon name={action.icon} size={16} />
                     {action.label}
                   </Button>
@@ -160,7 +173,7 @@ export function PlanYourPath() {
             />
             <PlanFacet label="Pathway:" value="Biology: Fall Start 2026 [BSc]" />
 
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex flex-wrap items-center gap-2 pt-2">
               {YEAR_TABS.map((tab) => (
                 <Button key={tab.label} size="sm" selected={tab.selected}>
                   {tab.icon && <Icon name={tab.icon} size={16} className={tab.tone} />}
@@ -173,7 +186,7 @@ export function PlanYourPath() {
           {/* ---------------------------------- 2026-2027, collapsed */}
           <section className="flex items-start gap-4">
             <TimelineRail phase="complete" nodes={1} />
-            <div className="flex min-w-0 flex-1 items-center justify-between pb-4">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-4">
               <h3 className="flex items-center gap-1 text-h300 font-semibold text-gray-100">
                 2026-2027
                 <Icon name="unfold-more" size={16} />

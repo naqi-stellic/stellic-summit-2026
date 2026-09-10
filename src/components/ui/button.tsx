@@ -19,8 +19,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        /* Tertiary is the workhorse: white surface, hairline, xs lift. */
-        tertiary: "border-input bg-card text-foreground shadow-xs hover:bg-gray-5",
+        /* Tertiary is the workhorse: white surface, hairline, xs lift.
+         * aria-pressed is Figma's Selected variant, for buttons that toggle
+         * something open — the Generate plan panel, for instance. */
+        tertiary:
+          "border-input bg-card text-foreground shadow-xs hover:bg-gray-5 " +
+          "aria-pressed:border-primary-50 aria-pressed:bg-primary-0 aria-pressed:text-primary-50 aria-pressed:hover:bg-primary-0",
         primary:
           "border-transparent bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         ghost: "border-transparent hover:bg-gray-5",

@@ -82,6 +82,32 @@ specifier is aliased to it (`vite.config.ts` + `tsconfig`) so CLI-added
 components get the fix without being edited. **Add any new `--text-*` token to
 that list.**
 
+## Generate Plan panel
+
+"Generate plan" toggles a side-by-side wizard (`src/components/stellic/generate-plan-panel.tsx`).
+The split uses shadcn's `resizable` (react-resizable-panels), and the drag handle
+*is* the 4px rail the design already draws between the two columns rather than an
+extra divider. Sizes are pixels in v4, so they are the design's own numbers: the
+panel opens at 434px, clamps between 340 and 720, and the planner keeps 520px.
+
+Two things the shell depends on:
+
+- It is `h-screen overflow-hidden`, so the sidebar and top bar stay put and each
+  column scrolls on its own. The panel group needs a bounded height anyway.
+- The panel group is always mounted. Swapping the wrapper when the panel opens
+  would remount the whole planner and throw away its scroll position and drag
+  state.
+
+## Responsive
+
+The planner reflows to *its own* width, not the viewport's — the panel opening
+matters as much as the window shrinking — so it uses container queries rather
+than media queries. `main` is the `@container`; term cards sit side by side above
+`@3xl` (768px) and stack below it. The wizard is its own container too, so its
+label/value rows stack once the user drags the panel under 320px.
+
+The sidebar stays a fixed 240px at every width; collapsing it is not wired up yet.
+
 ## Drag and drop
 
 Planned courses can be picked up and dropped into any other planned term

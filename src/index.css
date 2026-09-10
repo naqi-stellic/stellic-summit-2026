@@ -22,12 +22,16 @@
   --stellic-primary-100: #006cbc;
 
   --stellic-success-5: #eafcf7;
+  --stellic-success-50: #2fa77f;
   --stellic-success-100: #008259;
 
   --stellic-warning-5: #fff6e4;
+  --stellic-warning-25: #ffab3d;
   --stellic-warning-50: #e8672a;
+  --stellic-warning-75: #f08f2a;
 
   --stellic-alert-5: #ffeaea;
+  --stellic-alert-50: #d30303;
   --stellic-alert-100: #bd0303;
 
   /* Sidebar masthead ground. Not a Figma variable — sampled from the frame. */
@@ -106,10 +110,14 @@
   --color-primary-50: var(--stellic-primary-50);
   --color-primary-100: var(--stellic-primary-100);
   --color-success-5: var(--stellic-success-5);
+  --color-success-50: var(--stellic-success-50);
   --color-success-100: var(--stellic-success-100);
   --color-warning-5: var(--stellic-warning-5);
+  --color-warning-25: var(--stellic-warning-25);
   --color-warning-50: var(--stellic-warning-50);
+  --color-warning-75: var(--stellic-warning-75);
   --color-alert-5: var(--stellic-alert-5);
+  --color-alert-50: var(--stellic-alert-50);
   --color-alert-100: var(--stellic-alert-100);
 
   --radius-md: var(--radius);

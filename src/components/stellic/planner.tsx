@@ -153,12 +153,18 @@ export function SemesterCard({
       ref={setNodeRef}
       data-term={term.id}
       className={cn(
-        "min-w-0 flex-1 self-stretch gap-0 rounded-md border-gray-40 p-[23px] shadow-none transition-colors",
+        "w-full min-w-0 gap-0 rounded-md border-gray-40 p-[23px] shadow-none transition-colors",
+        "@3xl:w-auto @3xl:flex-1 @3xl:self-stretch",
         isTarget && "border-primary bg-primary-0/40"
       )}
     >
       <div className="flex w-full flex-col gap-2">
-        <div className={cn("flex w-full items-center justify-between", headerHasGap && "pb-4")}>
+        <div
+          className={cn(
+            "flex w-full flex-wrap items-center justify-between gap-x-2 gap-y-1",
+            headerHasGap && "pb-4"
+          )}
+        >
           <div className="flex flex-col gap-1">
             <h4 className="flex items-center gap-1 text-caption-lg font-semibold text-gray-100">
               {term.name}
@@ -251,7 +257,7 @@ export function YearSection({
     <section className="flex items-start gap-4">
       <TimelineRail phase={year.phase} nodes={2} />
       <div className="flex min-w-0 flex-1 flex-col items-start pb-8">
-        <div className="-mb-px flex w-full items-center justify-between pb-4">
+        <div className="-mb-px flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-4">
           <h3 className="flex items-center gap-1 text-h300 font-semibold text-gray-100">
             {year.label}
             <Icon name="unfold-less" size={16} />
@@ -261,7 +267,8 @@ export function YearSection({
             Add Term
           </Button>
         </div>
-        <div className="flex w-full items-start gap-4">
+        {/* Two cards need ~768px of planner; below that they stack. */}
+        <div className="flex w-full flex-col gap-4 @3xl:flex-row @3xl:items-start">
           {year.terms.map((term) => (
             <SemesterCard
               key={term.id}
