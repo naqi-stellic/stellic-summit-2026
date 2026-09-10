@@ -47,8 +47,10 @@ const PLAN_ACTIONS: PlanAction[] = [
 ]
 
 function RegistrationAlert() {
+  /* 92px is the design's height; a minimum rather than a fixed value so the
+     banner can grow when the closing date wraps to a second line. */
   return (
-    <Alert className="h-[92px]">
+    <Alert className="min-h-[92px]">
       <AlertBody>
         <AlertHeader>
           <AlertTitle>

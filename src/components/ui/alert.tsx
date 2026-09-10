@@ -46,7 +46,9 @@ function AlertHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-header"
-      className={cn("flex w-full items-center gap-2 pb-2", className)}
+      /* Wraps so the closing date drops to its own line when the card is
+         narrow, rather than being truncated. */
+      className={cn("flex w-full flex-wrap items-center gap-2", className)}
       {...props}
     />
   )
@@ -63,7 +65,10 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"span">) {
 }
 
 function AlertDescription({ className, ...props }: React.ComponentProps<"span">) {
-  return <span data-slot="alert-description" className={cn("truncate", className)} {...props} />
+  /* nowrap so it moves to the next line whole instead of squeezing. */
+  return (
+    <span data-slot="alert-description" className={cn("whitespace-nowrap", className)} {...props} />
+  )
 }
 
 export { Alert, AlertBody, AlertHeader, AlertTitle, AlertDescription }
