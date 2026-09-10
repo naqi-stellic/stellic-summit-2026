@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Stellic design tokens — mirrored 1:1 from the Figma variable collections,
+   then mapped onto the shadcn semantic layer so every shadcn primitive picks
+   up Stellic styling without being forked.
+   ========================================================================== */
+
+:root {
+  /* ---- Palette: stellic colors ---- */
+  --stellic-white: #ffffff;
+  --stellic-gray-0: #f9f9f9;
+  --stellic-gray-5: #f1f3f4;
+  --stellic-gray-40: #d3d8de;
+  --stellic-gray-60: #8891a6;
+  --stellic-gray-80: #6f7782;
+  --stellic-gray-100: #151b26;
+  --stellic-blue: #1e2129;
+
+  --stellic-primary-0: #ebf5ff;
+  --stellic-primary-50: #008dff;
+  --stellic-primary-100: #006cbc;
+
+  --stellic-success-5: #eafcf7;
+  --stellic-success-100: #008259;
+
+  --stellic-warning-5: #fff6e4;
+  --stellic-warning-50: #e8672a;
+
+  --stellic-alert-5: #ffeaea;
+  --stellic-alert-100: #bd0303;
+
+  /* Sidebar masthead ground. Not a Figma variable — sampled from the frame. */
+  --stellic-parchment: #f5f4ed;
+
+  /* ---- shadcn semantic tokens ----
+     The Figma file names these the same way (base/foreground, base/input,
+     base/ring, base/primary-selected), so the mapping is one-to-one. */
+  --background: var(--stellic-gray-0);
+  --foreground: var(--stellic-gray-100);
+  --card: var(--stellic-white);
+  --card-foreground: var(--stellic-gray-100);
+  --popover: var(--stellic-white);
+  --popover-foreground: var(--stellic-gray-100);
+  --primary: var(--stellic-primary-50);
+  --primary-foreground: var(--stellic-gray-0);
+  --primary-selected: var(--stellic-primary-100);
+  --secondary: var(--stellic-gray-5);
+  --secondary-foreground: var(--stellic-gray-100);
+  --muted: var(--stellic-gray-5);
+  --muted-foreground: var(--stellic-gray-80);
+  --accent: var(--stellic-gray-5);
+  --accent-foreground: var(--stellic-gray-100);
+  --destructive: var(--stellic-alert-100);
+  --destructive-foreground: var(--stellic-alert-5);
+  --border: var(--stellic-gray-40);
+  --input: var(--stellic-gray-40);
+  --ring: var(--stellic-gray-0);
+  --radius: 4px;
+
+  /* ---- Type ---- */
+  --font-sans: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* ---- Elevation ---- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-secondary: 0 6px 16px 0 rgb(0 0 0 / 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+@theme inline {
+  --font-sans: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-selected: var(--primary-selected);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Palette exposed as utilities: bg-gray-100, text-warning-50, … */
+  --color-white: var(--stellic-white);
+  --color-gray-0: var(--stellic-gray-0);
+  --color-gray-5: var(--stellic-gray-5);
+  --color-gray-40: var(--stellic-gray-40);
+  --color-gray-60: var(--stellic-gray-60);
+  --color-gray-80: var(--stellic-gray-80);
+  --color-gray-100: var(--stellic-gray-100);
+  --color-stellic-blue: var(--stellic-blue);
+  --color-parchment: var(--stellic-parchment);
+  --color-primary-0: var(--stellic-primary-0);
+  --color-primary-50: var(--stellic-primary-50);
+  --color-primary-100: var(--stellic-primary-100);
+  --color-success-5: var(--stellic-success-5);
+  --color-success-100: var(--stellic-success-100);
+  --color-warning-5: var(--stellic-warning-5);
+  --color-warning-50: var(--stellic-warning-50);
+  --color-alert-5: var(--stellic-alert-5);
+  --color-alert-100: var(--stellic-alert-100);
+
+  --radius-md: var(--radius);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-secondary: var(--shadow-secondary);
+  --shadow-2xl: var(--shadow-2xl);
+
+  /* Figma type styles, as `text-*` utilities that carry size + leading +
+     tracking together. Weight stays a separate utility. */
+  --text-h400: 18px;
+  --text-h400--line-height: 20px;
+  --text-h400--letter-spacing: 0;
+  --text-h300: 16px;
+  --text-h300--line-height: 24px;
+  --text-h300--letter-spacing: 0;
+  --text-caption-lg: 15px;
+  --text-caption-lg--line-height: 20px;
+  --text-caption-lg--letter-spacing: 0;
+  --text-body-md: 13px;
+  --text-body-md--line-height: 20px;
+  --text-body-md--letter-spacing: 0;
+  --text-button-md: 13px;
+  --text-button-md--line-height: 13px;
+  --text-button-md--letter-spacing: 0;
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.2px;
+  --text-label-sm: 11px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--letter-spacing: 0.2px;
+  --text-overline: 11px;
+  --text-overline--line-height: 16px;
+  --text-overline--letter-spacing: 0.5px;
+  --text-field: 15px;
+  --text-field--line-height: 24px;
+  --text-field--letter-spacing: 0;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-size: 13px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
