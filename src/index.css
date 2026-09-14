@@ -184,10 +184,40 @@
   }
 }
 
+/* Used when a card the draft struck out leaves the plan: it fades, then the
+   list closes the space it was holding. */
+@keyframes vanish {
+  from {
+    opacity: 1;
+    max-height: 240px;
+  }
+  55% {
+    opacity: 0;
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: -8px;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+  }
+}
+
+/* The draft frame seeing itself out, once the plan under it has settled. */
+@keyframes dissolve {
+  to {
+    opacity: 0;
+  }
+}
+
 @theme inline {
   --animate-rise: rise 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-dissolve: dissolve 0.3s ease-out 0.5s both;
   --animate-settle: settle 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-fade: fade 0.4s ease-out both;
+  --animate-vanish: vanish 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 /* Honour the system setting: the entrance is the decoration, the end state is
@@ -195,7 +225,9 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-rise,
   .animate-settle,
-  .animate-fade {
+  .animate-fade,
+  .animate-vanish,
+  .animate-dissolve {
     animation: none;
   }
 }

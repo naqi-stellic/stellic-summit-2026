@@ -1,3 +1,5 @@
+import { cn } from "cn"
+
 import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,11 +11,15 @@ import { Button } from "@/components/ui/button"
 export function DraftBar({
   added,
   removed,
+  leaving,
   onExit,
   onAccept,
 }: {
   added: number
   removed: number
+  /** The draft is being accepted: the bar waits for the plan to settle, then
+   *  sees itself out. */
+  leaving?: boolean
   onExit: () => void
   onAccept: () => void
 }) {
@@ -22,9 +28,16 @@ export function DraftBar({
       /* Border sits inside, so the bottom padding gives it back its pixel. */
       /* The tab hangs into this bar, so on a narrow screen the controls start
          below it rather than underneath it. */
-      className="animate-settle flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-gray-40 bg-warning-5 px-4 pt-3 pb-[11px] max-md:pt-10"
+      className={cn(
+        "flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-gray-40 bg-warning-5 px-4 pt-3 pb-[11px] max-md:pt-10",
+        /* An animation rather than a transition: these elements came in on one
+           that is still filling forwards, and a filled animation outranks any
+           transition on the same property. The half-second wait is in the
+           keyframe shorthand, so the plan settles before the frame goes. */
+        leaving ? "animate-dissolve pointer-events-none" : "animate-settle"
+      )}
     >
-      <Button onClick={onExit}>
+      <Button disabled={leaving} onClick={onExit}>
         <Icon name="keyboard-backspace" size={16} />
         Exit
       </Button>
@@ -34,7 +47,7 @@ export function DraftBar({
           <Badge variant="success">+{added} added</Badge>
           {removed > 0 && <Badge variant="danger">-{removed} removed</Badge>}
         </div>
-        <Button variant="primary" onClick={onAccept}>
+        <Button variant="primary" disabled={leaving} onClick={onAccept}>
           Accept draft
         </Button>
       </div>
@@ -45,9 +58,15 @@ export function DraftBar({
 /** The ring around the canvas and the tab hanging from its top edge. Drawn over
  *  the planner rather than around it, so nothing below it shifts when a draft
  *  appears. */
-export function DraftOutline() {
+export function DraftOutline({ leaving }: { leaving?: boolean }) {
   return (
-    <div aria-hidden="true" className="animate-fade pointer-events-none absolute inset-0 z-10">
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 z-10",
+        leaving ? "animate-dissolve" : "animate-fade"
+      )}
+    >
       <div className="absolute inset-0 border-[3px] border-warning-50" />
       <Badge
         variant="secondary"

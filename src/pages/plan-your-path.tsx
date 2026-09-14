@@ -68,6 +68,10 @@ function yearTabs(years: Year[]): YearTab[] {
   ]
 }
 
+/* Long enough for the last staggered card to finish settling (14 × 35ms of
+   stagger plus a 420ms vanish), then the frame follows it out. */
+const SETTLE_MS = 1100
+
 type PlanAction = { label: string; icon: IconName; toggles?: boolean }
 
 const PLAN_ACTIONS: PlanAction[] = [
@@ -136,6 +140,9 @@ export function PlanYourPath() {
   const [drafts, setDrafts] = useState<{ options: DraftOption[]; made: Draft[] } | null>(null)
   const [optionId, setOptionId] = useState("steady")
   const [explained, setExplained] = useState<string | null>(null)
+  /* Accepting is not instant: the marks come off and the struck cards leave
+   * before the plan underneath becomes the real one. */
+  const [accepting, setAccepting] = useState(false)
 
   const draft = drafts?.made.find((d) => d.optionId === optionId) ?? null
   const option = drafts?.options.find((o) => o.id === optionId) ?? null
@@ -191,9 +198,14 @@ export function PlanYourPath() {
   }
 
   function keepDraft() {
-    if (draft) setYears(acceptDraft(draft.years))
-    dropDraft()
-    setGenerateOpen(false)
+    if (!draft || accepting) return
+    setAccepting(true)
+    window.setTimeout(() => {
+      setYears(acceptDraft(draft.years))
+      setAccepting(false)
+      dropDraft()
+      setGenerateOpen(false)
+    }, SETTLE_MS)
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -263,6 +275,7 @@ export function PlanYourPath() {
             <DraftBar
               added={draft.added}
               removed={draft.removed}
+              leaving={accepting}
               onExit={() => {
                 dropDraft()
                 setGenerateOpen(false)
@@ -339,6 +352,7 @@ export function PlanYourPath() {
                 key={year.label}
                 year={year}
                 frozen={draft != null}
+                settling={accepting}
                 renderAlert={(term) => (
                   <>
                     {termBanner(term, draft != null)}
@@ -368,7 +382,7 @@ export function PlanYourPath() {
           </section>
           </main>
 
-          {draft && <DraftOutline />}
+          {draft && <DraftOutline leaving={accepting} />}
         </div>
 
         <DragOverlay>

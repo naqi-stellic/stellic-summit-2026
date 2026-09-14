@@ -39,6 +39,12 @@ function enterDelay(order: number): string {
   return `${Math.min(order, 14) * 45}ms`
 }
 
+/** The same idea on the way out: accepting a draft settles the cards in the
+ *  order the generator placed them rather than all at once. */
+function settleDelay(order: number): string {
+  return `${Math.min(order, 14) * 35}ms`
+}
+
 type AuditRowProps = {
   course: PlannedCourse
   /** Registered courses are fixed in place: no handle, no hover affordance. */
@@ -47,24 +53,48 @@ type AuditRowProps = {
   ghosted?: boolean
   /** The copy under the cursor. */
   overlay?: boolean
+  /** The draft is being accepted: marks come off, struck cards leave. */
+  settling?: boolean
   /** Present only where the course can leave the plan; reveals the × on hover. */
   onRemove?: () => void
 }
 
-export function AuditRow({ course, locked, ghosted, overlay, onRemove }: AuditRowProps) {
+export function AuditRow({
+  course,
+  locked,
+  ghosted,
+  overlay,
+  settling,
+  onRemove,
+}: AuditRowProps) {
   const draft = course.draft
   const style = draft ? DRAFT_STYLE[draft.mark] : null
   const struck = draft?.mark === "moved" || draft?.mark === "removed"
+  /* What the draft struck out is on its way off the plan; what it added is on
+   * its way to being an ordinary course. */
+  const leaving = settling && struck
+  const joining = settling && draft?.mark === "added"
 
   return (
     <div
-      style={draft ? { animationDelay: enterDelay(draft.order) } : undefined}
+      style={
+        draft
+          ? {
+              animationDelay: leaving ? settleDelay(draft.order) : enterDelay(draft.order),
+              transitionDelay: joining ? settleDelay(draft.order) : undefined,
+            }
+          : undefined
+      }
       className={cn(
         "group relative flex w-full items-center gap-2 rounded-md border bg-card",
         locked ? "px-[15px] py-[7px]" : "p-[7px]",
-        style ? style.card : "border-gray-40",
+        style && !joining ? style.card : "border-gray-40",
         !locked && !draft && "cursor-grab transition-colors hover:bg-gray-5",
-        draft && "animate-rise",
+        /* Same reason as the draft bar: a marked card carries the transition
+           all along, so losing its tint is something it can animate. */
+        draft && "animate-rise transition-colors duration-500",
+        /* Listed after animate-rise so it wins the animation slot. */
+        leaving && "animate-vanish overflow-hidden",
         ghosted && "opacity-40",
         overlay && "cursor-grabbing shadow-secondary"
       )}
@@ -97,7 +127,16 @@ export function AuditRow({ course, locked, ghosted, overlay, onRemove }: AuditRo
           </p>
         )}
         {draft && style && (
-          <p className={cn("flex items-center gap-1 pt-1 text-label-md", style.note)}>
+          <p
+            style={joining ? { animationDelay: settleDelay(draft.order) } : undefined}
+            className={cn(
+              "flex items-center gap-1 pt-1 text-label-md",
+              style.note,
+              /* The reason a course was added goes with the tint that framed
+                 it, so the card ends up the size an ordinary one is. */
+              joining && "animate-vanish overflow-hidden"
+            )}
+          >
             <Icon name={style.icon} size={16} />
             {draft.note}
           </p>
@@ -144,7 +183,7 @@ function SortableAuditRow({
    own courses, so the heading can never drift from the list beneath it. The
    badges tally what a draft proposes for this term. */
 
-function CreditGroup({ term }: { term: Term }) {
+function CreditGroup({ term, settling }: { term: Term; settling?: boolean }) {
   const credits = termCredits(term)
   const added = term.courses.filter((c) => c.draft?.mark === "added").length
   const dropped = term.courses.filter(
@@ -164,7 +203,12 @@ function CreditGroup({ term }: { term: Term }) {
         {CREDIT_GROUP_LABEL[term.state]} ({credits} Credit{credits === 1 ? "" : "s"})
       </p>
       {added + dropped > 0 && (
-        <div className="flex shrink-0 items-center gap-1">
+        <div
+          className={cn(
+            "flex shrink-0 items-center gap-1 transition-opacity duration-300",
+            settling && "opacity-0"
+          )}
+        >
           {added > 0 && <Badge variant="success">+{added}</Badge>}
           {dropped > 0 && <Badge variant="danger">-{dropped}</Badge>}
         </div>
@@ -180,6 +224,7 @@ export function SemesterCard({
   term,
   alert,
   frozen,
+  settling,
   onRemoveCourse,
   onExplain,
 }: {
@@ -187,6 +232,8 @@ export function SemesterCard({
   alert?: ReactNode
   /** A draft is on screen: its cards are a proposal, not something to rearrange. */
   frozen?: boolean
+  /** The draft is being accepted. */
+  settling?: boolean
   onRemoveCourse: (courseId: string) => void
   /** Offered only while there is a draft to explain. */
   onExplain?: () => void
@@ -205,7 +252,7 @@ export function SemesterCard({
 
   const rows = term.courses.map((course) =>
     term.locked || frozen ? (
-      <AuditRow key={course.id} course={course} locked={term.locked} />
+      <AuditRow key={course.id} course={course} locked={term.locked} settling={settling} />
     ) : (
       <SortableAuditRow
         key={course.id}
@@ -264,7 +311,7 @@ export function SemesterCard({
 
         {alert}
 
-        {term.courses.length > 0 && <CreditGroup term={term} />}
+        {term.courses.length > 0 && <CreditGroup term={term} settling={settling} />}
 
         {frozen ? (
           <div className="flex flex-col gap-2">{rows}</div>
@@ -339,12 +386,14 @@ export function YearSection({
   year,
   renderAlert,
   frozen,
+  settling,
   onRemoveCourse,
   onExplain,
 }: {
   year: Year
   renderAlert?: (term: Term) => ReactNode
   frozen?: boolean
+  settling?: boolean
   onRemoveCourse: (courseId: string) => void
   onExplain?: (term: Term) => void
 }) {
@@ -376,6 +425,7 @@ export function YearSection({
               term={term}
               alert={renderAlert?.(term)}
               frozen={frozen}
+              settling={settling}
               onRemoveCourse={onRemoveCourse}
               onExplain={onExplain && !term.locked ? () => onExplain(term) : undefined}
             />
