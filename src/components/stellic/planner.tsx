@@ -288,7 +288,6 @@ export function SemesterCard({
   addable,
   onRemoveCourse,
   onAddCourse,
-  onExplain,
 }: {
   term: Term
   alert?: ReactNode
@@ -303,8 +302,6 @@ export function SemesterCard({
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (entry: CatalogEntry) => void
-  /** Offered only while there is a draft to explain. */
-  onExplain?: () => void
 }) {
   const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
 
@@ -313,7 +310,7 @@ export function SemesterCard({
 
   /* The design only gives the header a bottom gap when something follows it
    * other than the course list. */
-  const headerHasGap = term.alert != null || term.courses.length === 0 || onExplain != null
+  const headerHasGap = term.alert != null || term.courses.length === 0
 
   /* Infinity means the draft has finished arriving. */
   const streaming = revealed !== Infinity
@@ -364,26 +361,12 @@ export function SemesterCard({
             </h4>
             <p className="text-body-md text-gray-80">{termMeta(term)}</p>
           </div>
-          {onExplain ? (
-            /* Narrow terms keep the button on the header row and drop the word
-               rather than wrapping under the title. */
-            <Button
-              size="sm"
-              aria-label="Explain"
-              onClick={onExplain}
-              className="shrink-0 @max-[320px]/term:w-8 @max-[320px]/term:px-0"
-            >
-              <Icon name="auto-awesome" size={16} />
-              <span className="@max-[320px]/term:hidden">Explain</span>
-            </Button>
-          ) : (
-            <StatusPill
-              status={term.reviewed ? "reviewed" : "unreviewed"}
-              className={cn("shrink-0", !term.reviewed && "opacity-0")}
-            >
-              {term.reviewed ? "reviewed" : "Unreviewed"}
-            </StatusPill>
-          )}
+          <StatusPill
+            status={term.reviewed ? "reviewed" : "unreviewed"}
+            className={cn("shrink-0", !term.reviewed && "opacity-0")}
+          >
+            {term.reviewed ? "reviewed" : "Unreviewed"}
+          </StatusPill>
         </div>
 
         {alert}
@@ -472,7 +455,6 @@ export function YearSection({
   addable,
   onRemoveCourse,
   onAddCourse,
-  onExplain,
 }: {
   year: Year
   renderAlert?: (term: Term) => ReactNode
@@ -484,7 +466,6 @@ export function YearSection({
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (termId: string, entry: CatalogEntry) => void
-  onExplain?: (term: Term) => void
 }) {
   return (
     <section className="flex items-start gap-4">
@@ -520,7 +501,6 @@ export function YearSection({
               addable={addable}
               onRemoveCourse={onRemoveCourse}
               onAddCourse={(entry) => onAddCourse(term.id, entry)}
-              onExplain={onExplain && !term.locked ? () => onExplain(term) : undefined}
             />
           ))}
         </div>

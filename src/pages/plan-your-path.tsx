@@ -44,7 +44,6 @@ import {
   addableCourses,
   draftLength,
   draftTally,
-  explainTerm,
   generateDraft,
   moveInDraft,
   planOptions,
@@ -168,7 +167,6 @@ export function PlanYourPath() {
    * so the generated three stay as they were generated. */
   const [custom, setCustom] = useState<{ option: DraftOption; draft: Draft } | null>(null)
   const [optionId, setOptionId] = useState("steady")
-  const [explained, setExplained] = useState<string | null>(null)
   /* Accepting is not instant: the marks come off and the struck cards leave
    * before the plan underneath becomes the real one. */
   const [accepting, setAccepting] = useState(false)
@@ -270,7 +268,6 @@ export function PlanYourPath() {
     setDrafts({ options, made: options.map((o) => generateDraft(years, o, released)) })
     setCustom(null)
     setOptionId(options[0].id)
-    setExplained(null)
   }
 
   function dropDraft() {
@@ -278,7 +275,6 @@ export function PlanYourPath() {
     setRevealed(Infinity)
     setDrafts(null)
     setCustom(null)
-    setExplained(null)
   }
 
   /* A change made by hand forks whichever option is on screen into the custom
@@ -381,10 +377,7 @@ export function PlanYourPath() {
             options={optionSummaries}
             selectedOption={optionId}
             placeholders={placeholders}
-            onSelectOption={(id) => {
-              setOptionId(id)
-              setExplained(null)
-            }}
+            onSelectOption={setOptionId}
             onFraming={() => setFraming(true)}
             onGenerated={startDraft}
             onDiscardDraft={dropDraft}
@@ -506,23 +499,9 @@ export function PlanYourPath() {
                 revealed={revealed}
                 drop={drop}
                 addable={addable}
-                renderAlert={(term) => (
-                  <>
-                    {termBanner(term, draft != null)}
-                    {explained === term.id && option && (
-                      <p className="animate-rise w-full rounded-md border border-gray-40 bg-gray-0 p-[11px] text-label-md text-gray-100">
-                        {explainTerm(term, option)}
-                      </p>
-                    )}
-                  </>
-                )}
+                renderAlert={(term) => termBanner(term, draft != null)}
                 onRemoveCourse={handleRemoveCourse}
                 onAddCourse={handleAddCourse}
-                onExplain={
-                  option
-                    ? (term) => setExplained((current) => (current === term.id ? null : term.id))
-                    : undefined
-                }
               />
             ))}
           </div>

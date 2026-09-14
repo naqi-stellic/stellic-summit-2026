@@ -372,32 +372,6 @@ export function acceptDraft(years: Year[]): Year[] {
   }))
 }
 
-/** What the draft did to one term, in a sentence. */
-export function explainTerm(term: Term, option: DraftOption): string {
-  const added = term.courses.filter((c) => c.draft?.mark === "added")
-  const moved = term.courses.filter((c) => c.draft?.mark === "moved")
-  const removed = term.courses.filter((c) => c.draft?.mark === "removed")
-
-  const clauses: string[] = []
-  if (added.length > 0) {
-    const seats = added.filter((c) => c.placeholder).length
-    clauses.push(
-      `filled ${added.length} of the ${option.coursesPerTerm} seats this option plans per term` +
-        (seats > 0 ? `, ${seats} of them held for a course you pick later` : "")
-    )
-  }
-  /* Only the first letter drops case — term names keep theirs. */
-  const uncapitalise = (text: string) => text[0].toLowerCase() + text.slice(1)
-  for (const course of moved) clauses.push(`${course.code} ${uncapitalise(course.draft!.note)}`)
-  for (const course of removed) {
-    clauses.push(`dropped ${course.code} — ${uncapitalise(course.draft!.note)}`)
-  }
-  if (clauses.length === 0) return "Nothing changed here."
-
-  const sentence = clauses.join("; ")
-  return sentence[0].toUpperCase() + sentence.slice(1) + "."
-}
-
 /* ------------------------------------------------- changing a draft by hand
 
    The playground is the planner: courses can be moved, dropped and added
