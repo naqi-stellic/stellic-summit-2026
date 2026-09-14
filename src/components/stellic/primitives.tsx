@@ -3,6 +3,7 @@ import { cn } from "cn"
 import * as React from "react"
 
 import { Icon } from "@/components/icon"
+import { RadioGroupItem } from "@/components/ui/radio-group"
 
 /* Small Stellic-specific pieces that have no shadcn equivalent. Anything here
  * used by a second page should stay here; page-local composition does not. */
@@ -87,5 +88,44 @@ export function AddSlot({
     <button type="button" className={cn(addSlotVariants({ tone }), className)} {...props}>
       {tone === "year" ? <span className="w-full text-left">{children}</span> : children}
     </button>
+  )
+}
+
+/* ============================================================ RadioCard
+   A bordered option in a RadioGroup: the radio, a label and a line under it,
+   with the border marking the choice. `children` is for an option that opens
+   up when it is the one chosen. */
+
+export function RadioCard({
+  value,
+  label,
+  detail,
+  selected,
+  children,
+}: {
+  value: string
+  label: string
+  detail: string
+  selected: boolean
+  children?: React.ReactNode
+}) {
+  return (
+    <div
+      className={cn(
+        "flex w-full flex-col gap-2 rounded-md border p-[11px] transition-colors",
+        selected ? "border-primary-50" : "border-gray-40"
+      )}
+    >
+      <label className="flex w-full cursor-pointer items-start gap-3">
+        <span className="flex items-center py-0.5">
+          <RadioGroupItem value={value} />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px text-body-md">
+          <span className="text-foreground">{label}</span>
+          <span className="text-gray-80">{detail}</span>
+        </span>
+      </label>
+      {children}
+    </div>
   )
 }

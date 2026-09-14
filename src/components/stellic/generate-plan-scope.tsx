@@ -1,10 +1,10 @@
 import { cn } from "cn"
 
 import { Icon, type IconName } from "@/components/icon"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { DEGREE, type PlanStanding } from "@/data/plan"
 
-/* Step 1: where the student stands, and whether to keep what is already planned. */
+/* Step 1: where the student stands, and what the plan is for. The questions
+ * themselves start at step 2. */
 
 type Segment = { share: number; className: string }
 
@@ -51,13 +51,9 @@ function Tally({ items }: { items: { icon: IconName; tone: string; value: number
 export function GeneratePlanScope({
   standing,
   graduation,
-  keepPlanned,
-  onKeepPlannedChange,
 }: {
   standing: PlanStanding
   graduation: string
-  keepPlanned: string
-  onKeepPlannedChange: (next: string) => void
 }) {
   const courses = standing.total.reqs
   const milestones = standing.milestones
@@ -66,19 +62,6 @@ export function GeneratePlanScope({
     { label: "Programs", value: DEGREE.program },
     { label: "Concentration", value: DEGREE.concentration },
     { label: "Expected Graduation", value: graduation },
-  ]
-
-  const choices = [
-    {
-      value: "yes",
-      label: "Yes",
-      detail: `Keep my ${standing.planned.reqs} courses and placeholders and fill in the blanks to complete my journey`,
-    },
-    {
-      value: "no",
-      label: "No",
-      detail: "Choose the courses and placeholders to keep and which can be moved or swapped",
-    },
   ]
 
   return (
@@ -153,39 +136,6 @@ export function GeneratePlanScope({
             </button>
           </div>
         ))}
-      </div>
-
-      <div className="flex w-full flex-col gap-2">
-        <div className="flex w-full items-center pb-2">
-          <h4 className="flex-1 text-body-md font-semibold text-gray-100">
-            Keep everything already planned?
-          </h4>
-        </div>
-        <RadioGroup
-          value={keepPlanned}
-          onValueChange={onKeepPlannedChange}
-          className="w-full gap-2"
-        >
-          {choices.map((choice) => (
-            <label
-              key={choice.value}
-              className={cn(
-                "flex w-full cursor-pointer items-center justify-between rounded-md border p-[11px] transition-colors",
-                keepPlanned === choice.value ? "border-primary-50" : "border-gray-40"
-              )}
-            >
-              <span className="flex min-w-0 flex-1 items-start gap-3">
-                <span className="flex items-center py-0.5">
-                  <RadioGroupItem value={choice.value} />
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px text-body-md">
-                  <span className="text-foreground">{choice.label}</span>
-                  <span className="text-gray-80">{choice.detail}</span>
-                </span>
-              </span>
-            </label>
-          ))}
-        </RadioGroup>
       </div>
     </>
   )

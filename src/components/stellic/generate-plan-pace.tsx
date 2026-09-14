@@ -1,13 +1,13 @@
-import { cn } from "cn"
-
 import { Icon } from "@/components/icon"
+import { RadioCard } from "@/components/stellic/primitives"
 import { TermMultiSelect } from "@/components/stellic/term-multi-select"
 import { Button } from "@/components/ui/button"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { RadioGroup } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
-import { PLANNING_RULES } from "@/data/plan"
+import { PLANNING_RULES, type PlanStanding } from "@/data/plan"
 
-/* Step 2: how many credits a term, and which terms are in play. */
+/* Step 2: what to keep of the plan you already have, how many credits a term,
+ * and which terms are in play. */
 
 /** What each named pace means in credits — the one place that decides, so the
  *  radio's own description and the load the generator plans to agree. */
@@ -113,12 +113,34 @@ export const INITIAL_PACE: PaceState = {
   exclude: [],
 }
 
+/** The two ways to treat what is already planned. */
+function keepChoices(planned: number) {
+  return [
+    {
+      value: "yes",
+      label: "Yes",
+      detail: `Keep my ${planned} courses and placeholders and fill in the blanks to complete my journey`,
+    },
+    {
+      value: "no",
+      label: "No",
+      detail: "Choose the courses and placeholders to keep and which can be moved or swapped",
+    },
+  ]
+}
+
 export function GeneratePlanPace({
   terms,
+  standing,
+  keepPlanned,
+  onKeepPlannedChange,
   state,
   onChange,
 }: {
   terms: string[]
+  standing: PlanStanding
+  keepPlanned: string
+  onKeepPlannedChange: (next: string) => void
   state: PaceState
   onChange: (next: PaceState) => void
 }) {
@@ -138,6 +160,30 @@ export function GeneratePlanPace({
 
       <div className="flex w-full flex-col gap-2">
         <div className="flex w-full items-center pb-2">
+          <h4 className="flex-1 text-body-md font-semibold text-gray-100">
+            Keep everything already planned?
+          </h4>
+        </div>
+
+        <RadioGroup
+          value={keepPlanned}
+          onValueChange={onKeepPlannedChange}
+          className="w-full gap-2"
+        >
+          {keepChoices(standing.planned.reqs).map((choice) => (
+            <RadioCard
+              key={choice.value}
+              value={choice.value}
+              label={choice.label}
+              detail={choice.detail}
+              selected={keepPlanned === choice.value}
+            />
+          ))}
+        </RadioGroup>
+      </div>
+
+      <div className="flex w-full flex-col gap-2">
+        <div className="flex w-full items-center pb-2">
           <h4 className="flex-1 text-body-md font-semibold text-gray-100">Your desired pacing</h4>
         </div>
 
@@ -149,23 +195,13 @@ export function GeneratePlanPace({
           {PACES.map((option) => {
             const active = state.pace === option.value
             return (
-              <div
+              <RadioCard
                 key={option.value}
-                className={cn(
-                  "flex w-full flex-col gap-2 rounded-md border p-[11px] transition-colors",
-                  active ? "border-primary-50" : "border-gray-40"
-                )}
+                value={option.value}
+                label={option.label}
+                detail={option.detail}
+                selected={active}
               >
-                <label className="flex w-full cursor-pointer items-start gap-3">
-                  <span className="flex items-center py-0.5">
-                    <RadioGroupItem value={option.value} />
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px text-body-md">
-                    <span className="text-foreground">{option.label}</span>
-                    <span className="text-gray-80">{option.detail}</span>
-                  </span>
-                </label>
-
                 {option.value === "custom" && active && (
                   /* 28px lines the settings up under the radio's label. */
                   <div className="flex w-full flex-col gap-2 pl-7">
@@ -206,7 +242,7 @@ export function GeneratePlanPace({
                     )}
                   </div>
                 )}
-              </div>
+              </RadioCard>
             )
           })}
         </RadioGroup>

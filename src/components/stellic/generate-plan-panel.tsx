@@ -164,15 +164,19 @@ export function GeneratePlanPanel({
 
       <div className="flex flex-1 flex-col gap-8 p-6">
         {view === 1 && (
-          <GeneratePlanScope
-            standing={standing}
-            graduation={graduation}
-            keepPlanned={keepPlanned}
-            onKeepPlannedChange={setKeepPlanned}
-          />
+          <GeneratePlanScope standing={standing} graduation={graduation} />
         )}
 
-        {view === 2 && <GeneratePlanPace terms={terms} state={pace} onChange={setPace} />}
+        {view === 2 && (
+          <GeneratePlanPace
+            terms={terms}
+            standing={standing}
+            keepPlanned={keepPlanned}
+            onKeepPlannedChange={setKeepPlanned}
+            state={pace}
+            onChange={setPace}
+          />
+        )}
 
         {view === 3 && <GeneratePlanNotes value={notes} onChange={setNotes} />}
 

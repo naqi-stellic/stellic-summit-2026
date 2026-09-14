@@ -39,7 +39,7 @@ export function planSettings({
     {
       label: "Keeping",
       value: keepPlanned === "yes" ? "Everything planned" : "Choosing what to keep",
-      step: 1,
+      step: 2,
     },
     { label: "Pacing", value: describePace(pace), step: 2 },
   ]
