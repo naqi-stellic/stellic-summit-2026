@@ -15,6 +15,8 @@ const alertVariants = cva(
         warning: "border-warning-50 bg-warning-5 text-foreground",
         danger: "border-alert-100 bg-alert-5 text-foreground",
         success: "border-success-100 bg-success-5 text-foreground",
+        /* No ground and no frame: a line in the card rather than a banner. */
+        quiet: "border-transparent bg-transparent p-0 text-foreground",
       },
     },
     defaultVariants: {

@@ -290,8 +290,8 @@ export function SemesterCard({
 
 export function NoActionsAlert() {
   return (
-    <Alert variant="success" className="animate-fade">
-      <Icon name="check-circle-outline" size={16} className="mt-0.5 shrink-0 text-success-50" />
+    <Alert variant="quiet" className="animate-fade">
+      <Icon name="thumb-up" size={16} className="shrink-0 text-gray-100" />
       <span className="min-w-0 flex-1 truncate font-semibold">
         No actions required at the moment
       </span>
