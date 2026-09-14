@@ -174,9 +174,10 @@ export function PlanYourPath() {
   /* The playground frames itself while the run is on its last step, so the plan
    * arrives into something rather than appearing with it. */
   const [framing, setFraming] = useState(false)
-  /* Bumped whenever a draft should land afresh — generated, or a different
-   * option chosen. A change made by hand is not a new arrival, so it leaves
-   * this alone and the plan on screen stays put. */
+  /* Bumped when a plan arrives on a canvas that had none — generating, or
+   * generating again. Swapping between the options it produced, or changing one
+   * by hand, is not an arrival: the plan is already there and only its contents
+   * differ, so those leave this alone and nothing re-animates. */
   const [streamId, setStreamId] = useState(0)
   /* How much of the landing draft has arrived. Infinity once it all has, which
    * is also the resting state for a draft that is just sitting there. */
@@ -395,8 +396,6 @@ export function PlanYourPath() {
             onSelectOption={(id) => {
               setOptionId(id)
               setExplained(null)
-              /* A different option is a different plan: it lands like one. */
-              setStreamId((n) => n + 1)
             }}
             onFraming={() => setFraming(true)}
             onGenerated={startDraft}
