@@ -54,27 +54,31 @@ export function StatusPill({
    16x16 square marking a course group's audit state. The leaf sizes are the
    design's, measured off the Figma render — they are not a uniform inset. */
 
+const AUDIT = {
+  completed: { ground: "bg-success-50 text-white", icon: "check", glyph: 10.667 },
+  registered: { ground: "bg-warning-50 text-white", icon: "watch-later", glyph: 10.667 },
+  planned: {
+    ground: "border-[0.667px] border-warning-50 bg-warning-5 text-warning-50",
+    icon: "check",
+    glyph: 9.333,
+  },
+} as const
+
 export function AuditIcon({
   state,
   size = 16,
 }: {
-  state: "registered" | "planned"
+  state: "registered" | "planned" | "completed"
   size?: 16 | 24
 }) {
-  const registered = state === "registered"
-  const glyph = registered ? 10.667 : 9.333
+  const { ground, icon, glyph } = AUDIT[state]
 
   return (
     <span
       style={{ width: size, height: size }}
-      className={cn(
-        "flex shrink-0 items-center justify-center rounded-md",
-        registered
-          ? "bg-warning-50 text-white"
-          : "border-[0.667px] border-warning-50 bg-warning-5 text-warning-50"
-      )}
+      className={cn("flex shrink-0 items-center justify-center rounded-md", ground)}
     >
-      <Icon name={registered ? "watch-later" : "check"} size={(glyph * size) / 16} />
+      <Icon name={icon} size={(glyph * size) / 16} />
     </span>
   )
 }

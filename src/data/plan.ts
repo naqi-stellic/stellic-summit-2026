@@ -45,7 +45,7 @@ export type Term = {
    *  out and nothing can be dropped in. */
   locked?: boolean
   /** Names the credit group once the term holds anything. */
-  state: "registered" | "planned"
+  state: "registered" | "planned" | "completed"
   courses: PlannedCourse[]
   /** Banner slotted between the header and the course list. */
   alert?: { kind: "registration"; closes: string }
@@ -90,12 +90,172 @@ export const PLANNING_RULES = {
   maxCreditsPerTerm: 18,
 }
 
-/** Years already finished. Not part of the editable plan, so it is a roll-up
- *  rather than a list of terms. */
-export const COMPLETED = {
+/** The year already behind the student. It is not part of the editable plan —
+ *  nothing in it can be moved, dropped or generated into — so it sits outside
+ *  INITIAL_YEARS and the planner shows it collapsed. Its terms are real enough
+ *  to open and read, though: they have classes, class numbers and hours. */
+export const COMPLETED_YEAR: Year = {
   label: "2026-2027",
-  courses: 8,
-  credits: 24,
+  phase: "complete",
+  terms: [
+    {
+      id: "fall-2026",
+      name: "Fall 2026",
+      window: "Sep - Dec",
+      campus: "Main campus",
+      reviewed: true,
+      locked: true,
+      scheduled: true,
+      state: "completed",
+      courses: [
+        {
+          id: "p1",
+          code: "BUS 101",
+          name: "Introduction to Business",
+          credits: 3,
+          section: "Lec-01",
+          classNo: "1004",
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+          accent: "purple",
+          meetings: [
+            { day: 1, from: 9, to: 10.25 },
+            { day: 3, from: 9, to: 10.25 },
+          ],
+        },
+        {
+          id: "p2",
+          code: "MATH 140",
+          name: "Business Calculus",
+          credits: 3,
+          section: "Lec-02",
+          classNo: "1017",
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+          accent: "amber",
+          meetings: [
+            { day: 2, from: 11, to: 12.25 },
+            { day: 4, from: 11, to: 12.25 },
+          ],
+        },
+        {
+          id: "p3",
+          code: "ENGL 101",
+          name: "Composition I",
+          credits: 3,
+          section: "Lec-01",
+          classNo: "1042",
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+          accent: "green",
+          meetings: [
+            { day: 1, from: 13, to: 14.25 },
+            { day: 3, from: 13, to: 14.25 },
+          ],
+        },
+        {
+          id: "p4",
+          code: "HIST 110",
+          name: "World Civilizations",
+          credits: 3,
+          section: "Lec-04",
+          classNo: "1063",
+          campus: "Main",
+          modality: "Online",
+          gradeOption: "Graded",
+          accent: "brown",
+          meetings: [{ day: 5, from: 10, to: 12.5 }],
+        },
+      ],
+    },
+    {
+      id: "spring-2027",
+      name: "Spring 2027",
+      window: "Jan - May",
+      campus: "Main campus",
+      reviewed: true,
+      locked: true,
+      scheduled: true,
+      state: "completed",
+      courses: [
+        {
+          id: "p5",
+          code: "ACCT 201",
+          name: "Financial Accounting",
+          credits: 3,
+          section: "Lec-01",
+          classNo: "1511",
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+          accent: "purple",
+          meetings: [
+            { day: 1, from: 10.5, to: 11.75 },
+            { day: 3, from: 10.5, to: 11.75 },
+          ],
+        },
+        {
+          id: "p6",
+          code: "ECON 201",
+          name: "Principles of Microeconomics",
+          credits: 3,
+          section: "Lec-01",
+          classNo: "1524",
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+          accent: "amber",
+          meetings: [
+            { day: 2, from: 9, to: 10.25 },
+            { day: 4, from: 9, to: 10.25 },
+          ],
+        },
+        {
+          id: "p7",
+          code: "MIS 120",
+          name: "Business Technology Essentials",
+          credits: 3,
+          section: "Lab-02",
+          classNo: "1548",
+          campus: "Main",
+          modality: "Hybrid",
+          gradeOption: "Graded",
+          accent: "green",
+          meetings: [
+            { day: 2, from: 14, to: 15.25 },
+            { day: 4, from: 14, to: 15.25 },
+          ],
+        },
+        {
+          id: "p8",
+          code: "ART 105",
+          name: "Visual Culture",
+          credits: 3,
+          section: "Lec-01",
+          classNo: "1570",
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Pass/Fail",
+          accent: "brown",
+          meetings: [{ day: 3, from: 15.5, to: 18 }],
+        },
+      ],
+    },
+  ],
+}
+
+/** The roll-up the planner shows in place of that year, counted from it so the
+ *  two can never disagree. */
+export const COMPLETED = {
+  label: COMPLETED_YEAR.label,
+  courses: COMPLETED_YEAR.terms.reduce((n, t) => n + t.courses.length, 0),
+  credits: COMPLETED_YEAR.terms.reduce(
+    (n, t) => n + t.courses.reduce((c, course) => c + course.credits, 0),
+    0
+  ),
   milestones: 3,
 }
 
@@ -339,6 +499,7 @@ export function termMeta(term: Term): string {
 export const CREDIT_GROUP_LABEL = {
   registered: "In Progress",
   planned: "Planned",
+  completed: "Completed",
 } as const
 
 /** Where the student stands against the degree. Everything sitting in the

@@ -60,6 +60,7 @@ import {
 } from "@/data/draft"
 import {
   COMPLETED,
+  COMPLETED_YEAR,
   INITIAL_YEARS,
   expectedGraduation,
   findCourse,
@@ -83,12 +84,13 @@ const PHASE_TAB = {
 /* A term carries its own state in the menu, which is not always its year's: a
    year under way holds a term in progress and a term still ahead. */
 function termTab(term: Term): TabTerm {
+  const done = term.state === "completed"
   return {
     id: term.id,
     /* "Fall 27" rather than "Fall 2027" — the year is the thing it hangs off. */
     label: term.name.replace(/(\d{2})(\d{2})$/, "$2"),
-    icon: term.locked ? "timelapse" : "arrow-circle-right",
-    tone: term.locked ? "text-warning-50" : "text-gray-60",
+    icon: done ? "check-circle" : term.locked ? "timelapse" : "arrow-circle-right",
+    tone: done ? "text-success-100" : term.locked ? "text-warning-50" : "text-gray-60",
   }
 }
 
@@ -103,9 +105,14 @@ function yearTabs(
 ): YearTab[] {
   return [
     { label: "All Years", icon: "grid-view", selected: !openYear, onSelect: onLeave },
-    /* Finished years are a roll-up rather than a list of terms, so this one has
-       nothing to open onto. */
-    { label: COMPLETED.label, ...PHASE_TAB.complete, onSelect: onLeave },
+    {
+      label: COMPLETED.label,
+      ...PHASE_TAB.complete,
+      selected: COMPLETED.label === openYear,
+      /* The year is finished, but its terms can still be read. */
+      terms: COMPLETED_YEAR.terms.map(termTab),
+      onSelectTerm: onOpenTerm,
+    },
     ...years.map((year) => ({
       label: year.label,
       ...PHASE_TAB[year.phase],
@@ -118,7 +125,7 @@ function yearTabs(
 
 /** The year a term belongs to, for the filter above it. */
 function yearOf(years: Year[], termId: string): string | undefined {
-  return years.find((year) => year.terms.some((t) => t.id === termId))?.label
+  return [...years, COMPLETED_YEAR].find((year) => year.terms.some((t) => t.id === termId))?.label
 }
 
 /* Long enough for the last staggered card to finish settling (14 × 35ms of
@@ -380,7 +387,9 @@ export function PlanYourPath() {
     else setYears((current) => addCourse(current, termId, entry, false))
   }
 
-  const openTerm: Term | null = openTermId ? findTerm(shown, openTermId) : null
+  const openTerm: Term | null = openTermId
+    ? (findTerm(shown, openTermId) ?? findTerm([COMPLETED_YEAR], openTermId))
+    : null
 
   /* A term opens inside whatever is on screen: if a draft is up, the frame,
    * the bar and the options stay where they are and the term shows the draft's
