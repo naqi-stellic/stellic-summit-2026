@@ -92,9 +92,11 @@ export function AddSlot({
 }
 
 /* ============================================================ RadioCard
-   A bordered option in a RadioGroup: the radio, a label and a line under it,
-   with the border marking the choice. `children` is for an option that opens
-   up when it is the one chosen. */
+   A bordered option in a RadioGroup: the radio, the label, and the line about
+   it on the same row, which is what keeps the box shallow enough to scan a
+   list of them. The line has to earn its place in four or five words — it
+   wraps underneath only when the panel is too narrow to hold both.
+   `children` is for an option that opens up when it is the one chosen. */
 
 export function RadioCard({
   value,
@@ -116,11 +118,11 @@ export function RadioCard({
         selected ? "border-primary-50" : "border-gray-40"
       )}
     >
-      <label className="flex w-full cursor-pointer items-start gap-3">
+      <label className="flex w-full cursor-pointer items-center gap-3">
         <span className="flex items-center py-0.5">
           <RadioGroupItem value={value} />
         </span>
-        <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px text-body-md">
+        <span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-body-md">
           <span className="text-foreground">{label}</span>
           <span className="text-gray-80">{detail}</span>
         </span>

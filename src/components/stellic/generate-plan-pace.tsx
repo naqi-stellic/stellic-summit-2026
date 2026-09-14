@@ -17,14 +17,14 @@ const PACES = [
   {
     value: "full-time",
     label: "Full-time",
-    detail: `About ${PACE_CREDITS["full-time"]} credits a term, no summers`,
+    detail: `${PACE_CREDITS["full-time"]} credits a term, no summers`,
   },
   {
     value: "part-time",
     label: "Part-time",
-    detail: `About ${PACE_CREDITS["part-time"]} credits a term, no summers`,
+    detail: `${PACE_CREDITS["part-time"]} credits a term, no summers`,
   },
-  { value: "custom", label: "Custom", detail: "Set it yourself" },
+  { value: "custom", label: "Custom", detail: "Set credits, include or skip terms" },
 ] as const
 
 const MIN_CREDITS = 3
@@ -119,12 +119,12 @@ function keepChoices(planned: number) {
     {
       value: "yes",
       label: "Yes",
-      detail: `Keep my ${planned} courses and placeholders and fill in the blanks to complete my journey`,
+      detail: `Keep all ${planned}, fill the gaps`,
     },
     {
       value: "no",
       label: "No",
-      detail: "Choose the courses and placeholders to keep and which can be moved or swapped",
+      detail: "Choose what stays, move the rest",
     },
   ]
 }

@@ -204,6 +204,13 @@ export function PlanYourPath() {
   const addable = addableCourses(shown)
   /* What the bar says while a draft is arriving. */
   const landedTally = draft ? draftTally(draft.years, revealed) : { added: 0, removed: 0 }
+  /* Terms the draft has something to say about, for the confirmation. */
+  const touchedTerms = draft
+    ? draft.years.reduce(
+        (n, year) => n + year.terms.filter((t) => t.courses.some((c) => c.draft)).length,
+        0
+      )
+    : 0
   const standing = planStanding(years)
 
   const optionSummaries = [
@@ -428,6 +435,7 @@ export function PlanYourPath() {
               added={landedTally.added}
               removed={landedTally.removed}
               showRemoved={draft.removed > 0}
+              terms={touchedTerms}
               leaving={accepting}
               onExit={() => {
                 dropDraft()

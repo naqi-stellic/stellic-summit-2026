@@ -3,8 +3,7 @@ import { Textarea } from "@/components/ui/textarea"
 /* Step 3: free-text context for the generator. */
 
 const PLACEHOLDER =
-  "What do you want to get out of your journey? Any additional comments? " +
-  "E.g. Working 20 hours a week, keep Spring light, hoping to study abroad or take a gap year."
+  "e.g. I work 20 hours a week — keep spring terms light and finish the finance core early."
 
 export function GeneratePlanNotes({
   value,

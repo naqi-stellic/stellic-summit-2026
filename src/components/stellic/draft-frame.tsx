@@ -1,8 +1,17 @@
 import { cn } from "cn"
+import { useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 /* The playground: while a generated draft is on the canvas the whole planner is
  * ringed in warning orange and topped with a bar that can only do two things —
@@ -12,6 +21,7 @@ export function DraftBar({
   added,
   removed,
   showRemoved,
+  terms,
   leaving,
   onExit,
   onAccept,
@@ -21,12 +31,18 @@ export function DraftBar({
   /** Whether this draft takes anything out at all. The count itself climbs
    *  from zero as the plan lands, so it cannot answer that on its own. */
   showRemoved: boolean
+  /** How many terms the draft touches, for the confirmation. */
+  terms: number
   /** The draft is being accepted: the bar waits for the plan to settle, then
    *  sees itself out. */
   leaving?: boolean
   onExit: () => void
   onAccept: () => void
 }) {
+  /* Applying rewrites the plan, so it asks once — with the count, which is the
+   * thing worth checking before saying yes. */
+  const [confirming, setConfirming] = useState(false)
+
   return (
     <div
       /* Border sits inside, so the bottom padding gives it back its pixel. */
@@ -51,10 +67,35 @@ export function DraftBar({
           <Badge variant="success">+{added} added</Badge>
           {showRemoved && <Badge variant="danger">-{removed} removed</Badge>}
         </div>
-        <Button variant="primary" disabled={leaving} onClick={onAccept}>
-          Accept draft
+        <Button variant="primary" disabled={leaving} onClick={() => setConfirming(true)}>
+          Apply plan
         </Button>
       </div>
+
+      <Dialog open={confirming} onOpenChange={setConfirming}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Apply this plan?</DialogTitle>
+            <DialogDescription>
+              Adds {added} course{added === 1 ? "" : "s"}
+              {removed > 0 && ` and removes ${removed}`}, across {terms} term
+              {terms === 1 ? "" : "s"}.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setConfirming(false)}>Cancel</Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                setConfirming(false)
+                onAccept()
+              }}
+            >
+              Accept
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
