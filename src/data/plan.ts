@@ -260,11 +260,13 @@ export const CREDIT_GROUP_LABEL = {
 export function planStanding(years: Year[]) {
   let plannedReqs = 0
   let plannedCredits = 0
+  let lockedCourses = 0
   for (const year of years) {
     for (const term of year.terms) {
       for (const course of term.courses) {
         plannedReqs += 1
         plannedCredits += course.credits
+        if (term.locked) lockedCourses += 1
       }
     }
   }
@@ -277,6 +279,8 @@ export function planStanding(years: Year[]) {
       credits: Math.max(0, DEGREE.credits - COMPLETED.credits - plannedCredits),
     },
     total: { reqs: DEGREE.requirements, credits: DEGREE.credits },
+    /** Courses the generator has to plan around rather than move. */
+    lockedCourses,
     milestones: {
       completed: COMPLETED.milestones,
       remaining: Math.max(0, DEGREE.milestones - COMPLETED.milestones),

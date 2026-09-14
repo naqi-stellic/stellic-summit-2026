@@ -18,6 +18,7 @@
   --stellic-blue: #1e2129;
 
   --stellic-primary-0: #ebf5ff;
+  --stellic-primary-5: #cce6ff;
   --stellic-primary-50: #008dff;
   --stellic-primary-100: #006cbc;
 
@@ -107,6 +108,7 @@
   --color-stellic-blue: var(--stellic-blue);
   --color-parchment: var(--stellic-parchment);
   --color-primary-0: var(--stellic-primary-0);
+  --color-primary-5: var(--stellic-primary-5);
   --color-primary-50: var(--stellic-primary-50);
   --color-primary-100: var(--stellic-primary-100);
   --color-success-5: var(--stellic-success-5);

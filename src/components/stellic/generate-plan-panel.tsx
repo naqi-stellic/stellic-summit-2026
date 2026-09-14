@@ -2,6 +2,7 @@ import { cn } from "cn"
 import { useState } from "react"
 
 import { Icon } from "@/components/icon"
+import { GeneratePlanBuilding } from "@/components/stellic/generate-plan-building"
 import { GeneratePlanNotes } from "@/components/stellic/generate-plan-notes"
 import {
   GeneratePlanPace,
@@ -19,8 +20,9 @@ import type { PlanStanding } from "@/data/plan"
 
 const TOTAL_STEPS = 3
 
-/** The three questions, then the review — which drops the step chrome. */
-type View = 1 | 2 | 3 | "summary"
+/** The three questions, then the review and the run — both of which drop the
+ * step chrome. */
+type View = 1 | 2 | 3 | "summary" | "building"
 
 export function GeneratePlanPanel({
   standing,
@@ -52,19 +54,22 @@ export function GeneratePlanPanel({
   }
 
   const isSummary = view === "summary"
+  /* Neither the review nor the run is a numbered step, so both hide the counter
+   * and the progress bars. */
+  const isStep = view !== "summary" && view !== "building"
 
   return (
     <aside className="@container flex h-full w-full flex-col overflow-x-clip overflow-y-auto bg-card">
       <header
         className={cn(
           "flex shrink-0 flex-col border-b border-gray-40 px-6 pt-3 pb-[15px]",
-          !isSummary && "gap-2"
+          isStep && "gap-2"
         )}
       >
         <div className="flex w-full items-center gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <h2 className="text-caption-lg font-semibold text-foreground">Generate Plan</h2>
-            {!isSummary && (
+            {isStep && (
               <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
                 Step {view} of {TOTAL_STEPS}
               </span>
@@ -75,14 +80,14 @@ export function GeneratePlanPanel({
           </Button>
         </div>
 
-        {!isSummary && (
+        {isStep && (
           <div className="flex w-full items-start gap-2">
             {Array.from({ length: TOTAL_STEPS }, (_, i) => (
               <span
                 key={i}
                 className={cn(
                   "h-1 min-w-0 flex-1 rounded-md",
-                  i < view ? "bg-primary-50" : "bg-gray-40"
+                  i < (view as number) ? "bg-primary-50" : "bg-gray-40"
                 )}
               />
             ))}
@@ -104,6 +109,8 @@ export function GeneratePlanPanel({
 
         {view === 3 && <GeneratePlanNotes value={notes} onChange={setNotes} />}
 
+        {view === "building" && <GeneratePlanBuilding standing={standing} />}
+
         {isSummary && (
           <GeneratePlanSummary
             standing={standing}
@@ -115,33 +122,45 @@ export function GeneratePlanPanel({
           />
         )}
 
-        <div className="flex w-full items-center gap-2">
-          {isSummary ? (
-            <>
-              <Button className="flex-1" onClick={startOver}>
-                Start over
-              </Button>
-              <Button variant="primary" className="flex-1">
-                Generate Plan
-              </Button>
-            </>
-          ) : (
-            <>
-              {view > 1 && (
-                <Button className="flex-1" onClick={() => setView((view as number) - 1 as View)}>
-                  Back
+        {/* The run has no controls of its own — it finishes on its own. */}
+        {view !== "building" && (
+          <div className="flex w-full items-center gap-2">
+            {isSummary ? (
+              <>
+                <Button className="flex-1" onClick={startOver}>
+                  Start over
                 </Button>
-              )}
-              <Button
-                variant="primary"
-                className="flex-1"
-                onClick={() => setView(view === TOTAL_STEPS ? "summary" : ((view as number) + 1 as View))}
-              >
-                Continue
-              </Button>
-            </>
-          )}
-        </div>
+                <Button
+                  variant="primary"
+                  className="flex-1"
+                  onClick={() => setView("building")}
+                >
+                  Generate Plan
+                </Button>
+              </>
+            ) : (
+              <>
+                {(view as number) > 1 && (
+                  <Button
+                    className="flex-1"
+                    onClick={() => setView(((view as number) - 1) as View)}
+                  >
+                    Back
+                  </Button>
+                )}
+                <Button
+                  variant="primary"
+                  className="flex-1"
+                  onClick={() =>
+                    setView(view === TOTAL_STEPS ? "summary" : (((view as number) + 1) as View))
+                  }
+                >
+                  Continue
+                </Button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </aside>
   )
