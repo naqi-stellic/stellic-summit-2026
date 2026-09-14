@@ -27,7 +27,7 @@ export type PlannedCourse = {
   /** When the term's schedule is out, where the class actually sits. */
   meetings?: Meeting[]
   /** The colour this course is drawn in, on its card and on the calendar. */
-  accent?: "green" | "amber" | "purple"
+  accent?: "green" | "amber" | "purple" | "brown"
   /** Set only while a generated draft is on screen. `relocated` marks a card
    *  that left somewhere to be here, so it counts as an addition and a removal
    *  at once. */
@@ -139,15 +139,41 @@ export const INITIAL_YEARS: Year[] = [
         campus: "Main campus",
         reviewed: true,
         locked: true,
+        /* Under way, so every class has been chosen and sits somewhere real. */
+        scheduled: true,
         state: "registered",
         courses: [
-          { id: "c1", code: "FIN 301", name: "Corporate Finance", credits: 3, section: "Lec-01" },
+          {
+            id: "c1",
+            code: "FIN 301",
+            name: "Corporate Finance",
+            credits: 3,
+            section: "Lec-01",
+            classNo: "2041",
+            campus: "Main",
+            modality: "In Person",
+            gradeOption: "Graded",
+            accent: "purple",
+            meetings: [
+              { day: 1, from: 9, to: 10.25 },
+              { day: 3, from: 9, to: 10.25 },
+            ],
+          },
           {
             id: "c2",
             code: "ACCT 202",
             name: "Managerial Accounting",
             credits: 3,
             section: "Lec-01",
+            classNo: "2088",
+            campus: "Main",
+            modality: "In Person",
+            gradeOption: "Graded",
+            accent: "amber",
+            meetings: [
+              { day: 2, from: 11, to: 12.25 },
+              { day: 4, from: 11, to: 12.25 },
+            ],
           },
           {
             id: "c3",
@@ -155,6 +181,15 @@ export const INITIAL_YEARS: Year[] = [
             name: "Principles of Macroeconomics",
             credits: 3,
             section: "Lec-01",
+            classNo: "2113",
+            campus: "Main",
+            modality: "In Person",
+            gradeOption: "Graded",
+            accent: "green",
+            meetings: [
+              { day: 1, from: 13, to: 14.25 },
+              { day: 3, from: 13, to: 14.25 },
+            ],
           },
           {
             id: "c4",
@@ -162,7 +197,16 @@ export const INITIAL_YEARS: Year[] = [
             name: "Business Statistics",
             credits: 3,
             section: "Lec-01",
+            classNo: "2156",
+            campus: "Main",
+            modality: "Hybrid",
+            gradeOption: "Graded",
+            accent: "brown",
             notes: 1,
+            meetings: [
+              { day: 2, from: 14.5, to: 15.75 },
+              { day: 4, from: 14.5, to: 15.75 },
+            ],
           },
         ],
       },
@@ -180,30 +224,20 @@ export const INITIAL_YEARS: Year[] = [
         state: "planned",
         courses: [
           {
+            /* Registration is open for this term, but no section has been
+               chosen for either course: both still need one before there is
+               anything to register or to draw on a calendar. */
             id: "c5",
             code: "FIN 340",
             name: "Investments & Portfolio Management",
             credits: 3,
-            /* A section is chosen, so this one is ready to register and has
-               somewhere to sit on the calendar. */
-            section: "Lec-01",
-            classNo: "3109",
-            campus: "Main",
-            modality: "In Person",
-            gradeOption: "Graded",
             accent: "purple",
-            meetings: [
-              { day: 1, from: 9, to: 10.25 },
-              { day: 3, from: 9, to: 10.25 },
-            ],
           },
           {
             id: "c6",
             code: "FIN 415",
             name: "Financial Modeling & Valuation",
             credits: 3,
-            /* No section picked yet: it is in the plan, but there is nothing
-               to register and nothing to draw. */
             accent: "amber",
           },
         ],

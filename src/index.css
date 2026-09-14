@@ -40,6 +40,7 @@
   --stellic-accent-green: #90be6d;
   --stellic-accent-amber: #f9a825;
   --stellic-accent-purple: #ac76da;
+  --stellic-accent-brown: #8d6e63;
 
   --stellic-alert-5: #ffeaea;
   --stellic-alert-50: #d30303;
@@ -132,6 +133,7 @@
   --color-accent-green: var(--stellic-accent-green);
   --color-accent-amber: var(--stellic-accent-amber);
   --color-accent-purple: var(--stellic-accent-purple);
+  --color-accent-brown: var(--stellic-accent-brown);
   --color-alert-5: var(--stellic-alert-5);
   --color-alert-50: var(--stellic-alert-50);
   --color-alert-100: var(--stellic-alert-100);

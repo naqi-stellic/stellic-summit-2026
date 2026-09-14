@@ -24,7 +24,9 @@ function RegistrationAlert({ term }: { term: Term }) {
         <span className="whitespace-nowrap">Closes: {term.alert?.closes}</span>
       </span>
       <Button variant="primary" size="sm" className="shrink-0">
-        Register {ready} course{ready === 1 ? "" : "s"}
+        {/* Nothing is ready to register until a section is chosen, so the
+            button asks you to start rather than counting to zero. */}
+        {ready > 0 ? `Register ${ready} course${ready === 1 ? "" : "s"}` : "Register courses"}
       </Button>
     </Alert>
   )
@@ -67,8 +69,10 @@ export function TermView({
    *  any other year, or All Years, goes back to the whole plan. */
   tabs: YearTab[]
 }) {
-  /* A published schedule is the interesting view, so it opens on it. */
-  const [mode, setMode] = useState(term.scheduled ? "calendar" : "list")
+  /* The calendar is the better view when there is anything on it — which needs
+   * both a published schedule and a section chosen against it. */
+  const hasTimes = term.courses.some((c) => c.meetings && c.meetings.length > 0)
+  const [mode, setMode] = useState(term.scheduled && hasTimes ? "calendar" : "list")
   const actions = termActions(term)
 
   const plannerActions: PlanAction[] = [

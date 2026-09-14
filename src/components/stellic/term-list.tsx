@@ -22,6 +22,7 @@ const ACCENT: Record<string, string> = {
   green: "bg-accent-green",
   amber: "bg-accent-amber",
   purple: "bg-accent-purple",
+  brown: "bg-accent-brown",
 }
 
 function CardHeader({
