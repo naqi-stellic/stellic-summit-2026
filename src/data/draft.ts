@@ -68,8 +68,9 @@ export function planOptions(coursesPerTerm: number): DraftOption[] {
       id: "lighter",
       label: "Lighter terms",
       blurb:
-        `${lighter} courses a term, which leaves room for work or a co-op. Financial Modeling is ` +
-        "not offered late enough to keep, so its requirement is held as an elective seat.",
+        `${lighter} courses a term, which leaves room for work or a co-op but adds a year. ` +
+        "Financial Modeling is not offered late enough to keep, so its requirement is held as an " +
+        "elective seat.",
       coursesPerTerm: lighter,
       summers: false,
       drop: { courseId: "c6", reason: "Not offered again before you graduate" },

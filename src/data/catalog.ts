@@ -5,7 +5,12 @@
  * the degree's 120 credits.
  *
  * A requirement with no specific course behind it yet is a placeholder: the
- * generator reserves the seat and the student picks the course later. */
+ * generator reserves the seat and the student picks the course later.
+ *
+ * There are 23 of them, which is exactly what a full-time pace has room for in
+ * the terms left before Spring 2030: ten courses are behind the student, seven
+ * are already on the plan, and 10 + 7 + 23 is the degree. Change this list and
+ * the four-year plan either overruns or ends short. */
 
 export type CatalogEntry = {
   code: string
@@ -18,7 +23,6 @@ export type CatalogEntry = {
 
 export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "MGMT 210", name: "Principles of Management", reason: "Business core" },
-  { code: "MKTG 201", name: "Principles of Marketing", reason: "Business core" },
   { code: "ACCT 310", name: "Intermediate Accounting I", reason: "Business core" },
   { code: "MIS 250", name: "Management Information Systems", reason: "Business core" },
   { code: "BLAW 301", name: "Business Law & Ethics", reason: "Business core" },
@@ -46,8 +50,6 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   },
   { code: "ENGL 210", name: "Advanced Composition", reason: "General education" },
   { code: "PHIL 240", name: "Business Ethics", reason: "General education" },
-  { code: "COMM 230", name: "Public Speaking", reason: "General education" },
-  { code: "PSYC 101", name: "Introduction to Psychology", reason: "General education" },
   { code: "HIST 205", name: "Modern World History", reason: "General education" },
   { code: "SCI 210", name: "Environmental Science", reason: "General education" },
   { code: "SPAN 201", name: "Intermediate Spanish I", reason: "General education" },

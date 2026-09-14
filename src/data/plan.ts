@@ -169,6 +169,22 @@ export const COMPLETED_YEAR: Year = {
           accent: "brown",
           meetings: [{ day: 5, from: 10, to: 12.5 }],
         },
+        {
+          id: "p9",
+          code: "PSYC 101",
+          name: "Introduction to Psychology",
+          credits: 3,
+          section: "Lec-03",
+          classNo: "1085",
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+          accent: "purple",
+          meetings: [
+            { day: 2, from: 13, to: 14.25 },
+            { day: 4, from: 13, to: 14.25 },
+          ],
+        },
       ],
     },
     {
@@ -241,6 +257,22 @@ export const COMPLETED_YEAR: Year = {
           gradeOption: "Pass/Fail",
           accent: "brown",
           meetings: [{ day: 3, from: 15.5, to: 18 }],
+        },
+        {
+          id: "p10",
+          code: "COMM 230",
+          name: "Public Speaking",
+          credits: 3,
+          section: "Lec-02",
+          classNo: "1593",
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+          accent: "amber",
+          meetings: [
+            { day: 1, from: 13, to: 14.25 },
+            { day: 3, from: 13, to: 14.25 },
+          ],
         },
       ],
     },
@@ -368,6 +400,22 @@ export const INITIAL_YEARS: Year[] = [
               { day: 4, from: 14.5, to: 15.75 },
             ],
           },
+          {
+            id: "c7",
+            code: "MKTG 201",
+            name: "Principles of Marketing",
+            credits: 3,
+            section: "Lec-02",
+            classNo: "2190",
+            campus: "Main",
+            modality: "In Person",
+            gradeOption: "Graded",
+            accent: "amber",
+            meetings: [
+              { day: 1, from: 10.5, to: 11.75 },
+              { day: 3, from: 10.5, to: 11.75 },
+            ],
+          },
         ],
       },
       {
@@ -404,9 +452,12 @@ export const INITIAL_YEARS: Year[] = [
       },
     ],
   },
+  /* The degree is a four-year one and the student started in Fall 2026, so the
+   * plan reaches Spring 2030 and stops. A pace that cannot fit inside it has to
+   * add a year of its own, which is the point: the extra year is the cost of
+   * the lighter load, and it should be visible rather than pre-drawn. */
   emptyYear(2028),
   emptyYear(2029),
-  emptyYear(2030),
 ]
 
 /* ---------------------------------------------------------------- moves */

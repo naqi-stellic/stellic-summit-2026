@@ -1,4 +1,5 @@
 import { cn } from "cn"
+import { useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
@@ -6,6 +7,12 @@ import { AuditIcon } from "@/components/stellic/primitives"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   CREDIT_GROUP_LABEL,
   courseStatus,
@@ -199,8 +206,16 @@ function Sidebar({ term }: { term: Term }) {
 
 /* ------------------------------------------------------------- the week */
 
+/** How much of the week the calendar draws. Classes meet Monday to Friday, so
+ *  five days is the useful view and the weekend is there when it is wanted. */
+const SPANS = [
+  { label: "Week (5 Day)", days: 5 },
+  { label: "Week (7 Day)", days: 7 },
+]
+
 function Week({ term }: { term: Term }) {
-  const days = termWeek(term)
+  const [span, setSpan] = useState(SPANS[0])
+  const days = termWeek(term).slice(0, span.days)
   const { from, to } = termHours(term)
   const hours = Array.from({ length: to - from }, (_, i) => from + i)
 
@@ -230,10 +245,31 @@ function Week({ term }: { term: Term }) {
             </span>
           </div>
         </div>
-        <span className="flex h-9 w-[175px] shrink-0 items-center gap-2 rounded-md border border-input bg-card px-[11px] text-body-md text-gray-100 shadow-xs">
-          <span className="min-w-0 flex-1 truncate">Week (7 Day)</span>
-          <Icon name="expand-more" size={16} />
-        </span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex h-9 w-[175px] shrink-0 cursor-pointer items-center gap-2 rounded-md border border-input bg-card px-[11px] text-body-md text-gray-100 shadow-xs"
+            >
+              <span className="min-w-0 flex-1 truncate text-left">{span.label}</span>
+              <Icon name="expand-more" size={16} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[175px]">
+            {SPANS.map((option) => (
+              <DropdownMenuItem
+                key={option.days}
+                onSelect={() => setSpan(option)}
+                className="gap-2 py-1.5 pr-2 pl-8 text-body-md"
+              >
+                {option.days === span.days && (
+                  <Icon name="check" size={16} className="absolute left-2 shrink-0" />
+                )}
+                {option.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="w-full overflow-x-auto rounded-md border border-gray-40">
