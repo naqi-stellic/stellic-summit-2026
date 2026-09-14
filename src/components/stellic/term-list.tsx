@@ -3,7 +3,15 @@ import { cn } from "cn"
 import { Icon, type IconName } from "@/components/icon"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Button } from "@/components/ui/button"
-import { CREDIT_GROUP_LABEL, courseStatus, termCredits, type PlannedCourse, type Term } from "@/data/plan"
+import {
+  CREDIT_GROUP_LABEL,
+  courseNeeds,
+  courseStatus,
+  missingLine,
+  termCredits,
+  type PlannedCourse,
+  type Term,
+} from "@/data/plan"
 
 /* A term as a list: every class it holds, and what still has to be settled
  * before any of it can be registered. This is all a term can show until its
@@ -31,7 +39,7 @@ function CardHeader({
         {title} ({count})
       </h4>
       <Button size="icon" aria-label={`Add to ${title}`}>
-        <Icon name="add" size={16} />
+        <Icon name="plus" size={16} />
       </Button>
     </div>
   )
@@ -53,6 +61,7 @@ function Accent({ course }: { course?: PlannedCourse }) {
 function CourseRow({ course }: { course: PlannedCourse }) {
   const status = courseStatus(course)
   const held = course.placeholder
+  const missing = courseNeeds(course) ? missingLine(course) : null
 
   return (
     <>
@@ -93,17 +102,17 @@ function CourseRow({ course }: { course: PlannedCourse }) {
         </div>
       </div>
 
-      {held && (
+      {missing && (
         <div className="flex w-full items-stretch border-t border-gray-40 bg-gray-0">
           <Accent />
           <p className="flex min-w-0 flex-1 items-center gap-1 px-4 py-[9px] text-body-md text-gray-100">
             <Icon name="error-outline" size={12} className="shrink-0 text-alert-50" />
-            No course selected for placeholder.{" "}
+            {missing.says}{" "}
             <button
               type="button"
               className="cursor-pointer underline [text-underline-position:from-font]"
             >
-              Search courses
+              {missing.action}
             </button>
           </p>
         </div>
@@ -152,7 +161,7 @@ export function TermList({ term }: { term: Term }) {
       </section>
 
       <section className="w-full overflow-hidden rounded-md border border-gray-40 bg-card">
-        <CardHeader icon="outlined-flag" title="My Activities" count={0} />
+        <CardHeader icon="sports-basketball" title="My Activities" count={0} />
         <p className="border-t border-gray-40 p-4 text-center text-body-md text-gray-80">
           No activities added to plan yet
         </p>

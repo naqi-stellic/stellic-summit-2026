@@ -184,6 +184,8 @@ export const INITIAL_YEARS: Year[] = [
             code: "FIN 340",
             name: "Investments & Portfolio Management",
             credits: 3,
+            /* A section is chosen, so this one is ready to register and has
+               somewhere to sit on the calendar. */
             section: "Lec-01",
             classNo: "3109",
             campus: "Main",
@@ -200,32 +202,9 @@ export const INITIAL_YEARS: Year[] = [
             code: "FIN 415",
             name: "Financial Modeling & Valuation",
             credits: 3,
-            section: "Lec-01",
-            classNo: "3142",
-            campus: "Main",
-            modality: "In Person",
-            gradeOption: "Graded",
+            /* No section picked yet: it is in the plan, but there is nothing
+               to register and nothing to draw. */
             accent: "amber",
-            meetings: [
-              { day: 2, from: 13, to: 14.25 },
-              { day: 4, from: 13, to: 14.25 },
-            ],
-          },
-          {
-            /* Seats held against a requirement: the term is planned, but these
-               two still need a class choosing before registration. */
-            id: "c7",
-            code: "FIN ELEC",
-            name: "Finance elective",
-            credits: 3,
-            placeholder: true,
-          },
-          {
-            id: "c8",
-            code: "GEN ELEC",
-            name: "General elective",
-            credits: 3,
-            placeholder: true,
           },
         ],
       },
@@ -404,15 +383,28 @@ export function planCampuses(years: Year[]): string {
 
 /* ------------------------------------------------------------ term view */
 
-/** A course is ready when a class has been chosen for it; a seat held against
- *  a requirement still needs one. */
+/** What is still missing before a course can be registered: a seat held
+ *  against a requirement needs a course choosing, and a course with no class
+ *  picked needs a section. */
+export function courseNeeds(course: PlannedCourse): "course" | "section" | null {
+  if (course.placeholder) return "course"
+  return course.classNo ? null : "section"
+}
+
 export function courseStatus(course: PlannedCourse): "ready" | "needs review" {
-  return course.placeholder || !course.classNo ? "needs review" : "ready"
+  return courseNeeds(course) ? "needs review" : "ready"
 }
 
 /** What the term is waiting on before it can be registered. */
 export function termActions(term: Term): PlannedCourse[] {
-  return term.courses.filter((c) => courseStatus(c) === "needs review")
+  return term.courses.filter((c) => courseNeeds(c) !== null)
+}
+
+/** The line a course shows when something is missing, and what to press. */
+export function missingLine(course: PlannedCourse): { says: string; action: string } {
+  return courseNeeds(course) === "course"
+    ? { says: "No course selected for placeholder.", action: "Search courses" }
+    : { says: "No section selected.", action: "Search sections" }
 }
 
 /** The week a term's calendar opens on: a real Monday inside the term, so the

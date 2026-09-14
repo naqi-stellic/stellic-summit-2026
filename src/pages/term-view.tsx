@@ -7,7 +7,7 @@ import { TermList } from "@/components/stellic/term-list"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { courseStatus, termActions, type Term } from "@/data/plan"
+import { courseStatus, missingLine, termActions, type Term } from "@/data/plan"
 
 /* One term on its own. Everything a term can show depends on whether its class
  * schedule is published: until it is, there are no times to put on a calendar,
@@ -38,19 +38,22 @@ function ActionsAlert({ term }: { term: Term }) {
       <p className="text-body-md font-semibold text-gray-100">
         {actions.length} action{actions.length === 1 ? "" : "s"} required
       </p>
-      {actions.map((course) => (
-        <p key={course.id} className="flex w-full flex-wrap items-center gap-2 text-body-md">
-          <Icon name="warning" size={16} className="shrink-0 text-warning-50" />
-          <span className="font-semibold">{course.name}</span>
-          <span>No course selected for placeholder.</span>
-          <button
-            type="button"
-            className="cursor-pointer underline [text-underline-position:from-font]"
-          >
-            Search courses
-          </button>
-        </p>
-      ))}
+      {actions.map((course) => {
+        const missing = missingLine(course)
+        return (
+          <p key={course.id} className="flex w-full flex-wrap items-center gap-2 text-body-md">
+            <Icon name="warning" size={16} className="shrink-0 text-warning-50" />
+            <span className="font-semibold">{course.name}</span>
+            <span>{missing.says}</span>
+            <button
+              type="button"
+              className="cursor-pointer underline [text-underline-position:from-font]"
+            >
+              {missing.action}
+            </button>
+          </p>
+        )
+      })}
     </Alert>
   )
 }
@@ -58,13 +61,11 @@ function ActionsAlert({ term }: { term: Term }) {
 export function TermView({
   term,
   tabs,
-  onBack,
 }: {
   term: Term
-  /** The year filter, with the term's own year marked and the rest able to
-   *  take you back to the whole plan. */
+  /** The year filter, with the term's own year marked. It is also the way out:
+   *  any other year, or All Years, goes back to the whole plan. */
   tabs: YearTab[]
-  onBack: () => void
 }) {
   /* A published schedule is the interesting view, so it opens on it. */
   const [mode, setMode] = useState(term.scheduled ? "calendar" : "list")
@@ -90,22 +91,12 @@ export function TermView({
       ) : null}
 
       <div className="flex w-full flex-wrap items-center justify-between gap-2">
-        <h3 className="flex min-w-0 items-center gap-2 text-h300 font-semibold text-gray-100">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="Back to the whole plan"
-            className="flex cursor-pointer items-center text-gray-80"
-          >
-            <Icon name="chevron-left" size={16} />
-          </button>
-          <span className="truncate">{term.name}</span>
-        </h3>
+        <h3 className="min-w-0 truncate text-h300 font-semibold text-gray-100">{term.name}</h3>
 
         <Tabs value={mode} onValueChange={setMode}>
           <TabsList>
             <TabsTrigger value="list">
-              <Icon name="format-list-bulleted" size={16} />
+              <Icon name="list" size={16} />
               List
             </TabsTrigger>
             {/* Nothing to draw until the schedule is out. */}

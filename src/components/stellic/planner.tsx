@@ -85,6 +85,10 @@ export function AuditRow({
   const draft = course.draft
   const style = draft ? DRAFT_STYLE[draft.mark] : null
   const struck = draft?.mark === "moved" || draft?.mark === "removed"
+  /* A seat held against a requirement, with no course chosen for it: there is
+   * no code to show and nothing to register, so it is drawn as an outline
+   * waiting to be filled rather than as a course. */
+  const held = course.placeholder
   /* What the draft struck out is on its way off the plan; what it added is on
    * its way to being an ordinary course. */
   const leaving = settling && struck
@@ -136,17 +140,40 @@ export function AuditRow({
       {!locked && <Icon name="drag-indicator" size={16} className="text-foreground" />}
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
-        <div>
-          <p className="text-body-md text-gray-80">{course.code}</p>
-          <p className={cn("text-body-md font-semibold text-foreground", struck && "line-through")}>
-            {course.name}
-          </p>
-        </div>
-        {course.section && (
-          <p className="flex items-center gap-1 text-body-md text-foreground">
-            <Icon name="calendar-today" size={14} />
-            {course.section}
-          </p>
+        {held ? (
+          <>
+            <p
+              className={cn(
+                "text-body-md font-semibold text-foreground",
+                struck && "line-through"
+              )}
+            >
+              {course.name}
+            </p>
+            <span>
+              <Badge variant="secondary">{course.credits} credits</Badge>
+            </span>
+          </>
+        ) : (
+          <>
+            <div>
+              <p className="text-body-md text-gray-80">{course.code}</p>
+              <p
+                className={cn(
+                  "text-body-md font-semibold text-foreground",
+                  struck && "line-through"
+                )}
+              >
+                {course.name}
+              </p>
+            </div>
+            {course.section && (
+              <p className="flex items-center gap-1 text-body-md text-foreground">
+                <Icon name="calendar-today" size={14} />
+                {course.section}
+              </p>
+            )}
+          </>
         )}
         {draft && style && (
           <p
@@ -164,6 +191,18 @@ export function AuditRow({
           </p>
         )}
       </div>
+
+      {/* A seat is filled by finding a class for it. */}
+      {held && !overlay && (
+        <Button
+          size="icon"
+          aria-label={`Search classes for ${course.name}`}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="shrink-0"
+        >
+          <Icon name="s-search" size={16} />
+        </Button>
+      )}
 
       {course.notes != null && (
         <Badge variant="quiet">

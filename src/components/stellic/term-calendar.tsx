@@ -105,7 +105,7 @@ function Sidebar({ term }: { term: Term }) {
             My Courses ({term.courses.length})
           </h4>
           <Button size="icon" aria-label="Add a course">
-            <Icon name="add" size={16} />
+            <Icon name="plus" size={16} />
           </Button>
         </div>
 
@@ -130,12 +130,12 @@ function Sidebar({ term }: { term: Term }) {
 
       <div className="flex w-full flex-col gap-2">
         <div className="flex w-full items-center gap-2">
-          <Icon name="outlined-flag" size={24} className="shrink-0 text-gray-100" />
+          <Icon name="sports-basketball" size={24} className="shrink-0 text-gray-100" />
           <h4 className="min-w-0 flex-1 truncate text-body-md font-semibold text-gray-100">
             My Activities (0)
           </h4>
           <Button size="icon" aria-label="Add an activity">
-            <Icon name="add" size={16} />
+            <Icon name="plus" size={16} />
           </Button>
         </div>
         <button

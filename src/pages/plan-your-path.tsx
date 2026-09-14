@@ -392,7 +392,6 @@ export function PlanYourPath() {
         <TermView
           term={openTerm}
           tabs={yearTabs(shown, yearOf(shown, openTerm.id), () => setOpenTermId(null))}
-          onBack={() => setOpenTermId(null)}
         />
       ) : (
       <DndContext
