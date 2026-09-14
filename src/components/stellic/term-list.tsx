@@ -1,6 +1,7 @@
 import { cn } from "cn"
 
 import { Icon, type IconName } from "@/components/icon"
+import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Button } from "@/components/ui/button"
 import {
@@ -62,13 +63,16 @@ function CourseRow({ course }: { course: PlannedCourse }) {
   const status = courseStatus(course)
   const held = course.placeholder
   const missing = courseNeeds(course) ? missingLine(course) : null
+  /* A draft on the canvas marks its terms here as well. */
+  const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
+  const struck = isStruck(course)
 
   return (
     <>
       <div
         className={cn(
           "flex w-full items-stretch border-t border-gray-40",
-          held ? "bg-gray-0" : "bg-card"
+          mark ? mark.card : held ? "bg-gray-0" : "bg-card"
         )}
       >
         <Accent course={held ? undefined : course} />
@@ -79,7 +83,15 @@ function CourseRow({ course }: { course: PlannedCourse }) {
             <span className="text-label-md text-gray-80">
               {held ? "Placeholder" : course.code}
             </span>
-            <span className="text-body-md font-semibold text-gray-100">{course.name}</span>
+            <span
+              className={cn(
+                "text-body-md font-semibold text-gray-100",
+                struck && "line-through"
+              )}
+            >
+              {course.name}
+            </span>
+            <DraftNote course={course} />
           </div>
 
           <div className="w-[121px] shrink-0">

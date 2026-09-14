@@ -4,8 +4,9 @@ import { CSS } from "@dnd-kit/utilities"
 import { cn } from "cn"
 import type { ReactNode } from "react"
 
-import { Icon, type IconName } from "@/components/icon"
+import { Icon } from "@/components/icon"
 import { AddCourseMenu } from "@/components/stellic/add-course-menu"
+import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +17,6 @@ import {
   CREDIT_GROUP_LABEL,
   termCredits,
   termMeta,
-  type DraftMark,
   type PlannedCourse,
   type Term,
   type Year,
@@ -26,14 +26,6 @@ import {
 /* ============================================================ AuditRow
    One course inside a semester card. Padding subtracts the border width
    (see button.tsx for why). */
-
-/* How a draft marks a course it wants to add, relocate or drop. A marked course
- * keeps its place on the canvas so the student can see what changed. */
-const DRAFT_STYLE: Record<DraftMark, { card: string; note: string; icon: IconName }> = {
-  added: { card: "border-success-50 bg-success-5", note: "text-success-100", icon: "add" },
-  moved: { card: "border-warning-50 bg-warning-5", note: "text-warning-50", icon: "remove" },
-  removed: { card: "border-alert-50 bg-alert-5", note: "text-alert-100", icon: "remove" },
-}
 
 /** How far apart the cards of a landing draft arrive. The tallies count in
  *  step with it, so the same value drives both. */
@@ -84,7 +76,7 @@ export function AuditRow({
 }: AuditRowProps) {
   const draft = course.draft
   const style = draft ? DRAFT_STYLE[draft.mark] : null
-  const struck = draft?.mark === "moved" || draft?.mark === "removed"
+  const struck = isStruck(course)
   /* A seat held against a requirement, with no course chosen for it: there is
    * no code to show and nothing to register, so it is drawn as an outline
    * waiting to be filled rather than as a course. */
@@ -175,20 +167,15 @@ export function AuditRow({
             )}
           </>
         )}
-        {draft && style && (
-          <p
+        {draft && (
+          <span
             style={joining ? { animationDelay: settleDelay(draft.order) } : undefined}
-            className={cn(
-              "flex items-center gap-1 pt-1 text-label-md",
-              style.note,
-              /* The reason a course was added goes with the tint that framed
-                 it, so the card ends up the size an ordinary one is. */
-              joining && "animate-vanish overflow-hidden"
-            )}
+            /* The reason a course was added goes with the tint that framed it,
+               so the card ends up the size an ordinary one is. */
+            className={cn("pt-1", joining && "animate-vanish overflow-hidden")}
           >
-            <Icon name={style.icon} size={16} />
-            {draft.note}
-          </p>
+            <DraftNote course={course} />
+          </span>
         )}
       </div>
 

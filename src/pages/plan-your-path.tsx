@@ -382,10 +382,11 @@ export function PlanYourPath() {
 
   const openTerm: Term | null = openTermId ? findTerm(shown, openTermId) : null
 
-  /* Opening a term puts the wizard away: it belongs to the plan as a whole. */
+  /* A term opens inside whatever is on screen: if a draft is up, the frame,
+   * the bar and the options stay where they are and the term shows the draft's
+   * version of itself. */
   function openTermView(termId: string) {
     setOpenTermId(termId)
-    setGenerateOpen(false)
   }
 
   return (
@@ -415,17 +416,38 @@ export function PlanYourPath() {
         )
       }
     >
-      {openTerm ? (
-        <TermView
-          term={openTerm}
-          tabs={yearTabs(
-            shown,
-            yearOf(shown, openTerm.id),
-            () => setOpenTermId(null),
-            openTermView
-          )}
-        />
-      ) : (
+      {/* relative so the draft's ring can be drawn over whatever is on screen
+          without moving anything that is already on it. */}
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        {/* The bar arrives with the frame, before there is a plan to put in it,
+            and fills as the plan lands. */}
+        {(draft || framing) && (
+          <DraftBar
+            added={landedTally.added}
+            removed={landedTally.removed}
+            showRemoved={draft ? draft.removed > 0 : true}
+            terms={touchedTerms}
+            pending={draft == null}
+            leaving={accepting}
+            onExit={() => {
+              dropDraft()
+              setGenerateOpen(false)
+            }}
+            onAccept={keepDraft}
+          />
+        )}
+
+        {openTerm ? (
+          <TermView
+            term={openTerm}
+            tabs={yearTabs(
+              shown,
+              yearOf(shown, openTerm.id),
+              () => setOpenTermId(null),
+              openTermView
+            )}
+          />
+        ) : (
       <DndContext
         sensors={sensors}
         /* The drop slot changes the height of the term it opens in, so the
@@ -444,27 +466,6 @@ export function PlanYourPath() {
           setDrop(null)
         }}
       >
-        {/* relative so the draft's ring can be drawn over the canvas without
-            moving anything that is already on it. */}
-        <div className="relative flex min-w-0 flex-1 flex-col">
-          {/* The bar arrives with the frame, before there is a plan to put in
-              it, and fills as the plan lands. */}
-          {(draft || framing) && (
-            <DraftBar
-              added={landedTally.added}
-              removed={landedTally.removed}
-              showRemoved={draft ? draft.removed > 0 : true}
-              terms={touchedTerms}
-              pending={draft == null}
-              leaving={accepting}
-              onExit={() => {
-                dropDraft()
-                setGenerateOpen(false)
-              }}
-              onAccept={keepDraft}
-            />
-          )}
-
           {/* @container so the planner reflows to its own width — the panel
               opening matters as much as the viewport shrinking. */}
           <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
@@ -517,14 +518,15 @@ export function PlanYourPath() {
           </section>
           </main>
 
-          {(draft || framing) && <DraftOutline leaving={accepting} pending={draft == null} />}
-        </div>
 
         <DragOverlay>
           {dragging && <AuditRow course={dragging.course} overlay />}
         </DragOverlay>
       </DndContext>
-      )}
+        )}
+
+        {(draft || framing) && <DraftOutline leaving={accepting} pending={draft == null} />}
+      </div>
     </AppShell>
   )
 }

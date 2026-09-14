@@ -1,6 +1,7 @@
 import { cn } from "cn"
 
 import { Icon } from "@/components/icon"
+import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon } from "@/components/stellic/primitives"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,9 +38,15 @@ function hourLabel(hour: number): string {
 
 function CourseCard({ course }: { course: PlannedCourse }) {
   const needsReview = courseStatus(course) === "needs review"
+  const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
 
   return (
-    <div className="flex w-full items-stretch overflow-hidden rounded-md border border-gray-40 bg-card pr-3">
+    <div
+      className={cn(
+        "flex w-full items-stretch overflow-hidden rounded-md border pr-3",
+        mark ? mark.card : "border-gray-40 bg-card"
+      )}
+    >
       <span
         aria-hidden="true"
         className={cn("w-1 shrink-0", course.accent ? ACCENT[course.accent] : "bg-gray-40")}
@@ -58,7 +65,15 @@ function CourseCard({ course }: { course: PlannedCourse }) {
             )}
             {course.code}
           </span>
-          <span className="text-body-md font-semibold text-gray-100">{course.name}</span>
+          <span
+            className={cn(
+              "text-body-md font-semibold text-gray-100",
+              isStruck(course) && "line-through"
+            )}
+          >
+            {course.name}
+          </span>
+          <DraftNote course={course} />
           {course.section && (
             <span className="flex items-center gap-1 text-body-md text-gray-100">
               <Icon name="calendar-today" size={14} />
@@ -77,11 +92,26 @@ function CourseCard({ course }: { course: PlannedCourse }) {
 }
 
 function HeldCard({ course }: { course: PlannedCourse }) {
+  const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
+
   return (
-    <div className="flex w-full items-center gap-2 rounded-md border border-dashed border-gray-40 bg-gray-0 p-[7px]">
+    <div
+      className={cn(
+        "flex w-full items-center gap-2 rounded-md border p-[7px]",
+        mark ? mark.card : "border-dashed border-gray-40 bg-gray-0"
+      )}
+    >
       <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-80" />
       <span className="flex min-w-0 flex-1 flex-col justify-center gap-2">
-        <span className="text-body-md font-semibold text-gray-100">{course.name}</span>
+        <span
+          className={cn(
+            "text-body-md font-semibold text-gray-100",
+            isStruck(course) && "line-through"
+          )}
+        >
+          {course.name}
+        </span>
+        <DraftNote course={course} />
         <span>
           <Badge variant="secondary">{course.credits} credits</Badge>
         </span>
