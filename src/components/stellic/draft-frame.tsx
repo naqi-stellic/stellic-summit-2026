@@ -22,6 +22,7 @@ export function DraftBar({
   removed,
   showRemoved,
   terms,
+  pending,
   leaving,
   onExit,
   onAccept,
@@ -33,6 +34,9 @@ export function DraftBar({
   showRemoved: boolean
   /** How many terms the draft touches, for the confirmation. */
   terms: number
+  /** The frame is up but the plan has not arrived yet: the bar is there to be
+   *  filled, and there is nothing to apply or leave until it is. */
+  pending?: boolean
   /** The draft is being accepted: the bar waits for the plan to settle, then
    *  sees itself out. */
   leaving?: boolean
@@ -57,7 +61,7 @@ export function DraftBar({
         leaving ? "animate-dissolve pointer-events-none" : "animate-settle"
       )}
     >
-      <Button disabled={leaving} onClick={onExit}>
+      <Button disabled={leaving || pending} onClick={onExit}>
         <Icon name="keyboard-backspace" size={16} />
         Exit
       </Button>
@@ -67,7 +71,7 @@ export function DraftBar({
           <Badge variant="success">+{added} added</Badge>
           {showRemoved && <Badge variant="danger">-{removed} removed</Badge>}
         </div>
-        <Button variant="primary" disabled={leaving} onClick={() => setConfirming(true)}>
+        <Button variant="primary" disabled={leaving || pending} onClick={() => setConfirming(true)}>
           Apply plan
         </Button>
       </div>

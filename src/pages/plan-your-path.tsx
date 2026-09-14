@@ -430,12 +430,15 @@ export function PlanYourPath() {
         {/* relative so the draft's ring can be drawn over the canvas without
             moving anything that is already on it. */}
         <div className="relative flex min-w-0 flex-1 flex-col">
-          {draft && (
+          {/* The bar arrives with the frame, before there is a plan to put in
+              it, and fills as the plan lands. */}
+          {(draft || framing) && (
             <DraftBar
               added={landedTally.added}
               removed={landedTally.removed}
-              showRemoved={draft.removed > 0}
+              showRemoved={draft ? draft.removed > 0 : true}
               terms={touchedTerms}
+              pending={draft == null}
               leaving={accepting}
               onExit={() => {
                 dropDraft()
