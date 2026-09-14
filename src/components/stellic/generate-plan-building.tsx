@@ -96,7 +96,12 @@ export function GeneratePlanBuilding({
               <StatusIcon status={status} />
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                 <span className="text-body-md text-gray-100">{step.title}</span>
-                {step.detail && <span className="text-body-md text-gray-80">{step.detail}</span>}
+                {/* What a step found is only known once it has finished, so the
+                    line arrives with the check rather than sitting there
+                    claiming a result the run hasn't reached yet. */}
+                {step.detail && status === "done" && (
+                  <span className="animate-rise text-body-md text-gray-80">{step.detail}</span>
+                )}
               </div>
             </li>
           )
