@@ -7,8 +7,8 @@ import { RadioGroup } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
 import { PLANNING_RULES, type PlanStanding, type Term } from "@/data/plan"
 
-/* Step 2: what to keep of the plan you already have, how many credits a term,
- * and which terms are in play. */
+/* Step 2: how many credits a term, which terms are in play, and what to keep
+ * of the plan you already have. */
 
 /** What each named pace means in credits — the one place that decides, so the
  *  radio's own description and the load the generator plans to agree. */
@@ -168,34 +168,6 @@ export function GeneratePlanPace({
 
       <div className="flex w-full flex-col gap-2">
         <div className="flex w-full items-center pb-2">
-          <h4 className="flex-1 text-body-md font-semibold text-gray-100">
-            Keep everything already planned?
-          </h4>
-        </div>
-
-        <RadioGroup
-          value={keepPlanned}
-          onValueChange={onKeepPlannedChange}
-          className="w-full gap-2"
-        >
-          {keepChoices(standing.planned.reqs).map((choice) => (
-            <RadioCard
-              key={choice.value}
-              value={choice.value}
-              label={choice.label}
-              detail={choice.detail}
-              selected={keepPlanned === choice.value}
-            />
-          ))}
-        </RadioGroup>
-
-        {keepPlanned === "no" && (
-          <KeepPicker terms={keepTerms} released={released} onChange={onReleasedChange} />
-        )}
-      </div>
-
-      <div className="flex w-full flex-col gap-2">
-        <div className="flex w-full items-center pb-2">
           <h4 className="flex-1 text-body-md font-semibold text-gray-100">Your desired pacing</h4>
         </div>
 
@@ -258,6 +230,34 @@ export function GeneratePlanPace({
             )
           })}
         </RadioGroup>
+      </div>
+
+      <div className="flex w-full flex-col gap-2">
+        <div className="flex w-full items-center pb-2">
+          <h4 className="flex-1 text-body-md font-semibold text-gray-100">
+            Keep everything already planned?
+          </h4>
+        </div>
+
+        <RadioGroup
+          value={keepPlanned}
+          onValueChange={onKeepPlannedChange}
+          className="w-full gap-2"
+        >
+          {keepChoices(standing.planned.reqs).map((choice) => (
+            <RadioCard
+              key={choice.value}
+              value={choice.value}
+              label={choice.label}
+              detail={choice.detail}
+              selected={keepPlanned === choice.value}
+            />
+          ))}
+        </RadioGroup>
+
+        {keepPlanned === "no" && (
+          <KeepPicker terms={keepTerms} released={released} onChange={onReleasedChange} />
+        )}
       </div>
     </>
   )
