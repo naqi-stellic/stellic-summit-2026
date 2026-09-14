@@ -1,0 +1,127 @@
+import { useState } from "react"
+
+import { Icon } from "@/components/icon"
+import { PlanHeader, type PlanAction, type YearTab } from "@/components/stellic/plan-header"
+import { TermCalendar } from "@/components/stellic/term-calendar"
+import { TermList } from "@/components/stellic/term-list"
+import { Alert } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { courseStatus, termActions, type Term } from "@/data/plan"
+
+/* One term on its own. Everything a term can show depends on whether its class
+ * schedule is published: until it is, there are no times to put on a calendar,
+ * so the list is all there is. */
+
+function RegistrationAlert({ term }: { term: Term }) {
+  const ready = term.courses.filter((c) => courseStatus(c) === "ready").length
+
+  return (
+    <Alert className="border-gray-40 px-[23px] py-[15px]">
+      <Icon name="shopping-cart" size={16} className="shrink-0 text-gray-100" />
+      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2">
+        <span className="font-semibold">Registration is now open!</span>
+        <span className="whitespace-nowrap">Closes: {term.alert?.closes}</span>
+      </span>
+      <Button variant="primary" size="sm" className="shrink-0">
+        Register {ready} course{ready === 1 ? "" : "s"}
+      </Button>
+    </Alert>
+  )
+}
+
+function ActionsAlert({ term }: { term: Term }) {
+  const actions = termActions(term)
+
+  return (
+    <Alert variant="warning" className="flex-col items-start gap-2 p-[15px]">
+      <p className="text-body-md font-semibold text-gray-100">
+        {actions.length} action{actions.length === 1 ? "" : "s"} required
+      </p>
+      {actions.map((course) => (
+        <p key={course.id} className="flex w-full flex-wrap items-center gap-2 text-body-md">
+          <Icon name="warning" size={16} className="shrink-0 text-warning-50" />
+          <span className="font-semibold">{course.name}</span>
+          <span>No course selected for placeholder.</span>
+          <button
+            type="button"
+            className="cursor-pointer underline [text-underline-position:from-font]"
+          >
+            Search courses
+          </button>
+        </p>
+      ))}
+    </Alert>
+  )
+}
+
+export function TermView({
+  term,
+  tabs,
+  onBack,
+}: {
+  term: Term
+  /** The year filter, with the term's own year marked and the rest able to
+   *  take you back to the whole plan. */
+  tabs: YearTab[]
+  onBack: () => void
+}) {
+  /* A published schedule is the interesting view, so it opens on it. */
+  const [mode, setMode] = useState(term.scheduled ? "calendar" : "list")
+  const actions = termActions(term)
+
+  const plannerActions: PlanAction[] = [
+    { label: "Request review", icon: "assignment" },
+    {
+      label: term.scheduled ? "Generate Schedule" : "Generate Term",
+      icon: "design-services",
+    },
+    { label: "Plan details", icon: "remove-red-eye" },
+  ]
+
+  return (
+    <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
+      <PlanHeader actions={plannerActions} tabs={tabs} />
+
+      {term.scheduled && term.alert ? (
+        <RegistrationAlert term={term} />
+      ) : actions.length > 0 ? (
+        <ActionsAlert term={term} />
+      ) : null}
+
+      <div className="flex w-full flex-wrap items-center justify-between gap-2">
+        <h3 className="flex min-w-0 items-center gap-2 text-h300 font-semibold text-gray-100">
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back to the whole plan"
+            className="flex cursor-pointer items-center text-gray-80"
+          >
+            <Icon name="chevron-left" size={16} />
+          </button>
+          <span className="truncate">{term.name}</span>
+        </h3>
+
+        <Tabs value={mode} onValueChange={setMode}>
+          <TabsList>
+            <TabsTrigger value="list">
+              <Icon name="format-list-bulleted" size={16} />
+              List
+            </TabsTrigger>
+            {/* Nothing to draw until the schedule is out. */}
+            <TabsTrigger value="calendar" disabled={!term.scheduled}>
+              <Icon name="calendar-month" size={16} />
+              Calendar
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {mode === "calendar" && term.scheduled ? (
+        <TermCalendar term={term} />
+      ) : (
+        <TermList term={term} />
+      )}
+    </main>
+  )
+}

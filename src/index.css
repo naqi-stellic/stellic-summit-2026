@@ -31,6 +31,16 @@
   --stellic-warning-50: #e8672a;
   --stellic-warning-75: #f08f2a;
 
+  /* Warning at full contrast, for a mark that has to read at 14px. */
+  --stellic-warning-100: #d57800;
+
+  /* Course accents. The design names the green and the purple Accent 4 and
+     Accent 6; the amber is a raw value in the file. A course keeps its colour
+     wherever it appears — the card in the list and the block on the calendar. */
+  --stellic-accent-green: #90be6d;
+  --stellic-accent-amber: #f9a825;
+  --stellic-accent-purple: #ac76da;
+
   --stellic-alert-5: #ffeaea;
   --stellic-alert-50: #d30303;
   --stellic-alert-100: #bd0303;
@@ -118,6 +128,10 @@
   --color-warning-25: var(--stellic-warning-25);
   --color-warning-50: var(--stellic-warning-50);
   --color-warning-75: var(--stellic-warning-75);
+  --color-warning-100: var(--stellic-warning-100);
+  --color-accent-green: var(--stellic-accent-green);
+  --color-accent-amber: var(--stellic-accent-amber);
+  --color-accent-purple: var(--stellic-accent-purple);
   --color-alert-5: var(--stellic-alert-5);
   --color-alert-50: var(--stellic-alert-50);
   --color-alert-100: var(--stellic-alert-100);

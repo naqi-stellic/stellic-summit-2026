@@ -2,14 +2,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 import * as React from "react"
 
-import { Icon } from "@/components/icon"
+import { Icon, type IconName } from "@/components/icon"
 import { RadioGroupItem } from "@/components/ui/radio-group"
 
 /* Small Stellic-specific pieces that have no shadcn equivalent. Anything here
  * used by a second page should stay here; page-local composition does not. */
 
 /* ============================================================ StatusPill
-   The REVIEWED / UNREVIEWED marker in a semester card header. */
+   The small uppercase marker that says where something stands: a term's review
+   state in the planner, a class's registration state in a term. */
 
 const statusPillVariants = cva(
   "inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-overline font-medium uppercase whitespace-nowrap",
@@ -18,11 +19,20 @@ const statusPillVariants = cva(
       status: {
         reviewed: "bg-success-5 text-success-100",
         unreviewed: "bg-gray-5 text-gray-100",
+        ready: "bg-primary-0 text-primary-100",
+        "needs review": "bg-warning-5 text-warning-50",
       },
     },
     defaultVariants: { status: "reviewed" },
   }
 )
+
+const STATUS_ICON: Record<string, IconName> = {
+  reviewed: "check-circle",
+  unreviewed: "error-outline",
+  ready: "thumb-up",
+  "needs review": "warning",
+}
 
 export function StatusPill({
   status = "reviewed",
@@ -34,7 +44,7 @@ export function StatusPill({
 }) {
   return (
     <span className={cn(statusPillVariants({ status }), className)}>
-      <Icon name={status === "reviewed" ? "check-circle" : "error-outline"} size={12} />
+      <Icon name={STATUS_ICON[status ?? "reviewed"]} size={12} />
       {children}
     </span>
   )
@@ -44,19 +54,27 @@ export function StatusPill({
    16x16 square marking a course group's audit state. The leaf sizes are the
    design's, measured off the Figma render — they are not a uniform inset. */
 
-export function AuditIcon({ state }: { state: "registered" | "planned" }) {
+export function AuditIcon({
+  state,
+  size = 16,
+}: {
+  state: "registered" | "planned"
+  size?: 16 | 24
+}) {
   const registered = state === "registered"
+  const glyph = registered ? 10.667 : 9.333
 
   return (
     <span
+      style={{ width: size, height: size }}
       className={cn(
-        "flex size-4 shrink-0 items-center justify-center rounded-md",
+        "flex shrink-0 items-center justify-center rounded-md",
         registered
           ? "bg-warning-50 text-white"
           : "border-[0.667px] border-warning-50 bg-warning-5 text-warning-50"
       )}
     >
-      <Icon name={registered ? "watch-later" : "check"} size={registered ? 10.667 : 9.333} />
+      <Icon name={registered ? "watch-later" : "check"} size={(glyph * size) / 16} />
     </span>
   )
 }

@@ -26,6 +26,8 @@ export type PlannedCourse = {
   gradeOption?: string
   /** When the term's schedule is out, where the class actually sits. */
   meetings?: Meeting[]
+  /** The colour this course is drawn in, on its card and on the calendar. */
+  accent?: "green" | "amber" | "purple"
   /** Set only while a generated draft is on screen. `relocated` marks a card
    *  that left somewhere to be here, so it counts as an addition and a removal
    *  at once. */
@@ -187,6 +189,7 @@ export const INITIAL_YEARS: Year[] = [
             campus: "Main",
             modality: "In Person",
             gradeOption: "Graded",
+            accent: "purple",
             meetings: [
               { day: 1, from: 9, to: 10.25 },
               { day: 3, from: 9, to: 10.25 },
@@ -202,6 +205,7 @@ export const INITIAL_YEARS: Year[] = [
             campus: "Main",
             modality: "In Person",
             gradeOption: "Graded",
+            accent: "amber",
             meetings: [
               { day: 2, from: 13, to: 14.25 },
               { day: 4, from: 13, to: 14.25 },
@@ -396,4 +400,50 @@ export function planCampuses(years: Year[]): string {
     }
   }
   return seen.size > 0 ? [...seen].join(", ") : "—"
+}
+
+/* ------------------------------------------------------------ term view */
+
+/** A course is ready when a class has been chosen for it; a seat held against
+ *  a requirement still needs one. */
+export function courseStatus(course: PlannedCourse): "ready" | "needs review" {
+  return course.placeholder || !course.classNo ? "needs review" : "ready"
+}
+
+/** What the term is waiting on before it can be registered. */
+export function termActions(term: Term): PlannedCourse[] {
+  return term.courses.filter((c) => courseStatus(c) === "needs review")
+}
+
+/** The week a term's calendar opens on: a real Monday inside the term, so the
+ *  days line up with the weekdays the classes actually meet. */
+export function termWeek(term: Term): Date[] {
+  const year = Number(term.id.split("-")[1])
+  /* A week far enough in for the term to be under way, and taken from the
+   * second week of the month so it cannot straddle two of them. */
+  const start = term.id.startsWith("fall")
+    ? new Date(Date.UTC(year, 9, 8))
+    : term.id.startsWith("summer")
+      ? new Date(Date.UTC(year, 6, 8))
+      : new Date(Date.UTC(year, 2, 8))
+
+  /* Wind back to the Monday of that week. */
+  const monday = new Date(start)
+  monday.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7))
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(monday)
+    day.setUTCDate(monday.getUTCDate() + i)
+    return day
+  })
+}
+
+/** The hours a term's calendar has to cover, with an hour's air either side. */
+export function termHours(term: Term): { from: number; to: number } {
+  const meetings = term.courses.flatMap((c) => c.meetings ?? [])
+  if (meetings.length === 0) return { from: 8, to: 18 }
+  return {
+    from: Math.floor(Math.min(...meetings.map((m) => m.from)) - 1),
+    to: Math.ceil(Math.max(...meetings.map((m) => m.to)) + 2),
+  }
 }

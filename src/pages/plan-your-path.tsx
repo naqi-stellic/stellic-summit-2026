@@ -23,6 +23,7 @@ import {
   type YearTab,
 } from "@/components/stellic/plan-header"
 import { GeneratePlanPanel } from "@/components/stellic/generate-plan-panel"
+import { TermView } from "@/pages/term-view"
 import {
   AuditRow,
   NoActionsAlert,
@@ -79,13 +80,24 @@ const PHASE_TAB = {
 } as const
 
 /* One tab per year the plan actually covers, completed year included, so the
-   filter can never omit a year that is on screen. */
-function yearTabs(years: Year[]): YearTab[] {
+   filter can never omit a year that is on screen. `openYear` is the year of a
+   term being looked at on its own, which is what the filter then reads as. */
+function yearTabs(years: Year[], openYear?: string, onLeave?: () => void): YearTab[] {
   return [
-    { label: "All Years", icon: "grid-view", selected: true },
-    { label: COMPLETED.label, ...PHASE_TAB.complete },
-    ...years.map((year) => ({ label: year.label, ...PHASE_TAB[year.phase] })),
+    { label: "All Years", icon: "grid-view", selected: !openYear, onSelect: onLeave },
+    { label: COMPLETED.label, ...PHASE_TAB.complete, onSelect: onLeave },
+    ...years.map((year) => ({
+      label: year.label,
+      ...PHASE_TAB[year.phase],
+      selected: year.label === openYear,
+      onSelect: onLeave,
+    })),
   ]
+}
+
+/** The year a term belongs to, for the filter above it. */
+function yearOf(years: Year[], termId: string): string | undefined {
+  return years.find((year) => year.terms.some((t) => t.id === termId))?.label
 }
 
 /* Long enough for the last staggered card to finish settling (14 × 35ms of
@@ -347,6 +359,8 @@ export function PlanYourPath() {
     else setYears((current) => addCourse(current, termId, entry, false))
   }
 
+  const openTerm: Term | null = openTermId ? findTerm(shown, openTermId) : null
+
   return (
     <AppShell
       title="Plan Your Path"
@@ -374,6 +388,13 @@ export function PlanYourPath() {
         )
       }
     >
+      {openTerm ? (
+        <TermView
+          term={openTerm}
+          tabs={yearTabs(shown, yearOf(shown, openTerm.id), () => setOpenTermId(null))}
+          onBack={() => setOpenTermId(null)}
+        />
+      ) : (
       <DndContext
         sensors={sensors}
         /* The drop slot changes the height of the term it opens in, so the
@@ -451,7 +472,10 @@ export function PlanYourPath() {
                 renderAlert={(term) => termBanner(term, draft != null)}
                 onRemoveCourse={handleRemoveCourse}
                 onAddCourse={handleAddCourse}
-                onOpenTerm={setOpenTermId}
+                onOpenTerm={(id) => {
+                  setOpenTermId(id)
+                  setGenerateOpen(false)
+                }}
               />
             ))}
           </div>
@@ -472,6 +496,7 @@ export function PlanYourPath() {
           {dragging && <AuditRow course={dragging.course} overlay />}
         </DragOverlay>
       </DndContext>
+      )}
     </AppShell>
   )
 }
