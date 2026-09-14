@@ -105,6 +105,16 @@ const ICONS = {
       },
     ],
   },
+  /* The outlined ring, as the "no actions required" banner uses it — the filled
+     disc is a different glyph and reads much heavier at 16px. */
+  "check-circle-outline": {
+    viewBox: "0 0 24 24",
+    parts: [
+      {
+        d: "M16.59 7.58 10 14.17l-3.59-3.58L5 12l5 5 8-8zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+      },
+    ],
+  },
   "keyboard-backspace": {
     viewBox: "0 0 24 24",
     parts: [{ d: "M21 11H6.83l3.58-3.59L9 6l-6 6 6 6 1.41-1.41L6.83 13H21v-2z" }],

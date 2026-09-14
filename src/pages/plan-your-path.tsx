@@ -83,10 +83,14 @@ function RegistrationAlert({ closes }: { closes: string }) {
       <AlertBody>
         <AlertHeader>
           <AlertTitle>
-            <Icon name="shopping-cart" size={16} className="mt-0.5 text-primary-100" />
+            <Icon name="shopping-cart" size={16} className="mt-0.5 shrink-0 text-primary-100" />
             Registration is now open!
           </AlertTitle>
-          <AlertDescription>Closes: {closes}</AlertDescription>
+          {/* The date stays on one line while there is room for it; in a term
+              sharing its row with two others there is not. */}
+          <AlertDescription className="@max-[400px]/term:whitespace-normal">
+            Closes: {closes}
+          </AlertDescription>
         </AlertHeader>
         <Button variant="primary" size="sm">
           Register Now
@@ -98,11 +102,11 @@ function RegistrationAlert({ closes }: { closes: string }) {
 
 function PlanFacet({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
       <span className="text-body-md font-semibold text-foreground">{label}</span>
-      <Badge variant="secondary">
-        {value}
-        <Icon name="close" size={12} />
+      <Badge variant="secondary" className="max-w-full">
+        <span className="min-w-0 truncate">{value}</span>
+        <Icon name="close" size={12} className="shrink-0" />
       </Badge>
       <a
         href="#"

@@ -219,35 +219,43 @@ export function SemesterCard({
     <Card
       ref={setNodeRef}
       data-term={term.id}
+      /* Its own container: a term beside two others has to make different calls
+         about what fits than the same term on its own. */
       className={cn(
-        "w-full min-w-0 gap-0 rounded-md border-gray-40 p-[23px] shadow-none transition-colors",
-        "@3xl:w-auto @3xl:flex-1 @3xl:self-stretch",
+        "@container/term w-full min-w-0 gap-0 rounded-md border-gray-40 p-[23px] shadow-none transition-colors",
         isTarget && "border-primary bg-primary-0/40"
       )}
     >
       <div className="flex w-full flex-col gap-2">
         <div
           className={cn(
-            "flex w-full flex-wrap items-center justify-between gap-x-2 gap-y-1",
+            "flex w-full items-center justify-between gap-2",
             headerHasGap && "pb-4"
           )}
         >
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             <h4 className="flex items-center gap-1 text-caption-lg font-semibold text-gray-100">
-              {term.name}
-              <Icon name="chevron-right" size={16} className="text-gray-80" />
+              <span className="truncate">{term.name}</span>
+              <Icon name="chevron-right" size={16} className="shrink-0 text-gray-80" />
             </h4>
             <p className="text-body-md text-gray-80">{termMeta(term)}</p>
           </div>
           {onExplain ? (
-            <Button size="sm" onClick={onExplain}>
+            /* Narrow terms keep the button on the header row and drop the word
+               rather than wrapping under the title. */
+            <Button
+              size="sm"
+              aria-label="Explain"
+              onClick={onExplain}
+              className="shrink-0 @max-[320px]/term:w-8 @max-[320px]/term:px-0"
+            >
               <Icon name="auto-awesome" size={16} />
-              Explain
+              <span className="@max-[320px]/term:hidden">Explain</span>
             </Button>
           ) : (
             <StatusPill
               status={term.reviewed ? "reviewed" : "unreviewed"}
-              className={cn(!term.reviewed && "opacity-0")}
+              className={cn("shrink-0", !term.reviewed && "opacity-0")}
             >
               {term.reviewed ? "reviewed" : "Unreviewed"}
             </StatusPill>
@@ -283,7 +291,7 @@ export function SemesterCard({
 export function NoActionsAlert() {
   return (
     <Alert variant="success" className="animate-fade">
-      <Icon name="check-circle" size={16} className="shrink-0 text-success-100" />
+      <Icon name="check-circle-outline" size={16} className="mt-0.5 shrink-0 text-success-50" />
       <span className="min-w-0 flex-1 truncate font-semibold">
         No actions required at the moment
       </span>
@@ -354,8 +362,14 @@ export function YearSection({
             Add Term
           </Button>
         </div>
-        {/* Two cards need ~768px of planner; below that they stack. */}
-        <div className="flex w-full flex-col gap-4 @3xl:flex-row @3xl:items-start">
+        {/* A term needs ~384px to read properly: two fit from 768px, three from
+            1152px. Below that they stack rather than squeeze. */}
+        <div
+          className={cn(
+            "grid w-full grid-cols-1 gap-4 @3xl:grid-cols-2",
+            year.terms.length > 2 && "@6xl:grid-cols-3"
+          )}
+        >
           {year.terms.map((term) => (
             <SemesterCard
               key={term.id}

@@ -20,14 +20,16 @@ export function DraftBar({
   return (
     <div
       /* Border sits inside, so the bottom padding gives it back its pixel. */
-      className="animate-settle flex shrink-0 items-center justify-between gap-2 border-b border-gray-40 bg-warning-5 px-4 pt-3 pb-[11px]"
+      /* The tab hangs into this bar, so on a narrow screen the controls start
+         below it rather than underneath it. */
+      className="animate-settle flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-gray-40 bg-warning-5 px-4 pt-3 pb-[11px] max-md:pt-10"
     >
       <Button onClick={onExit}>
         <Icon name="keyboard-backspace" size={16} />
         Exit
       </Button>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
         <div className="flex items-center gap-1">
           <Badge variant="success">+{added} added</Badge>
           {removed > 0 && <Badge variant="danger">-{removed} removed</Badge>}

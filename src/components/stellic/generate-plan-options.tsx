@@ -57,7 +57,7 @@ export function GeneratePlanOptions({
 
       <Section title="Plan options">
         <RadioGroup value={selected} onValueChange={onSelect} className="w-full gap-2">
-          {options.map((option) => {
+          {options.map((option, index) => {
             const active = option.id === selected
             return (
               <div
@@ -72,7 +72,7 @@ export function GeneratePlanOptions({
                     <RadioGroupItem value={option.id} />
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px text-body-md">
-                    <span className="font-semibold text-foreground">{option.label}</span>
+                    <span className="font-semibold text-foreground">Option {index + 1}</span>
                     <span className="text-gray-80">Expected Graduation {option.graduation}</span>
                   </span>
                   <span className="flex shrink-0 items-center gap-1">
@@ -80,7 +80,11 @@ export function GeneratePlanOptions({
                     {option.removed > 0 && <Badge variant="danger">-{option.removed}</Badge>}
                   </span>
                 </label>
-                <p className="w-full text-label-md text-gray-100">{option.blurb}</p>
+                <p className="w-full text-label-md text-gray-100">
+                  {/* The strategy names the option rather than replacing its
+                      number, so "Option 2" stays the thing you refer to. */}
+                  <span className="font-semibold">{option.label}.</span> {option.blurb}
+                </p>
               </div>
             )
           })}
