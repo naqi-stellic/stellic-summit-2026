@@ -460,22 +460,17 @@ export function TimelineRail({ phase, nodes }: { phase: YearPhase; nodes: 1 | 2 
   const { icon, tone } = RAIL_NODE[phase]
   const line = phase === "active" ? "bg-warning-50" : "bg-gray-60"
 
-  /* A single node sits in a 24px gutter with a 4px lead; a pair hugs to 20px
-   * and is joined by the connector. Both come straight from the design. */
-  if (nodes === 1) {
-    return (
-      <div className="flex w-6 shrink-0 flex-col items-center self-stretch pt-1">
-        <Icon name={icon} size={20} className={tone} />
-      </div>
-    )
-  }
-
+  /* One gutter and one lead whether the year is folded or not: the node sits
+   * level with the year's heading either way, so unfolding moves nothing. */
   return (
-    <div className="flex shrink-0 flex-col items-center self-stretch">
-      <span className="h-3" />
+    <div className="flex w-6 shrink-0 flex-col items-center self-stretch pt-2">
       <Icon name={icon} size={20} className={tone} />
-      <span className={cn("w-0.5 min-h-0 flex-1", line)} />
-      <Icon name={icon} size={20} className={tone} />
+      {nodes === 2 && (
+        <>
+          <span className={cn("w-0.5 min-h-0 flex-1", line)} />
+          <Icon name={icon} size={20} className={tone} />
+        </>
+      )}
     </div>
   )
 }
@@ -535,9 +530,14 @@ export function YearSection({
     return (
       <section className="flex items-start gap-4">
         <TimelineRail phase={year.phase} nodes={1} />
-        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-4">
-          <h3 className="min-w-0">{heading}</h3>
-          <p className="text-label-md text-gray-100">{yearSummary(year)}</p>
+        {/* The band is 36px tall, as the unfolded header's Add Term button
+            makes it, with the same 16px beneath — so the heading and the node
+            beside it stay put when the year opens. */}
+        <div className="flex min-w-0 flex-1 flex-col pb-4">
+          <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <h3 className="min-w-0">{heading}</h3>
+            <p className="text-label-md text-gray-100">{yearSummary(year)}</p>
+          </div>
         </div>
       </section>
     )
@@ -547,15 +547,19 @@ export function YearSection({
     <section className="flex items-start gap-4">
       <TimelineRail phase={year.phase} nodes={2} />
       <div className="flex min-w-0 flex-1 flex-col items-start pb-8">
-        <div className="-mb-px flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-4">
-          <h3 className="min-w-0">{heading}</h3>
-          {/* A year already behind you takes no more terms. */}
-          {year.phase !== "complete" && (
-            <Button>
-              <Icon name="add" size={16} />
-              Add Term
-            </Button>
-          )}
+        {/* The band holds its 36px whether or not the year offers a term to
+            add, so a finished year lines up with the rest. */}
+        <div className="-mb-px flex w-full flex-col pb-4">
+          <div className="flex min-h-9 w-full flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <h3 className="min-w-0">{heading}</h3>
+            {/* A year already behind you takes no more terms. */}
+            {year.phase !== "complete" && (
+              <Button>
+                <Icon name="add" size={16} />
+                Add Term
+              </Button>
+            )}
+          </div>
         </div>
         {/* A term needs ~384px to read properly: two fit from 768px, three from
             1152px. Below that they stack rather than squeeze. */}
