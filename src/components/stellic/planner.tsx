@@ -482,6 +482,15 @@ export function TimelineRail({ phase, nodes }: { phase: YearPhase; nodes: 1 | 2 
 
 /* ============================================================ YearSection */
 
+/** What a year amounts to, for when it is folded away. */
+function yearSummary(year: Year): string {
+  const courses = year.terms.reduce((n, t) => n + t.courses.length, 0)
+  const credits = year.terms.reduce((n, t) => n + termCredits(t), 0)
+  return `${courses} course${courses === 1 ? "" : "s"}, ${credits} credits ${
+    year.phase === "complete" ? "earned" : "planned"
+  }`
+}
+
 export function YearSection({
   year,
   renderAlert,
@@ -489,6 +498,8 @@ export function YearSection({
   revealed,
   drop,
   addable,
+  collapsed,
+  onToggleCollapse,
   onRemoveCourse,
   onAddCourse,
   onOpenTerm,
@@ -501,23 +512,50 @@ export function YearSection({
    *  much room it needs. */
   drop: { termId: string; index: number; height: number } | null
   addable: CatalogEntry[]
+  /** Folded away to its heading and what it comes to. */
+  collapsed?: boolean
+  onToggleCollapse?: () => void
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (termId: string, entry: CatalogEntry) => void
   onOpenTerm?: (termId: string) => void
 }) {
+  const heading = (
+    <button
+      type="button"
+      onClick={onToggleCollapse}
+      aria-expanded={!collapsed}
+      className="flex cursor-pointer items-center gap-1 text-h300 font-semibold text-gray-100"
+    >
+      {year.label}
+      <Icon name={collapsed ? "unfold-more" : "unfold-less"} size={16} />
+    </button>
+  )
+
+  if (collapsed) {
+    return (
+      <section className="flex items-start gap-4">
+        <TimelineRail phase={year.phase} nodes={1} />
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-4">
+          <h3 className="min-w-0">{heading}</h3>
+          <p className="text-label-md text-gray-100">{yearSummary(year)}</p>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="flex items-start gap-4">
       <TimelineRail phase={year.phase} nodes={2} />
       <div className="flex min-w-0 flex-1 flex-col items-start pb-8">
         <div className="-mb-px flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-4">
-          <h3 className="flex items-center gap-1 text-h300 font-semibold text-gray-100">
-            {year.label}
-            <Icon name="unfold-less" size={16} />
-          </h3>
-          <Button>
-            <Icon name="add" size={16} />
-            Add Term
-          </Button>
+          <h3 className="min-w-0">{heading}</h3>
+          {/* A year already behind you takes no more terms. */}
+          {year.phase !== "complete" && (
+            <Button>
+              <Icon name="add" size={16} />
+              Add Term
+            </Button>
+          )}
         </div>
         {/* A term needs ~384px to read properly: two fit from 768px, three from
             1152px. Below that they stack rather than squeeze. */}

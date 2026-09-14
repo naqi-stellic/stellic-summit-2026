@@ -30,7 +30,6 @@ import {
   NoActionsAlert,
   STREAM_CAP,
   STREAM_MS,
-  TimelineRail,
   YearSection,
 } from "@/components/stellic/planner"
 import { AddSlot } from "@/components/stellic/primitives"
@@ -198,6 +197,8 @@ export function PlanYourPath() {
   /* A term opened on its own. The planner stays mounted behind it, so coming
    * back does not cost the plan its scroll position or its draft. */
   const [openTermId, setOpenTermId] = useState<string | null>(null)
+  /* The finished year comes folded away; the rest come open. */
+  const [collapsed, setCollapsed] = useState<string[]>([COMPLETED_YEAR.label])
   /* Bumped when a plan arrives on a canvas that had none — generating, or
    * generating again. Swapping between the options it produced, or changing one
    * by hand, is not an arrival: the plan is already there and only its contents
@@ -489,27 +490,21 @@ export function PlanYourPath() {
             onAction={(action) => action.toggles && setGenerateOpen((open) => !open)}
           />
 
-          {/* ---------------------------------- 2026-2027, collapsed */}
-          <section className="flex items-start gap-4">
-            <TimelineRail phase="complete" nodes={1} />
-            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-4">
-              <h3 className="flex items-center gap-1 text-h300 font-semibold text-gray-100">
-                {COMPLETED.label}
-                <Icon name="unfold-more" size={16} />
-              </h3>
-              <p className="text-label-md text-gray-100">
-                {COMPLETED.courses} courses, {COMPLETED.credits} credits earned
-              </p>
-            </div>
-          </section>
-
           {/* Keyed on the option so switching one replays the entrances rather
               than swapping the cards in place. */}
           <div key={draft ? `draft-${streamId}` : "plan"} className="contents">
-            {shown.map((year) => (
+            {[COMPLETED_YEAR, ...shown].map((year) => (
               <YearSection
                 key={year.label}
                 year={year}
+                collapsed={collapsed.includes(year.label)}
+                onToggleCollapse={() =>
+                  setCollapsed((current) =>
+                    current.includes(year.label)
+                      ? current.filter((label) => label !== year.label)
+                      : [...current, year.label]
+                  )
+                }
                 settling={accepting}
                 revealed={revealed}
                 drop={drop}
