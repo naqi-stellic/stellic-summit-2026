@@ -4,6 +4,7 @@ import { Icon, type IconName } from "@/components/icon"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   CREDIT_GROUP_LABEL,
   courseNeeds,
@@ -60,7 +61,7 @@ function Accent({ course }: { course?: PlannedCourse }) {
   )
 }
 
-function CourseRow({ course }: { course: PlannedCourse }) {
+function CourseRow({ course, drafting }: { course: PlannedCourse; drafting: boolean }) {
   const status = courseStatus(course)
   const held = course.placeholder
   const missing = courseNeeds(course) ? missingLine(course) : null
@@ -79,6 +80,11 @@ function CourseRow({ course }: { course: PlannedCourse }) {
         <Accent course={held ? undefined : course} />
         <div className="flex min-w-0 flex-1 items-center gap-4 pr-4 pl-6">
           <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-80" />
+          {/* A draft is something to pick through, so each class can be taken
+              in or left out of what you are about to accept. */}
+          {drafting && (
+            <Checkbox defaultChecked aria-label={`Keep ${course.name}`} className="shrink-0" />
+          )}
 
           <div className="flex w-[223px] shrink-0 flex-col gap-1 px-2 py-3">
             <span className="text-label-md text-gray-80">
@@ -92,7 +98,6 @@ function CourseRow({ course }: { course: PlannedCourse }) {
             >
               {course.name}
             </span>
-            <DraftNote course={course} />
           </div>
 
           <div className="w-[121px] shrink-0">
@@ -115,7 +120,18 @@ function CourseRow({ course }: { course: PlannedCourse }) {
         </div>
       </div>
 
-      {missing && (
+      {/* What the draft did to this class reads under it, the same way an
+          unsettled one says what it is waiting for. */}
+      {course.draft && (
+        <div className={cn("flex w-full items-stretch border-t border-gray-40", mark?.card)}>
+          <Accent course={held ? undefined : course} />
+          <span className="flex min-w-0 flex-1 items-center px-4 py-[9px]">
+            <DraftNote course={course} />
+          </span>
+        </div>
+      )}
+
+      {missing && !course.draft && (
         <div className="flex w-full items-stretch border-t border-gray-40 bg-gray-0">
           <Accent />
           <p className="flex min-w-0 flex-1 items-center gap-1 px-4 py-[9px] text-body-md text-gray-100">
@@ -136,6 +152,7 @@ function CourseRow({ course }: { course: PlannedCourse }) {
 
 export function TermList({ term }: { term: Term }) {
   const credits = termCredits(term)
+  const drafting = term.courses.some((c) => c.draft)
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -149,6 +166,7 @@ export function TermList({ term }: { term: Term }) {
             <div className="flex w-full items-center pr-4 pl-6 text-body-md font-semibold text-gray-100">
               <span aria-hidden="true" className="w-1 shrink-0" />
               <span className="w-4 shrink-0" />
+              {drafting && <span aria-hidden="true" className="ml-4 w-4 shrink-0" />}
               <span className="ml-4 w-[223px] shrink-0 px-2 py-3">Course</span>
               <span className="ml-4 w-[121px] shrink-0">Status</span>
               <span aria-hidden="true" className="ml-4 w-px" />
@@ -167,7 +185,7 @@ export function TermList({ term }: { term: Term }) {
             </div>
 
             {term.courses.map((course) => (
-              <CourseRow key={course.id} course={course} />
+              <CourseRow key={course.id} course={course} drafting={drafting} />
             ))}
           </div>
         </div>

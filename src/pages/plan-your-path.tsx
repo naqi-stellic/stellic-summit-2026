@@ -439,6 +439,10 @@ export function PlanYourPath() {
 
         {openTerm ? (
           <TermView
+            /* Keyed on the term so switching to another one opens it as itself
+               — on its calendar if it has one — rather than inheriting the view
+               the last term was being read in. */
+            key={openTerm.id}
             term={openTerm}
             tabs={yearTabs(
               shown,

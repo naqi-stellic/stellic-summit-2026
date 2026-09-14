@@ -53,12 +53,17 @@ function CourseCard({ course }: { course: PlannedCourse }) {
         className={cn("w-1 shrink-0", course.accent ? ACCENT[course.accent] : "bg-gray-40")}
       />
       <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 p-3">
-        {/* Level with the code line rather than the middle of the card. */}
-        <Checkbox
-          defaultChecked
-          className="mt-0.5"
-          aria-label={`Show ${course.name} on the calendar`}
-        />
+        {/* A class already in the plan can be shown or hidden; one the draft is
+            proposing carries its mark there instead. */}
+        {mark ? (
+          <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
+        ) : (
+          <Checkbox
+            defaultChecked
+            className="mt-0.5"
+            aria-label={`Show ${course.name} on the calendar`}
+          />
+        )}
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="flex items-center gap-1.5 text-body-md text-gray-80">
             {needsReview && (
@@ -74,7 +79,6 @@ function CourseCard({ course }: { course: PlannedCourse }) {
           >
             {course.name}
           </span>
-          <DraftNote course={course} />
           {course.section && (
             <span className="flex items-center gap-1 text-body-md text-gray-100">
               <Icon name="calendar-today" size={14} />
@@ -86,6 +90,8 @@ function CourseCard({ course }: { course: PlannedCourse }) {
             {course.campus && <Badge variant="secondary">{course.campus}</Badge>}
             {course.modality && <Badge variant="secondary">{course.modality}</Badge>}
           </span>
+          {/* Under the badges, where the card has room to say why it is here. */}
+          <DraftNote course={course} className="pt-1" />
         </span>
       </label>
     </div>
@@ -265,7 +271,10 @@ function Week({ term }: { term: Term }) {
                         top: (meeting.from - from) * HOUR,
                         height: (meeting.to - meeting.from) * HOUR,
                       }}
-                      className="absolute inset-x-1 flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card"
+                      className={cn(
+                        "absolute inset-x-1 flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card",
+                        course.draft && "opacity-60"
+                      )}
                     >
                       <span
                         aria-hidden="true"
