@@ -65,6 +65,10 @@ type AuditRowProps = {
   overlay?: boolean
   /** The draft is being accepted: marks come off, struck cards leave. */
   settling?: boolean
+  /** The draft is still landing. The stagger belongs to that arrival, not to
+   *  the card: once the plan is on screen a card that mounts again — dropped
+   *  somewhere new, say — should appear at once. */
+  streaming?: boolean
   /** Present only where the course can leave the plan; reveals the × on hover. */
   onRemove?: () => void
 }
@@ -75,6 +79,7 @@ export function AuditRow({
   ghosted,
   overlay,
   settling,
+  streaming,
   onRemove,
 }: AuditRowProps) {
   const draft = course.draft
@@ -84,6 +89,11 @@ export function AuditRow({
    * its way to being an ordinary course. */
   const leaving = settling && struck
   const joining = settling && draft?.mark === "added"
+  /* Only two things earn an entrance: a draft landing, and the card you just
+   * acted on, which the generator numbers zero. Anything else that happens to
+   * mount again — a neighbour re-rendering after a drop — stays put rather
+   * than flashing back in. */
+  const entering = draft != null && (streaming || draft.order === 0)
 
   return (
     <div
@@ -103,7 +113,8 @@ export function AuditRow({
         !locked && !draft && "cursor-grab transition-colors hover:bg-gray-5",
         /* Same reason as the draft bar: a marked card carries the transition
            all along, so losing its tint is something it can animate. */
-        draft && "animate-rise transition-colors duration-500",
+        draft && "transition-colors duration-500",
+        entering && "animate-rise",
         /* Listed after animate-rise so it wins the animation slot. */
         leaving && "animate-vanish overflow-hidden",
         ghosted && "opacity-40",
@@ -167,10 +178,12 @@ export function AuditRow({
 function SortableAuditRow({
   course,
   settling,
+  streaming,
   onRemove,
 }: {
   course: PlannedCourse
   settling?: boolean
+  streaming?: boolean
   onRemove: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -186,7 +199,13 @@ function SortableAuditRow({
       {...attributes}
       {...listeners}
     >
-      <AuditRow course={course} ghosted={isDragging} settling={settling} onRemove={onRemove} />
+      <AuditRow
+        course={course}
+        ghosted={isDragging}
+        settling={settling}
+        streaming={streaming}
+        onRemove={onRemove}
+      />
     </div>
   )
 }
@@ -296,15 +315,25 @@ export function SemesterCard({
    * other than the course list. */
   const headerHasGap = term.alert != null || term.courses.length === 0 || onExplain != null
 
+  /* Infinity means the draft has finished arriving. */
+  const streaming = revealed !== Infinity
+
   const rows: ReactNode[] = term.courses.map((course) => {
     const struck = course.draft?.mark === "moved" || course.draft?.mark === "removed"
     return term.locked || struck ? (
-      <AuditRow key={course.id} course={course} locked={term.locked} settling={settling} />
+      <AuditRow
+        key={course.id}
+        course={course}
+        locked={term.locked}
+        settling={settling}
+        streaming={streaming}
+      />
     ) : (
       <SortableAuditRow
         key={course.id}
         course={course}
         settling={settling}
+        streaming={streaming}
         onRemove={() => onRemoveCourse(course.id)}
       />
     )
