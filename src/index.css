@@ -159,6 +159,47 @@
   --text-field--letter-spacing: 0;
 }
 
+/* ==========================================================================
+   Motion. Small entrances only: things that appear while you are looking at
+   them announce themselves, nothing else moves.
+   ========================================================================== */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@theme inline {
+  --animate-rise: rise 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-settle: settle 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade: fade 0.4s ease-out both;
+}
+
+/* Honour the system setting: the entrance is the decoration, the end state is
+   the information. Left alone, the spinner still spins. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-settle,
+  .animate-fade {
+    animation: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

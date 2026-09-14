@@ -1,14 +1,16 @@
 import { cn } from "cn"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { PLANNING_RULES, type PlanStanding } from "@/data/plan"
 
-/* The progress state the panel shows after Generate Plan. Each step is held for
- * STEP_MS, so five of them run for ten seconds in total. */
+/* The progress state the panel shows after Generate Plan. Five steps and the
+ * pause on the finished list add up to ten seconds exactly. */
 
-const STEP_MS = 2000
+const STEP_MS = 1900
 const STEP_COUNT = 5
+/* Long enough to read the last check before the draft takes the screen. */
+const REST_MS = 10_000 - STEP_COUNT * STEP_MS
 
 type Status = "done" | "active" | "pending"
 
@@ -29,13 +31,29 @@ function StatusIcon({ status }: { status: Status }) {
   )
 }
 
-export function GeneratePlanBuilding({ standing }: { standing: PlanStanding }) {
+export function GeneratePlanBuilding({
+  standing,
+  onDone,
+}: {
+  standing: PlanStanding
+  /** Fired once the run is over, so the draft can take the canvas. */
+  onDone: () => void
+}) {
   /* How many steps have finished; the one after them is the active one. */
   const [done, setDone] = useState(0)
 
+  /* Held in a ref so a new callback identity can't restart the run. */
+  const finish = useRef(onDone)
   useEffect(() => {
-    if (done >= STEP_COUNT) return
-    const timer = setTimeout(() => setDone((current) => current + 1), STEP_MS)
+    finish.current = onDone
+  }, [onDone])
+
+  useEffect(() => {
+    const last = done >= STEP_COUNT
+    const timer = setTimeout(
+      () => (last ? finish.current() : setDone((current) => current + 1)),
+      last ? REST_MS : STEP_MS
+    )
     return () => clearTimeout(timer)
   }, [done])
 
@@ -63,14 +81,14 @@ export function GeneratePlanBuilding({ standing }: { standing: PlanStanding }) {
 
   return (
     <>
-      <div className="flex w-full flex-col gap-2">
+      <div className="animate-fade flex w-full flex-col gap-2">
         <h3 className="text-h400 font-semibold text-black">Building your plan</h3>
         <p className="text-body-md text-gray-80">
           Finding a place for your remaining requirements.
         </p>
       </div>
 
-      <ol className="flex w-full flex-col gap-6">
+      <ol className="animate-fade flex w-full flex-col gap-6">
         {steps.map((step, i) => {
           const status: Status = i < done ? "done" : i === done ? "active" : "pending"
           return (

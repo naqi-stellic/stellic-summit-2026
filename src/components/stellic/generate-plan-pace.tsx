@@ -10,8 +10,8 @@ import { PLANNING_RULES } from "@/data/plan"
 /* Step 2: how many credits a term, and which terms are in play. */
 
 const PACES = [
-  { value: "full-time", label: "Full-time", detail: "About 30 credits a term, no summers" },
-  { value: "part-time", label: "Part-time", detail: "About 15 credits a term, no summers" },
+  { value: "full-time", label: "Full-time", detail: "About 15 credits a term, no summers" },
+  { value: "part-time", label: "Part-time", detail: "About 9 credits a term, no summers" },
   { value: "custom", label: "Custom", detail: "Set it yourself" },
 ] as const
 
@@ -93,7 +93,7 @@ export function describePace(state: PaceState): string {
 
 export const INITIAL_PACE: PaceState = {
   pace: "full-time",
-  maxCredits: 30,
+  maxCredits: 15,
   /* Both term filters start off; turning one on reveals its picker. */
   includeOn: false,
   include: [],

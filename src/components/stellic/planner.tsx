@@ -4,8 +4,9 @@ import { CSS } from "@dnd-kit/utilities"
 import { cn } from "cn"
 import type { ReactNode } from "react"
 
-import { Icon } from "@/components/icon"
+import { Icon, type IconName } from "@/components/icon"
 import { AddSlot, AuditIcon, StatusPill } from "@/components/stellic/primitives"
+import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -13,6 +14,7 @@ import {
   CREDIT_GROUP_LABEL,
   termCredits,
   termMeta,
+  type DraftMark,
   type PlannedCourse,
   type Term,
   type Year,
@@ -22,6 +24,20 @@ import {
 /* ============================================================ AuditRow
    One course inside a semester card. Padding subtracts the border width
    (see button.tsx for why). */
+
+/* How a draft marks a course it wants to add, relocate or drop. A marked course
+ * keeps its place on the canvas so the student can see what changed. */
+const DRAFT_STYLE: Record<DraftMark, { card: string; note: string; icon: IconName }> = {
+  added: { card: "border-success-50 bg-success-5", note: "text-success-100", icon: "add" },
+  moved: { card: "border-warning-50 bg-warning-5", note: "text-warning-50", icon: "remove" },
+  removed: { card: "border-alert-50 bg-alert-5", note: "text-alert-100", icon: "remove" },
+}
+
+/** Entrance delay, so a term's cards land one after another rather than all at
+ *  once. Capped, or the tail of a long plan would still be arriving. */
+function enterDelay(order: number): string {
+  return `${Math.min(order, 14) * 45}ms`
+}
 
 type AuditRowProps = {
   course: PlannedCourse
@@ -36,12 +52,19 @@ type AuditRowProps = {
 }
 
 export function AuditRow({ course, locked, ghosted, overlay, onRemove }: AuditRowProps) {
+  const draft = course.draft
+  const style = draft ? DRAFT_STYLE[draft.mark] : null
+  const struck = draft?.mark === "moved" || draft?.mark === "removed"
+
   return (
     <div
+      style={draft ? { animationDelay: enterDelay(draft.order) } : undefined}
       className={cn(
-        "group relative flex w-full items-center gap-2 rounded-md border border-gray-40 bg-card",
+        "group relative flex w-full items-center gap-2 rounded-md border bg-card",
         locked ? "px-[15px] py-[7px]" : "p-[7px]",
-        !locked && "cursor-grab transition-colors hover:bg-gray-5",
+        style ? style.card : "border-gray-40",
+        !locked && !draft && "cursor-grab transition-colors hover:bg-gray-5",
+        draft && "animate-rise",
         ghosted && "opacity-40",
         overlay && "cursor-grabbing shadow-secondary"
       )}
@@ -63,12 +86,20 @@ export function AuditRow({ course, locked, ghosted, overlay, onRemove }: AuditRo
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
         <div>
           <p className="text-body-md text-gray-80">{course.code}</p>
-          <p className="text-body-md font-semibold text-foreground">{course.name}</p>
+          <p className={cn("text-body-md font-semibold text-foreground", struck && "line-through")}>
+            {course.name}
+          </p>
         </div>
         {course.section && (
           <p className="flex items-center gap-1 text-body-md text-foreground">
             <Icon name="calendar-today" size={14} />
             {course.section}
+          </p>
+        )}
+        {draft && style && (
+          <p className={cn("flex items-center gap-1 pt-1 text-label-md", style.note)}>
+            <Icon name={style.icon} size={16} />
+            {draft.note}
           </p>
         )}
       </div>
@@ -110,12 +141,18 @@ function SortableAuditRow({
 
 /* ============================================================ CreditGroup
    "In Progress (12 Credits)" / "Planned (6 Credits)" — summed from the term's
-   own courses, so the heading can never drift from the list beneath it. */
+   own courses, so the heading can never drift from the list beneath it. The
+   badges tally what a draft proposes for this term. */
 
 function CreditGroup({ term }: { term: Term }) {
   const credits = termCredits(term)
+  const added = term.courses.filter((c) => c.draft?.mark === "added").length
+  const dropped = term.courses.filter(
+    (c) => c.draft?.mark === "removed" || c.draft?.mark === "moved"
+  ).length
+
   return (
-    <div className="flex w-full items-center justify-between pt-4">
+    <div className="flex w-full items-center justify-between gap-2 pt-4">
       <p
         className={cn(
           "flex items-center gap-2 text-body-md font-semibold text-gray-80",
@@ -126,6 +163,12 @@ function CreditGroup({ term }: { term: Term }) {
         <AuditIcon state={term.state} />
         {CREDIT_GROUP_LABEL[term.state]} ({credits} Credit{credits === 1 ? "" : "s"})
       </p>
+      {added + dropped > 0 && (
+        <div className="flex shrink-0 items-center gap-1">
+          {added > 0 && <Badge variant="success">+{added}</Badge>}
+          {dropped > 0 && <Badge variant="danger">-{dropped}</Badge>}
+        </div>
+      )}
     </div>
   )
 }
@@ -136,20 +179,41 @@ function CreditGroup({ term }: { term: Term }) {
 export function SemesterCard({
   term,
   alert,
+  frozen,
   onRemoveCourse,
+  onExplain,
 }: {
   term: Term
   alert?: ReactNode
+  /** A draft is on screen: its cards are a proposal, not something to rearrange. */
+  frozen?: boolean
   onRemoveCourse: (courseId: string) => void
+  /** Offered only while there is a draft to explain. */
+  onExplain?: () => void
 }) {
-  const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
+  const { setNodeRef, isOver, active } = useDroppable({
+    id: term.id,
+    disabled: term.locked || frozen,
+  })
 
   /* Only light up while something is actually being dragged. */
   const isTarget = isOver && active != null
 
   /* The design only gives the header a bottom gap when something follows it
    * other than the course list. */
-  const headerHasGap = term.alert != null || term.courses.length === 0
+  const headerHasGap = term.alert != null || term.courses.length === 0 || frozen
+
+  const rows = term.courses.map((course) =>
+    term.locked || frozen ? (
+      <AuditRow key={course.id} course={course} locked={term.locked} />
+    ) : (
+      <SortableAuditRow
+        key={course.id}
+        course={course}
+        onRemove={() => onRemoveCourse(course.id)}
+      />
+    )
+  )
 
   return (
     <Card
@@ -175,39 +239,55 @@ export function SemesterCard({
             </h4>
             <p className="text-body-md text-gray-80">{termMeta(term)}</p>
           </div>
-          <StatusPill
-            status={term.reviewed ? "reviewed" : "unreviewed"}
-            className={cn(!term.reviewed && "opacity-0")}
-          >
-            {term.reviewed ? "reviewed" : "Unreviewed"}
-          </StatusPill>
+          {onExplain ? (
+            <Button size="sm" onClick={onExplain}>
+              <Icon name="auto-awesome" size={16} />
+              Explain
+            </Button>
+          ) : (
+            <StatusPill
+              status={term.reviewed ? "reviewed" : "unreviewed"}
+              className={cn(!term.reviewed && "opacity-0")}
+            >
+              {term.reviewed ? "reviewed" : "Unreviewed"}
+            </StatusPill>
+          )}
         </div>
 
         {alert}
 
         {term.courses.length > 0 && <CreditGroup term={term} />}
 
-        <SortableContext
-          items={term.courses.map((c) => c.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="flex flex-col gap-2">
-            {term.courses.map((course) =>
-              term.locked ? (
-                <AuditRow key={course.id} course={course} locked />
-              ) : (
-                <SortableAuditRow
-                  key={course.id}
-                  course={course}
-                  onRemove={() => onRemoveCourse(course.id)}
-                />
-              )
-            )}
-            <AddSlot>+ Add to Term</AddSlot>
-          </div>
-        </SortableContext>
+        {frozen ? (
+          <div className="flex flex-col gap-2">{rows}</div>
+        ) : (
+          <SortableContext
+            items={term.courses.map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="flex flex-col gap-2">
+              {rows}
+              <AddSlot>+ Add to Term</AddSlot>
+            </div>
+          </SortableContext>
+        )}
       </div>
     </Card>
+  )
+}
+
+/* ============================================================ NoActionsAlert
+   The quiet counterpart to the registration banner: this term needs nothing
+   from you right now. */
+
+export function NoActionsAlert() {
+  return (
+    <Alert variant="success" className="animate-fade">
+      <Icon name="check-circle" size={16} className="shrink-0 text-success-100" />
+      <span className="min-w-0 flex-1 truncate font-semibold">
+        No actions required at the moment
+      </span>
+    </Alert>
   )
 }
 
@@ -250,11 +330,15 @@ export function TimelineRail({ phase, nodes }: { phase: YearPhase; nodes: 1 | 2 
 export function YearSection({
   year,
   renderAlert,
+  frozen,
   onRemoveCourse,
+  onExplain,
 }: {
   year: Year
   renderAlert?: (term: Term) => ReactNode
+  frozen?: boolean
   onRemoveCourse: (courseId: string) => void
+  onExplain?: (term: Term) => void
 }) {
   return (
     <section className="flex items-start gap-4">
@@ -277,7 +361,9 @@ export function YearSection({
               key={term.id}
               term={term}
               alert={renderAlert?.(term)}
+              frozen={frozen}
               onRemoveCourse={onRemoveCourse}
+              onExplain={onExplain && !term.locked ? () => onExplain(term) : undefined}
             />
           ))}
         </div>

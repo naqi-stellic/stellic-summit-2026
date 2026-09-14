@@ -7,8 +7,13 @@ import { GeneratePlanNotes } from "@/components/stellic/generate-plan-notes"
 import {
   GeneratePlanPace,
   INITIAL_PACE,
+  describePace,
   type PaceState,
 } from "@/components/stellic/generate-plan-pace"
+import {
+  GeneratePlanOptions,
+  type PlanOptionSummary,
+} from "@/components/stellic/generate-plan-options"
 import { GeneratePlanScope } from "@/components/stellic/generate-plan-scope"
 import { GeneratePlanSummary } from "@/components/stellic/generate-plan-summary"
 import { Button } from "@/components/ui/button"
@@ -20,15 +25,39 @@ import type { PlanStanding } from "@/data/plan"
 
 const TOTAL_STEPS = 3
 
-/** The three questions, then the review and the run — both of which drop the
- * step chrome. */
-type View = 1 | 2 | 3 | "summary" | "building"
+/** One line reading the wizard's answers back, for the draft's instructions. */
+function instructions(
+  keepPlanned: string,
+  pace: PaceState,
+  notes: string,
+  placeholders: number
+): string {
+  const parts = [
+    describePace(pace),
+    keepPlanned === "yes" ? "kept everything planned" : "chose what to keep",
+  ]
+  if (placeholders > 0) {
+    parts.push(`${placeholders} placeholder seat${placeholders === 1 ? "" : "s"}`)
+  }
+  if (notes.trim()) parts.push(`"${notes.trim()}"`)
+  return parts.join(" · ")
+}
+
+/** The three questions, then the review, the run, and the options the run came
+ * up with. Only the questions are numbered steps. */
+type View = 1 | 2 | 3 | "summary" | "building" | "options"
 
 export function GeneratePlanPanel({
   standing,
   graduation,
   campus,
   terms,
+  options,
+  selectedOption,
+  placeholders,
+  onSelectOption,
+  onGenerated,
+  onDiscardDraft,
   onClose,
 }: {
   standing: PlanStanding
@@ -36,6 +65,16 @@ export function GeneratePlanPanel({
   campus: string
   /** Terms the pacing step can include or exclude, summers included. */
   terms: string[]
+  /** The drafts the run produced, once there are any. */
+  options: PlanOptionSummary[]
+  selectedOption: string
+  /** Seats the chosen draft is holding for a requirement with no course yet. */
+  placeholders: number
+  onSelectOption: (id: string) => void
+  /** The run is over: put the draft on the canvas. */
+  onGenerated: () => void
+  /** Take the draft back off the canvas so the answers can be changed. */
+  onDiscardDraft: () => void
   onClose: () => void
 }) {
   const [view, setView] = useState<View>(1)
@@ -54,9 +93,9 @@ export function GeneratePlanPanel({
   }
 
   const isSummary = view === "summary"
-  /* Neither the review nor the run is a numbered step, so both hide the counter
-   * and the progress bars. */
-  const isStep = view !== "summary" && view !== "building"
+  /* Only the three questions are numbered, so everything after them hides the
+   * counter and the progress bars. */
+  const isStep = view === 1 || view === 2 || view === 3
 
   return (
     <aside className="@container flex h-full w-full flex-col overflow-x-clip overflow-y-auto bg-card">
@@ -109,7 +148,28 @@ export function GeneratePlanPanel({
 
         {view === 3 && <GeneratePlanNotes value={notes} onChange={setNotes} />}
 
-        {view === "building" && <GeneratePlanBuilding standing={standing} />}
+        {view === "building" && (
+          <GeneratePlanBuilding
+            standing={standing}
+            onDone={() => {
+              onGenerated()
+              setView("options")
+            }}
+          />
+        )}
+
+        {view === "options" && (
+          <GeneratePlanOptions
+            instructions={instructions(keepPlanned, pace, notes, placeholders)}
+            options={options}
+            selected={selectedOption}
+            onSelect={onSelectOption}
+            onEdit={() => {
+              onDiscardDraft()
+              setView("summary")
+            }}
+          />
+        )}
 
         {isSummary && (
           <GeneratePlanSummary
@@ -122,8 +182,9 @@ export function GeneratePlanPanel({
           />
         )}
 
-        {/* The run has no controls of its own — it finishes on its own. */}
-        {view !== "building" && (
+        {/* The run finishes on its own; the options are settled on the canvas,
+            by the draft bar. Neither needs a footer. */}
+        {view !== "building" && view !== "options" && (
           <div className="flex w-full items-center gap-2">
             {isSummary ? (
               <>

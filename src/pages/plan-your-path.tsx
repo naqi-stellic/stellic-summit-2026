@@ -14,8 +14,9 @@ import { useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
+import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { GeneratePlanPanel } from "@/components/stellic/generate-plan-panel"
-import { AuditRow, TimelineRail, YearSection } from "@/components/stellic/planner"
+import { AuditRow, NoActionsAlert, TimelineRail, YearSection } from "@/components/stellic/planner"
 import { AddSlot } from "@/components/stellic/primitives"
 import {
   Alert,
@@ -26,6 +27,13 @@ import {
 } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  PLAN_OPTIONS,
+  acceptDraft,
+  explainTerm,
+  generateDraft,
+  type Draft,
+} from "@/data/draft"
 import {
   COMPLETED,
   INITIAL_YEARS,
@@ -106,14 +114,29 @@ function PlanFacet({ label, value }: { label: string; value: string }) {
   )
 }
 
-function renderAlert(term: Term) {
-  return term.alert ? <RegistrationAlert closes={term.alert.closes} /> : null
+/** A term's banner: the registration deadline when it has one, and — while a
+ *  draft is on the canvas — the reassurance that it needs nothing otherwise. */
+function termBanner(term: Term, drafting: boolean) {
+  if (term.alert) return <RegistrationAlert closes={term.alert.closes} />
+  return drafting && !term.locked ? <NoActionsAlert /> : null
 }
 
 export function PlanYourPath() {
   const [years, setYears] = useState(INITIAL_YEARS)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [generateOpen, setGenerateOpen] = useState(false)
+
+  /* One draft per option, generated together so the panel can show what each
+   * one costs before the student commits to looking at it. */
+  const [drafts, setDrafts] = useState<Draft[] | null>(null)
+  const [optionId, setOptionId] = useState(PLAN_OPTIONS[0].id)
+  const [explained, setExplained] = useState<string | null>(null)
+
+  const draft = drafts?.find((d) => d.optionId === optionId) ?? null
+  const option = PLAN_OPTIONS.find((o) => o.id === optionId)!
+  /* The draft is a proposal laid over the plan; the plan itself is untouched
+   * underneath until it is accepted. */
+  const shown = draft ? draft.years : years
 
   const sensors = useSensors(
     /* A few pixels of travel before a drag starts, so rows stay clickable. */
@@ -123,6 +146,47 @@ export function PlanYourPath() {
 
   const dragging = draggingId ? findCourse(years, draggingId) : null
   const standing = planStanding(years)
+
+  const optionSummaries = (drafts ?? []).map((d) => {
+    const meta = PLAN_OPTIONS.find((o) => o.id === d.optionId)!
+    return {
+      id: meta.id,
+      label: meta.label,
+      blurb: meta.blurb,
+      graduation: d.graduation,
+      added: d.added,
+      removed: d.removed,
+    }
+  })
+
+  const placeholders = draft
+    ? draft.years.reduce(
+        (sum, year) =>
+          sum +
+          year.terms.reduce(
+            (n, term) => n + term.courses.filter((c) => c.placeholder && c.draft).length,
+            0
+          ),
+        0
+      )
+    : 0
+
+  function startDraft() {
+    setDrafts(PLAN_OPTIONS.map((o) => generateDraft(years, o)))
+    setOptionId(PLAN_OPTIONS[0].id)
+    setExplained(null)
+  }
+
+  function dropDraft() {
+    setDrafts(null)
+    setExplained(null)
+  }
+
+  function keepDraft() {
+    if (draft) setYears(acceptDraft(draft.years))
+    dropDraft()
+    setGenerateOpen(false)
+  }
 
   function handleDragStart(event: DragStartEvent) {
     setDraggingId(String(event.active.id))
@@ -149,6 +213,7 @@ export function PlanYourPath() {
   return (
     <AppShell
       title="Plan Your Path"
+      assistLabel={draft ? "Make changes to Generated plan" : "Generate with Assistant"}
       panel={
         generateOpen && (
           <GeneratePlanPanel
@@ -156,7 +221,19 @@ export function PlanYourPath() {
             graduation={expectedGraduation(years)}
             terms={selectableTerms(years)}
             campus={planCampuses(years)}
-            onClose={() => setGenerateOpen(false)}
+            options={optionSummaries}
+            selectedOption={optionId}
+            placeholders={placeholders}
+            onSelectOption={(id) => {
+              setOptionId(id)
+              setExplained(null)
+            }}
+            onGenerated={startDraft}
+            onDiscardDraft={dropDraft}
+            onClose={() => {
+              dropDraft()
+              setGenerateOpen(false)
+            }}
           />
         )
       }
@@ -171,9 +248,24 @@ export function PlanYourPath() {
         onDragEnd={handleDragEnd}
         onDragCancel={() => setDraggingId(null)}
       >
-        {/* @container so the planner reflows to its own width — the panel
-            opening matters as much as the viewport shrinking. */}
-        <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
+        {/* relative so the draft's ring can be drawn over the canvas without
+            moving anything that is already on it. */}
+        <div className="relative flex min-w-0 flex-1 flex-col">
+          {draft && (
+            <DraftBar
+              added={draft.added}
+              removed={draft.removed}
+              onExit={() => {
+                dropDraft()
+                setGenerateOpen(false)
+              }}
+              onAccept={keepDraft}
+            />
+          )}
+
+          {/* @container so the planner reflows to its own width — the panel
+              opening matters as much as the viewport shrinking. */}
+          <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
           {/* ---------------------------------- Plan header */}
           <section className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -208,7 +300,7 @@ export function PlanYourPath() {
             <PlanFacet label="Pathway:" value="Business Administration: Fall Start 2026 [BSc]" />
 
             <div className="flex flex-wrap items-center gap-2 pt-2">
-              {yearTabs(years).map((tab) => (
+              {yearTabs(shown).map((tab) => (
                 <Button key={tab.label} size="sm" selected={tab.selected}>
                   {tab.icon && <Icon name={tab.icon} size={16} className={tab.tone} />}
                   {tab.label}
@@ -231,23 +323,45 @@ export function PlanYourPath() {
             </div>
           </section>
 
-          {years.map((year) => (
-            <YearSection
-              key={year.label}
-              year={year}
-              renderAlert={renderAlert}
-              onRemoveCourse={handleRemoveCourse}
-            />
-          ))}
+          {/* Keyed on the option so switching one replays the entrances rather
+              than swapping the cards in place. */}
+          <div key={draft?.optionId ?? "plan"} className="contents">
+            {shown.map((year) => (
+              <YearSection
+                key={year.label}
+                year={year}
+                frozen={draft != null}
+                renderAlert={(term) => (
+                  <>
+                    {termBanner(term, draft != null)}
+                    {explained === term.id && (
+                      <p className="animate-rise w-full rounded-md border border-gray-40 bg-gray-0 p-[11px] text-label-md text-gray-100">
+                        {explainTerm(term, option)}
+                      </p>
+                    )}
+                  </>
+                )}
+                onRemoveCourse={handleRemoveCourse}
+                onExplain={
+                  draft
+                    ? (term) => setExplained((current) => (current === term.id ? null : term.id))
+                    : undefined
+                }
+              />
+            ))}
+          </div>
 
           {/* ---------------------------------- Add year */}
           <section className="flex items-start gap-4">
             <div className="flex w-6 shrink-0 flex-col items-center justify-center self-stretch">
               <Icon name="fiber-manual-record" size={24} className="text-gray-40" />
             </div>
-            <AddSlot tone="year">+ Add Year {nextYearNumber(years)}</AddSlot>
+            <AddSlot tone="year">+ Add Year {nextYearNumber(shown)}</AddSlot>
           </section>
-        </main>
+          </main>
+
+          {draft && <DraftOutline />}
+        </div>
 
         <DragOverlay>
           {dragging && <AuditRow course={dragging.course} overlay />}

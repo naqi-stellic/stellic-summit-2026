@@ -18,11 +18,14 @@ export function AppShell({
   title,
   children,
   panel,
+  assistLabel = "Generate with Assistant",
 }: {
   title: string
   children: ReactNode
   /** When present, the content area splits into a resizable two-column view. */
   panel?: ReactNode
+  /** What the pill beside the assistant offers to do next. */
+  assistLabel?: string
 }) {
   return (
     <>
@@ -63,7 +66,7 @@ export function AppShell({
         {panel && (
           /* A pill in the design, not the usual 4px button radius. */
           <Button size="sm" className="rounded-full">
-            Generate with Assistant
+            {assistLabel}
           </Button>
         )}
         <button

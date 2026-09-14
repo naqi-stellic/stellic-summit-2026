@@ -1,5 +1,9 @@
 export type YearPhase = "complete" | "active" | "future"
 
+/** What a generated draft proposes for a course. A moved or removed course
+ *  stays on the canvas, struck through, until the draft is settled. */
+export type DraftMark = "added" | "moved" | "removed"
+
 export type PlannedCourse = {
   /** Stable across moves — drag and drop identifies courses by this. */
   id: string
@@ -9,6 +13,10 @@ export type PlannedCourse = {
   section?: string
   /** Note count shown as an inline tally. */
   notes?: number
+  /** A requirement with no course chosen for it yet. */
+  placeholder?: boolean
+  /** Set only while a generated draft is on screen. */
+  draft?: { mark: DraftMark; note: string; order: number }
 }
 
 export type Term = {
@@ -34,6 +42,10 @@ export type Year = {
   terms: Term[]
 }
 
+/** Every course in the catalogue carries the same load, which is what makes
+ *  40 requirements and 120 credits the same statement twice. */
+export const CREDITS_PER_COURSE = 3
+
 /** The degree the plan is working towards. Requirements are one per course,
  *  which is what makes "5 reqs · 15 credits" read consistently. */
 export const DEGREE = {
@@ -54,8 +66,9 @@ export const PLANNING_RULES = {
   doubleCounting: "Applied",
   /** How far the published course catalogue reaches. */
   offeringsThrough: "Spring 2029",
-  /** Hard ceiling per term — also what the custom pacing stepper clamps to. */
-  maxCreditsPerTerm: 30,
+  /** Hard ceiling per term — six courses — and what the custom pacing stepper
+   *  clamps to. A full-time term is five. */
+  maxCreditsPerTerm: 18,
 }
 
 /** Years already finished. Not part of the editable plan, so it is a roll-up
@@ -237,7 +250,12 @@ export function removeCourse(years: Year[], courseId: string): Year[] {
 /* ------------------------------------------------------------- derived */
 
 export function termCredits(term: Term): number {
-  return term.courses.reduce((sum, c) => sum + c.credits, 0)
+  /* What a draft has struck out is still on screen but no longer part of the
+   * term's load. */
+  return term.courses.reduce(
+    (sum, c) => (c.draft?.mark === "moved" || c.draft?.mark === "removed" ? sum : sum + c.credits),
+    0
+  )
 }
 
 /** "Sep - Dec • 12 credits • Main campus", with the credit clause dropped
