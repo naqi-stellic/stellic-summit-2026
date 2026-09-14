@@ -136,9 +136,11 @@ function CourseRow({ course, selectable }: { course: PlannedCourse; selectable: 
         </div>
       )}
 
+      {/* The line belongs to the course above it, so it carries the same ground
+          and the same colour down its edge. */}
       {missing && !course.draft && (
-        <div className="flex w-full items-stretch bg-gray-0">
-          <Accent />
+        <div className={cn("flex w-full items-stretch", held ? "bg-gray-0" : "bg-card")}>
+          <Accent course={held ? undefined : course} />
           <p className="flex min-w-0 flex-1 items-center gap-1 px-4 py-[9px] text-body-md text-gray-100">
             <Icon name="error-outline" size={12} className="shrink-0 text-alert-50" />
             {missing.says}{" "}
