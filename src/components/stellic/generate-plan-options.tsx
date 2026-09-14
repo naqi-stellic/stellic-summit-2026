@@ -123,8 +123,9 @@ export function GeneratePlanOptions({
                 {option.blurb && (
                   <p className="w-full text-label-md text-gray-100">
                     {/* The strategy names the option rather than replacing its
-                        number, so "Option 2" stays the thing you refer to. */}
-                    <span className="font-semibold">{option.label}.</span> {option.blurb}
+                        number, so "Option 2" stays the thing you refer to. It
+                        reads as a label on the sentence, not a heading over it. */}
+                    {option.label}: {option.blurb}
                   </p>
                 )}
               </div>
