@@ -45,6 +45,19 @@ export const DEGREE = {
   milestones: 13,
 }
 
+/** Institution settings the generator always honours. These are facts about
+ *  the school rather than answers the student gives, which is why the summary
+ *  lists them separately under "Also accounting for". */
+export const PLANNING_RULES = {
+  requirementPriority: "Core before general",
+  prerequisites: "Applied",
+  doubleCounting: "Applied",
+  /** How far the published course catalogue reaches. */
+  offeringsThrough: "Spring 2029",
+  /** Hard ceiling per term — also what the custom pacing stepper clamps to. */
+  maxCreditsPerTerm: 30,
+}
+
 /** Years already finished. Not part of the editable plan, so it is a roll-up
  *  rather than a list of terms. */
 export const COMPLETED = {
@@ -298,4 +311,15 @@ export function selectableTerms(years: Year[]): string[] {
     terms.push(`Summer ${start + 1}`)
   }
   return terms
+}
+
+/** Campuses the plan actually uses, for the summary's "Campus" row. */
+export function planCampuses(years: Year[]): string {
+  const seen = new Set<string>()
+  for (const year of years) {
+    for (const term of year.terms) {
+      if (term.campus) seen.add(term.campus.replace(/ campus$/i, ""))
+    }
+  }
+  return seen.size > 0 ? [...seen].join(", ") : "—"
 }

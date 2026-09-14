@@ -33,6 +33,7 @@ import {
   findCourse,
   moveCourse,
   nextYearNumber,
+  planCampuses,
   planStanding,
   removeCourse,
   selectableTerms,
@@ -154,6 +155,7 @@ export function PlanYourPath() {
             standing={standing}
             graduation={expectedGraduation(years)}
             terms={selectableTerms(years)}
+            campus={planCampuses(years)}
             onClose={() => setGenerateOpen(false)}
           />
         )

@@ -83,7 +83,23 @@ but a student can still choose to study through. So the list runs Spring 2028,
 Summer 2028, Fall 2028 … Summer 2031 — eleven terms, where the canvas shows
 eight.
 
-Step 3 is not designed yet, so Continue is disabled on the last step.
+**Step 3** is a free-text box for anything the generator should know.
+
+**The summary** then reads the answers back. Its "Your choices" rows are not
+re-stated copy — Keeping comes from step 1's radio, Pacing from
+`describePace()` over step 2's state (so it grows "exclude: Summer 2029, Fall
+2030" only when those were actually picked), and Anything else from step 3's
+box. Answers live on the panel, so Back never loses one and Start over clears
+them all.
+
+The rows beneath, under "Also accounting for", are institution settings rather
+than answers: `PLANNING_RULES` in `src/data/plan.ts`, except Existing credit
+and Campus, which are summed and collected from the plan. The credit ceiling is
+shared — `PLANNING_RULES.maxCreditsPerTerm` is both what the summary reports and
+what step 2's stepper clamps to, so the two can't contradict each other the way
+the frame's "max 30 per term" pacing and "max 18 per term" limit did.
+
+Generate Plan itself does nothing yet — there is no design for what follows.
 
 ## Responsive
 

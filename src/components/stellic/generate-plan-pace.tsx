@@ -5,6 +5,7 @@ import { TermMultiSelect } from "@/components/stellic/term-multi-select"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
+import { PLANNING_RULES } from "@/data/plan"
 
 /* Step 2: how many credits a term, and which terms are in play. */
 
@@ -15,7 +16,9 @@ const PACES = [
 ] as const
 
 const MIN_CREDITS = 3
-const MAX_CREDITS = 45
+/* The institution's own ceiling, so pacing can never exceed what the summary
+ * reports as the credit load limit. */
+const MAX_CREDITS = PLANNING_RULES.maxCreditsPerTerm
 
 function Stepper({ value, onChange }: { value: number; onChange: (next: number) => void }) {
   /* Three buttons sharing their borders, so the group reads as one control. */
@@ -70,6 +73,21 @@ export type PaceState = {
   include: string[]
   excludeOn: boolean
   exclude: string[]
+}
+
+/** One line describing the pacing choice, for the summary. */
+export function describePace(state: PaceState): string {
+  const option = PACES.find((p) => p.value === state.pace)
+  if (state.pace !== "custom") return `${option?.label ?? "—"}, ${option?.detail.toLowerCase()}`
+
+  const clauses = [`Custom, max ${state.maxCredits} credits per term`]
+  if (state.includeOn && state.include.length > 0) {
+    clauses.push(`include: ${state.include.join(", ")}`)
+  }
+  if (state.excludeOn && state.exclude.length > 0) {
+    clauses.push(`exclude: ${state.exclude.join(", ")}`)
+  }
+  return clauses.join(", ")
 }
 
 export const INITIAL_PACE: PaceState = {
