@@ -96,7 +96,14 @@ export function GeneratePlanOptions({
                   active ? "border-primary-50" : "border-gray-40"
                 )}
               >
-                <label className="flex w-full cursor-pointer items-start gap-3 border-b border-gray-40 pb-4">
+                {/* The rule divides the option from its description, so the
+                    card that has none ends at the row. */}
+                <label
+                  className={cn(
+                    "flex w-full cursor-pointer items-start gap-3",
+                    option.blurb && "border-b border-gray-40 pb-4"
+                  )}
+                >
                   <span className="flex items-center py-0.5">
                     <RadioGroupItem value={option.id} />
                   </span>
