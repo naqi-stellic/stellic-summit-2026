@@ -33,20 +33,30 @@ function StatusIcon({ status }: { status: Status }) {
 
 export function GeneratePlanBuilding({
   standing,
+  onLastStep,
   onDone,
 }: {
   standing: PlanStanding
+  /** Fired when the final step starts, so the playground can frame itself
+   *  before the plan arrives to fill it. */
+  onLastStep: () => void
   /** Fired once the run is over, so the draft can take the canvas. */
   onDone: () => void
 }) {
   /* How many steps have finished; the one after them is the active one. */
   const [done, setDone] = useState(0)
 
-  /* Held in a ref so a new callback identity can't restart the run. */
+  /* Held in refs so a new callback identity can't restart the run. */
   const finish = useRef(onDone)
+  const frame = useRef(onLastStep)
   useEffect(() => {
     finish.current = onDone
-  }, [onDone])
+    frame.current = onLastStep
+  }, [onDone, onLastStep])
+
+  useEffect(() => {
+    if (done === STEP_COUNT - 1) frame.current()
+  }, [done])
 
   useEffect(() => {
     const last = done >= STEP_COUNT

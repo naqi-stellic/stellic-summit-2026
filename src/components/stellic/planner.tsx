@@ -35,10 +35,11 @@ const DRAFT_STYLE: Record<DraftMark, { card: string; note: string; icon: IconNam
   removed: { card: "border-alert-50 bg-alert-5", note: "text-alert-100", icon: "remove" },
 }
 
-/** Entrance delay, so a term's cards land one after another rather than all at
- *  once. Capped, or the tail of a long plan would still be arriving. */
+/** Entrance delay. The generator places a term at a time, so following its own
+ *  order lands the plan term by term. Capped near a second, or the tail of a
+ *  long plan would still be arriving. */
 function enterDelay(order: number): string {
-  return `${Math.min(order, 14) * 45}ms`
+  return `${Math.min(order, 32) * 30}ms`
 }
 
 /** The same idea on the way out: accepting a draft settles the cards in the
@@ -79,6 +80,7 @@ export function AuditRow({
 
   return (
     <div
+      data-draft-mark={draft?.mark}
       style={
         draft
           ? {

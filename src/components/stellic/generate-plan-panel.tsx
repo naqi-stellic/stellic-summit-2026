@@ -61,6 +61,7 @@ export function GeneratePlanPanel({
   graduation,
   campus,
   terms,
+  onFraming,
   options,
   selectedOption,
   placeholders,
@@ -80,6 +81,9 @@ export function GeneratePlanPanel({
   /** Seats the chosen draft is holding for a requirement with no course yet. */
   placeholders: number
   onSelectOption: (id: string) => void
+  /** The run has reached its last step: frame the playground, ready for what
+   *  is about to fill it. */
+  onFraming: () => void
   /** The run is over: put the draft on the canvas, built to this many courses
    *  a term — the pace the student asked for. */
   onGenerated: (coursesPerTerm: number) => void
@@ -175,6 +179,7 @@ export function GeneratePlanPanel({
         {view === "building" && (
           <GeneratePlanBuilding
             standing={standing}
+            onLastStep={onFraming}
             onDone={() => {
               onGenerated(coursesPerTerm(pace))
               setGeneratedFrom(answers)

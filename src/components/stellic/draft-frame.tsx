@@ -58,7 +58,7 @@ export function DraftBar({
 /** The ring around the canvas and the tab hanging from its top edge. Drawn over
  *  the planner rather than around it, so nothing below it shifts when a draft
  *  appears. */
-export function DraftOutline({ leaving }: { leaving?: boolean }) {
+export function DraftOutline({ leaving, pending }: { leaving?: boolean; pending?: boolean }) {
   return (
     <div
       aria-hidden="true"
@@ -73,7 +73,9 @@ export function DraftOutline({ leaving }: { leaving?: boolean }) {
         className="absolute top-[3px] left-1/2 -translate-x-1/2 rounded-t-none bg-warning-50 text-white"
       >
         <Icon name="design-services" size={12} />
-        <span className="text-body-md font-semibold">Generated plan</span>
+        <span className="text-body-md font-semibold">
+          {pending ? "Generating plan" : "Generated plan"}
+        </span>
       </Badge>
     </div>
   )

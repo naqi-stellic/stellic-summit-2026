@@ -10,7 +10,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
@@ -155,6 +155,9 @@ export function PlanYourPath() {
   /* Accepting is not instant: the marks come off and the struck cards leave
    * before the plan underneath becomes the real one. */
   const [accepting, setAccepting] = useState(false)
+  /* The playground frames itself while the run is on its last step, so the plan
+   * arrives into something rather than appearing with it. */
+  const [framing, setFraming] = useState(false)
 
   const draft =
     (optionId === CUSTOM_ID ? custom?.draft : drafts?.made.find((d) => d.optionId === optionId)) ??
@@ -207,7 +210,22 @@ export function PlanYourPath() {
 
   /* The options are built around the pace the student asked for, so the answer
    * from step 2 decides what the three of them look like. */
+  /* The first change is usually below the fold, and a plan you never saw
+   * arrive may as well have been there all along. */
+  const hadDraft = useRef(false)
+  useEffect(() => {
+    const has = draft != null
+    if (has && !hadDraft.current) {
+      requestAnimationFrame(() => {
+        const first = document.querySelector("[data-term] [data-draft-mark]")
+        first?.closest("[data-term]")?.scrollIntoView({ behavior: "smooth", block: "center" })
+      })
+    }
+    hadDraft.current = has
+  }, [draft])
+
   function startDraft(coursesPerTerm: number) {
+    setFraming(false)
     const options = planOptions(coursesPerTerm)
     setDrafts({ options, made: options.map((o) => generateDraft(years, o)) })
     setCustom(null)
@@ -216,6 +234,7 @@ export function PlanYourPath() {
   }
 
   function dropDraft() {
+    setFraming(false)
     setDrafts(null)
     setCustom(null)
     setExplained(null)
@@ -297,6 +316,7 @@ export function PlanYourPath() {
               setOptionId(id)
               setExplained(null)
             }}
+            onFraming={() => setFraming(true)}
             onGenerated={startDraft}
             onDiscardDraft={dropDraft}
             onClose={() => {
@@ -432,7 +452,7 @@ export function PlanYourPath() {
           </section>
           </main>
 
-          {draft && <DraftOutline leaving={accepting} />}
+          {(draft || framing) && <DraftOutline leaving={accepting} pending={draft == null} />}
         </div>
 
         <DragOverlay>
