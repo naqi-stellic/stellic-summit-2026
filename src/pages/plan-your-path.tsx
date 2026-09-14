@@ -27,11 +27,17 @@ import {
 } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import type { CatalogEntry } from "@/data/catalog"
 import {
   acceptDraft,
+  addCourse,
+  addableCourses,
   explainTerm,
   generateDraft,
+  moveInDraft,
   planOptions,
+  removeInDraft,
+  summariseDraft,
   type Draft,
   type DraftOption,
 } from "@/data/draft"
@@ -71,6 +77,9 @@ function yearTabs(years: Year[]): YearTab[] {
 /* Long enough for the last staggered card to finish settling (14 × 35ms of
    stagger plus a 420ms vanish), then the frame follows it out. */
 const SETTLE_MS = 1100
+
+/** The option that collects the student's own changes. */
+const CUSTOM_ID = "custom"
 
 type PlanAction = { label: string; icon: IconName; toggles?: boolean }
 
@@ -138,14 +147,21 @@ export function PlanYourPath() {
   /* One draft per option, generated together so the panel can show what each
    * one costs before the student commits to looking at it. */
   const [drafts, setDrafts] = useState<{ options: DraftOption[]; made: Draft[] } | null>(null)
+  /* Everything the student changes by hand collects in one option of its own,
+   * so the generated three stay as they were generated. */
+  const [custom, setCustom] = useState<{ option: DraftOption; draft: Draft } | null>(null)
   const [optionId, setOptionId] = useState("steady")
   const [explained, setExplained] = useState<string | null>(null)
   /* Accepting is not instant: the marks come off and the struck cards leave
    * before the plan underneath becomes the real one. */
   const [accepting, setAccepting] = useState(false)
 
-  const draft = drafts?.made.find((d) => d.optionId === optionId) ?? null
-  const option = drafts?.options.find((o) => o.id === optionId) ?? null
+  const draft =
+    (optionId === CUSTOM_ID ? custom?.draft : drafts?.made.find((d) => d.optionId === optionId)) ??
+    null
+  const option =
+    (optionId === CUSTOM_ID ? custom?.option : drafts?.options.find((o) => o.id === optionId)) ??
+    null
   /* The draft is a proposal laid over the plan; the plan itself is untouched
    * underneath until it is accepted. */
   const shown = draft ? draft.years : years
@@ -156,20 +172,26 @@ export function PlanYourPath() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
-  const dragging = draggingId ? findCourse(years, draggingId) : null
+  const dragging = draggingId ? findCourse(shown, draggingId) : null
+  /* Offered by every term's "+ Add to Term", so the same requirement is never
+   * offered twice over. */
+  const addable = addableCourses(shown)
   const standing = planStanding(years)
 
-  const optionSummaries = (drafts?.made ?? []).map((d) => {
-    const meta = drafts!.options.find((o) => o.id === d.optionId)!
-    return {
-      id: meta.id,
-      label: meta.label,
-      blurb: meta.blurb,
-      graduation: d.graduation,
-      added: d.added,
-      removed: d.removed,
-    }
-  })
+  const optionSummaries = [
+    ...(drafts?.made ?? []).map((d) => ({
+      meta: drafts!.options.find((o) => o.id === d.optionId)!,
+      draft: d,
+    })),
+    ...(custom ? [{ meta: custom.option, draft: custom.draft }] : []),
+  ].map(({ meta, draft: d }) => ({
+    id: meta.id,
+    label: meta.label,
+    blurb: meta.blurb,
+    graduation: d.graduation,
+    added: d.added,
+    removed: d.removed,
+  }))
 
   const placeholders = draft
     ? draft.years.reduce(
@@ -188,13 +210,34 @@ export function PlanYourPath() {
   function startDraft(coursesPerTerm: number) {
     const options = planOptions(coursesPerTerm)
     setDrafts({ options, made: options.map((o) => generateDraft(years, o)) })
+    setCustom(null)
     setOptionId(options[0].id)
     setExplained(null)
   }
 
   function dropDraft() {
     setDrafts(null)
+    setCustom(null)
     setExplained(null)
+  }
+
+  /* A change made by hand forks whichever option is on screen into the custom
+   * one, which then becomes the selected plan. */
+  function editDraft(change: (years: Year[]) => Year[]) {
+    if (!draft || !option || accepting) return
+    const next = change(draft.years)
+    if (next === draft.years) return
+
+    setCustom({
+      option:
+        option.id === CUSTOM_ID
+          ? option
+          : /* No blurb: the card names itself rather than describing a strategy
+               it is no longer following. */
+            { ...option, id: CUSTOM_ID, label: "Custom Plan", blurb: "" },
+      draft: summariseDraft(next, CUSTOM_ID),
+    })
+    setOptionId(CUSTOM_ID)
   }
 
   function keepDraft() {
@@ -218,16 +261,22 @@ export function PlanYourPath() {
 
     const courseId = String(active.id)
     /* Dropping onto a row inserts at its position; onto a card, appends. */
-    const overCourse = findCourse(years, String(over.id))
-    setYears((current) =>
-      overCourse
-        ? moveCourse(current, courseId, overCourse.term.id, overCourse.index)
-        : moveCourse(current, courseId, String(over.id))
-    )
+    const overCourse = findCourse(shown, String(over.id))
+    const toTerm = overCourse ? overCourse.term.id : String(over.id)
+    const toIndex = overCourse ? overCourse.index : undefined
+
+    if (draft) editDraft((current) => moveInDraft(current, courseId, toTerm, toIndex))
+    else setYears((current) => moveCourse(current, courseId, toTerm, toIndex))
   }
 
   function handleRemoveCourse(courseId: string) {
-    setYears((current) => removeCourse(current, courseId))
+    if (draft) editDraft((current) => removeInDraft(current, courseId))
+    else setYears((current) => removeCourse(current, courseId))
+  }
+
+  function handleAddCourse(termId: string, entry: CatalogEntry) {
+    if (draft) editDraft((current) => addCourse(current, termId, entry, true))
+    else setYears((current) => addCourse(current, termId, entry, false))
   }
 
   return (
@@ -351,8 +400,8 @@ export function PlanYourPath() {
               <YearSection
                 key={year.label}
                 year={year}
-                frozen={draft != null}
                 settling={accepting}
+                addable={addable}
                 renderAlert={(term) => (
                   <>
                     {termBanner(term, draft != null)}
@@ -364,6 +413,7 @@ export function PlanYourPath() {
                   </>
                 )}
                 onRemoveCourse={handleRemoveCourse}
+                onAddCourse={handleAddCourse}
                 onExplain={
                   option
                     ? (term) => setExplained((current) => (current === term.id ? null : term.id))

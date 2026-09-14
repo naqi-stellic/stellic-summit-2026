@@ -15,8 +15,10 @@ export type PlannedCourse = {
   notes?: number
   /** A requirement with no course chosen for it yet. */
   placeholder?: boolean
-  /** Set only while a generated draft is on screen. */
-  draft?: { mark: DraftMark; note: string; order: number }
+  /** Set only while a generated draft is on screen. `relocated` marks a card
+   *  that left somewhere to be here, so it counts as an addition and a removal
+   *  at once. */
+  draft?: { mark: DraftMark; note: string; order: number; relocated?: boolean }
 }
 
 export type Term = {

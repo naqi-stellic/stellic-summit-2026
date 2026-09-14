@@ -4,6 +4,7 @@ import {
   PLANNING_RULES,
   emptyYear,
   findCourse,
+  findTerm,
   type PlannedCourse,
   type Term,
   type Year,
@@ -85,11 +86,35 @@ export type Draft = {
   years: Year[]
   /** Courses the draft put on the canvas, placeholders included. */
   added: number
-  /** Courses the draft took back out. */
+  /** Courses it took out of where they were — dropped, or moved elsewhere. */
   removed: number
-  moved: number
   /** The last term the draft leaves you working in. */
   graduation: string
+}
+
+/** Reads a draft's tallies off the marks themselves, so a change made by hand
+ *  counts exactly like one the generator made. */
+export function summariseDraft(years: Year[], optionId: string): Draft {
+  let added = 0
+  let removed = 0
+
+  for (const year of years) {
+    for (const term of year.terms) {
+      for (const course of term.courses) {
+        const mark = course.draft
+        if (!mark) continue
+        if (mark.mark === "added") {
+          added += 1
+          /* It is here because it left somewhere else. */
+          if (mark.relocated) removed += 1
+        } else {
+          removed += 1
+        }
+      }
+    }
+  }
+
+  return { optionId, years, added, removed, graduation: lastWorkingTerm(years) }
 }
 
 let seq = 0
@@ -143,8 +168,6 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
   }
 
   const queue: CatalogEntry[] = [...REMAINING_REQUIREMENTS]
-  let removed = 0
-  let moved = 0
 
   const edit = (termId: string, fn: (term: Term) => Term) => {
     years = years.map((year) => ({
@@ -158,7 +181,6 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
   if (option.drop) {
     const found = findCourse(years, option.drop.courseId)
     if (found && !found.term.locked) {
-      removed += 1
       const at = order++
       edit(found.term.id, (term) => ({
         ...term,
@@ -178,7 +200,6 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
   if (option.move) {
     const found = findCourse(years, option.move.courseId)
     if (found && !found.term.locked) {
-      moved += 1
       const at = order++
       moving = {
         course: found.course,
@@ -196,8 +217,6 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
       }))
     }
   }
-
-  let added = 0
 
   /* Fills one term to the option's load from the front of the queue. Terms are
    * reached in order, so the queue's own priority — core, then concentration,
@@ -221,7 +240,6 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
     let room = option.coursesPerTerm - keptCourses(term).length - incoming.length
     while (room > 0 && queue.length > 0) {
       incoming.push(draftCourse(queue.shift()!, order++))
-      added += 1
       room -= 1
     }
 
@@ -240,14 +258,7 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
     years = [...years, { ...next, terms: terms.map(fillTerm) }]
   }
 
-  return {
-    optionId: option.id,
-    years,
-    added: added + moved,
-    removed,
-    moved,
-    graduation: lastWorkingTerm(years),
-  }
+  return summariseDraft(years, option.id)
 }
 
 function termName(years: Year[], termId: string): string {
@@ -304,4 +315,128 @@ export function explainTerm(term: Term, option: DraftOption): string {
 
   const sentence = clauses.join("; ")
   return sentence[0].toUpperCase() + sentence.slice(1) + "."
+}
+
+/* ------------------------------------------------- changing a draft by hand
+
+   The playground is the planner: courses can be moved, dropped and added
+   while a draft is up. Every hand edit leaves the same marks the generator
+   leaves, which is what lets the tallies and the canvas agree. */
+
+function mapTerm(years: Year[], termId: string, fn: (term: Term) => Term): Year[] {
+  return years.map((year) => ({
+    ...year,
+    terms: year.terms.map((term) => (term.id === termId ? fn(term) : term)),
+  }))
+}
+
+/** Moves a course inside a draft. Within a term it is a reorder and nothing is
+ *  marked; across terms the card arrives green, saying where it came from. */
+export function moveInDraft(
+  years: Year[],
+  courseId: string,
+  toTermId: string,
+  toIndex?: number
+): Year[] {
+  const from = findCourse(years, courseId)
+  const to = findTerm(years, toTermId)
+  if (!from || !to || from.term.locked || to.locked) return years
+  /* What the draft struck out is on its way off the plan, not up for moving. */
+  if (from.course.draft?.mark === "moved" || from.course.draft?.mark === "removed") return years
+
+  if (from.term.id === to.id) {
+    if (toIndex === undefined || toIndex === from.index) return years
+    return mapTerm(years, to.id, (term) => {
+      const rest = term.courses.filter((c) => c.id !== courseId)
+      return { ...term, courses: [...rest.slice(0, toIndex), from.course, ...rest.slice(toIndex)] }
+    })
+  }
+
+  const moved: PlannedCourse = {
+    ...from.course,
+    draft: {
+      mark: "added",
+      note: `You moved this here from ${from.term.name}`,
+      order: 0,
+      /* A course that was already in the plan leaves a hole behind it. One the
+       * draft had added is only being rearranged. */
+      relocated: from.course.draft ? from.course.draft.relocated : true,
+    },
+  }
+
+  const without = mapTerm(years, from.term.id, (term) => ({
+    ...term,
+    courses: term.courses.filter((c) => c.id !== courseId),
+  }))
+
+  return mapTerm(without, to.id, (term) => {
+    const at = toIndex ?? term.courses.length
+    return { ...term, courses: [...term.courses.slice(0, at), moved, ...term.courses.slice(at)] }
+  })
+}
+
+/** Drops a course from a draft. One the draft itself added simply goes; one
+ *  that was already in the plan is struck through instead, so the change stays
+ *  visible until the draft is settled. */
+export function removeInDraft(years: Year[], courseId: string): Year[] {
+  const found = findCourse(years, courseId)
+  if (!found || found.term.locked) return years
+
+  const mark = found.course.draft
+  if (mark?.mark === "added" && !mark.relocated) {
+    return mapTerm(years, found.term.id, (term) => ({
+      ...term,
+      courses: term.courses.filter((c) => c.id !== courseId),
+    }))
+  }
+
+  return mapTerm(years, found.term.id, (term) => ({
+    ...term,
+    courses: term.courses.map((c) =>
+      c.id === courseId
+        ? { ...c, draft: { mark: "removed" as const, note: "You removed this", order: 0 } }
+        : c
+    ),
+  }))
+}
+
+/** Adds a course to a term. `marked` is false on the plan proper, where an
+ *  addition is just a course rather than a proposal. */
+export function addCourse(
+  years: Year[],
+  termId: string,
+  entry: CatalogEntry,
+  marked: boolean
+): Year[] {
+  const term = findTerm(years, termId)
+  if (!term || term.locked) return years
+
+  const course: PlannedCourse = {
+    id: `u${(seq += 1)}`,
+    code: entry.code,
+    name: entry.name,
+    credits: CREDITS_PER_COURSE,
+    placeholder: entry.placeholder,
+    ...(marked ? { draft: { mark: "added" as const, note: "You added this", order: 0 } } : {}),
+  }
+
+  return mapTerm(years, termId, (t) => ({ ...t, courses: [...t.courses, course] }))
+}
+
+/** Requirements the plan is not holding a place for, which is what there is to
+ *  add. The seat comes last: it is the answer when nothing specific is left. */
+export function addableCourses(years: Year[]): CatalogEntry[] {
+  const placed = new Set<string>()
+  for (const year of years) {
+    for (const term of year.terms) {
+      for (const course of term.courses) {
+        if (course.draft?.mark !== "removed") placed.add(`${course.code} ${course.name}`)
+      }
+    }
+  }
+
+  const unplaced = REMAINING_REQUIREMENTS.filter(
+    (entry) => !placed.has(`${entry.code} ${entry.name}`)
+  )
+  return [...unplaced, REPLACEMENT_SEAT]
 }

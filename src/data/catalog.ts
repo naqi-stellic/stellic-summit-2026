@@ -55,10 +55,11 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "BUS 495", name: "Strategic Management", reason: "Capstone, taken last" },
 ]
 
-/** Stands in for a requirement whose course the draft had to drop. */
+/** A held place rather than a course: used when the draft has to drop a course
+ *  whose requirement still stands, and when a seat is added by hand. */
 export const REPLACEMENT_SEAT: CatalogEntry = {
   code: "FIN ELEC",
   name: "Finance elective",
-  reason: "Replaces a course that is no longer offered",
+  reason: "Seat held for a course you pick later",
   placeholder: true,
 }

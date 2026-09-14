@@ -5,11 +5,13 @@ import { cn } from "cn"
 import type { ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
-import { AddSlot, AuditIcon, StatusPill } from "@/components/stellic/primitives"
+import { AddCourseMenu } from "@/components/stellic/add-course-menu"
+import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import type { CatalogEntry } from "@/data/catalog"
 import {
   CREDIT_GROUP_LABEL,
   termCredits,
@@ -155,9 +157,11 @@ export function AuditRow({
 
 function SortableAuditRow({
   course,
+  settling,
   onRemove,
 }: {
   course: PlannedCourse
+  settling?: boolean
   onRemove: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -173,7 +177,7 @@ function SortableAuditRow({
       {...attributes}
       {...listeners}
     >
-      <AuditRow course={course} ghosted={isDragging} onRemove={onRemove} />
+      <AuditRow course={course} ghosted={isDragging} settling={settling} onRemove={onRemove} />
     </div>
   )
 }
@@ -223,44 +227,45 @@ function CreditGroup({ term, settling }: { term: Term; settling?: boolean }) {
 export function SemesterCard({
   term,
   alert,
-  frozen,
   settling,
+  addable,
   onRemoveCourse,
+  onAddCourse,
   onExplain,
 }: {
   term: Term
   alert?: ReactNode
-  /** A draft is on screen: its cards are a proposal, not something to rearrange. */
-  frozen?: boolean
   /** The draft is being accepted. */
   settling?: boolean
+  /** What "+ Add to Term" can offer. */
+  addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
+  onAddCourse: (entry: CatalogEntry) => void
   /** Offered only while there is a draft to explain. */
   onExplain?: () => void
 }) {
-  const { setNodeRef, isOver, active } = useDroppable({
-    id: term.id,
-    disabled: term.locked || frozen,
-  })
+  const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
 
   /* Only light up while something is actually being dragged. */
   const isTarget = isOver && active != null
 
   /* The design only gives the header a bottom gap when something follows it
    * other than the course list. */
-  const headerHasGap = term.alert != null || term.courses.length === 0 || frozen
+  const headerHasGap = term.alert != null || term.courses.length === 0 || onExplain != null
 
-  const rows = term.courses.map((course) =>
-    term.locked || frozen ? (
+  const rows = term.courses.map((course) => {
+    const struck = course.draft?.mark === "moved" || course.draft?.mark === "removed"
+    return term.locked || struck ? (
       <AuditRow key={course.id} course={course} locked={term.locked} settling={settling} />
     ) : (
       <SortableAuditRow
         key={course.id}
         course={course}
+        settling={settling}
         onRemove={() => onRemoveCourse(course.id)}
       />
     )
-  )
+  })
 
   return (
     <Card
@@ -313,19 +318,15 @@ export function SemesterCard({
 
         {term.courses.length > 0 && <CreditGroup term={term} settling={settling} />}
 
-        {frozen ? (
-          <div className="flex flex-col gap-2">{rows}</div>
-        ) : (
-          <SortableContext
-            items={term.courses.map((c) => c.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="flex flex-col gap-2">
-              {rows}
-              <AddSlot>+ Add to Term</AddSlot>
-            </div>
-          </SortableContext>
-        )}
+        <SortableContext
+          items={term.courses.map((c) => c.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col gap-2">
+            {rows}
+            {!term.locked && <AddCourseMenu options={addable} onPick={onAddCourse} />}
+          </div>
+        </SortableContext>
       </div>
     </Card>
   )
@@ -385,16 +386,18 @@ export function TimelineRail({ phase, nodes }: { phase: YearPhase; nodes: 1 | 2 
 export function YearSection({
   year,
   renderAlert,
-  frozen,
   settling,
+  addable,
   onRemoveCourse,
+  onAddCourse,
   onExplain,
 }: {
   year: Year
   renderAlert?: (term: Term) => ReactNode
-  frozen?: boolean
   settling?: boolean
+  addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
+  onAddCourse: (termId: string, entry: CatalogEntry) => void
   onExplain?: (term: Term) => void
 }) {
   return (
@@ -424,9 +427,10 @@ export function YearSection({
               key={term.id}
               term={term}
               alert={renderAlert?.(term)}
-              frozen={frozen}
               settling={settling}
+              addable={addable}
               onRemoveCourse={onRemoveCourse}
+              onAddCourse={(entry) => onAddCourse(term.id, entry)}
               onExplain={onExplain && !term.locked ? () => onExplain(term) : undefined}
             />
           ))}

@@ -101,7 +101,11 @@ export function GeneratePlanOptions({
                     <RadioGroupItem value={option.id} />
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px text-body-md">
-                    <span className="font-semibold text-foreground">Option {index + 1}</span>
+                    {/* The generated three are numbered; the one collecting your
+                        own changes goes by its name. */}
+                    <span className="font-semibold text-foreground">
+                      {option.blurb ? `Option ${index + 1}` : option.label}
+                    </span>
                     <span className="text-gray-80">Expected Graduation {option.graduation}</span>
                   </span>
                   <span className="flex shrink-0 items-center gap-1">
@@ -109,11 +113,13 @@ export function GeneratePlanOptions({
                     {option.removed > 0 && <Badge variant="danger">-{option.removed}</Badge>}
                   </span>
                 </label>
-                <p className="w-full text-label-md text-gray-100">
-                  {/* The strategy names the option rather than replacing its
-                      number, so "Option 2" stays the thing you refer to. */}
-                  <span className="font-semibold">{option.label}.</span> {option.blurb}
-                </p>
+                {option.blurb && (
+                  <p className="w-full text-label-md text-gray-100">
+                    {/* The strategy names the option rather than replacing its
+                        number, so "Option 2" stays the thing you refer to. */}
+                    <span className="font-semibold">{option.label}.</span> {option.blurb}
+                  </p>
+                )}
               </div>
             )
           })}
