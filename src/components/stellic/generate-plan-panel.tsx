@@ -19,7 +19,7 @@ import { planSettings } from "@/components/stellic/plan-settings"
 import { GeneratePlanScope } from "@/components/stellic/generate-plan-scope"
 import { GeneratePlanSummary } from "@/components/stellic/generate-plan-summary"
 import { Button } from "@/components/ui/button"
-import { CREDITS_PER_COURSE, type PlanStanding } from "@/data/plan"
+import { CREDITS_PER_COURSE, type PlanStanding, type Term } from "@/data/plan"
 
 /* The Generate Plan wizard that opens beside the planner. Three questions, then
  * a review of the answers. Padding subtracts the border width where a container
@@ -37,13 +37,16 @@ function coursesPerTerm(pace: PaceState): number {
 /** One line reading the wizard's answers back, for the draft's instructions. */
 function instructions(
   keepPlanned: string,
+  released: number,
   pace: PaceState,
   notes: string,
   placeholders: number
 ): string {
   const parts = [
     describePace(pace),
-    keepPlanned === "yes" ? "kept everything planned" : "chose what to keep",
+    keepPlanned === "yes"
+      ? "kept everything planned"
+      : `left ${released} course${released === 1 ? "" : "s"} open`,
   ]
   if (placeholders > 0) {
     parts.push(`${placeholders} placeholder seat${placeholders === 1 ? "" : "s"}`)
@@ -61,6 +64,7 @@ export function GeneratePlanPanel({
   graduation,
   campus,
   terms,
+  keepTerms,
   onFraming,
   options,
   selectedOption,
@@ -75,6 +79,8 @@ export function GeneratePlanPanel({
   campus: string
   /** Terms the pacing step can include or exclude, summers included. */
   terms: string[]
+  /** Terms whose courses can be kept or released. */
+  keepTerms: Term[]
   /** The drafts the run produced, once there are any. */
   options: PlanOptionSummary[]
   selectedOption: string
@@ -86,7 +92,7 @@ export function GeneratePlanPanel({
   onFraming: () => void
   /** The run is over: put the draft on the canvas, built to this many courses
    *  a term — the pace the student asked for. */
-  onGenerated: (coursesPerTerm: number) => void
+  onGenerated: (coursesPerTerm: number, released: string[]) => void
   /** Take the draft back off the canvas so the answers can be changed. */
   onDiscardDraft: () => void
   onClose: () => void
@@ -98,19 +104,23 @@ export function GeneratePlanPanel({
   const [keepPlanned, setKeepPlanned] = useState("yes")
   const [pace, setPace] = useState<PaceState>(INITIAL_PACE)
   const [notes, setNotes] = useState("")
+  /* Courses the student has taken off the "keep" list, so the generator may
+   * move them. Empty while the answer is yes. */
+  const [released, setReleased] = useState<string[]>([])
   /* Whether the instructions card is open. Editing does not touch the draft:
    * it stays on the canvas until it is re-generated or left. */
   const [editing, setEditing] = useState(false)
   /* The answers the draft on the canvas was built from, so the card can tell
    * whether there is anything new to run. */
   const [generatedFrom, setGeneratedFrom] = useState<string | null>(null)
-  const answers = JSON.stringify({ keepPlanned, pace, notes })
+  const answers = JSON.stringify({ keepPlanned, pace, notes, released })
   /* A step opened from Edit Settings is a detour, not the wizard running: it
    * goes back where it came from rather than on to the next question. */
   const [detour, setDetour] = useState(false)
 
   function startOver() {
     setKeepPlanned("yes")
+    setReleased([])
     setPace(INITIAL_PACE)
     setNotes("")
     setEditing(false)
@@ -172,7 +182,14 @@ export function GeneratePlanPanel({
             terms={terms}
             standing={standing}
             keepPlanned={keepPlanned}
-            onKeepPlannedChange={setKeepPlanned}
+            onKeepPlannedChange={(next) => {
+              setKeepPlanned(next)
+              /* Going back to yes puts everything back on the list. */
+              if (next === "yes") setReleased([])
+            }}
+            keepTerms={keepTerms}
+            released={released}
+            onReleasedChange={setReleased}
             state={pace}
             onChange={setPace}
           />
@@ -185,7 +202,7 @@ export function GeneratePlanPanel({
             standing={standing}
             onLastStep={onFraming}
             onDone={() => {
-              onGenerated(coursesPerTerm(pace))
+              onGenerated(coursesPerTerm(pace), keepPlanned === "no" ? released : [])
               setGeneratedFrom(answers)
               setView("options")
             }}
@@ -194,8 +211,16 @@ export function GeneratePlanPanel({
 
         {view === "options" && (
           <GeneratePlanOptions
-            instructions={instructions(keepPlanned, pace, notes, placeholders)}
-            settings={planSettings({ standing, graduation, campus, keepPlanned, pace, notes })}
+            instructions={instructions(keepPlanned, released.length, pace, notes, placeholders)}
+            settings={planSettings({
+              standing,
+              graduation,
+              campus,
+              keepPlanned,
+              released: released.length,
+              pace,
+              notes,
+            })}
             editing={editing}
             options={options}
             selected={selectedOption}
@@ -223,6 +248,7 @@ export function GeneratePlanPanel({
             graduation={graduation}
             campus={campus}
             keepPlanned={keepPlanned}
+            released={released.length}
             pace={pace}
             notes={notes}
             onEdit={(step) => setView(step)}

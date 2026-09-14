@@ -16,6 +16,7 @@ export function GeneratePlanSummary({
   graduation,
   campus,
   keepPlanned,
+  released,
   pace,
   notes,
   onEdit,
@@ -24,6 +25,7 @@ export function GeneratePlanSummary({
   graduation: string
   campus: string
   keepPlanned: string
+  released: number
   pace: PaceState
   notes: string
   onEdit: (step: SettingStep) => void
@@ -33,6 +35,7 @@ export function GeneratePlanSummary({
     graduation,
     campus,
     keepPlanned,
+    released,
     pace,
     notes,
   })

@@ -22,6 +22,7 @@ export function planSettings({
   graduation,
   campus,
   keepPlanned,
+  released,
   pace,
   notes,
 }: {
@@ -29,6 +30,8 @@ export function planSettings({
   graduation: string
   campus: string
   keepPlanned: string
+  /** How many planned courses the student left open for the generator. */
+  released: number
   pace: PaceState
   notes: string
 }): { choices: SettingRow[]; rules: SettingRow[] } {
@@ -38,7 +41,10 @@ export function planSettings({
     { label: "Expected Graduation", value: graduation },
     {
       label: "Keeping",
-      value: keepPlanned === "yes" ? "Everything planned" : "Choosing what to keep",
+      value:
+        keepPlanned === "yes"
+          ? "Everything planned"
+          : `${standing.planned.reqs - released} of ${standing.planned.reqs} courses`,
       step: 2,
     },
     { label: "Pacing", value: describePace(pace), step: 2 },

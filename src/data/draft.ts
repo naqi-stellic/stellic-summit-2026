@@ -135,6 +135,10 @@ export function summariseDraft(years: Year[], optionId: string): Draft {
   return { optionId, years, ...draftTally(years), graduation: lastWorkingTerm(years) }
 }
 
+/** A catalogue entry on its way into a term. A released course carries the
+ *  term it must not go back to, and the card it left behind. */
+type QueueEntry = CatalogEntry & { avoid?: string; ghostFor?: string }
+
 let seq = 0
 function draftCourse(entry: CatalogEntry, order: number, note?: string): PlannedCourse {
   return {
@@ -165,7 +169,13 @@ export function keptCourses(term: Term): PlannedCourse[] {
   return term.courses.filter((c) => c.draft?.mark !== "moved" && c.draft?.mark !== "removed")
 }
 
-export function generateDraft(base: Year[], option: DraftOption): Draft {
+export function generateDraft(
+  base: Year[],
+  option: DraftOption,
+  /** Courses the student did not keep, which the generator may pick up and
+   *  place wherever they fit best. */
+  released: string[] = []
+): Draft {
   seq = 0
   let order = 0
 
@@ -185,8 +195,6 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
     })
   }
 
-  const queue: CatalogEntry[] = [...REMAINING_REQUIREMENTS]
-
   const edit = (termId: string, fn: (term: Term) => Term) => {
     years = years.map((year) => ({
       ...year,
@@ -194,9 +202,39 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
     }))
   }
 
+  const queue: QueueEntry[] = [...REMAINING_REQUIREMENTS]
+
+  /* A released course leaves its term the way the generator's own moves do —
+   * struck through where it was — and goes to the front of the queue to be
+   * placed again. `avoid` keeps it from landing back where it started: putting
+   * it down where it already was is not a move worth showing. */
+  const ghosts: { termId: string; courseId: string; order: number }[] = []
+  for (const courseId of released) {
+    const found = findCourse(years, courseId)
+    if (!found || found.term.locked) continue
+    const at = order++
+    ghosts.push({ termId: found.term.id, courseId, order: at })
+    edit(found.term.id, (term) => ({
+      ...term,
+      courses: term.courses.map((c) =>
+        c.id === courseId
+          ? { ...c, draft: { mark: "moved" as const, note: "You left this one open", order: at } }
+          : c
+      ),
+    }))
+    queue.unshift({
+      code: found.course.code,
+      name: found.course.name,
+      reason: "You left this one open",
+      placeholder: found.course.placeholder,
+      avoid: found.term.id,
+      ghostFor: courseId,
+    })
+  }
+
   /* A dropped course leaves its requirement unmet, so the draft holds a seat
    * for it further down the plan rather than quietly losing it. */
-  if (option.drop) {
+  if (option.drop && !released.includes(option.drop.courseId)) {
     const found = findCourse(years, option.drop.courseId)
     if (found && !found.term.locked) {
       const at = order++
@@ -215,7 +253,7 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
   /* A move leaves a struck-through marker behind, so the student can see where
    * the course went rather than hunting for it. */
   let moving: { course: PlannedCourse; from: string; to: string; reason: string } | null = null
-  if (option.move) {
+  if (option.move && !released.includes(option.move.courseId)) {
     const found = findCourse(years, option.move.courseId)
     if (found && !found.term.locked) {
       const at = order++
@@ -235,6 +273,9 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
       }))
     }
   }
+
+  /* Where each released course ended up, for the note left behind. */
+  const placed = new Map<string, string>()
 
   /* Fills one term to the option's load from the front of the queue. Terms are
    * reached in order, so the queue's own priority — core, then concentration,
@@ -256,8 +297,13 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
     }
 
     let room = option.coursesPerTerm - keptCourses(term).length - incoming.length
-    while (room > 0 && queue.length > 0) {
-      incoming.push(draftCourse(queue.shift()!, order++))
+    while (room > 0) {
+      /* The first entry that is allowed to be here. */
+      const next = queue.findIndex((entry) => entry.avoid !== term.id)
+      if (next === -1) break
+      const [entry] = queue.splice(next, 1)
+      if (entry.ghostFor) placed.set(entry.ghostFor, term.name)
+      incoming.push(draftCourse(entry, order++))
       room -= 1
     }
 
@@ -274,6 +320,23 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
     const next = emptyYear(start)
     const terms = option.summers ? [...next.terms, summerTerm(start + 1)] : next.terms
     years = [...years, { ...next, terms: terms.map(fillTerm) }]
+  }
+
+  /* Now that the placement is known, the card left behind can say where its
+   * course went. One that found no room anywhere is not struck out at all —
+   * nothing happened to it. */
+  for (const ghost of ghosts) {
+    const to = placed.get(ghost.courseId)
+    edit(ghost.termId, (term) => ({
+      ...term,
+      courses: term.courses.map((c) =>
+        c.id !== ghost.courseId
+          ? c
+          : to
+            ? { ...c, draft: { mark: "moved" as const, note: `Moved to ${to}`, order: ghost.order } }
+            : { ...c, draft: undefined }
+      ),
+    }))
   }
 
   return summariseDraft(years, option.id)

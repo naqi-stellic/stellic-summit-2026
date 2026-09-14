@@ -37,6 +37,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { CatalogEntry } from "@/data/catalog"
+import { releasableTerms } from "@/components/stellic/keep-picker"
 import {
   acceptDraft,
   addCourse,
@@ -276,11 +277,11 @@ export function PlanYourPath() {
     hadDraft.current = has
   }, [draft])
 
-  function startDraft(coursesPerTerm: number) {
+  function startDraft(coursesPerTerm: number, released: string[]) {
     setFraming(false)
     setStreamId((n) => n + 1)
     const options = planOptions(coursesPerTerm)
-    setDrafts({ options, made: options.map((o) => generateDraft(years, o)) })
+    setDrafts({ options, made: options.map((o) => generateDraft(years, o, released)) })
     setCustom(null)
     setOptionId(options[0].id)
     setExplained(null)
@@ -389,6 +390,7 @@ export function PlanYourPath() {
             standing={standing}
             graduation={expectedGraduation(years)}
             terms={selectableTerms(years)}
+            keepTerms={releasableTerms(years)}
             campus={planCampuses(years)}
             options={optionSummaries}
             selectedOption={optionId}

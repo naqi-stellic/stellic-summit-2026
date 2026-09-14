@@ -1,10 +1,11 @@
 import { Icon } from "@/components/icon"
+import { KeepPicker } from "@/components/stellic/keep-picker"
 import { RadioCard } from "@/components/stellic/primitives"
 import { TermMultiSelect } from "@/components/stellic/term-multi-select"
 import { Button } from "@/components/ui/button"
 import { RadioGroup } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
-import { PLANNING_RULES, type PlanStanding } from "@/data/plan"
+import { PLANNING_RULES, type PlanStanding, type Term } from "@/data/plan"
 
 /* Step 2: what to keep of the plan you already have, how many credits a term,
  * and which terms are in play. */
@@ -134,6 +135,9 @@ export function GeneratePlanPace({
   standing,
   keepPlanned,
   onKeepPlannedChange,
+  keepTerms,
+  released,
+  onReleasedChange,
   state,
   onChange,
 }: {
@@ -141,6 +145,10 @@ export function GeneratePlanPace({
   standing: PlanStanding
   keepPlanned: string
   onKeepPlannedChange: (next: string) => void
+  /** The terms whose courses are up for keeping, when the answer is no. */
+  keepTerms: Term[]
+  released: string[]
+  onReleasedChange: (next: string[]) => void
   state: PaceState
   onChange: (next: PaceState) => void
 }) {
@@ -180,6 +188,10 @@ export function GeneratePlanPace({
             />
           ))}
         </RadioGroup>
+
+        {keepPlanned === "no" && (
+          <KeepPicker terms={keepTerms} released={released} onChange={onReleasedChange} />
+        )}
       </div>
 
       <div className="flex w-full flex-col gap-2">
