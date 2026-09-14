@@ -26,6 +26,12 @@ const ACCENT: Record<string, string> = {
   brown: "bg-accent-brown",
 }
 
+function Empty({ children }: { children: string }) {
+  return (
+    <p className="border-t border-gray-40 p-4 text-center text-body-md text-gray-80">{children}</p>
+  )
+}
+
 function CardHeader({
   icon,
   title,
@@ -166,8 +172,12 @@ export function TermList({ term }: { term: Term }) {
       <section className="w-full overflow-hidden rounded-md border border-gray-40 bg-card">
         <CardHeader icon="class" title="My Courses" count={term.courses.length} />
 
-        {/* The table scrolls on its own when the columns no longer fit, rather
-            than squeezing them or pushing the page sideways. */}
+        {/* A term nobody has planned into has no columns worth heading. */}
+        {term.courses.length === 0 ? (
+          <Empty>No courses added to plan yet</Empty>
+        ) : (
+        /* The table scrolls on its own when the columns no longer fit, rather
+           than squeezing them or pushing the page sideways. */
         <div className="w-full overflow-x-auto">
           <div className="min-w-[1000px]">
             <div className="flex w-full items-stretch pr-4 pl-6 text-body-md font-semibold text-gray-100">
@@ -196,13 +206,12 @@ export function TermList({ term }: { term: Term }) {
             ))}
           </div>
         </div>
+        )}
       </section>
 
       <section className="w-full overflow-hidden rounded-md border border-gray-40 bg-card">
         <CardHeader icon="sports-basketball" title="My Activities" count={0} />
-        <p className="border-t border-gray-40 p-4 text-center text-body-md text-gray-80">
-          No activities added to plan yet
-        </p>
+        <Empty>No activities added to plan yet</Empty>
       </section>
     </div>
   )
