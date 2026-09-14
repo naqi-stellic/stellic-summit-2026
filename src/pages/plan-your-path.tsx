@@ -12,7 +12,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
@@ -262,20 +262,6 @@ export function PlanYourPath() {
        the whole plan landing again. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamId])
-
-  /* The first change is usually below the fold, and a plan you never saw
-   * arrive may as well have been there all along. */
-  const hadDraft = useRef(false)
-  useEffect(() => {
-    const has = draft != null
-    if (has && !hadDraft.current) {
-      requestAnimationFrame(() => {
-        const first = document.querySelector("[data-term] [data-draft-mark]")
-        first?.closest("[data-term]")?.scrollIntoView({ behavior: "smooth", block: "center" })
-      })
-    }
-    hadDraft.current = has
-  }, [draft])
 
   function startDraft(coursesPerTerm: number, released: string[]) {
     setFraming(false)
