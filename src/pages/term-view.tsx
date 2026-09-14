@@ -69,10 +69,10 @@ export function TermView({
    *  any other year, or All Years, goes back to the whole plan. */
   tabs: YearTab[]
 }) {
-  /* The calendar is the better view when there is anything on it — which needs
-   * both a published schedule and a section chosen against it. */
-  const hasTimes = term.courses.some((c) => c.meetings && c.meetings.length > 0)
-  const [mode, setMode] = useState(term.scheduled && hasTimes ? "calendar" : "list")
+  /* A published schedule is what the calendar is for, so a term that has one
+   * opens on it — empty, if no section has been chosen yet, which is itself
+   * the thing to do next. */
+  const [mode, setMode] = useState(term.scheduled ? "calendar" : "list")
   const actions = termActions(term)
 
   const plannerActions: PlanAction[] = [

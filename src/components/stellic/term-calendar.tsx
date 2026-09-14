@@ -95,6 +95,15 @@ function CourseCard({ course, selectable }: { course: PlannedCourse; selectable:
           <DraftNote course={course} className="pt-1" />
         </span>
       </label>
+      {/* Nothing of this class can be drawn until a section is chosen, so the
+          way to choose one sits on the card. */}
+      {needsReview && !mark && (
+        <span className="flex items-center py-3">
+          <Button size="icon" aria-label={`Search sections for ${course.name}`}>
+            <Icon name="s-search" size={16} />
+          </Button>
+        </span>
+      )}
     </div>
   )
 }
