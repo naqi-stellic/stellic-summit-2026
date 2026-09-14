@@ -37,7 +37,7 @@ function hourLabel(hour: number): string {
 
 /* ------------------------------------------------------------- the classes */
 
-function CourseCard({ course }: { course: PlannedCourse }) {
+function CourseCard({ course, selectable }: { course: PlannedCourse; selectable: boolean }) {
   const needsReview = courseStatus(course) === "needs review"
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
 
@@ -53,17 +53,18 @@ function CourseCard({ course }: { course: PlannedCourse }) {
         className={cn("w-1 shrink-0", course.accent ? ACCENT[course.accent] : "bg-gray-40")}
       />
       <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 p-3">
-        {/* A class already in the plan can be shown or hidden; one the draft is
-            proposing carries its mark there instead. */}
+        {/* A proposed class carries its mark; one you can still choose to
+            register carries a tick. A term that is neither — already under way —
+            has nothing to offer here. */}
         {mark ? (
           <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
-        ) : (
+        ) : selectable ? (
           <Checkbox
             defaultChecked
             className="mt-0.5"
-            aria-label={`Show ${course.name} on the calendar`}
+            aria-label={`Register ${course.name}`}
           />
-        )}
+        ) : null}
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="flex items-center gap-1.5 text-body-md text-gray-80">
             {needsReview && (
@@ -132,6 +133,7 @@ function HeldCard({ course }: { course: PlannedCourse }) {
 
 function Sidebar({ term }: { term: Term }) {
   const credits = termCredits(term)
+  const selectable = term.alert != null
 
   return (
     <div className="flex w-full shrink-0 flex-col gap-6 p-6 @3xl/term:w-[350px]">
@@ -160,7 +162,7 @@ function Sidebar({ term }: { term: Term }) {
           course.placeholder ? (
             <HeldCard key={course.id} course={course} />
           ) : (
-            <CourseCard key={course.id} course={course} />
+            <CourseCard key={course.id} course={course} selectable={selectable} />
           )
         )}
       </div>

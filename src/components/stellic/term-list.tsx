@@ -61,7 +61,7 @@ function Accent({ course }: { course?: PlannedCourse }) {
   )
 }
 
-function CourseRow({ course, drafting }: { course: PlannedCourse; drafting: boolean }) {
+function CourseRow({ course, selectable }: { course: PlannedCourse; selectable: boolean }) {
   const status = courseStatus(course)
   const held = course.placeholder
   const missing = courseNeeds(course) ? missingLine(course) : null
@@ -80,10 +80,15 @@ function CourseRow({ course, drafting }: { course: PlannedCourse; drafting: bool
         <Accent course={held ? undefined : course} />
         <div className="flex min-w-0 flex-1 items-center gap-4 pr-4 pl-6">
           <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-80" />
-          {/* A draft is something to pick through, so each class can be taken
-              in or left out of what you are about to accept. */}
-          {drafting && (
-            <Checkbox defaultChecked aria-label={`Keep ${course.name}`} className="shrink-0" />
+          {/* Registration is what the ticks are for: choosing which of these
+              classes to put through. A term not open for it has nothing to
+              tick. */}
+          {selectable && (
+            <Checkbox
+              defaultChecked
+              aria-label={`Register ${course.name}`}
+              className="shrink-0"
+            />
           )}
 
           <div className="flex w-[223px] shrink-0 flex-col gap-1 px-2 py-3">
@@ -123,7 +128,7 @@ function CourseRow({ course, drafting }: { course: PlannedCourse; drafting: bool
       {/* What the draft did to this class reads under it, the same way an
           unsettled one says what it is waiting for. */}
       {course.draft && (
-        <div className={cn("flex w-full items-stretch border-t border-gray-40", mark?.card)}>
+        <div className={cn("flex w-full items-stretch", mark?.card)}>
           <Accent course={held ? undefined : course} />
           <span className="flex min-w-0 flex-1 items-center px-4 py-[9px]">
             <DraftNote course={course} />
@@ -132,7 +137,7 @@ function CourseRow({ course, drafting }: { course: PlannedCourse; drafting: bool
       )}
 
       {missing && !course.draft && (
-        <div className="flex w-full items-stretch border-t border-gray-40 bg-gray-0">
+        <div className="flex w-full items-stretch bg-gray-0">
           <Accent />
           <p className="flex min-w-0 flex-1 items-center gap-1 px-4 py-[9px] text-body-md text-gray-100">
             <Icon name="error-outline" size={12} className="shrink-0 text-alert-50" />
@@ -152,7 +157,7 @@ function CourseRow({ course, drafting }: { course: PlannedCourse; drafting: bool
 
 export function TermList({ term }: { term: Term }) {
   const credits = termCredits(term)
-  const drafting = term.courses.some((c) => c.draft)
+  const selectable = term.alert != null
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -163,18 +168,18 @@ export function TermList({ term }: { term: Term }) {
             than squeezing them or pushing the page sideways. */}
         <div className="w-full overflow-x-auto">
           <div className="min-w-[1000px]">
-            <div className="flex w-full items-center pr-4 pl-6 text-body-md font-semibold text-gray-100">
+            <div className="flex w-full items-stretch pr-4 pl-6 text-body-md font-semibold text-gray-100">
               <span aria-hidden="true" className="w-1 shrink-0" />
-              <span className="w-4 shrink-0" />
-              {drafting && <span aria-hidden="true" className="ml-4 w-4 shrink-0" />}
-              <span className="ml-4 w-[223px] shrink-0 px-2 py-3">Course</span>
-              <span className="ml-4 w-[121px] shrink-0">Status</span>
-              <span aria-hidden="true" className="ml-4 w-px" />
-              <span className="ml-4 w-[98px] shrink-0">Class No.</span>
-              <span className="ml-4 w-[109px] shrink-0">Campus</span>
-              <span className="ml-4 w-[109px] shrink-0">Modality</span>
-              <span className="ml-4 w-[100px] shrink-0">Grade Option</span>
-              <span className="ml-4 w-[100px] shrink-0">Credits</span>
+              <span className="w-4 shrink-0 self-center" />
+              {selectable && <span aria-hidden="true" className="ml-4 w-4 shrink-0" />}
+              <span className="ml-4 w-[223px] shrink-0 self-center px-2 py-3">Course</span>
+              <span className="ml-4 w-[121px] shrink-0 self-center">Status</span>
+              <span aria-hidden="true" className="ml-4 w-px self-stretch bg-gray-40" />
+              <span className="ml-4 w-[98px] shrink-0 self-center">Class No.</span>
+              <span className="ml-4 w-[109px] shrink-0 self-center">Campus</span>
+              <span className="ml-4 w-[109px] shrink-0 self-center">Modality</span>
+              <span className="ml-4 w-[100px] shrink-0 self-center">Grade Option</span>
+              <span className="ml-4 w-[100px] shrink-0 self-center">Credits</span>
             </div>
 
             <div className="flex w-full items-center gap-2 border-t border-gray-40 bg-gray-0 py-2 pr-6 pl-6">
@@ -185,7 +190,7 @@ export function TermList({ term }: { term: Term }) {
             </div>
 
             {term.courses.map((course) => (
-              <CourseRow key={course.id} course={course} drafting={drafting} />
+              <CourseRow key={course.id} course={course} selectable={selectable} />
             ))}
           </div>
         </div>
