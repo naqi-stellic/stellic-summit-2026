@@ -2,11 +2,13 @@ import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
+  MeasuringStrategy,
   PointerSensor,
   pointerWithin,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
@@ -55,6 +57,7 @@ import {
   INITIAL_YEARS,
   expectedGraduation,
   findCourse,
+  findTerm,
   moveCourse,
   nextYearNumber,
   planCampuses,
@@ -151,6 +154,10 @@ function termBanner(term: Term, drafting: boolean) {
 export function PlanYourPath() {
   const [years, setYears] = useState(INITIAL_YEARS)
   const [draggingId, setDraggingId] = useState<string | null>(null)
+  /* Where the course under the cursor would land if it were let go. Only set
+   * while it is crossing into another term: sorting within one already opens
+   * its own gap. */
+  const [drop, setDrop] = useState<{ termId: string; index: number; height: number } | null>(null)
   const [generateOpen, setGenerateOpen] = useState(false)
 
   /* One draft per option, generated together so the panel can show what each
@@ -313,8 +320,35 @@ export function PlanYourPath() {
     setDraggingId(String(event.active.id))
   }
 
+  /** Reads the drop target the same way the drop itself will: over a course
+   *  means that course's place, over a card means the end of its list. */
+  function handleDragOver({ active, over }: DragOverEvent) {
+    const from = over ? findCourse(shown, String(active.id)) : null
+    const overCourse = over ? findCourse(shown, String(over.id)) : null
+    const termId = overCourse ? overCourse.term.id : String(over?.id)
+    const term = over ? findTerm(shown, termId) : null
+
+    if (!from || !term || term.locked || term.id === from.term.id) {
+      setDrop((current) => (current === null ? current : null))
+      return
+    }
+
+    /* The cursor sitting in the gap the slot opened resolves to the term
+     * rather than to a course. Holding the place it already found keeps the
+     * slot from bouncing to the end of the list and back. */
+    const held = !overCourse && drop?.termId === termId
+    const index = held ? drop.index : overCourse ? overCourse.index : term.courses.length
+    const height = active.rect.current.translated?.height ?? 64
+    setDrop((current) =>
+      current && current.termId === termId && current.index === index && current.height === height
+        ? current
+        : { termId, index, height }
+    )
+  }
+
   function handleDragEnd({ active, over }: DragEndEvent) {
     setDraggingId(null)
+    setDrop(null)
     if (!over) return
 
     const courseId = String(active.id)
@@ -370,13 +404,21 @@ export function PlanYourPath() {
     >
       <DndContext
         sensors={sensors}
+        /* The drop slot changes the height of the term it opens in, so the
+         * droppable rects have to be re-read as it does rather than measured
+         * once at the start of the drag. */
+        measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
         /* pointerWithin only reports droppables the cursor is actually inside,
          * so releasing over a locked term (or empty canvas) resolves to no
          * target and the course snaps back instead of landing somewhere near. */
         collisionDetection={pointerWithin}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onDragCancel={() => setDraggingId(null)}
+        onDragOver={handleDragOver}
+        onDragCancel={() => {
+          setDraggingId(null)
+          setDrop(null)
+        }}
       >
         {/* relative so the draft's ring can be drawn over the canvas without
             moving anything that is already on it. */}
@@ -464,6 +506,7 @@ export function PlanYourPath() {
                 year={year}
                 settling={accepting}
                 revealed={revealed}
+                drop={drop}
                 addable={addable}
                 renderAlert={(term) => (
                   <>

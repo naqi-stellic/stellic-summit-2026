@@ -241,6 +241,21 @@ function CreditGroup({
   )
 }
 
+/* ============================================================ DropSlot
+   The space a dragged course is about to take. Sorting inside a term already
+   opens a gap on its own; this is for the crossing, where the card being
+   dragged belongs to another term's list and cannot. */
+
+function DropSlot({ height }: { height: number }) {
+  return (
+    <div
+      aria-hidden="true"
+      style={{ height }}
+      className="animate-fade w-full shrink-0 rounded-md border border-dashed border-input bg-gray-5"
+    />
+  )
+}
+
 /* ============================================================ SemesterCard
    Also the drop target: the whole card accepts a course unless it is locked. */
 
@@ -249,6 +264,8 @@ export function SemesterCard({
   alert,
   settling,
   revealed,
+  dropAt,
+  dropHeight,
   addable,
   onRemoveCourse,
   onAddCourse,
@@ -260,6 +277,9 @@ export function SemesterCard({
   settling?: boolean
   /** How much of a landing draft has arrived; Infinity once it all has. */
   revealed: number
+  /** Where a course crossing into this term would land, and how tall it is. */
+  dropAt?: number
+  dropHeight: number
   /** What "+ Add to Term" can offer. */
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
@@ -276,7 +296,7 @@ export function SemesterCard({
    * other than the course list. */
   const headerHasGap = term.alert != null || term.courses.length === 0 || onExplain != null
 
-  const rows = term.courses.map((course) => {
+  const rows: ReactNode[] = term.courses.map((course) => {
     const struck = course.draft?.mark === "moved" || course.draft?.mark === "removed"
     return term.locked || struck ? (
       <AuditRow key={course.id} course={course} locked={term.locked} settling={settling} />
@@ -348,7 +368,13 @@ export function SemesterCard({
           strategy={verticalListSortingStrategy}
         >
           <div className="flex flex-col gap-2">
-            {rows}
+            {dropAt == null
+              ? rows
+              : [
+                  ...rows.slice(0, dropAt),
+                  <DropSlot key="drop" height={dropHeight} />,
+                  ...rows.slice(dropAt),
+                ]}
             {!term.locked && <AddCourseMenu options={addable} onPick={onAddCourse} />}
           </div>
         </SortableContext>
@@ -413,6 +439,7 @@ export function YearSection({
   renderAlert,
   settling,
   revealed,
+  drop,
   addable,
   onRemoveCourse,
   onAddCourse,
@@ -422,6 +449,9 @@ export function YearSection({
   renderAlert?: (term: Term) => ReactNode
   settling?: boolean
   revealed: number
+  /** The term a dragged course is crossing into, where it would sit, and how
+   *  much room it needs. */
+  drop: { termId: string; index: number; height: number } | null
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (termId: string, entry: CatalogEntry) => void
@@ -456,6 +486,8 @@ export function YearSection({
               alert={renderAlert?.(term)}
               settling={settling}
               revealed={revealed}
+              dropAt={drop?.termId === term.id ? drop.index : undefined}
+              dropHeight={drop?.height ?? 64}
               addable={addable}
               onRemoveCourse={onRemoveCourse}
               onAddCourse={(entry) => onAddCourse(term.id, entry)}
