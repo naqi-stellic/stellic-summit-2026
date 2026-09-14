@@ -11,12 +11,16 @@ import { Button } from "@/components/ui/button"
 export function DraftBar({
   added,
   removed,
+  showRemoved,
   leaving,
   onExit,
   onAccept,
 }: {
   added: number
   removed: number
+  /** Whether this draft takes anything out at all. The count itself climbs
+   *  from zero as the plan lands, so it cannot answer that on its own. */
+  showRemoved: boolean
   /** The draft is being accepted: the bar waits for the plan to settle, then
    *  sees itself out. */
   leaving?: boolean
@@ -45,7 +49,7 @@ export function DraftBar({
       <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
         <div className="flex items-center gap-1">
           <Badge variant="success">+{added} added</Badge>
-          {removed > 0 && <Badge variant="danger">-{removed} removed</Badge>}
+          {showRemoved && <Badge variant="danger">-{removed} removed</Badge>}
         </div>
         <Button variant="primary" disabled={leaving} onClick={onAccept}>
           Accept draft

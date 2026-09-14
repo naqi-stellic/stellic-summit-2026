@@ -93,8 +93,9 @@ export type Draft = {
 }
 
 /** Reads a draft's tallies off the marks themselves, so a change made by hand
- *  counts exactly like one the generator made. */
-export function summariseDraft(years: Year[], optionId: string): Draft {
+ *  counts exactly like one the generator made. `upTo` limits the count to the
+ *  cards that have arrived, which is how the tallies climb as a draft lands. */
+export function draftTally(years: Year[], upTo = Infinity): { added: number; removed: number } {
   let added = 0
   let removed = 0
 
@@ -102,7 +103,7 @@ export function summariseDraft(years: Year[], optionId: string): Draft {
     for (const term of year.terms) {
       for (const course of term.courses) {
         const mark = course.draft
-        if (!mark) continue
+        if (!mark || mark.order >= upTo) continue
         if (mark.mark === "added") {
           added += 1
           /* It is here because it left somewhere else. */
@@ -114,7 +115,24 @@ export function summariseDraft(years: Year[], optionId: string): Draft {
     }
   }
 
-  return { optionId, years, added, removed, graduation: lastWorkingTerm(years) }
+  return { added, removed }
+}
+
+/** The highest order a draft's marks carry, which is how long it takes to land. */
+export function draftLength(years: Year[]): number {
+  let last = 0
+  for (const year of years) {
+    for (const term of year.terms) {
+      for (const course of term.courses) {
+        if (course.draft) last = Math.max(last, course.draft.order)
+      }
+    }
+  }
+  return last
+}
+
+export function summariseDraft(years: Year[], optionId: string): Draft {
+  return { optionId, years, ...draftTally(years), graduation: lastWorkingTerm(years) }
 }
 
 let seq = 0

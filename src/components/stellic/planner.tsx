@@ -35,12 +35,18 @@ const DRAFT_STYLE: Record<DraftMark, { card: string; note: string; icon: IconNam
   removed: { card: "border-alert-50 bg-alert-5", note: "text-alert-100", icon: "remove" },
 }
 
+/** How far apart the cards of a landing draft arrive. The tallies count in
+ *  step with it, so the same value drives both. */
+export const STREAM_MS = 130
+
+/** The last card that gets a delay of its own; past this the tail lands
+ *  together rather than keeping a long plan arriving for half a minute. */
+export const STREAM_CAP = 36
+
 /** Entrance delay. The generator places one course at a time and the cards
- *  follow it, far enough apart to be seen arriving one by one rather than a
- *  term at a time. Capped, or the tail of a long plan would still be landing
- *  minutes later. */
+ *  follow it, far enough apart to be seen arriving one by one. */
 function enterDelay(order: number): string {
-  return `${Math.min(order, 36) * 80}ms`
+  return `${Math.min(order, STREAM_CAP) * STREAM_MS}ms`
 }
 
 /** The same idea on the way out: accepting a draft settles the cards in the
@@ -190,12 +196,21 @@ function SortableAuditRow({
    own courses, so the heading can never drift from the list beneath it. The
    badges tally what a draft proposes for this term. */
 
-function CreditGroup({ term, settling }: { term: Term; settling?: boolean }) {
+function CreditGroup({
+  term,
+  settling,
+  revealed,
+}: {
+  term: Term
+  settling?: boolean
+  revealed: number
+}) {
   const credits = termCredits(term)
-  const added = term.courses.filter((c) => c.draft?.mark === "added").length
-  const dropped = term.courses.filter(
-    (c) => c.draft?.mark === "removed" || c.draft?.mark === "moved"
-  ).length
+  /* A card that has not arrived yet is not in the tally yet. */
+  const landed = term.courses.filter((c) => c.draft && c.draft.order < revealed)
+  const added = landed.filter((c) => c.draft!.mark === "added").length
+  const dropped = landed.filter((c) => c.draft!.mark !== "added").length
+  const eventual = term.courses.filter((c) => c.draft).length
 
   return (
     <div className="flex w-full items-center justify-between gap-2 pt-4">
@@ -209,15 +224,17 @@ function CreditGroup({ term, settling }: { term: Term; settling?: boolean }) {
         <AuditIcon state={term.state} />
         {CREDIT_GROUP_LABEL[term.state]} ({credits} Credit{credits === 1 ? "" : "s"})
       </p>
-      {added + dropped > 0 && (
+      {eventual > 0 && (
         <div
           className={cn(
             "flex shrink-0 items-center gap-1 transition-opacity duration-300",
             settling && "opacity-0"
           )}
         >
-          {added > 0 && <Badge variant="success">+{added}</Badge>}
-          {dropped > 0 && <Badge variant="danger">-{dropped}</Badge>}
+          <Badge variant="success">+{added}</Badge>
+          {term.courses.some((c) => c.draft && c.draft.mark !== "added") && (
+            <Badge variant="danger">-{dropped}</Badge>
+          )}
         </div>
       )}
     </div>
@@ -231,6 +248,7 @@ export function SemesterCard({
   term,
   alert,
   settling,
+  revealed,
   addable,
   onRemoveCourse,
   onAddCourse,
@@ -240,6 +258,8 @@ export function SemesterCard({
   alert?: ReactNode
   /** The draft is being accepted. */
   settling?: boolean
+  /** How much of a landing draft has arrived; Infinity once it all has. */
+  revealed: number
   /** What "+ Add to Term" can offer. */
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
@@ -319,7 +339,9 @@ export function SemesterCard({
 
         {alert}
 
-        {term.courses.length > 0 && <CreditGroup term={term} settling={settling} />}
+        {term.courses.length > 0 && (
+          <CreditGroup term={term} settling={settling} revealed={revealed} />
+        )}
 
         <SortableContext
           items={term.courses.map((c) => c.id)}
@@ -390,6 +412,7 @@ export function YearSection({
   year,
   renderAlert,
   settling,
+  revealed,
   addable,
   onRemoveCourse,
   onAddCourse,
@@ -398,6 +421,7 @@ export function YearSection({
   year: Year
   renderAlert?: (term: Term) => ReactNode
   settling?: boolean
+  revealed: number
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (termId: string, entry: CatalogEntry) => void
@@ -431,6 +455,7 @@ export function YearSection({
               term={term}
               alert={renderAlert?.(term)}
               settling={settling}
+              revealed={revealed}
               addable={addable}
               onRemoveCourse={onRemoveCourse}
               onAddCourse={(entry) => onAddCourse(term.id, entry)}

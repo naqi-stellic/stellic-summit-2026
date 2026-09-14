@@ -16,7 +16,14 @@ import { Icon, type IconName } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
 import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { GeneratePlanPanel } from "@/components/stellic/generate-plan-panel"
-import { AuditRow, NoActionsAlert, TimelineRail, YearSection } from "@/components/stellic/planner"
+import {
+  AuditRow,
+  NoActionsAlert,
+  STREAM_CAP,
+  STREAM_MS,
+  TimelineRail,
+  YearSection,
+} from "@/components/stellic/planner"
 import { AddSlot } from "@/components/stellic/primitives"
 import {
   Alert,
@@ -32,6 +39,8 @@ import {
   acceptDraft,
   addCourse,
   addableCourses,
+  draftLength,
+  draftTally,
   explainTerm,
   generateDraft,
   moveInDraft,
@@ -158,6 +167,13 @@ export function PlanYourPath() {
   /* The playground frames itself while the run is on its last step, so the plan
    * arrives into something rather than appearing with it. */
   const [framing, setFraming] = useState(false)
+  /* Bumped whenever a draft should land afresh — generated, or a different
+   * option chosen. A change made by hand is not a new arrival, so it leaves
+   * this alone and the plan on screen stays put. */
+  const [streamId, setStreamId] = useState(0)
+  /* How much of the landing draft has arrived. Infinity once it all has, which
+   * is also the resting state for a draft that is just sitting there. */
+  const [revealed, setRevealed] = useState(Infinity)
 
   const draft =
     (optionId === CUSTOM_ID ? custom?.draft : drafts?.made.find((d) => d.optionId === optionId)) ??
@@ -179,6 +195,8 @@ export function PlanYourPath() {
   /* Offered by every term's "+ Add to Term", so the same requirement is never
    * offered twice over. */
   const addable = addableCourses(shown)
+  /* What the bar says while a draft is arriving. */
+  const landedTally = draft ? draftTally(draft.years, revealed) : { added: 0, removed: 0 }
   const standing = planStanding(years)
 
   const optionSummaries = [
@@ -210,6 +228,25 @@ export function PlanYourPath() {
 
   /* The options are built around the pace the student asked for, so the answer
    * from step 2 decides what the three of them look like. */
+  /* The cards land on CSS delays; this walks the same interval so the tallies
+   * climb with them rather than standing at the total from the first frame. */
+  const landing = draft?.years
+  useEffect(() => {
+    if (!landing) return
+    const last = Math.min(draftLength(landing), STREAM_CAP)
+    setRevealed(0)
+    let at = 0
+    const tick = window.setInterval(() => {
+      at += 1
+      setRevealed(at > last ? Infinity : at)
+      if (at > last) window.clearInterval(tick)
+    }, STREAM_MS)
+    return () => window.clearInterval(tick)
+    /* Keyed on the arrival, not on the draft: editing one by hand must not set
+       the whole plan landing again. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streamId])
+
   /* The first change is usually below the fold, and a plan you never saw
    * arrive may as well have been there all along. */
   const hadDraft = useRef(false)
@@ -226,6 +263,7 @@ export function PlanYourPath() {
 
   function startDraft(coursesPerTerm: number) {
     setFraming(false)
+    setStreamId((n) => n + 1)
     const options = planOptions(coursesPerTerm)
     setDrafts({ options, made: options.map((o) => generateDraft(years, o)) })
     setCustom(null)
@@ -235,6 +273,7 @@ export function PlanYourPath() {
 
   function dropDraft() {
     setFraming(false)
+    setRevealed(Infinity)
     setDrafts(null)
     setCustom(null)
     setExplained(null)
@@ -315,6 +354,8 @@ export function PlanYourPath() {
             onSelectOption={(id) => {
               setOptionId(id)
               setExplained(null)
+              /* A different option is a different plan: it lands like one. */
+              setStreamId((n) => n + 1)
             }}
             onFraming={() => setFraming(true)}
             onGenerated={startDraft}
@@ -342,8 +383,9 @@ export function PlanYourPath() {
         <div className="relative flex min-w-0 flex-1 flex-col">
           {draft && (
             <DraftBar
-              added={draft.added}
-              removed={draft.removed}
+              added={landedTally.added}
+              removed={landedTally.removed}
+              showRemoved={draft.removed > 0}
               leaving={accepting}
               onExit={() => {
                 dropDraft()
@@ -415,12 +457,13 @@ export function PlanYourPath() {
 
           {/* Keyed on the option so switching one replays the entrances rather
               than swapping the cards in place. */}
-          <div key={draft?.optionId ?? "plan"} className="contents">
+          <div key={draft ? `draft-${streamId}` : "plan"} className="contents">
             {shown.map((year) => (
               <YearSection
                 key={year.label}
                 year={year}
                 settling={accepting}
+                revealed={revealed}
                 addable={addable}
                 renderAlert={(term) => (
                   <>
