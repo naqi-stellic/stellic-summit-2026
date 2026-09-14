@@ -57,6 +57,10 @@ const ICONS = {
       },
     ],
   },
+  remove: {
+    viewBox: "0 0 24 24",
+    parts: [{ d: "M19 13H5v-2h14v2z" }],
+  },
   "more-horiz": {
     viewBox: "0 0 24 24",
     parts: [

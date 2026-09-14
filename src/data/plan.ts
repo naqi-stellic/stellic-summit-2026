@@ -284,3 +284,18 @@ export function expectedGraduation(years: Year[]): string {
 export function nextYearNumber(years: Year[]): number {
   return 1 + years.length + 1
 }
+
+/** Every term the pacing step can include or exclude: the plan's own terms plus
+ *  the summers, which the planner canvas does not show but the student can
+ *  still choose to study through. Terms already under way are not on offer. */
+export function selectableTerms(years: Year[]): string[] {
+  const terms: string[] = []
+  for (const year of years) {
+    const start = Number(year.label.split("-")[0])
+    for (const term of year.terms) {
+      if (!term.locked) terms.push(term.name)
+    }
+    terms.push(`Summer ${start + 1}`)
+  }
+  return terms
+}

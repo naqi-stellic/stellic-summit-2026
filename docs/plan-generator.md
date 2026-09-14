@@ -66,11 +66,24 @@ columns rather than an extra divider. Sizes are pixels in react-resizable-panels
 v4, so they are the design's own numbers: the panel opens at 520px, clamps
 between 340 and 760, and the planner keeps 520px.
 
-Step 1 asks three questions. It shows Courses and Milestones progress bars, the
-plan summary, and a keep-or-choose radio (shadcn `radio-group`, which is what
-the Figma component points at). Every figure comes from `planStanding()` — the
-tallies, the bar shares, and the "Keep my N courses" copy — so Figma's own
-numbers there are placeholders that were deliberately not copied.
+**Step 1** shows Courses and Milestones progress, the plan summary, and a
+keep-or-choose radio. Every figure comes from `planStanding()` — the tallies,
+the bar shares, and the "Keep my N courses" copy — so Figma's own numbers there
+are placeholders that were deliberately not copied.
+
+**Step 2** sets pacing: Full-time, Part-time, or Custom. Custom expands in place
+to a credits-per-term stepper and two term filters. Both filters are off by
+default; switching one on reveals a search field that opens its options on focus
+and collects picks as removable tags (`TermMultiSelect`, built on shadcn
+`popover` + `command`).
+
+The terms on offer come from `selectableTerms()`: every term in the plan that is
+not already under way, **plus the summers**, which the planner canvas never shows
+but a student can still choose to study through. So the list runs Spring 2028,
+Summer 2028, Fall 2028 … Summer 2031 — eleven terms, where the canvas shows
+eight.
+
+Step 3 is not designed yet, so Continue is disabled on the last step.
 
 ## Responsive
 

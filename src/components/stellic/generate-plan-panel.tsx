@@ -1,96 +1,36 @@
 import { cn } from "cn"
 import { useState } from "react"
 
-import { Icon, type IconName } from "@/components/icon"
+import { Icon } from "@/components/icon"
+import {
+  GeneratePlanPace,
+  INITIAL_PACE,
+  type PaceState,
+} from "@/components/stellic/generate-plan-pace"
+import { GeneratePlanScope } from "@/components/stellic/generate-plan-scope"
 import { Button } from "@/components/ui/button"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { DEGREE, type PlanStanding } from "@/data/plan"
+import type { PlanStanding } from "@/data/plan"
 
 /* The Generate Plan wizard that opens beside the planner. Padding subtracts
  * the border width where a container is stroked (see button.tsx for why). */
 
 const TOTAL_STEPS = 3
 
-/* ---------------------------------------------------------------- progress */
-
-type Segment = { share: number; className: string }
-
-/** Leading segments take their share of the width; the last one absorbs the
- *  remainder, so the bar always fills exactly. */
-function ProgressBar({ segments }: { segments: Segment[] }) {
-  return (
-    <div className="flex h-2 w-full items-start">
-      {segments.map((segment, i) => {
-        const last = i === segments.length - 1
-        return (
-          <div
-            key={i}
-            className={cn(
-              "h-full",
-              i === 0 && "rounded-l-full",
-              last ? "min-w-0 flex-1 rounded-r-full" : "border-r border-white",
-              segment.className
-            )}
-            style={last ? undefined : { width: `${segment.share * 100}%` }}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-function Tally({ items }: { items: { icon: IconName; tone: string; value: number }[] }) {
-  return (
-    <div className="flex flex-wrap items-center gap-x-[17px]">
-      {items.map((item) => (
-        <span
-          key={item.icon + item.value}
-          className="flex items-center gap-1 text-body-md text-gray-80"
-        >
-          <Icon name={item.icon} size={16} className={item.tone} />
-          {item.value}
-        </span>
-      ))}
-    </div>
-  )
-}
-
-/* ---------------------------------------------------------------- panel */
-
 export function GeneratePlanPanel({
   standing,
   graduation,
-  step = 1,
+  terms,
   onClose,
 }: {
   standing: PlanStanding
   graduation: string
-  step?: number
+  /** Terms the pacing step can include or exclude, summers included. */
+  terms: string[]
   onClose: () => void
 }) {
+  const [step, setStep] = useState(1)
   const [keepPlanned, setKeepPlanned] = useState("yes")
-
-  const courses = standing.total.reqs
-  const milestones = standing.milestones
-
-  const planning = [
-    { label: "Programs", value: DEGREE.program },
-    { label: "Concentration", value: DEGREE.concentration },
-    { label: "Expected Graduation", value: graduation },
-  ]
-
-  const choices = [
-    {
-      value: "yes",
-      label: "Yes",
-      detail: `Keep my ${standing.planned.reqs} courses and placeholders and fill in the blanks to complete my journey`,
-    },
-    {
-      value: "no",
-      label: "No",
-      detail: "Choose the courses and placeholders to keep and which can be moved or swapped",
-    },
-  ]
+  const [pace, setPace] = useState<PaceState>(INITIAL_PACE)
 
   return (
     <aside className="@container flex h-full w-full flex-col overflow-x-clip overflow-y-auto bg-card">
@@ -121,110 +61,32 @@ export function GeneratePlanPanel({
       </header>
 
       <div className="flex flex-1 flex-col gap-8 p-6">
-        <div className="flex w-full flex-col gap-2">
-          <h3 className="text-h400 font-semibold text-black">
-            Let's plan the rest of your journey
-          </h3>
-          <p className="text-body-md text-gray-80">
-            Answer three questions and we'll draft a term-by-term plan. You can change anything
-            before you save it.
-          </p>
+        {step === 1 && (
+          <GeneratePlanScope
+            standing={standing}
+            graduation={graduation}
+            keepPlanned={keepPlanned}
+            onKeepPlannedChange={setKeepPlanned}
+          />
+        )}
+
+        {step === 2 && <GeneratePlanPace terms={terms} state={pace} onChange={setPace} />}
+
+        <div className="flex w-full items-center gap-2">
+          {step > 1 && (
+            <Button className="flex-1" onClick={() => setStep(step - 1)}>
+              Back
+            </Button>
+          )}
+          <Button
+            variant="primary"
+            className="flex-1"
+            disabled={step === TOTAL_STEPS}
+            onClick={() => setStep(step + 1)}
+          >
+            Continue
+          </Button>
         </div>
-
-        <div className="flex w-full flex-col gap-6">
-          <div className="flex w-full flex-col gap-2">
-            <p className="text-body-md font-semibold text-gray-100">Courses</p>
-            <ProgressBar
-              segments={[
-                { share: standing.completed.reqs / courses, className: "bg-success-50" },
-                { share: standing.planned.reqs / courses, className: "bg-warning-75" },
-                { share: 0, className: "bg-gray-5" },
-              ]}
-            />
-            <Tally
-              items={[
-                { icon: "check", tone: "text-success-50", value: standing.completed.reqs },
-                { icon: "check", tone: "text-warning-25", value: standing.planned.reqs },
-                { icon: "crop-square", tone: "text-alert-50", value: standing.remaining.reqs },
-              ]}
-            />
-          </div>
-
-          <div className="flex w-full flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Icon name="outlined-flag" size={16} className="text-gray-100" />
-              <p className="text-body-md font-semibold text-gray-100">Milestones</p>
-            </div>
-            <ProgressBar
-              segments={[
-                { share: milestones.completed / milestones.total, className: "bg-success-50" },
-                { share: 0, className: "bg-gray-5" },
-              ]}
-            />
-            <Tally
-              items={[
-                { icon: "check", tone: "text-success-50", value: milestones.completed },
-                { icon: "crop-square", tone: "text-alert-50", value: milestones.remaining },
-              ]}
-            />
-          </div>
-        </div>
-
-        <div className="flex w-full flex-col gap-2">
-          <div className="flex items-center pb-2">
-            <h4 className="text-body-md font-semibold text-gray-100">What we&rsquo;re planning</h4>
-          </div>
-          {planning.map((row) => (
-            <div
-              key={row.label}
-              className="flex w-full flex-col gap-x-2 @xs:flex-row @xs:items-start"
-            >
-              <span className="text-body-md text-gray-80 @xs:w-[150px] @xs:shrink-0">
-                {row.label}
-              </span>
-              <span className="min-w-0 flex-1 text-body-md text-gray-100">{row.value}</span>
-              <button
-                type="button"
-                className="shrink-0 cursor-pointer text-body-md text-gray-80 underline [text-underline-position:from-font]"
-              >
-                edit
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex w-full flex-col gap-2">
-          <div className="flex w-full items-center pb-2">
-            <h4 className="flex-1 text-body-md font-semibold text-gray-100">
-              Keep everything already planned?
-            </h4>
-          </div>
-          <RadioGroup value={keepPlanned} onValueChange={setKeepPlanned} className="w-full gap-2">
-            {choices.map((choice) => (
-              <label
-                key={choice.value}
-                className={cn(
-                  "flex w-full cursor-pointer items-center justify-between rounded-md border p-[11px] transition-colors",
-                  keepPlanned === choice.value ? "border-primary-50" : "border-gray-40"
-                )}
-              >
-                <span className="flex min-w-0 flex-1 items-start gap-3">
-                  <span className="flex items-center py-0.5">
-                    <RadioGroupItem value={choice.value} />
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px text-body-md">
-                    <span className="text-foreground">{choice.label}</span>
-                    <span className="text-gray-80">{choice.detail}</span>
-                  </span>
-                </span>
-              </label>
-            ))}
-          </RadioGroup>
-        </div>
-
-        <Button variant="primary" className="w-full">
-          Continue
-        </Button>
       </div>
     </aside>
   )

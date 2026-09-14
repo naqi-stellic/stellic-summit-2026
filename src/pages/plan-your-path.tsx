@@ -35,6 +35,7 @@ import {
   nextYearNumber,
   planStanding,
   removeCourse,
+  selectableTerms,
   type Term,
   type Year,
 } from "@/data/plan"
@@ -152,6 +153,7 @@ export function PlanYourPath() {
           <GeneratePlanPanel
             standing={standing}
             graduation={expectedGraduation(years)}
+            terms={selectableTerms(years)}
             onClose={() => setGenerateOpen(false)}
           />
         )
