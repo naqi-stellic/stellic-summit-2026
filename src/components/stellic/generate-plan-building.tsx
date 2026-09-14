@@ -70,7 +70,7 @@ export function GeneratePlanBuilding({
     },
     {
       title: "Checking credit limits and offerings",
-      detail: `Up to ${PLANNING_RULES.maxCreditsPerTerm} credits a term through ${PLANNING_RULES.offeringsThrough}`,
+      detail: `Up to ${PLANNING_RULES.maxCreditsPerTerm} credits a term, offerings confirmed through ${PLANNING_RULES.offeringsThrough}`,
     },
     {
       title: "Fitting courses into your terms",

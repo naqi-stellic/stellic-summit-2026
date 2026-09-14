@@ -25,8 +25,11 @@ const buttonVariants = cva(
         tertiary:
           "border-input bg-card text-foreground shadow-xs hover:bg-gray-5 " +
           "aria-pressed:border-primary-50 aria-pressed:bg-primary-0 aria-pressed:text-primary-50 aria-pressed:hover:bg-primary-0",
+        /* Disabled primary has its own fill and label in the design — grey on
+         * grey at full opacity, rather than a faded blue. */
         primary:
-          "border-transparent bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+          "border-transparent bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 " +
+          "disabled:bg-gray-5 disabled:text-gray-80 disabled:opacity-100 disabled:shadow-none",
         ghost: "border-transparent hover:bg-gray-5",
       },
       size: {

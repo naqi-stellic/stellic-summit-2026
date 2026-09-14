@@ -7,6 +7,7 @@ import { GeneratePlanNotes } from "@/components/stellic/generate-plan-notes"
 import {
   GeneratePlanPace,
   INITIAL_PACE,
+  PACE_CREDITS,
   describePace,
   type PaceState,
 } from "@/components/stellic/generate-plan-pace"
@@ -14,16 +15,24 @@ import {
   GeneratePlanOptions,
   type PlanOptionSummary,
 } from "@/components/stellic/generate-plan-options"
+import { planSettings } from "@/components/stellic/plan-settings"
 import { GeneratePlanScope } from "@/components/stellic/generate-plan-scope"
 import { GeneratePlanSummary } from "@/components/stellic/generate-plan-summary"
 import { Button } from "@/components/ui/button"
-import type { PlanStanding } from "@/data/plan"
+import { CREDITS_PER_COURSE, type PlanStanding } from "@/data/plan"
 
 /* The Generate Plan wizard that opens beside the planner. Three questions, then
  * a review of the answers. Padding subtracts the border width where a container
  * is stroked (see button.tsx for why). */
 
 const TOTAL_STEPS = 3
+
+/** The pacing answer as a number of courses a term, which is how the generator
+ *  thinks about a term's load. */
+function coursesPerTerm(pace: PaceState): number {
+  const credits = PACE_CREDITS[pace.pace] ?? pace.maxCredits
+  return Math.max(1, Math.round(credits / CREDITS_PER_COURSE))
+}
 
 /** One line reading the wizard's answers back, for the draft's instructions. */
 function instructions(
@@ -71,8 +80,9 @@ export function GeneratePlanPanel({
   /** Seats the chosen draft is holding for a requirement with no course yet. */
   placeholders: number
   onSelectOption: (id: string) => void
-  /** The run is over: put the draft on the canvas. */
-  onGenerated: () => void
+  /** The run is over: put the draft on the canvas, built to this many courses
+   *  a term — the pace the student asked for. */
+  onGenerated: (coursesPerTerm: number) => void
   /** Take the draft back off the canvas so the answers can be changed. */
   onDiscardDraft: () => void
   onClose: () => void
@@ -84,11 +94,25 @@ export function GeneratePlanPanel({
   const [keepPlanned, setKeepPlanned] = useState("yes")
   const [pace, setPace] = useState<PaceState>(INITIAL_PACE)
   const [notes, setNotes] = useState("")
+  /* Whether the instructions card is open. Editing does not touch the draft:
+   * it stays on the canvas until it is re-generated or left. */
+  const [editing, setEditing] = useState(false)
+  /* The answers the draft on the canvas was built from, so the card can tell
+   * whether there is anything new to run. */
+  const [generatedFrom, setGeneratedFrom] = useState<string | null>(null)
+  const answers = JSON.stringify({ keepPlanned, pace, notes })
+  /* A step opened from Edit Settings is a detour, not the wizard running: it
+   * goes back where it came from rather than on to the next question. */
+  const [detour, setDetour] = useState(false)
 
   function startOver() {
     setKeepPlanned("yes")
     setPace(INITIAL_PACE)
     setNotes("")
+    setEditing(false)
+    setDetour(false)
+    setGeneratedFrom(null)
+    onDiscardDraft()
     setView(1)
   }
 
@@ -152,7 +176,8 @@ export function GeneratePlanPanel({
           <GeneratePlanBuilding
             standing={standing}
             onDone={() => {
-              onGenerated()
+              onGenerated(coursesPerTerm(pace))
+              setGeneratedFrom(answers)
               setView("options")
             }}
           />
@@ -161,12 +186,24 @@ export function GeneratePlanPanel({
         {view === "options" && (
           <GeneratePlanOptions
             instructions={instructions(keepPlanned, pace, notes, placeholders)}
+            settings={planSettings({ standing, graduation, campus, keepPlanned, pace, notes })}
+            editing={editing}
             options={options}
             selected={selectedOption}
             onSelect={onSelectOption}
-            onEdit={() => {
+            onEdit={() => setEditing(true)}
+            onCancelEdit={() => setEditing(false)}
+            onEditStep={(step) => {
+              setDetour(true)
+              setView(step)
+            }}
+            onStartOver={startOver}
+            canRegenerate={generatedFrom !== null && generatedFrom !== answers}
+            onRegenerate={() => {
+              /* The old draft comes off the canvas while the new one is built. */
               onDiscardDraft()
-              setView("summary")
+              setEditing(false)
+              setView("building")
             }}
           />
         )}
@@ -179,6 +216,7 @@ export function GeneratePlanPanel({
             keepPlanned={keepPlanned}
             pace={pace}
             notes={notes}
+            onEdit={(step) => setView(step)}
           />
         )}
 
@@ -199,6 +237,19 @@ export function GeneratePlanPanel({
                   Generate Plan
                 </Button>
               </>
+            ) : detour ? (
+              /* One way out of a detour: back to the plan you left, with the
+                 answer you came to change. */
+              <Button
+                variant="primary"
+                className="flex-1"
+                onClick={() => {
+                  setDetour(false)
+                  setView("options")
+                }}
+              >
+                Done
+              </Button>
             ) : (
               <>
                 {(view as number) > 1 && (

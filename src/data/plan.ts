@@ -64,7 +64,8 @@ export const PLANNING_RULES = {
   requirementPriority: "Core before general",
   prerequisites: "Applied",
   doubleCounting: "Applied",
-  /** How far the published course catalogue reaches. */
+  /** How far the published catalogue reaches. A plan can run past it — later
+   *  terms are projected from the usual pattern rather than confirmed. */
   offeringsThrough: "Spring 2029",
   /** Hard ceiling per term — six courses — and what the custom pacing stepper
    *  clamps to. A full-time term is five. */
@@ -81,7 +82,7 @@ export const COMPLETED = {
 }
 
 /** Years the student has not planned into yet: two empty terms, nothing locked. */
-function emptyYear(start: number): Year {
+export function emptyYear(start: number): Year {
   return {
     label: `${start}-${start + 1}`,
     phase: "future",

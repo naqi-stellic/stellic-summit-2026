@@ -9,9 +9,21 @@ import { PLANNING_RULES } from "@/data/plan"
 
 /* Step 2: how many credits a term, and which terms are in play. */
 
+/** What each named pace means in credits — the one place that decides, so the
+ *  radio's own description and the load the generator plans to agree. */
+export const PACE_CREDITS: Record<string, number> = { "full-time": 15, "part-time": 9 }
+
 const PACES = [
-  { value: "full-time", label: "Full-time", detail: "About 15 credits a term, no summers" },
-  { value: "part-time", label: "Part-time", detail: "About 9 credits a term, no summers" },
+  {
+    value: "full-time",
+    label: "Full-time",
+    detail: `About ${PACE_CREDITS["full-time"]} credits a term, no summers`,
+  },
+  {
+    value: "part-time",
+    label: "Part-time",
+    detail: `About ${PACE_CREDITS["part-time"]} credits a term, no summers`,
+  },
   { value: "custom", label: "Custom", detail: "Set it yourself" },
 ] as const
 

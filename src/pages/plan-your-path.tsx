@@ -28,11 +28,12 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  PLAN_OPTIONS,
   acceptDraft,
   explainTerm,
   generateDraft,
+  planOptions,
   type Draft,
+  type DraftOption,
 } from "@/data/draft"
 import {
   COMPLETED,
@@ -132,12 +133,12 @@ export function PlanYourPath() {
 
   /* One draft per option, generated together so the panel can show what each
    * one costs before the student commits to looking at it. */
-  const [drafts, setDrafts] = useState<Draft[] | null>(null)
-  const [optionId, setOptionId] = useState(PLAN_OPTIONS[0].id)
+  const [drafts, setDrafts] = useState<{ options: DraftOption[]; made: Draft[] } | null>(null)
+  const [optionId, setOptionId] = useState("steady")
   const [explained, setExplained] = useState<string | null>(null)
 
-  const draft = drafts?.find((d) => d.optionId === optionId) ?? null
-  const option = PLAN_OPTIONS.find((o) => o.id === optionId)!
+  const draft = drafts?.made.find((d) => d.optionId === optionId) ?? null
+  const option = drafts?.options.find((o) => o.id === optionId) ?? null
   /* The draft is a proposal laid over the plan; the plan itself is untouched
    * underneath until it is accepted. */
   const shown = draft ? draft.years : years
@@ -151,8 +152,8 @@ export function PlanYourPath() {
   const dragging = draggingId ? findCourse(years, draggingId) : null
   const standing = planStanding(years)
 
-  const optionSummaries = (drafts ?? []).map((d) => {
-    const meta = PLAN_OPTIONS.find((o) => o.id === d.optionId)!
+  const optionSummaries = (drafts?.made ?? []).map((d) => {
+    const meta = drafts!.options.find((o) => o.id === d.optionId)!
     return {
       id: meta.id,
       label: meta.label,
@@ -175,9 +176,12 @@ export function PlanYourPath() {
       )
     : 0
 
-  function startDraft() {
-    setDrafts(PLAN_OPTIONS.map((o) => generateDraft(years, o)))
-    setOptionId(PLAN_OPTIONS[0].id)
+  /* The options are built around the pace the student asked for, so the answer
+   * from step 2 decides what the three of them look like. */
+  function startDraft(coursesPerTerm: number) {
+    const options = planOptions(coursesPerTerm)
+    setDrafts({ options, made: options.map((o) => generateDraft(years, o)) })
+    setOptionId(options[0].id)
     setExplained(null)
   }
 
@@ -338,7 +342,7 @@ export function PlanYourPath() {
                 renderAlert={(term) => (
                   <>
                     {termBanner(term, draft != null)}
-                    {explained === term.id && (
+                    {explained === term.id && option && (
                       <p className="animate-rise w-full rounded-md border border-gray-40 bg-gray-0 p-[11px] text-label-md text-gray-100">
                         {explainTerm(term, option)}
                       </p>
@@ -347,7 +351,7 @@ export function PlanYourPath() {
                 )}
                 onRemoveCourse={handleRemoveCourse}
                 onExplain={
-                  draft
+                  option
                     ? (term) => setExplained((current) => (current === term.id ? null : term.id))
                     : undefined
                 }

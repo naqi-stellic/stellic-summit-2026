@@ -2,6 +2,8 @@ import { cn } from "cn"
 import type { ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
+import { GeneratePlanEdit } from "@/components/stellic/generate-plan-edit"
+import type { SettingRow, SettingStep } from "@/components/stellic/plan-settings"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -31,28 +33,55 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 export function GeneratePlanOptions({
   instructions,
+  settings,
+  editing,
   options,
   selected,
   onSelect,
   onEdit,
+  onCancelEdit,
+  onEditStep,
+  onStartOver,
+  onRegenerate,
+  canRegenerate,
 }: {
   /** One line reading back what the draft was built from. */
   instructions: string
+  /** The same line spelled out, for when the card is opened up. */
+  settings: { choices: SettingRow[]; rules: SettingRow[] }
+  editing: boolean
   options: PlanOptionSummary[]
   selected: string
   onSelect: (id: string) => void
   onEdit: () => void
+  onCancelEdit: () => void
+  onEditStep: (step: SettingStep) => void
+  onStartOver: () => void
+  onRegenerate: () => void
+  canRegenerate: boolean
 }) {
   return (
     <>
       <Section title="Plan instructions">
-        <div className="flex w-full items-center justify-between gap-2 rounded-md border border-gray-40 bg-gray-0 p-[15px]">
-          <p className="min-w-0 flex-1 text-body-md text-gray-100">{instructions}</p>
-          <Button onClick={onEdit}>
-            <Icon name="edit" size={16} />
-            Edit
-          </Button>
-        </div>
+        {editing ? (
+          <GeneratePlanEdit
+            choices={settings.choices}
+            rules={settings.rules}
+            onCancel={onCancelEdit}
+            onEditStep={onEditStep}
+            onStartOver={onStartOver}
+            onRegenerate={onRegenerate}
+            canRegenerate={canRegenerate}
+          />
+        ) : (
+          <div className="flex w-full items-center justify-between gap-2 rounded-md border border-gray-40 bg-gray-0 p-[15px]">
+            <p className="min-w-0 flex-1 text-body-md text-gray-100">{instructions}</p>
+            <Button onClick={onEdit}>
+              <Icon name="edit" size={16} />
+              Edit
+            </Button>
+          </div>
+        )}
       </Section>
 
       <Section title="Plan options">

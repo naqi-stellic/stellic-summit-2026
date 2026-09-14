@@ -1,5 +1,13 @@
 import { REMAINING_REQUIREMENTS, REPLACEMENT_SEAT, type CatalogEntry } from "@/data/catalog"
-import { CREDITS_PER_COURSE, findCourse, type PlannedCourse, type Term, type Year } from "@/data/plan"
+import {
+  CREDITS_PER_COURSE,
+  PLANNING_RULES,
+  emptyYear,
+  findCourse,
+  type PlannedCourse,
+  type Term,
+  type Year,
+} from "@/data/plan"
 
 /* A generated draft: the student's plan with the generator's proposal laid over
  * it. Nothing is destroyed — a course the draft wants to move or drop stays on
@@ -19,46 +27,58 @@ export type DraftOption = {
   drop?: { courseId: string; reason: string }
 }
 
-export const PLAN_OPTIONS: DraftOption[] = [
-  {
-    id: "steady",
-    label: "Steady pace",
-    blurb:
-      "Five courses a term, no summers. Investments runs before Financial Modeling so the " +
-      "prerequisite is met, and the capstone lands in your final term.",
-    coursesPerTerm: 5,
-    summers: false,
-    move: {
-      courseId: "c6",
-      toTermId: "fall-2028",
-      reason: "FIN 340 is its prerequisite",
+/** The most a term can hold, from the institution's credit ceiling. */
+const MAX_COURSES_PER_TERM = Math.floor(PLANNING_RULES.maxCreditsPerTerm / CREDITS_PER_COURSE)
+const MIN_COURSES_PER_TERM = 2
+/** A guard on extending the plan, not a rule: eight years past the start is
+ *  already far beyond any pace worth proposing. */
+const MAX_YEARS = 12
+
+/** Three ways to place the same requirements, built around the pace the student
+ *  asked for: exactly that, one course heavier with summers, one course lighter.
+ *  Answer a different pace and all three move with it. */
+export function planOptions(coursesPerTerm: number): DraftOption[] {
+  const steady = clamp(coursesPerTerm)
+  const sooner = clamp(steady + 1)
+  const lighter = clamp(steady - 1)
+
+  return [
+    {
+      id: "steady",
+      label: "Steady pace",
+      blurb:
+        `${steady} courses a term, the pace you asked for, no summers. Investments runs before ` +
+        "Financial Modeling so the prerequisite is met, and the capstone lands in your final term.",
+      coursesPerTerm: steady,
+      summers: false,
+      move: { courseId: "c6", toTermId: "fall-2028", reason: "FIN 340 is its prerequisite" },
     },
-  },
-  {
-    id: "sooner",
-    label: "Finish sooner",
-    blurb:
-      "Six courses a term and a summer term each year. The heaviest option, but it clears the " +
-      "degree a full year earlier.",
-    coursesPerTerm: 6,
-    summers: true,
-    move: {
-      courseId: "c6",
-      toTermId: "summer-2028",
-      reason: "FIN 340 is its prerequisite",
+    {
+      id: "sooner",
+      label: "Finish sooner",
+      blurb:
+        `${sooner} courses a term and a summer term each year. Heavier than you asked for, but it ` +
+        "clears the degree sooner.",
+      coursesPerTerm: sooner,
+      summers: true,
+      move: { courseId: "c6", toTermId: "summer-2028", reason: "FIN 340 is its prerequisite" },
     },
-  },
-  {
-    id: "lighter",
-    label: "Lighter terms",
-    blurb:
-      "Four courses a term, which leaves room for work or a co-op. Financial Modeling is not " +
-      "offered late enough to keep, so its requirement is held as an elective seat.",
-    coursesPerTerm: 4,
-    summers: false,
-    drop: { courseId: "c6", reason: "Not offered again before you graduate" },
-  },
-]
+    {
+      id: "lighter",
+      label: "Lighter terms",
+      blurb:
+        `${lighter} courses a term, which leaves room for work or a co-op. Financial Modeling is ` +
+        "not offered late enough to keep, so its requirement is held as an elective seat.",
+      coursesPerTerm: lighter,
+      summers: false,
+      drop: { courseId: "c6", reason: "Not offered again before you graduate" },
+    },
+  ]
+}
+
+function clamp(courses: number): number {
+  return Math.max(MIN_COURSES_PER_TERM, Math.min(MAX_COURSES_PER_TERM, courses))
+}
 
 export type Draft = {
   optionId: string
@@ -178,34 +198,46 @@ export function generateDraft(base: Year[], option: DraftOption): Draft {
   }
 
   let added = 0
-  for (const year of years) {
-    for (const term of year.terms) {
-      if (term.locked) continue
 
-      const incoming: PlannedCourse[] = []
-      if (moving && moving.to === term.id) {
-        incoming.push({
-          ...moving.course,
-          id: `${moving.course.id}-to`,
-          draft: {
-            mark: "added",
-            note: `Moved from ${moving.from} — ${moving.reason}`,
-            order: order++,
-          },
-        })
-      }
+  /* Fills one term to the option's load from the front of the queue. Terms are
+   * reached in order, so the queue's own priority — core, then concentration,
+   * then general — becomes the order of the plan. */
+  const fillTerm = (term: Term): Term => {
+    if (term.locked) return term
 
-      let room = option.coursesPerTerm - keptCourses(term).length - incoming.length
-      while (room > 0 && queue.length > 0) {
-        incoming.push(draftCourse(queue.shift()!, order++))
-        added += 1
-        room -= 1
-      }
-
-      if (incoming.length > 0) {
-        edit(term.id, (t) => ({ ...t, courses: [...t.courses, ...incoming] }))
-      }
+    const incoming: PlannedCourse[] = []
+    if (moving && moving.to === term.id) {
+      incoming.push({
+        ...moving.course,
+        id: `${moving.course.id}-to`,
+        draft: {
+          mark: "added",
+          note: `Moved from ${moving.from} — ${moving.reason}`,
+          order: order++,
+        },
+      })
     }
+
+    let room = option.coursesPerTerm - keptCourses(term).length - incoming.length
+    while (room > 0 && queue.length > 0) {
+      incoming.push(draftCourse(queue.shift()!, order++))
+      added += 1
+      room -= 1
+    }
+
+    return incoming.length > 0 ? { ...term, courses: [...term.courses, ...incoming] } : term
+  }
+
+  years = years.map((year) => ({ ...year, terms: year.terms.map(fillTerm) }))
+
+  /* A light pace needs more years than the plan has. Rather than leaving
+   * requirements unplaced, the draft extends the plan — which is the same thing
+   * the student would do by hand with "Add Year". */
+  while (queue.length > 0 && years.length < MAX_YEARS) {
+    const start = Number(years.at(-1)!.label.split("-")[0]) + 1
+    const next = emptyYear(start)
+    const terms = option.summers ? [...next.terms, summerTerm(start + 1)] : next.terms
+    years = [...years, { ...next, terms: terms.map(fillTerm) }]
   }
 
   return {
