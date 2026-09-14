@@ -1,6 +1,14 @@
+import { cn } from "cn"
+
 import { Icon, type IconName } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { DEGREE } from "@/data/plan"
 
 /* The top of every plan screen: which plan, what it is for, and which years
@@ -9,12 +17,23 @@ import { DEGREE } from "@/data/plan"
 
 export type PlanAction = { label: string; icon: IconName; toggles?: boolean }
 
+/** A term as the year filter offers it: its own state, not its year's. */
+export type TabTerm = {
+  id: string
+  label: string
+  icon: IconName
+  tone: string
+}
+
 export type YearTab = {
   label: string
   icon?: IconName
   tone?: string
   selected?: boolean
   onSelect?: () => void
+  /** Given, the tab opens onto the year's terms rather than acting on its own. */
+  terms?: TabTerm[]
+  onSelectTerm?: (termId: string) => void
 }
 
 function PlanFacet({ label, value }: { label: string; value: string }) {
@@ -81,12 +100,49 @@ export function PlanHeader({
       <PlanFacet label="Pathway:" value="Business Administration: Fall Start 2026 [BSc]" />
 
       <div className="flex flex-wrap items-center gap-2 pt-2">
-        {tabs.map((tab) => (
-          <Button key={tab.label} size="sm" selected={tab.selected} onClick={tab.onSelect}>
-            {tab.icon && <Icon name={tab.icon} size={16} className={tab.tone} />}
-            {tab.label}
-          </Button>
-        ))}
+        {tabs.map((tab) => {
+          const button = (
+            <Button
+              size="sm"
+              selected={tab.selected}
+              onClick={tab.onSelect}
+              /* Open reads as hovered, which is how the design marks the tab
+                 whose menu is showing. */
+              className="data-[state=open]:bg-gray-5"
+            >
+              {tab.icon && <Icon name={tab.icon} size={16} className={tab.tone} />}
+              {tab.label}
+            </Button>
+          )
+
+          if (!tab.terms || tab.terms.length === 0) {
+            return <span key={tab.label}>{button}</span>
+          }
+
+          return (
+            <DropdownMenu key={tab.label}>
+              <DropdownMenuTrigger asChild>{button}</DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[200px]">
+                {tab.terms.map((term) => (
+                  <DropdownMenuItem
+                    key={term.id}
+                    onSelect={() => tab.onSelectTerm?.(term.id)}
+                    className="gap-2 py-1.5 pr-2 pl-8 text-body-md"
+                  >
+                    {/* In the checkmark's place, so the labels line up whether
+                        or not a term carries a mark. */}
+                    <Icon
+                      name={term.icon}
+                      size={16}
+                      className={cn("absolute left-2 shrink-0", term.tone)}
+                    />
+                    {term.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )
+        })}
       </div>
     </section>
   )

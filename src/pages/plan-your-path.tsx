@@ -20,6 +20,7 @@ import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import {
   PlanHeader,
   type PlanAction,
+  type TabTerm,
   type YearTab,
 } from "@/components/stellic/plan-header"
 import { GeneratePlanPanel } from "@/components/stellic/generate-plan-panel"
@@ -79,18 +80,38 @@ const PHASE_TAB = {
   future: {},
 } as const
 
+/* A term carries its own state in the menu, which is not always its year's: a
+   year under way holds a term in progress and a term still ahead. */
+function termTab(term: Term): TabTerm {
+  return {
+    id: term.id,
+    /* "Fall 27" rather than "Fall 2027" — the year is the thing it hangs off. */
+    label: term.name.replace(/(\d{2})(\d{2})$/, "$2"),
+    icon: term.locked ? "timelapse" : "arrow-circle-right",
+    tone: term.locked ? "text-warning-50" : "text-gray-60",
+  }
+}
+
 /* One tab per year the plan actually covers, completed year included, so the
    filter can never omit a year that is on screen. `openYear` is the year of a
    term being looked at on its own, which is what the filter then reads as. */
-function yearTabs(years: Year[], openYear?: string, onLeave?: () => void): YearTab[] {
+function yearTabs(
+  years: Year[],
+  openYear: string | undefined,
+  onLeave: () => void,
+  onOpenTerm: (termId: string) => void
+): YearTab[] {
   return [
     { label: "All Years", icon: "grid-view", selected: !openYear, onSelect: onLeave },
+    /* Finished years are a roll-up rather than a list of terms, so this one has
+       nothing to open onto. */
     { label: COMPLETED.label, ...PHASE_TAB.complete, onSelect: onLeave },
     ...years.map((year) => ({
       label: year.label,
       ...PHASE_TAB[year.phase],
       selected: year.label === openYear,
-      onSelect: onLeave,
+      terms: year.terms.map(termTab),
+      onSelectTerm: onOpenTerm,
     })),
   ]
 }
@@ -361,6 +382,12 @@ export function PlanYourPath() {
 
   const openTerm: Term | null = openTermId ? findTerm(shown, openTermId) : null
 
+  /* Opening a term puts the wizard away: it belongs to the plan as a whole. */
+  function openTermView(termId: string) {
+    setOpenTermId(termId)
+    setGenerateOpen(false)
+  }
+
   return (
     <AppShell
       title="Plan Your Path"
@@ -391,7 +418,12 @@ export function PlanYourPath() {
       {openTerm ? (
         <TermView
           term={openTerm}
-          tabs={yearTabs(shown, yearOf(shown, openTerm.id), () => setOpenTermId(null))}
+          tabs={yearTabs(
+            shown,
+            yearOf(shown, openTerm.id),
+            () => setOpenTermId(null),
+            openTermView
+          )}
         />
       ) : (
       <DndContext
@@ -438,7 +470,7 @@ export function PlanYourPath() {
           <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
           <PlanHeader
             actions={PLAN_ACTIONS}
-            tabs={yearTabs(shown)}
+            tabs={yearTabs(shown, undefined, () => setOpenTermId(null), openTermView)}
             pressed={generateOpen}
             onAction={(action) => action.toggles && setGenerateOpen((open) => !open)}
           />
@@ -471,10 +503,7 @@ export function PlanYourPath() {
                 renderAlert={(term) => termBanner(term, draft != null)}
                 onRemoveCourse={handleRemoveCourse}
                 onAddCourse={handleAddCourse}
-                onOpenTerm={(id) => {
-                  setOpenTermId(id)
-                  setGenerateOpen(false)
-                }}
+                onOpenTerm={openTermView}
               />
             ))}
           </div>
