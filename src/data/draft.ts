@@ -491,7 +491,9 @@ export function addableCourses(years: Year[]): CatalogEntry[] {
   }
 
   const unplaced = REMAINING_REQUIREMENTS.filter(
-    (entry) => !placed.has(`${entry.code} ${entry.name}`)
+    /* A seat is a placeholder for a requirement, not a course: holding one
+     * does not use it up. */
+    (entry) => entry.placeholder || !placed.has(`${entry.code} ${entry.name}`)
   )
   return [...unplaced, REPLACEMENT_SEAT]
 }

@@ -14,9 +14,14 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { useEffect, useState } from "react"
 
-import { Icon, type IconName } from "@/components/icon"
+import { Icon } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
 import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
+import {
+  PlanHeader,
+  type PlanAction,
+  type YearTab,
+} from "@/components/stellic/plan-header"
 import { GeneratePlanPanel } from "@/components/stellic/generate-plan-panel"
 import {
   AuditRow,
@@ -34,7 +39,6 @@ import {
   AlertHeader,
   AlertTitle,
 } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { CatalogEntry } from "@/data/catalog"
 import { releasableTerms } from "@/components/stellic/keep-picker"
@@ -68,8 +72,6 @@ import {
   type Year,
 } from "@/data/plan"
 
-type YearTab = { label: string; icon?: IconName; tone?: string; selected?: boolean }
-
 const PHASE_TAB = {
   complete: { icon: "check-circle", tone: "text-success-100" },
   active: { icon: "timelapse", tone: "text-warning-50" },
@@ -92,8 +94,6 @@ const SETTLE_MS = 1100
 
 /** The option that collects the student's own changes. */
 const CUSTOM_ID = "custom"
-
-type PlanAction = { label: string; icon: IconName; toggles?: boolean }
 
 const PLAN_ACTIONS: PlanAction[] = [
   { label: "Request review", icon: "assignment" },
@@ -126,24 +126,6 @@ function RegistrationAlert({ closes }: { closes: string }) {
   )
 }
 
-function PlanFacet({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
-      <span className="text-body-md font-semibold text-foreground">{label}</span>
-      <Badge variant="secondary" className="max-w-full">
-        <span className="min-w-0 truncate">{value}</span>
-        <Icon name="close" size={12} className="shrink-0" />
-      </Badge>
-      <a
-        href="#"
-        className="text-body-md text-gray-80 underline [text-underline-position:from-font]"
-      >
-        + add another
-      </a>
-    </div>
-  )
-}
-
 /** A term's banner: the registration deadline when it has one, and — while a
  *  draft is on the canvas — the reassurance that it needs nothing otherwise. */
 function termBanner(term: Term, drafting: boolean) {
@@ -173,6 +155,9 @@ export function PlanYourPath() {
   /* The playground frames itself while the run is on its last step, so the plan
    * arrives into something rather than appearing with it. */
   const [framing, setFraming] = useState(false)
+  /* A term opened on its own. The planner stays mounted behind it, so coming
+   * back does not cost the plan its scroll position or its draft. */
+  const [openTermId, setOpenTermId] = useState<string | null>(null)
   /* Bumped when a plan arrives on a canvas that had none — generating, or
    * generating again. Swapping between the options it produced, or changing one
    * by hand, is not an arrival: the plan is already there and only its contents
@@ -431,48 +416,12 @@ export function PlanYourPath() {
           {/* @container so the planner reflows to its own width — the panel
               opening matters as much as the viewport shrinking. */}
           <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
-          {/* ---------------------------------- Plan header */}
-          <section className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-              <h2 className="flex items-center gap-1 text-h400 font-semibold text-gray-100">
-                Primary Plan
-                <Icon name="expand-more" size={16} />
-              </h2>
-              <div className="flex flex-wrap items-center gap-2">
-                {PLAN_ACTIONS.map((action) => (
-                  <Button
-                    key={action.label}
-                    aria-pressed={action.toggles ? generateOpen : undefined}
-                    onClick={action.toggles ? () => setGenerateOpen((open) => !open) : undefined}
-                  >
-                    <Icon name={action.icon} size={16} />
-                    {action.label}
-                  </Button>
-                ))}
-                <Button size="icon" aria-label="Toggle sidebar">
-                  <Icon name="view-sidebar" size={16} />
-                </Button>
-                <Button size="icon" aria-label="More options">
-                  <Icon name="more-horiz" size={16} />
-                </Button>
-              </div>
-            </div>
-
-            <PlanFacet
-              label="Programs:"
-              value="BSc in Business Administration (concentration: Finance)"
-            />
-            <PlanFacet label="Pathway:" value="Business Administration: Fall Start 2026 [BSc]" />
-
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              {yearTabs(shown).map((tab) => (
-                <Button key={tab.label} size="sm" selected={tab.selected}>
-                  {tab.icon && <Icon name={tab.icon} size={16} className={tab.tone} />}
-                  {tab.label}
-                </Button>
-              ))}
-            </div>
-          </section>
+          <PlanHeader
+            actions={PLAN_ACTIONS}
+            tabs={yearTabs(shown)}
+            pressed={generateOpen}
+            onAction={(action) => action.toggles && setGenerateOpen((open) => !open)}
+          />
 
           {/* ---------------------------------- 2026-2027, collapsed */}
           <section className="flex items-start gap-4">
@@ -502,6 +451,7 @@ export function PlanYourPath() {
                 renderAlert={(term) => termBanner(term, draft != null)}
                 onRemoveCourse={handleRemoveCourse}
                 onAddCourse={handleAddCourse}
+                onOpenTerm={setOpenTermId}
               />
             ))}
           </div>

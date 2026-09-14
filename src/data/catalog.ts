@@ -38,12 +38,6 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
     reason: "Concentration elective",
     placeholder: true,
   },
-  {
-    code: "FIN ELEC",
-    name: "Finance elective",
-    reason: "Concentration elective",
-    placeholder: true,
-  },
   { code: "ENGL 210", name: "Advanced Composition", reason: "General education" },
   { code: "PHIL 240", name: "Business Ethics", reason: "General education" },
   { code: "COMM 230", name: "Public Speaking", reason: "General education" },
@@ -51,7 +45,6 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "HIST 205", name: "Modern World History", reason: "General education" },
   { code: "SCI 210", name: "Environmental Science", reason: "General education" },
   { code: "SPAN 201", name: "Intermediate Spanish I", reason: "General education" },
-  { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "BUS 495", name: "Strategic Management", reason: "Capstone, taken last" },
 ]
 

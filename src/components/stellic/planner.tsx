@@ -288,6 +288,7 @@ export function SemesterCard({
   addable,
   onRemoveCourse,
   onAddCourse,
+  onOpen,
 }: {
   term: Term
   alert?: ReactNode
@@ -302,6 +303,9 @@ export function SemesterCard({
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (entry: CatalogEntry) => void
+  /** Opens the term on its own, with its classes and — when the schedule is
+   *  out — its calendar. */
+  onOpen?: () => void
 }) {
   const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
 
@@ -355,9 +359,15 @@ export function SemesterCard({
           )}
         >
           <div className="flex min-w-0 flex-col gap-1">
-            <h4 className="flex items-center gap-1 text-caption-lg font-semibold text-gray-100">
-              <span className="truncate">{term.name}</span>
-              <Icon name="chevron-right" size={16} className="shrink-0 text-gray-80" />
+            <h4 className="flex min-w-0 items-center text-caption-lg font-semibold text-gray-100">
+              <button
+                type="button"
+                onClick={onOpen}
+                className="flex min-w-0 cursor-pointer items-center gap-1 rounded-md text-left hover:underline [text-underline-position:from-font]"
+              >
+                <span className="truncate">{term.name}</span>
+                <Icon name="chevron-right" size={16} className="shrink-0 text-gray-80" />
+              </button>
             </h4>
             <p className="text-body-md text-gray-80">{termMeta(term)}</p>
           </div>
@@ -455,6 +465,7 @@ export function YearSection({
   addable,
   onRemoveCourse,
   onAddCourse,
+  onOpenTerm,
 }: {
   year: Year
   renderAlert?: (term: Term) => ReactNode
@@ -466,6 +477,7 @@ export function YearSection({
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (termId: string, entry: CatalogEntry) => void
+  onOpenTerm?: (termId: string) => void
 }) {
   return (
     <section className="flex items-start gap-4">
@@ -501,6 +513,7 @@ export function YearSection({
               addable={addable}
               onRemoveCourse={onRemoveCourse}
               onAddCourse={(entry) => onAddCourse(term.id, entry)}
+              onOpen={onOpenTerm && (() => onOpenTerm(term.id))}
             />
           ))}
         </div>

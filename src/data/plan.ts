@@ -4,6 +4,10 @@ export type YearPhase = "complete" | "active" | "future"
  *  stays on the canvas, struck through, until the draft is settled. */
 export type DraftMark = "added" | "moved" | "removed"
 
+/** One meeting of a class: which weekday (1 = Monday) and the hours it runs,
+ *  as decimal hours so the calendar can lay it out arithmetically. */
+export type Meeting = { day: number; from: number; to: number }
+
 export type PlannedCourse = {
   /** Stable across moves — drag and drop identifies courses by this. */
   id: string
@@ -15,6 +19,13 @@ export type PlannedCourse = {
   notes?: number
   /** A requirement with no course chosen for it yet. */
   placeholder?: boolean
+  /** Registration detail, known once a class has been chosen. */
+  classNo?: string
+  campus?: string
+  modality?: string
+  gradeOption?: string
+  /** When the term's schedule is out, where the class actually sits. */
+  meetings?: Meeting[]
   /** Set only while a generated draft is on screen. `relocated` marks a card
    *  that left somewhere to be here, so it counts as an addition and a removal
    *  at once. */
@@ -36,6 +47,9 @@ export type Term = {
   courses: PlannedCourse[]
   /** Banner slotted between the header and the course list. */
   alert?: { kind: "registration"; closes: string }
+  /** The class schedule is published, so this term can be seen on a calendar
+   *  rather than only as a list. */
+  scheduled?: boolean
 }
 
 export type Year = {
@@ -159,6 +173,8 @@ export const INITIAL_YEARS: Year[] = [
         /* Registration for Spring opens during the Fall term and closes at the
            start of Spring — the frame's "Jan 18, 2026" predates the term. */
         alert: { kind: "registration", closes: "Mon Jan 17, 2028 • 11:59pm EST" },
+        /* Registration is open for this term, so its classes have times. */
+        scheduled: true,
         state: "planned",
         courses: [
           {
@@ -167,12 +183,45 @@ export const INITIAL_YEARS: Year[] = [
             name: "Investments & Portfolio Management",
             credits: 3,
             section: "Lec-01",
+            classNo: "3109",
+            campus: "Main",
+            modality: "In Person",
+            gradeOption: "Graded",
+            meetings: [
+              { day: 1, from: 9, to: 10.25 },
+              { day: 3, from: 9, to: 10.25 },
+            ],
           },
           {
             id: "c6",
             code: "FIN 415",
             name: "Financial Modeling & Valuation",
             credits: 3,
+            section: "Lec-01",
+            classNo: "3142",
+            campus: "Main",
+            modality: "In Person",
+            gradeOption: "Graded",
+            meetings: [
+              { day: 2, from: 13, to: 14.25 },
+              { day: 4, from: 13, to: 14.25 },
+            ],
+          },
+          {
+            /* Seats held against a requirement: the term is planned, but these
+               two still need a class choosing before registration. */
+            id: "c7",
+            code: "FIN ELEC",
+            name: "Finance elective",
+            credits: 3,
+            placeholder: true,
+          },
+          {
+            id: "c8",
+            code: "GEN ELEC",
+            name: "General elective",
+            credits: 3,
+            placeholder: true,
           },
         ],
       },
