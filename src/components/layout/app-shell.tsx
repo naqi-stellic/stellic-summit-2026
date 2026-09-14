@@ -47,7 +47,7 @@ export function AppShell({
                       the design, so the drag handle is that rail rather than an
                       extra line. `after` widens the grab target, not the rail. */}
                   <ResizableHandle className="w-1 bg-gray-40 transition-colors after:w-3 hover:bg-primary-50 data-[resize-handle-state=drag]:bg-primary-50" />
-                  <ResizablePanel defaultSize={434} minSize={340} maxSize={720} className="flex">
+                  <ResizablePanel defaultSize={520} minSize={340} maxSize={760} className="flex">
                     {panel}
                   </ResizablePanel>
                 </>

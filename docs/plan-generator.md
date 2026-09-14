@@ -63,8 +63,14 @@ Expected graduation is the last term the plan reaches, not a stored date.
 (`src/components/stellic/generate-plan-panel.tsx`) through `AppShell`'s `panel`
 prop. The drag handle *is* the 4px rail the design already draws between the two
 columns rather than an extra divider. Sizes are pixels in react-resizable-panels
-v4, so they are the design's own numbers: the panel opens at 434px, clamps
-between 340 and 720, and the planner keeps 520px.
+v4, so they are the design's own numbers: the panel opens at 520px, clamps
+between 340 and 760, and the planner keeps 520px.
+
+Step 1 asks three questions. It shows Courses and Milestones progress bars, the
+plan summary, and a keep-or-choose radio (shadcn `radio-group`, which is what
+the Figma component points at). Every figure comes from `planStanding()` — the
+tallies, the bar shares, and the "Keep my N courses" copy — so Figma's own
+numbers there are placeholders that were deliberately not copied.
 
 ## Responsive
 

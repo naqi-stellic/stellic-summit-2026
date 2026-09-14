@@ -41,6 +41,8 @@ export const DEGREE = {
   concentration: "Finance",
   requirements: 40,
   credits: 120,
+  /** Non-course checkpoints: declare major, internship, capstone proposal… */
+  milestones: 13,
 }
 
 /** Years already finished. Not part of the editable plan, so it is a roll-up
@@ -49,6 +51,7 @@ export const COMPLETED = {
   label: "2026-2027",
   courses: 8,
   credits: 24,
+  milestones: 3,
 }
 
 /** Years the student has not planned into yet: two empty terms, nothing locked. */
@@ -261,6 +264,11 @@ export function planStanding(years: Year[]) {
       credits: Math.max(0, DEGREE.credits - COMPLETED.credits - plannedCredits),
     },
     total: { reqs: DEGREE.requirements, credits: DEGREE.credits },
+    milestones: {
+      completed: COMPLETED.milestones,
+      remaining: Math.max(0, DEGREE.milestones - COMPLETED.milestones),
+      total: DEGREE.milestones,
+    },
   }
 }
 

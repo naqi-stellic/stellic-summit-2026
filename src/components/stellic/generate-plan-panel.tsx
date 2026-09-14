@@ -1,25 +1,61 @@
 import { cn } from "cn"
+import { useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { DEGREE, type PlanStanding } from "@/data/plan"
 
 /* The Generate Plan wizard that opens beside the planner. Padding subtracts
  * the border width where a container is stroked (see button.tsx for why). */
 
-const TOTAL_STEPS = 5
+const TOTAL_STEPS = 3
 
-const BUCKETS = [
-  { key: "completed", icon: "check", tone: "text-success-50", label: "Completed" },
-  { key: "planned", icon: "check", tone: "text-warning-25", label: "Planned" },
-  { key: "remaining", icon: "crop-square", tone: "text-alert-50", label: "Remaining" },
-] as const satisfies ReadonlyArray<{
-  key: keyof Omit<PlanStanding, "total">
-  icon: IconName
-  tone: string
-  label: string
-}>
+/* ---------------------------------------------------------------- progress */
+
+type Segment = { share: number; className: string }
+
+/** Leading segments take their share of the width; the last one absorbs the
+ *  remainder, so the bar always fills exactly. */
+function ProgressBar({ segments }: { segments: Segment[] }) {
+  return (
+    <div className="flex h-2 w-full items-start">
+      {segments.map((segment, i) => {
+        const last = i === segments.length - 1
+        return (
+          <div
+            key={i}
+            className={cn(
+              "h-full",
+              i === 0 && "rounded-l-full",
+              last ? "min-w-0 flex-1 rounded-r-full" : "border-r border-white",
+              segment.className
+            )}
+            style={last ? undefined : { width: `${segment.share * 100}%` }}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+function Tally({ items }: { items: { icon: IconName; tone: string; value: number }[] }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-[17px]">
+      {items.map((item) => (
+        <span
+          key={item.icon + item.value}
+          className="flex items-center gap-1 text-body-md text-gray-80"
+        >
+          <Icon name={item.icon} size={16} className={item.tone} />
+          {item.value}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+/* ---------------------------------------------------------------- panel */
 
 export function GeneratePlanPanel({
   standing,
@@ -32,7 +68,10 @@ export function GeneratePlanPanel({
   step?: number
   onClose: () => void
 }) {
-  const share = (credits: number) => `${(credits / standing.total.credits) * 100}%`
+  const [keepPlanned, setKeepPlanned] = useState("yes")
+
+  const courses = standing.total.reqs
+  const milestones = standing.milestones
 
   const planning = [
     { label: "Programs", value: DEGREE.program },
@@ -40,8 +79,19 @@ export function GeneratePlanPanel({
     { label: "Expected Graduation", value: graduation },
   ]
 
-  /* @container so the wizard reflows to the panel width the user drags to,
-     not to the viewport. */
+  const choices = [
+    {
+      value: "yes",
+      label: "Yes",
+      detail: `Keep my ${standing.planned.reqs} courses and placeholders and fill in the blanks to complete my journey`,
+    },
+    {
+      value: "no",
+      label: "No",
+      detail: "Choose the courses and placeholders to keep and which can be moved or swapped",
+    },
+  ]
+
   return (
     <aside className="@container flex h-full w-full flex-col overflow-x-clip overflow-y-auto bg-card">
       <header className="flex shrink-0 flex-col gap-2 border-b border-gray-40 px-6 pt-3 pb-[15px]">
@@ -71,51 +121,54 @@ export function GeneratePlanPanel({
       </header>
 
       <div className="flex flex-1 flex-col gap-8 p-6">
-        <div className="flex flex-col gap-2">
+        <div className="flex w-full flex-col gap-2">
           <h3 className="text-h400 font-semibold text-black">
-            Let's plan the rest of your degree
+            Let's plan the rest of your journey
           </h3>
           <p className="text-body-md text-gray-80">
-            Four quick questions, then we'll draft a term-by-term plan. You can edit anything
-            before it's saved.
+            Answer three questions and we'll draft a term-by-term plan. You can change anything
+            before you save it.
           </p>
         </div>
 
-        <Card className="w-full gap-2 rounded-md border-gray-40 p-[15px] shadow-none">
-          <p className="text-body-md font-semibold text-gray-100">Where you are today</p>
-
-          {/* Segments are shares of the degree's credits rather than the
-              design's fixed pixel widths, so the bar tracks the plan. */}
-          <div className="flex h-2 w-full items-start">
-            <div
-              className="h-full rounded-l-full border-r border-white bg-success-50"
-              style={{ width: share(standing.completed.credits) }}
+        <div className="flex w-full flex-col gap-6">
+          <div className="flex w-full flex-col gap-2">
+            <p className="text-body-md font-semibold text-gray-100">Courses</p>
+            <ProgressBar
+              segments={[
+                { share: standing.completed.reqs / courses, className: "bg-success-50" },
+                { share: standing.planned.reqs / courses, className: "bg-warning-75" },
+                { share: 0, className: "bg-gray-5" },
+              ]}
             />
-            <div
-              className="h-full border-r border-white bg-warning-75"
-              style={{ width: share(standing.planned.credits) }}
+            <Tally
+              items={[
+                { icon: "check", tone: "text-success-50", value: standing.completed.reqs },
+                { icon: "check", tone: "text-warning-25", value: standing.planned.reqs },
+                { icon: "crop-square", tone: "text-alert-50", value: standing.remaining.reqs },
+              ]}
             />
-            <div className="h-full min-w-0 flex-1 rounded-r-full bg-gray-5" />
           </div>
 
-          {BUCKETS.map((bucket) => {
-            const { reqs, credits } = standing[bucket.key]
-            return (
-              <div
-                key={bucket.key}
-                className="flex w-full flex-wrap items-center justify-between gap-x-2"
-              >
-                <span className="flex items-center gap-1 text-body-md text-gray-80">
-                  <Icon name={bucket.icon} size={16} className={bucket.tone} />
-                  {bucket.label}
-                </span>
-                <span className="text-body-md whitespace-nowrap text-gray-80">
-                  {reqs} reqs · {credits} credits
-                </span>
-              </div>
-            )
-          })}
-        </Card>
+          <div className="flex w-full flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Icon name="outlined-flag" size={16} className="text-gray-100" />
+              <p className="text-body-md font-semibold text-gray-100">Milestones</p>
+            </div>
+            <ProgressBar
+              segments={[
+                { share: milestones.completed / milestones.total, className: "bg-success-50" },
+                { share: 0, className: "bg-gray-5" },
+              ]}
+            />
+            <Tally
+              items={[
+                { icon: "check", tone: "text-success-50", value: milestones.completed },
+                { icon: "crop-square", tone: "text-alert-50", value: milestones.remaining },
+              ]}
+            />
+          </div>
+        </div>
 
         <div className="flex w-full flex-col gap-2">
           <div className="flex items-center pb-2">
@@ -138,6 +191,35 @@ export function GeneratePlanPanel({
               </button>
             </div>
           ))}
+        </div>
+
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex w-full items-center pb-2">
+            <h4 className="flex-1 text-body-md font-semibold text-gray-100">
+              Keep everything already planned?
+            </h4>
+          </div>
+          <RadioGroup value={keepPlanned} onValueChange={setKeepPlanned} className="w-full gap-2">
+            {choices.map((choice) => (
+              <label
+                key={choice.value}
+                className={cn(
+                  "flex w-full cursor-pointer items-center justify-between rounded-md border p-[11px] transition-colors",
+                  keepPlanned === choice.value ? "border-primary-50" : "border-gray-40"
+                )}
+              >
+                <span className="flex min-w-0 flex-1 items-start gap-3">
+                  <span className="flex items-center py-0.5">
+                    <RadioGroupItem value={choice.value} />
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px text-body-md">
+                    <span className="text-foreground">{choice.label}</span>
+                    <span className="text-gray-80">{choice.detail}</span>
+                  </span>
+                </span>
+              </label>
+            ))}
+          </RadioGroup>
         </div>
 
         <Button variant="primary" className="w-full">
