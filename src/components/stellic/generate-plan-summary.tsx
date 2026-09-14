@@ -61,8 +61,13 @@ export function GeneratePlanSummary({
       editable: true,
     },
     { label: "Pacing", value: describePace(pace), editable: true },
-    { label: "Anything else", value: notes.trim() || "Nothing added", editable: true },
   ]
+
+  /* Nothing typed in step 3 means nothing to read back, so the row goes away
+   * rather than reporting its own emptiness. */
+  if (notes.trim()) {
+    choices.push({ label: "Anything else", value: notes.trim(), editable: true })
+  }
 
   const rules: Row[] = [
     { label: "Requirement priority", value: PLANNING_RULES.requirementPriority, editable: true },

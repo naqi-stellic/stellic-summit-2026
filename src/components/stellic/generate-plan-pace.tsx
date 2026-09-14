@@ -75,10 +75,11 @@ export type PaceState = {
   exclude: string[]
 }
 
-/** One line describing the pacing choice, for the summary. */
+/** One line describing the pacing choice, for the summary. The named paces
+ * carry their own meaning, so only a custom one has to spell out its settings. */
 export function describePace(state: PaceState): string {
   const option = PACES.find((p) => p.value === state.pace)
-  if (state.pace !== "custom") return `${option?.label ?? "—"}, ${option?.detail.toLowerCase()}`
+  if (state.pace !== "custom") return option?.label ?? "—"
 
   const clauses = [`Custom, max ${state.maxCredits} credits per term`]
   if (state.includeOn && state.include.length > 0) {
