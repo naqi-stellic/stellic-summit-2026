@@ -171,10 +171,10 @@ export function AuditRow({
       </div>
 
       {/* What can be done to this row, at the end of it: a seat is filled by
-          finding a class for it, and anything can be taken out. They sit side
-          by side and keep their place whether or not the row is under the
-          cursor, so nothing lands on top of anything else and nothing moves
-          when the cursor arrives. */}
+          finding a class for it, and anything can be taken out. Remove is only
+          there under the cursor, and takes no room until it is — so a seat at
+          rest has its search button at the end of the row, and the two sit
+          side by side when the row is hovered. */}
       {!overlay && (held || onRemove) && (
         <span className="flex shrink-0 items-center gap-1">
           {held && (
@@ -193,7 +193,7 @@ export function AuditRow({
               /* Keep the drag sensor out of it, or the press starts a drag. */
               onPointerDown={(e) => e.stopPropagation()}
               onClick={onRemove}
-              className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+              className="hidden group-hover:inline-flex"
             >
               <Icon name="close" size={16} />
             </Button>
