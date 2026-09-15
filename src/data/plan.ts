@@ -888,7 +888,11 @@ const SECTION_SLOTS: Meeting[][] = [
  * keeps to four mid-day weekdays, one that uses the whole week and both ends
  * of the day, and one that starts early and finishes by mid-afternoon. */
 const SCHEDULE_ORDERS = [
-  [0, 1, 2, 3, 4],
+  /* None of them begins at the first slot. Picking a section by hand takes the
+     first hour nothing else is using, so an order starting there hands those
+     courses back the times they already had — and a schedule that changes
+     nothing has nothing to show against what it replaced. */
+  [2, 3, 4, 0, 1],
   [5, 0, 6, 2, 7],
   [6, 0, 4, 2, 3],
 ]

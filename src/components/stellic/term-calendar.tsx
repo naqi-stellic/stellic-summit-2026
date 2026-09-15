@@ -365,10 +365,12 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
                         top: (meeting.from - from) * HOUR,
                         height: (meeting.to - meeting.from) * HOUR,
                       }}
-                      className={cn(
-                        "absolute inset-x-1 flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card",
-                        course.draft && "opacity-60"
-                      )}
+                      /* Solid, even while it is a proposal: on this week the
+                         faded, dashed blocks mean "this is where the class used
+                         to be", and a proposed class drawn the same way reads
+                         as a ghost of a schedule that never existed. What the
+                         draft is offering is what you would get. */
+                      className="absolute inset-x-1 flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card"
                     >
                       <span
                         aria-hidden="true"
