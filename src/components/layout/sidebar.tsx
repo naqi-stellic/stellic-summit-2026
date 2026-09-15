@@ -7,8 +7,6 @@ type NavItem = {
   label: string
   /** 8x8 glyph inside the 16x16 ring; omitted items keep the ring as a spacer. */
   glyph?: IconName
-  /** Ring drawn but empty, as on Schedule. */
-  emptyRing?: boolean
   /** Ring reserved but invisible, so labels stay on one alignment. */
   spacerRing?: boolean
   trailing?: IconName
@@ -21,7 +19,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { label: "Home", glyph: "s-home" },
   { label: "Track Progress", glyph: "s-check", strong: true },
-  { label: "Schedule", emptyRing: true, trailing: "expand-more" },
+  { label: "Schedule", glyph: "calendar-today", trailing: "expand-more" },
   { label: "Fall 2027", spacerRing: true, badge: "In Progress" },
   { label: "Spring 2028", spacerRing: true },
   { label: "Fall 2028", spacerRing: true },
@@ -42,7 +40,7 @@ const QUICK_LINKS = [
 ]
 
 function NavRing({ item }: { item: NavItem }) {
-  if (!item.glyph && !item.emptyRing && !item.spacerRing) return null
+  if (!item.glyph && !item.spacerRing) return null
 
   return (
     <span
