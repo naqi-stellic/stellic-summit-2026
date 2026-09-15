@@ -57,6 +57,33 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "BUS 495", name: "Strategic Management", reason: "Capstone, taken last" },
 ]
 
+/* Actual courses that can stand in an elective seat. A seat is a requirement
+ * with no course chosen against it, so resolving one means picking from what
+ * the catalogue offers for that requirement — which is what these are. They
+ * are not requirements in their own right and never appear in the list above;
+ * they only exist to fill a seat. */
+export const ELECTIVE_COURSES: Record<string, CatalogEntry[]> = {
+  "FIN ELEC": [
+    { code: "FIN 405", name: "Behavioral Finance", reason: "Concentration elective" },
+    { code: "FIN 425", name: "Private Equity", reason: "Concentration elective" },
+    { code: "FIN 455", name: "Financial Technology", reason: "Concentration elective" },
+    { code: "FIN 465", name: "Venture Capital", reason: "Concentration elective" },
+    { code: "FIN 475", name: "Commodities & Energy Markets", reason: "Concentration elective" },
+    { code: "FIN 485", name: "Credit Risk Analysis", reason: "Concentration elective" },
+  ],
+  "GEN ELEC": [
+    { code: "ANTH 210", name: "Cultural Anthropology", reason: "Open elective" },
+    { code: "PHIL 120", name: "Logic & Critical Thinking", reason: "Open elective" },
+    { code: "MUSC 120", name: "Music & Society", reason: "Open elective" },
+    { code: "GEOG 230", name: "Cities & Urban Life", reason: "Open elective" },
+    { code: "ASTR 101", name: "Introduction to Astronomy", reason: "Open elective" },
+    { code: "FILM 150", name: "Film & Visual Storytelling", reason: "Open elective" },
+  ],
+}
+
+/** Everything an elective seat could be filled with, whichever kind it is. */
+export const ALL_ELECTIVES: CatalogEntry[] = Object.values(ELECTIVE_COURSES).flat()
+
 /** A held place rather than a course: used when the draft has to drop a course
  *  whose requirement still stands, and when a seat is added by hand. */
 export const REPLACEMENT_SEAT: CatalogEntry = {

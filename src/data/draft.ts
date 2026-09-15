@@ -1,4 +1,9 @@
-import { REMAINING_REQUIREMENTS, REPLACEMENT_SEAT, type CatalogEntry } from "@/data/catalog"
+import {
+  ALL_ELECTIVES,
+  REMAINING_REQUIREMENTS,
+  REPLACEMENT_SEAT,
+  type CatalogEntry,
+} from "@/data/catalog"
 import {
   CREDITS_PER_COURSE,
   PLANNING_RULES,
@@ -400,7 +405,26 @@ export function generateTermDraft(
     terms: year.terms.map((term) => ({ ...term, courses: [...term.courses] })),
   }))
 
-  const queue: QueueEntry[] = termQueue(optionId)
+  const queue: QueueEntry[] = termQueue(optionId, base)
+
+  /* A held seat is the whole point of generating: it is a requirement with no
+   * course against it, and the run is what chooses one. Striking it here frees
+   * its credits, and the fill below puts a real course in its place. */
+  for (const term of years.flatMap((y) => y.terms)) {
+    if (term.id !== termId || term.locked) continue
+    for (const course of term.courses) {
+      if (!course.placeholder || released.includes(course.id)) continue
+      const at = order++
+      years = mapTerm(years, termId, (t) => ({
+        ...t,
+        courses: t.courses.map((c) =>
+          c.id === course.id
+            ? { ...c, draft: { mark: "removed" as const, note: "Filled with a course", order: at } }
+            : c
+        ),
+      }))
+    }
+  }
 
   /* Anything let go leaves a struck card behind and its requirement returns to
    * the front of the queue, where the term may well pick it up again. */
@@ -416,12 +440,13 @@ export function generateTermDraft(
           : c
       ),
     }))
-    queue.unshift({
-      code: found.course.code,
-      name: found.course.name,
-      reason: "You left this one open",
-      placeholder: found.course.placeholder,
-    })
+    if (!found.course.placeholder) {
+      queue.unshift({
+        code: found.course.code,
+        name: found.course.name,
+        reason: "You left this one open",
+      })
+    }
   }
 
   years = mapTerm(years, termId, (term) => {
@@ -472,9 +497,30 @@ export const TERM_OPTIONS: DraftOption[] = [
   },
 ]
 
-/** Orders the outstanding requirements the way an option wants them taken. */
-function termQueue(optionId: string): QueueEntry[] {
-  const all = [...REMAINING_REQUIREMENTS]
+/** What a term can still be filled with, ordered the way an option wants it
+ *  taken. Held seats are left out on purpose: generating a term is meant to
+ *  end with a term of real courses, so a seat is something to resolve rather
+ *  than something to add. Anything already somewhere in the plan is out too,
+ *  or the term would offer a course the student is taking elsewhere. */
+function termQueue(optionId: string, years: Year[]): QueueEntry[] {
+  const placed = new Set<string>()
+  for (const year of years) {
+    for (const term of year.terms) {
+      for (const course of term.courses) placed.add(`${course.code} ${course.name}`)
+    }
+  }
+
+  /* Requirements still outstanding, then the courses an elective seat can be
+   * filled with. The electives are rotated per option, so the three runs
+   * resolve the same seat differently — which is the choice being offered. */
+  const turn = Math.max(0, TERM_OPTIONS.findIndex((o) => o.id === optionId))
+  const electives = ALL_ELECTIVES.filter((e) => !placed.has(`${e.code} ${e.name}`))
+  const rotated = [...electives.slice(turn * 2), ...electives.slice(0, turn * 2)]
+
+  const all = [
+    ...addableCourses(years).filter((entry) => !entry.placeholder),
+    ...rotated,
+  ]
   if (optionId === "term-general") {
     const general = all.filter((e) => /general|elective/i.test(e.reason))
     return [...general, ...all.filter((e) => !general.includes(e))]

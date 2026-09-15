@@ -221,7 +221,7 @@ export function GenerateTermPanel({
                 onValueChange={(next) => onSelectOption?.(next)}
                 className="w-full gap-2"
               >
-                {options!.map((option) => (
+                {options!.map((option, index) => (
                   <label
                     key={option.id}
                     className={cn(
@@ -231,8 +231,10 @@ export function GenerateTermPanel({
                   >
                     <span className="flex w-full items-center gap-3">
                       <RadioGroupItem value={option.id} />
+                      {/* Numbered, the way the plan's options are: what you
+                          point at on stage is "option two", not its name. */}
                       <span className="min-w-0 flex-1 text-body-md font-semibold text-gray-100">
-                        {option.label}
+                        Option {index + 1}
                       </span>
                       <Badge variant="success">+{option.added}</Badge>
                     </span>
