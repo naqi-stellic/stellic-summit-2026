@@ -13,6 +13,9 @@ plan off the plan header, Generate Term and Generate Schedule off a term's, and
 the assistant's "Generate with Assistant" pill off the panel. The assistant's
 own button stays — it is the shell's, not the generator's.
 
+Everything else it has, including the requirements panel behind the sidebar
+button and dragging out of it, is the plan generator's.
+
 The plan itself is the same `INITIAL_YEARS` the plan generator opens on, so the
 two prototypes start from the same place and can be read against each other.
 Everything else is the same components and the same behaviour, so a change to

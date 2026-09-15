@@ -157,6 +157,32 @@ labels (`2027-2028`) rather than "Year 1", since that is what every other
 surface here calls them; and the Changes and Graduation Clearance tabs are drawn
 but empty, there being no design for either.
 
+## Add remaining courses
+
+Figma: [`1017:189481`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-189481).
+
+The sidebar button in the toolbar opens what the degree still wants: the shares
+of the forty requirements — taken, planned, still to place — the milestones
+beside them, and then the outstanding requirements grouped the way the degree
+asks for them. Each row is dragged out of the panel and dropped into the term
+it is going to be taken in, which is the same move as "+ Add to Term" and lands
+the same card.
+
+The drag context wraps the whole shell rather than the planner alone, because a
+row is picked up in the panel and let go over a term and both ends have to be
+inside it. A requirement has no place in the plan to leave, so it is always
+added at the end of the term it lands on, and the drop preview says so.
+
+A requirement leaves the list once it has a term. A course is recognised by its
+name wherever it was placed from; a seat cannot be — every seat reads alike —
+so a placed seat remembers which outstanding requirement it answers, and the
+generator's seats remember it too. That is what keeps the three shares summing
+to forty: after generating the whole plan the panel reads 10 taken, 30 planned,
+0 to place.
+
+The panel's refresh button is not built: there is nothing behind it to re-read,
+the list being derived from the plan on screen.
+
 ## Responsive
 
 `main` is the `@container`. Term cards sit side by side above `@3xl` (768px of

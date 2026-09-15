@@ -63,6 +63,8 @@ function ActionsAlert({
   onRequestReview?: () => void
   /** Whether this prototype offers to generate the term or its schedule. */
   generators?: boolean
+  /** The requirements panel the header's sidebar button opens. */
+  sidebar?: { open: boolean; onToggle: () => void }
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -89,6 +91,7 @@ export function TermView({
   onGenerateTerm,
   onRequestReview,
   generators = true,
+  sidebar,
   compare = true,
 }: {
   term: Term
@@ -108,6 +111,8 @@ export function TermView({
   onRequestReview?: () => void
   /** Whether this prototype offers to generate the term or its schedule. */
   generators?: boolean
+  /** The requirements panel the header's sidebar button opens. */
+  sidebar?: { open: boolean; onToggle: () => void }
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -145,6 +150,7 @@ export function TermView({
       <PlanHeader
         actions={plannerActions}
         tabs={tabs}
+        sidebar={sidebar}
         onToggleField={onToggleField}
         onAction={(action) => {
           if (action.toggles) onGenerateTerm?.()

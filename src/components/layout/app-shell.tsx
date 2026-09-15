@@ -57,7 +57,7 @@ export function AppShell({
               <ResizablePanel minSize={wide ? 520 : 200} className="flex">
                 {children}
               </ResizablePanel>
-              {panel && assistLabel && (
+              {panel && (
                 <>
                   {/* The 4px rail between planner and panel is the divider in
                       the design, so the drag handle is that rail rather than an

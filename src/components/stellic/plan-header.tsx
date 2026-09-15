@@ -125,6 +125,7 @@ export function PlanHeader({
   pressed,
   onAction,
   onToggleField,
+  sidebar,
 }: {
   actions: PlanAction[]
   tabs: YearTab[]
@@ -132,6 +133,9 @@ export function PlanHeader({
   pressed?: boolean
   onAction?: (action: PlanAction) => void
   onToggleField?: (id: string) => void
+  /** The requirements panel this header's sidebar button opens.
+   *  Omitted where there is nothing to open. */
+  sidebar?: { open: boolean; onToggle: () => void }
 }) {
   /* The last stretch of header above the toolbar. Once all of it is out of the
      pane the toolbar has reached the top and is holding there — a band rather
@@ -194,7 +198,13 @@ export function PlanHeader({
               </DropdownMenu>
             )
           })}
-          <Button size="icon" aria-label="Toggle sidebar">
+          {/* Opens what the degree still wants, to be dragged into the plan. */}
+          <Button
+            size="icon"
+            aria-label="Add remaining courses"
+            aria-pressed={sidebar ? sidebar.open : undefined}
+            onClick={sidebar?.onToggle}
+          >
             <Icon name="view-sidebar" size={16} />
           </Button>
           <Button size="icon" aria-label="More options">

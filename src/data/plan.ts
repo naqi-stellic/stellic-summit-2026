@@ -19,6 +19,11 @@ export type PlannedCourse = {
   notes?: number
   /** A requirement with no course chosen for it yet. */
   placeholder?: boolean
+  /** Which of the degree's outstanding requirements this answers, by its place
+   *  in that list. Set when one is dragged out of the panel, so a seat leaves
+   *  the list once it has a term — a seat cannot be recognised by its name the
+   *  way a course can. */
+  requirement?: number
   /** Put through registration. Only possible once a class has been chosen and
    *  only while the term's registration window is open. */
   registered?: boolean
@@ -96,6 +101,8 @@ export const DEGREE = {
   credits: 120,
   /** Non-course checkpoints: declare major, internship, capstone proposal… */
   milestones: 13,
+  /** How many of those have been signed off. The rest are still ahead. */
+  milestonesDone: 3,
 }
 
 /** Institution settings the generator always honours. These are facts about

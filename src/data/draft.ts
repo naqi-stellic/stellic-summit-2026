@@ -144,7 +144,20 @@ export function summariseDraft(years: Year[], optionId: string): Draft {
 
 /** A catalogue entry on its way into a term. A released course carries the
  *  term it must not go back to, and the card it left behind. */
-type QueueEntry = CatalogEntry & { avoid?: string; ghostFor?: string }
+type QueueEntry = CatalogEntry & {
+  avoid?: string
+  ghostFor?: string
+  /** Which outstanding requirement this entry is, by its place in the list.
+   *  Carried onto the course the run places, so the panel of what is left can
+   *  tell that this one now has a term. */
+  requirement?: number
+}
+
+/** The outstanding requirements, each knowing where it sits in the list. */
+const OUTSTANDING: QueueEntry[] = REMAINING_REQUIREMENTS.map((entry, requirement) => ({
+  ...entry,
+  requirement,
+}))
 
 let seq = 0
 /* The colours a course is drawn in down the side of a list and across a
@@ -179,13 +192,14 @@ function spreadAccents(term: Term): Term {
  *  every time it is shown, like every other date in the data. */
 const GENERATED_ON = "15 Sep 2027"
 
-function draftCourse(entry: CatalogEntry, order: number, note?: string): PlannedCourse {
+function draftCourse(entry: QueueEntry, order: number, note?: string): PlannedCourse {
   return {
     id: `d${(seq += 1)}`,
     code: entry.code,
     name: entry.name,
     credits: CREDITS_PER_COURSE,
     placeholder: entry.placeholder,
+    ...(entry.requirement == null ? {} : { requirement: entry.requirement }),
     /* What the course is, which is known from the catalogue. Which sitting of
      * it to attend is not, so there is no section and no room or instructor —
      * those come with one. A seat has none of it: there is no course yet. */
@@ -254,7 +268,7 @@ export function generateDraft(
     }))
   }
 
-  const queue: QueueEntry[] = [...REMAINING_REQUIREMENTS]
+  const queue: QueueEntry[] = [...OUTSTANDING]
 
   /* A released course leaves its term the way the generator's own moves do —
    * struck through where it was — and goes to the front of the queue to be
@@ -737,7 +751,10 @@ export function addCourse(
   years: Year[],
   termId: string,
   entry: CatalogEntry,
-  marked: boolean
+  marked: boolean,
+  /** Where the entry sits in `REMAINING_REQUIREMENTS`, when it came from
+   *  there. A seat has no name to be recognised by later. */
+  requirement?: number
 ): Year[] {
   const term = findTerm(years, termId)
   if (!term || term.locked) return years
@@ -749,6 +766,7 @@ export function addCourse(
     name: entry.name,
     credits: CREDITS_PER_COURSE,
     placeholder: entry.placeholder,
+    ...(requirement == null ? {} : { requirement }),
     /* Its own colour if the term has one spare, which under the credit ceiling
        it always does. */
     accent: ACCENTS.find((a) => !taken.has(a)) ?? nextAccent(),
@@ -769,6 +787,32 @@ export function addCourse(
 
 /** Requirements the plan is not holding a place for, which is what there is to
  *  add. The seat comes last: it is the answer when nothing specific is left. */
+/** The degree's outstanding requirements: the ones with no term yet. A course
+ *  is recognised by its name, wherever it was placed from; a seat only by the
+ *  requirement it was dragged out against, since every seat reads alike.
+ *
+ *  Each comes back with its place in `REMAINING_REQUIREMENTS`, which is the
+ *  name a row is dragged under and what a placed seat remembers. */
+export function unplacedRequirements(years: Year[]): { entry: CatalogEntry; index: number }[] {
+  const placed = new Set<string>()
+  const answered = new Set<number>()
+  for (const year of years) {
+    for (const term of year.terms) {
+      for (const course of term.courses) {
+        if (course.draft?.mark === "removed") continue
+        if (course.requirement != null) answered.add(course.requirement)
+        if (!course.placeholder) placed.add(`${course.code} ${course.name}`)
+      }
+    }
+  }
+
+  return REMAINING_REQUIREMENTS.map((entry, index) => ({ entry, index })).filter(
+    ({ entry, index }) =>
+      !answered.has(index) &&
+      (entry.placeholder || !placed.has(`${entry.code} ${entry.name}`))
+  )
+}
+
 export function addableCourses(years: Year[]): CatalogEntry[] {
   const placed = new Set<string>()
   for (const year of years) {

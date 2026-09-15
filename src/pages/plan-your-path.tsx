@@ -20,6 +20,11 @@ import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { MetadataProvider } from "@/components/stellic/course-metadata"
 import { GenerateTermPanel } from "@/components/stellic/generate-term-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
+import {
+  RequirementRow,
+  RequirementsPanel,
+  requirementIndex,
+} from "@/components/stellic/requirements-panel"
 import { ReviewDialog } from "@/components/stellic/review-dialog"
 import { ReviewPanel } from "@/components/stellic/review-panel"
 import { PendingReviewProvider } from "@/components/stellic/review-state"
@@ -63,6 +68,7 @@ import {
   planOptions,
   removeInDraft,
   summariseDraft,
+  unplacedRequirements,
   type Draft,
   type DraftOption,
 } from "@/data/draft"
@@ -269,6 +275,9 @@ export function PlanYourPath({
   const [requesting, setRequesting] = useState<{ term: Term | null } | null>(null)
   /* Whether the reviews panel is showing beside the plan. */
   const [reviewPanel, setReviewPanel] = useState(false)
+  /* Whether what the degree still wants is showing beside the plan, to be
+     dragged into it. */
+  const [reqsOpen, setReqsOpen] = useState(false)
   /* Whether a generated schedule is shown against what the term already held,
      or on its own. */
   const [compare, setCompare] = useState(true)
@@ -301,6 +310,15 @@ export function PlanYourPath({
   /* Offered by every term's "+ Add to Term", so the same requirement is never
    * offered twice over. */
   const addable = addableCourses(shown)
+  /* What the degree still wants — the requirements with no term yet, each
+     knowing its place in that list. Not the same as what "+ Add to Term"
+     offers: that ends with a spare seat, which is a way to hold a place rather
+     than a requirement outstanding. */
+  const requirements = unplacedRequirements(shown)
+  /* The requirement being dragged out of the panel, if that is what this is. */
+  const draggingEntry = requirements.find(
+    (r) => draggingId != null && r.index === requirementIndex(draggingId)
+  )?.entry
   /* What the bar says while a draft is arriving. */
   const landedTally = draft ? draftTally(draft.years, revealed) : { added: 0, removed: 0 }
   /* Terms the draft has something to say about, for the confirmation. */
@@ -419,14 +437,18 @@ export function PlanYourPath({
   }
 
   /** Reads the drop target the same way the drop itself will: over a course
-   *  means that course's place, over a card means the end of its list. */
+   *  means that course's place, over a card means the end of its list. A
+   *  requirement coming from the panel is not in the plan yet, so it has no
+   *  place to leave and is always added at the end. */
   function handleDragOver({ active, over }: DragOverEvent) {
-    const from = over ? findCourse(shown, String(active.id)) : null
+    const activeId = String(active.id)
+    const requirement = requirementIndex(activeId) != null
+    const from = !requirement && over ? findCourse(shown, activeId) : null
     const overCourse = over ? findCourse(shown, String(over.id)) : null
     const termId = overCourse ? overCourse.term.id : String(over?.id)
     const term = over ? findTerm(shown, termId) : null
 
-    if (!from || !term || term.locked || term.id === from.term.id) {
+    if (!term || term.locked || (!requirement && (!from || term.id === from.term.id))) {
       setDrop((current) => (current === null ? current : null))
       return
     }
@@ -435,7 +457,13 @@ export function PlanYourPath({
      * rather than to a course. Holding the place it already found keeps the
      * slot from bouncing to the end of the list and back. */
     const held = !overCourse && drop?.termId === termId
-    const index = held ? drop.index : overCourse ? overCourse.index : term.courses.length
+    const index = requirement
+      ? term.courses.length
+      : held
+        ? drop.index
+        : overCourse
+          ? overCourse.index
+          : term.courses.length
     const height = active.rect.current.translated?.height ?? 64
     setDrop((current) =>
       current && current.termId === termId && current.index === index && current.height === height
@@ -450,6 +478,18 @@ export function PlanYourPath({
     if (!over) return
 
     const courseId = String(active.id)
+    /* A requirement dragged out of the panel is not being moved but placed:
+       the term it was let go over is the term it is now to be taken in. */
+    const index = requirementIndex(courseId)
+    if (index != null) {
+      const entry = requirements.find((r) => r.index === index)?.entry
+      const landed = findCourse(shown, String(over.id))
+      const termId = landed ? landed.term.id : String(over.id)
+      const term = findTerm(shown, termId)
+      if (entry && term && !term.locked) handleAddCourse(termId, entry, index)
+      return
+    }
+
     /* Dropping onto a row inserts at its position; onto a card, appends. */
     const overCourse = findCourse(shown, String(over.id))
     const toTerm = overCourse ? overCourse.term.id : String(over.id)
@@ -464,9 +504,9 @@ export function PlanYourPath({
     else setYears((current) => removeCourse(current, courseId))
   }
 
-  function handleAddCourse(termId: string, entry: CatalogEntry) {
-    if (draft) editDraft((current) => addCourse(current, termId, entry, true))
-    else setYears((current) => addCourse(current, termId, entry, false))
+  function handleAddCourse(termId: string, entry: CatalogEntry, requirement?: number) {
+    if (draft) editDraft((current) => addCourse(current, termId, entry, true, requirement))
+    else setYears((current) => addCourse(current, termId, entry, false, requirement))
   }
 
   const openTerm: Term | null = openTermId
@@ -515,8 +555,16 @@ export function PlanYourPath({
     /* The request is the whole of what just happened, so the panel that
        accounts for it opens with it. */
     setReviewPanel(true)
+    setReqsOpen(false)
     setGenerateOpen(false)
     setGeneratingTerm(null)
+  }
+
+  /* One panel at a time: the two answer different questions and the space
+     beside the plan only holds one of them. */
+  function openRequirements() {
+    setReqsOpen((open) => !open)
+    setReviewPanel(false)
   }
 
   function cancelReview(id: string) {
@@ -531,6 +579,27 @@ export function PlanYourPath({
   }
 
   return (
+    /* Around the whole shell, panel included: a requirement is picked up in the
+       panel and let go over a term, and both ends of that have to be inside the
+       same context. */
+    <DndContext
+      sensors={sensors}
+      /* The drop slot changes the height of the term it opens in, so the
+       * droppable rects have to be re-read as it does rather than measured
+       * once at the start of the drag. */
+      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+      /* pointerWithin only reports droppables the cursor is actually inside,
+       * so releasing over a locked term (or empty canvas) resolves to no
+       * target and the course snaps back instead of landing somewhere near. */
+      collisionDetection={pointerWithin}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragOver={handleDragOver}
+      onDragCancel={() => {
+        setDraggingId(null)
+        setDrop(null)
+      }}
+    >
     <AppShell
       title="Plan Your Path"
       assistLabel={
@@ -589,6 +658,7 @@ export function PlanYourPath({
         )) ||
         /* Last in line: a generator being open is what you are doing now, and
            the reviews are what you asked for earlier. */
+        (reqsOpen && <RequirementsPanel entries={requirements} years={shown} />) ||
         (reviewPanel && (
           <ReviewPanel
             reviews={reviews}
@@ -642,29 +712,12 @@ export function PlanYourPath({
             onGenerateTerm={() => setGeneratingTerm(openTerm.id)}
             onRequestReview={() => setRequesting({ term: openTerm })}
             generators={generators}
+            sidebar={{ open: reqsOpen, onToggle: openRequirements }}
             compare={compare}
           />
         ) : (
-      <DndContext
-        sensors={sensors}
-        /* The drop slot changes the height of the term it opens in, so the
-         * droppable rects have to be re-read as it does rather than measured
-         * once at the start of the drag. */
-        measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
-        /* pointerWithin only reports droppables the cursor is actually inside,
-         * so releasing over a locked term (or empty canvas) resolves to no
-         * target and the course snaps back instead of landing somewhere near. */
-        collisionDetection={pointerWithin}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragOver={handleDragOver}
-        onDragCancel={() => {
-          setDraggingId(null)
-          setDrop(null)
-        }}
-      >
-          {/* @container so the planner reflows to its own width — the panel
-              opening matters as much as the viewport shrinking. */}
+          /* @container so the planner reflows to its own width — the panel
+             opening matters as much as the viewport shrinking. */
           <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
           <PlanHeader
             actions={planActions(metadata, generators)}
@@ -675,6 +728,7 @@ export function PlanYourPath({
               else if (action.label === "Request review") setRequesting({ term: null })
             }}
             onToggleField={toggleMetadata}
+            sidebar={{ open: reqsOpen, onToggle: openRequirements }}
           />
 
           {/* What was asked for and has not come back. A term carries the same
@@ -688,7 +742,10 @@ export function PlanYourPath({
                   {requestedLine(pending)}{" "}
                   <button
                     type="button"
-                    onClick={() => setReviewPanel(true)}
+                    onClick={() => {
+                      setReviewPanel(true)
+                      setReqsOpen(false)
+                    }}
                     className="cursor-pointer underline [text-underline-position:from-font]"
                   >
                     View details
@@ -734,12 +791,6 @@ export function PlanYourPath({
             <AddSlot tone="year">+ Add Year {nextYearNumber(shown)}</AddSlot>
           </section>
           </main>
-
-
-        <DragOverlay>
-          {dragging && <AuditRow course={dragging.course} overlay />}
-        </DragOverlay>
-      </DndContext>
         )}
 
         {(draft || framing) && <DraftOutline leaving={accepting} pending={draft == null} />}
@@ -769,5 +820,11 @@ export function PlanYourPath({
       </PendingReviewProvider>
       </MetadataProvider>
     </AppShell>
+
+    <DragOverlay>
+      {dragging && <AuditRow course={dragging.course} overlay />}
+      {draggingEntry && <RequirementRow entry={draggingEntry} overlay />}
+    </DragOverlay>
+    </DndContext>
   )
 }
