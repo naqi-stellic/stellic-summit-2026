@@ -460,14 +460,15 @@ export function NoActionsAlert() {
    the connector colour. */
 
 const RAIL_NODE = {
-  complete: { icon: "check-circle", tone: "text-success-100" },
-  active: { icon: "timelapse", tone: "text-warning-50" },
-  future: { icon: "arrow-circle-right", tone: "text-gray-60" },
+  complete: { icon: "check-circle", tone: "text-success-100", line: "bg-success-100" },
+  active: { icon: "timelapse", tone: "text-warning-50", line: "bg-warning-50" },
+  future: { icon: "arrow-circle-right", tone: "text-gray-60", line: "bg-gray-60" },
 } as const
 
 export function TimelineRail({ phase, nodes }: { phase: YearPhase; nodes: 1 | 2 }) {
-  const { icon, tone } = RAIL_NODE[phase]
-  const line = phase === "active" ? "bg-warning-50" : "bg-gray-60"
+  /* The line runs between two nodes, so it is the colour of the nodes it
+     joins — a finished year is green from end to end. */
+  const { icon, tone, line } = RAIL_NODE[phase]
 
   /* One gutter and one lead whether the year is folded or not: the node sits
    * level with the year's heading either way, so unfolding moves nothing. */

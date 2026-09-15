@@ -665,7 +665,7 @@ export function termMeta(term: Term): string {
 export const CREDIT_GROUP_LABEL = {
   registered: "In Progress",
   planned: "Planned",
-  completed: "Completed",
+  completed: "Taken",
   "pre-registered": "Registered",
 } as const
 

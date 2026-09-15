@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -76,9 +77,17 @@ export function DraftBar({
         </Button>
       </div>
 
+      {/* Laid out like the registration dialog, because it asks the same kind
+          of question: the close on its own line at the top left, then what is
+          about to happen, then the answer across the foot. */}
       <Dialog open={confirming} onOpenChange={setConfirming}>
-        <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader>
+        <DialogContent className="gap-4 sm:max-w-[460px]" showCloseButton={false}>
+          <DialogClose className="cursor-pointer justify-self-start rounded-md text-gray-80 transition-colors hover:text-gray-100">
+            <Icon name="close" size={24} />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+
+          <DialogHeader className="gap-1.5">
             <DialogTitle>Apply this plan?</DialogTitle>
             <DialogDescription>
               Adds {added} course{added === 1 ? "" : "s"}
@@ -86,10 +95,14 @@ export function DraftBar({
               {terms === 1 ? "" : "s"}.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setConfirming(false)}>Cancel</Button>
+
+          <DialogFooter className="w-full gap-2 sm:justify-stretch">
+            <Button className="flex-1" onClick={() => setConfirming(false)}>
+              Cancel
+            </Button>
             <Button
               variant="primary"
+              className="flex-1"
               onClick={() => {
                 setConfirming(false)
                 onAccept()
