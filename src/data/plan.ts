@@ -539,6 +539,10 @@ export const INITIAL_YEARS: Year[] = [
             code: "FIN 340",
             name: "Investments & Portfolio Management",
             credits: 3,
+            classNo: "2417",
+            campus: "Main",
+            modality: "In Person",
+            gradeOption: "Graded",
             accent: "purple",
             lastActivity: "Added by sabott, 2 Sep 2027",
           },
@@ -547,6 +551,10 @@ export const INITIAL_YEARS: Year[] = [
             code: "FIN 415",
             name: "Financial Modeling & Valuation",
             credits: 3,
+            classNo: "2438",
+            campus: "Main",
+            modality: "Hybrid",
+            gradeOption: "Graded",
             accent: "amber",
             lastActivity: "Added by sabott, 2 Sep 2027",
           },
@@ -803,7 +811,7 @@ export function courseTags(course: PlannedCourse, shown: MetadataField[]): strin
 export function registrableCourses(term: Term): PlannedCourse[] {
   if (!term.scheduled || !term.alert) return []
   return term.courses.filter(
-    (c) => !c.registered && !c.placeholder && c.draft == null && c.classNo != null
+    (c) => !c.registered && !c.placeholder && c.draft == null && c.section != null
   )
 }
 
@@ -876,10 +884,7 @@ export function chooseSection(years: Year[], termId: string, courseId: string): 
             : {
                 ...c,
                 section: "Lec-01",
-                classNo: String(3000 + used * 17 + 41),
-                campus: "Main",
-                modality: "In Person",
-                gradeOption: "Graded",
+                classNo: c.classNo ?? String(3000 + used * 17 + 41),
                 meetings: slot,
               }
         ),
@@ -900,7 +905,10 @@ export function courseNeeds(course: PlannedCourse, term: Term): "course" | "sect
    * What such a term is holding is already plain on the planner. */
   if (!term.scheduled) return null
   if (course.placeholder) return "course"
-  return course.classNo ? null : "section"
+  /* The section is what is missing, so the section is what to ask about. A
+   * class number, campus, modality and grading are known from the course
+   * itself long before anybody picks which sitting of it to attend. */
+  return course.section ? null : "section"
 }
 
 export function courseStatus(

@@ -158,8 +158,17 @@ function draftCourse(entry: CatalogEntry, order: number, note?: string): Planned
     name: entry.name,
     credits: CREDITS_PER_COURSE,
     placeholder: entry.placeholder,
-    /* Nobody has picked a class for these yet, so a room or an instructor
-     * would be inventing one. What is known is who put it here. */
+    /* What the course is, which is known from the catalogue. Which sitting of
+     * it to attend is not, so there is no section and no room or instructor —
+     * those come with one. A seat has none of it: there is no course yet. */
+    ...(entry.placeholder
+      ? {}
+      : {
+          classNo: String(2500 + seq * 13),
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+        }),
     lastActivity: `Added by pathway, ${GENERATED_ON}`,
     draft: { mark: "added", note: note ?? entry.reason, order },
   }
@@ -461,6 +470,10 @@ export function generateTermDraft(
                 code: pick.code,
                 name: pick.name,
                 placeholder: undefined,
+                classNo: String(2500 + (seq += 1) * 13),
+                campus: "Main",
+                modality: "In Person",
+                gradeOption: "Graded",
                 draft: { mark: "added" as const, note: `Fills your ${seat}`, order: at },
               }
         ),
@@ -686,6 +699,14 @@ export function addCourse(
     name: entry.name,
     credits: CREDITS_PER_COURSE,
     placeholder: entry.placeholder,
+    ...(entry.placeholder
+      ? {}
+      : {
+          classNo: String(2500 + seq * 13),
+          campus: "Main",
+          modality: "In Person",
+          gradeOption: "Graded",
+        }),
     lastActivity: `Added by you, ${GENERATED_ON}`,
     ...(marked ? { draft: { mark: "added" as const, note: "You added this", order: 0 } } : {}),
   }
