@@ -158,22 +158,27 @@ function RequestCard({
             <Stage state={pending ? "later" : "done"} title="Complete" last />
           </div>
 
-          <div className="flex flex-wrap items-start gap-6 text-body-md text-gray-80">
-            {changes > 0 && (
-              <span className="underline [text-underline-position:from-font]">
-                {changes} change{changes === 1 ? "" : "s"} during review request
-              </span>
-            )}
-            {pending && (
-              <button
-                type="button"
-                onClick={onCancel}
-                className="cursor-pointer underline [text-underline-position:from-font]"
-              >
-                Cancel Request
-              </button>
-            )}
-          </div>
+          {/* A request that has come back has nothing left to do or to undo,
+              and the row is left out rather than left empty — an empty one
+              still takes its gap, which reads as padding under the timeline. */}
+          {(changes > 0 || pending) && (
+            <div className="flex flex-wrap items-start gap-6 text-body-md text-gray-80">
+              {changes > 0 && (
+                <span className="underline [text-underline-position:from-font]">
+                  {changes} change{changes === 1 ? "" : "s"} during review request
+                </span>
+              )}
+              {pending && (
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="cursor-pointer underline [text-underline-position:from-font]"
+                >
+                  Cancel Request
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
