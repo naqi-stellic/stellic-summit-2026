@@ -152,10 +152,12 @@ const CUSTOM_ID = "custom"
 
 /** Plan details gets its menu built per render, since it has to show which
  *  details are currently on. The other two act on their own. */
-function planActions(metadata: MetadataField[]): PlanAction[] {
+function planActions(metadata: MetadataField[], generators: boolean): PlanAction[] {
   return [
     { label: "Request review", icon: "assignment" },
-    { label: "Generate plan", icon: "design-services", toggles: true },
+    ...(generators
+      ? [{ label: "Generate plan", icon: "design-services" as const, toggles: true }]
+      : []),
     {
       label: "Plan details",
       icon: "remove-red-eye",
@@ -216,8 +218,18 @@ function termBanner(term: Term, drafting: boolean, onRegister: (term: Term) => v
   return drafting && !term.locked ? <NoActionsAlert /> : null
 }
 
-export function PlanYourPath() {
-  const [years, setYears] = useState(INITIAL_YEARS)
+export function PlanYourPath({
+  generators = true,
+  initialYears = INITIAL_YEARS,
+}: {
+  /* Whether this prototype offers to generate: the plan, a term, a schedule.
+     Without them the planner is the same in every other way — the same cards,
+     the same term views, the same registration and review. */
+  generators?: boolean
+  /** What the plan holds when it opens. */
+  initialYears?: Year[]
+} = {}) {
+  const [years, setYears] = useState(initialYears)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   /* Where the course under the cursor would land if it were let go. Only set
    * while it is crossing into another term: sorting within one already opens
@@ -521,7 +533,9 @@ export function PlanYourPath() {
   return (
     <AppShell
       title="Plan Your Path"
-      assistLabel={draft ? "Make changes to Generated plan" : "Generate with Assistant"}
+      assistLabel={
+        generators ? (draft ? "Make changes to Generated plan" : "Generate with Assistant") : null
+      }
       panel={
         (generatingTerm && findTerm(years, generatingTerm) ? (
           <GenerateTermPanel
@@ -627,6 +641,7 @@ export function PlanYourPath() {
             onPickSection={pickSection}
             onGenerateTerm={() => setGeneratingTerm(openTerm.id)}
             onRequestReview={() => setRequesting({ term: openTerm })}
+            generators={generators}
             compare={compare}
           />
         ) : (
@@ -652,7 +667,7 @@ export function PlanYourPath() {
               opening matters as much as the viewport shrinking. */}
           <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
           <PlanHeader
-            actions={planActions(metadata)}
+            actions={planActions(metadata, generators)}
             tabs={yearTabs(shown, undefined, () => setOpenTermId(null), openTermView)}
             pressed={generateOpen}
             onAction={(action) => {

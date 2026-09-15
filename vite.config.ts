@@ -13,6 +13,16 @@ export default defineConfig({
      * that daemon. Safe to drop once fseventsd is healthy again. */
     watch: { usePolling: true, interval: 300 },
   },
+  build: {
+    /* Two prototypes, two pages. They share every component and all the data;
+       what differs is which one a link opens. */
+    rollupOptions: {
+      input: {
+        index: path.resolve(import.meta.dirname, 'index.html'),
+        planner: path.resolve(import.meta.dirname, 'planner.html'),
+      },
+    },
+  },
   resolve: {
     alias: [
       /* Exact match only, so `cn/config` still resolves to the package. */

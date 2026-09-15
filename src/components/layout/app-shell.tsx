@@ -25,8 +25,9 @@ export function AppShell({
   children: ReactNode
   /** When present, the content area splits into a resizable two-column view. */
   panel?: ReactNode
-  /** What the pill beside the assistant offers to do next. */
-  assistLabel?: string
+  /** What the pill beside the assistant offers to do next. `null` for a
+   *  prototype that does not generate: the assistant keeps its own button. */
+  assistLabel?: string | null
 }) {
   /* Below the tablet breakpoint there is no room for two columns side by side,
    * so the split turns on its side and the panel sits under the planner. */
@@ -56,7 +57,7 @@ export function AppShell({
               <ResizablePanel minSize={wide ? 520 : 200} className="flex">
                 {children}
               </ResizablePanel>
-              {panel && (
+              {panel && assistLabel && (
                 <>
                   {/* The 4px rail between planner and panel is the divider in
                       the design, so the drag handle is that rail rather than an
@@ -80,7 +81,7 @@ export function AppShell({
       </div>
 
       <div className="fixed right-10 bottom-10 flex max-w-[calc(100vw-3rem)] items-center gap-[10px] max-md:right-4 max-md:bottom-4">
-        {panel && (
+        {panel && assistLabel && (
           /* A pill in the design, not the usual 4px button radius. On a phone
              it would sit on top of the panel it refers to, so only the
              assistant itself floats. */

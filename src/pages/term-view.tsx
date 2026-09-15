@@ -61,6 +61,8 @@ function ActionsAlert({
   /** Asks for a review of this term alone — the plan-wide first step is
    *  already answered, so the dialog opens on its second. */
   onRequestReview?: () => void
+  /** Whether this prototype offers to generate the term or its schedule. */
+  generators?: boolean
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -86,6 +88,7 @@ export function TermView({
   onPickSection,
   onGenerateTerm,
   onRequestReview,
+  generators = true,
   compare = true,
 }: {
   term: Term
@@ -103,6 +106,8 @@ export function TermView({
   /** Asks for a review of this term alone — the plan-wide first step is
    *  already answered, so the dialog opens on its second. */
   onRequestReview?: () => void
+  /** Whether this prototype offers to generate the term or its schedule. */
+  generators?: boolean
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -116,11 +121,15 @@ export function TermView({
 
   const plannerActions: PlanAction[] = [
     { label: "Request review", icon: "assignment" },
-    {
-      label: term.scheduled ? "Generate Schedule" : "Generate Term",
-      icon: "design-services",
-      toggles: true,
-    },
+    ...(generators
+      ? [
+          {
+            label: term.scheduled ? "Generate Schedule" : "Generate Term",
+            icon: "design-services" as const,
+            toggles: true,
+          },
+        ]
+      : []),
     {
       label: "Plan details",
       icon: "remove-red-eye",

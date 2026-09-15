@@ -17,9 +17,10 @@ Polling sidesteps the daemon; drop it if `fseventsd` is behaving.
 
 ## Prototypes
 
-| Prototype | Figma | Entry | Notes |
-| --- | --- | --- | --- |
-| Plan Generator | [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392) | `src/pages/plan-your-path.tsx` | [docs](docs/plan-generator.md) |
+| Prototype | Opens at | Figma | Entry | Notes |
+| --- | --- | --- | --- | --- |
+| Plan Generator | `/` | [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392) | `src/pages/plan-your-path.tsx` | [docs](docs/plan-generator.md) |
+| Planner | `/planner.html` | same frames, minus the generators | `src/pages/planner.tsx` | [docs](docs/planner.md) |
 
 ### Adding one
 
@@ -29,10 +30,16 @@ gets for free — tokens, the app shell, the icon set, the retuned shadcn
 primitives. Anything worth writing down about the prototype itself goes in
 `docs/<name>.md`, not here.
 
-Once a second prototype lands it is probably worth folding each one into its own
-`src/prototypes/<name>/` directory and routing between them. Not done yet: with
-one prototype it would be churn, and the second will say more about where the
-seam belongs than guessing now does.
+Each prototype is its own page in the Vite sense: an `<name>.html` at the root
+with a `src/main-<name>.tsx` beside it, both listed in `build.rollupOptions.input`.
+That is what gives each one its own link, in the dev server and in `dist` alike,
+with no router and no shared shell to fall out of step.
+
+The second one landed as a thin page over the first rather than a copy of it:
+`src/pages/planner.tsx` is a dozen lines that hand `PlanYourPath` a different
+starting plan and switch its generators off. Where the two are meant to differ,
+that file is the seam — it is the one place a change can be made to one
+prototype without reaching the other.
 
 ## Stack
 
