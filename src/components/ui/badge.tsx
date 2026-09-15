@@ -15,6 +15,9 @@ const badgeVariants = cva(
     variants: {
       variant: {
         secondary: "bg-gray-5 text-gray-100",
+        /* Named on the plan header's facets: the same tag on a white ground,
+           drawn with an edge rather than a fill. */
+        outline: "border-gray-40 bg-card text-gray-100",
         success: "bg-success-5 text-success-100",
         danger: "bg-alert-5 text-alert-100",
         warning: "bg-warning-5 text-warning-50",

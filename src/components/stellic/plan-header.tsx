@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DEGREE } from "@/data/plan"
+import { DEGREE, STUDENT } from "@/data/plan"
 
 /* The top of every plan screen: which plan, what it is for, and which years
  * are in view. The planner and a term share it — only the actions and the
@@ -48,7 +48,7 @@ function PlanFacet({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
       <span className="text-body-md font-semibold text-foreground">{label}</span>
-      <Badge variant="secondary" className="max-w-full">
+      <Badge variant="outline" className="max-w-full">
         <span className="min-w-0 truncate">{value}</span>
         <Icon name="close" size={12} className="shrink-0" />
       </Badge>
@@ -151,9 +151,17 @@ export function PlanHeader({
     <section className="relative flex flex-col gap-4">
       <span ref={sentinel} aria-hidden="true" className="absolute inset-x-0 bottom-0 h-6" />
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <h2 className="flex items-center gap-1 text-h400 font-semibold text-gray-100">
-          Primary Plan
-          <Icon name="expand-more" size={16} />
+        {/* Whose plan, then which of their plans. The student's name reads as
+            the trail you came in on, so it is set back in gray. */}
+        <h2 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-h400 font-semibold">
+          <span className="flex items-center gap-1 text-gray-80">
+            {STUDENT.name}
+            <Icon name="chevron-right" size={16} />
+          </span>
+          <span className="flex items-center gap-1 text-gray-100">
+            Primary Plan
+            <Icon name="expand-more" size={16} />
+          </span>
         </h2>
         {/* They are in the toolbar once it sticks, so they are never in two
             places at once. */}

@@ -78,6 +78,10 @@ export type Year = {
  *  40 requirements and 120 credits the same statement twice. */
 export const CREDITS_PER_COURSE = 3
 
+/** Whose plan this is. The header names them, and a course they put on the
+ *  plan themselves says so by their username. */
+export const STUDENT = { name: "Scott Abott", username: "sabott" }
+
 /** The degree the plan is working towards. Requirements are one per course,
  *  which is what makes "5 reqs · 15 credits" read consistently. */
 export const DEGREE = {
@@ -485,7 +489,7 @@ export const INITIAL_YEARS: Year[] = [
             building: "Science Center",
             room: "Lab 1",
             subTerm: "Full Term",
-            lastActivity: "Added by sabott, 11 Apr 2027",
+            lastActivity: "Added by mjs, 11 Apr 2027",
           },
           {
             id: "c7",
@@ -533,7 +537,7 @@ export const INITIAL_YEARS: Year[] = [
             name: "Investments & Portfolio Management",
             credits: 3,
             accent: "purple",
-            lastActivity: "Added by you, 2 Sep 2027",
+            lastActivity: "Added by sabott, 2 Sep 2027",
           },
           {
             id: "c6",
@@ -541,7 +545,7 @@ export const INITIAL_YEARS: Year[] = [
             name: "Financial Modeling & Valuation",
             credits: 3,
             accent: "amber",
-            lastActivity: "Added by you, 2 Sep 2027",
+            lastActivity: "Added by sabott, 2 Sep 2027",
           },
         ],
       },
