@@ -8,6 +8,7 @@ import { Icon } from "@/components/icon"
 import { AddCourseMenu } from "@/components/stellic/add-course-menu"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { CourseActivity, CourseTags } from "@/components/stellic/course-metadata"
+import { TermActions } from "@/components/stellic/term-actions"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -403,6 +404,10 @@ export function SemesterCard({
         </div>
 
         {alert}
+
+        {/* Under the invitation to register, the same way the term itself reads:
+            here is the window, and here is what is stopping you using it. */}
+        <TermActions term={term} />
 
         {term.courses.length > 0 && (
           <CreditGroup term={term} settling={settling} revealed={revealed} />

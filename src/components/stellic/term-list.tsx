@@ -67,10 +67,18 @@ function Accent({ course }: { course?: PlannedCourse }) {
   )
 }
 
-function CourseRow({ course, selectable }: { course: PlannedCourse; selectable: boolean }) {
-  const status = courseStatus(course)
+function CourseRow({
+  course,
+  term,
+  selectable,
+}: {
+  course: PlannedCourse
+  term: Term
+  selectable: boolean
+}) {
+  const status = courseStatus(course, term)
   const held = course.placeholder
-  const missing = courseNeeds(course) ? missingLine(course) : null
+  const missing = courseNeeds(course, term) ? missingLine(course, term) : null
   /* A draft on the canvas marks its terms here as well. */
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
   const struck = isStruck(course)
@@ -204,7 +212,7 @@ export function TermList({ term }: { term: Term }) {
             </div>
 
             {term.courses.map((course) => (
-              <CourseRow key={course.id} course={course} selectable={selectable} />
+              <CourseRow key={course.id} course={course} term={term} selectable={selectable} />
             ))}
           </div>
         </div>

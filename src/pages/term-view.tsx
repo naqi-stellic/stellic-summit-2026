@@ -4,13 +4,13 @@ import { Icon } from "@/components/icon"
 import { PlanHeader, type PlanAction, type YearTab } from "@/components/stellic/plan-header"
 import { TermCalendar } from "@/components/stellic/term-calendar"
 import { TermList } from "@/components/stellic/term-list"
+import { ActionLines } from "@/components/stellic/term-actions"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   METADATA_FIELDS,
   courseStatus,
-  missingLine,
   termActions,
   type MetadataField,
   type Term,
@@ -21,7 +21,7 @@ import {
  * so the list is all there is. */
 
 function RegistrationAlert({ term }: { term: Term }) {
-  const ready = term.courses.filter((c) => courseStatus(c) === "ready").length
+  const ready = term.courses.filter((c) => courseStatus(c, term) === "ready").length
 
   return (
     <Alert className="border-gray-40 px-[23px] py-[15px]">
@@ -47,22 +47,7 @@ function ActionsAlert({ term }: { term: Term }) {
       <p className="text-body-md font-semibold text-gray-100">
         {actions.length} action{actions.length === 1 ? "" : "s"} required
       </p>
-      {actions.map((course) => {
-        const missing = missingLine(course)
-        return (
-          <p key={course.id} className="flex w-full flex-wrap items-center gap-2 text-body-md">
-            <Icon name="warning" size={16} className="shrink-0 text-warning-50" />
-            <span className="font-semibold">{course.name}</span>
-            <span>{missing.says}</span>
-            <button
-              type="button"
-              className="cursor-pointer underline [text-underline-position:from-font]"
-            >
-              {missing.action}
-            </button>
-          </p>
-        )
-      })}
+      <ActionLines term={term} />
     </Alert>
   )
 }

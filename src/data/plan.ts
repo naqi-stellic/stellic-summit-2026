@@ -788,23 +788,32 @@ export function courseTags(course: PlannedCourse, shown: MetadataField[]): strin
 /** What is still missing before a course can be registered: a seat held
  *  against a requirement needs a course choosing, and a course with no class
  *  picked needs a section. */
-export function courseNeeds(course: PlannedCourse): "course" | "section" | null {
+export function courseNeeds(course: PlannedCourse, term: Term): "course" | "section" | null {
+  /* Nothing is outstanding in a term whose schedule has not been published. No
+   * sections exist to choose between yet, so a course without one is not
+   * waiting on anybody — it is simply further out than the catalogue reaches.
+   * What such a term is holding is already plain on the planner. */
+  if (!term.scheduled) return null
   if (course.placeholder) return "course"
   return course.classNo ? null : "section"
 }
 
-export function courseStatus(course: PlannedCourse): "ready" | "needs review" {
-  return courseNeeds(course) ? "needs review" : "ready"
+export function courseStatus(course: PlannedCourse, term: Term): "ready" | "needs review" {
+  return courseNeeds(course, term) ? "needs review" : "ready"
 }
 
 /** What the term is waiting on before it can be registered. */
 export function termActions(term: Term): PlannedCourse[] {
-  return term.courses.filter((c) => courseNeeds(c) !== null)
+  /* A draft on the canvas is a proposal, not the plan. What it is striking out
+   * of this term is on its way elsewhere and no longer this term's problem,
+   * and what it is offering has not been accepted yet — so neither is counted
+   * until the draft is. */
+  return term.courses.filter((c) => c.draft == null && courseNeeds(c, term) !== null)
 }
 
 /** The line a course shows when something is missing, and what to press. */
-export function missingLine(course: PlannedCourse): { says: string; action: string } {
-  return courseNeeds(course) === "course"
+export function missingLine(course: PlannedCourse, term: Term): { says: string; action: string } {
+  return courseNeeds(course, term) === "course"
     ? { says: "No course selected for placeholder.", action: "Search courses" }
     : { says: "No section selected.", action: "Search sections" }
 }

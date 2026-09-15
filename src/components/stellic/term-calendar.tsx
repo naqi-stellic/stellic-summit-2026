@@ -44,8 +44,16 @@ function hourLabel(hour: number): string {
 
 /* ------------------------------------------------------------- the classes */
 
-function CourseCard({ course, selectable }: { course: PlannedCourse; selectable: boolean }) {
-  const needsReview = courseStatus(course) === "needs review"
+function CourseCard({
+  course,
+  term,
+  selectable,
+}: {
+  course: PlannedCourse
+  term: Term
+  selectable: boolean
+}) {
+  const needsReview = courseStatus(course, term) === "needs review"
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
 
   return (
@@ -178,7 +186,7 @@ function Sidebar({ term }: { term: Term }) {
           course.placeholder ? (
             <HeldCard key={course.id} course={course} />
           ) : (
-            <CourseCard key={course.id} course={course} selectable={selectable} />
+            <CourseCard key={course.id} course={course} term={term} selectable={selectable} />
           )
         )}
       </div>
@@ -332,7 +340,7 @@ function Week({ term }: { term: Term }) {
                       />
                       <span className="flex min-w-0 flex-1 flex-col gap-1 p-2">
                         <span className="flex items-center gap-1 truncate text-body-md text-gray-80">
-                          {courseStatus(course) === "needs review" && (
+                          {courseStatus(course, term) === "needs review" && (
                             <Icon name="warning" size={14} className="shrink-0 text-warning-100" />
                           )}
                           {course.code}
