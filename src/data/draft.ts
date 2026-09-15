@@ -10,6 +10,7 @@ import {
   emptyYear,
   findCourse,
   findTerm,
+  scheduleTerm,
   type PlannedCourse,
   type Term,
   type Year,
@@ -456,7 +457,10 @@ export function generateTermDraft(
   termId: string,
   targetCredits: number,
   released: string[] = [],
-  optionId: string = TERM_OPTIONS[0].id
+  optionId: string = TERM_OPTIONS[0].id,
+  /** The term's schedule is published, so the run picks class times too and
+   *  what comes out is a timetable rather than a list. */
+  withSchedule = false
 ): Draft {
   seq = 0
   let order = 0
@@ -543,9 +547,14 @@ export function generateTermDraft(
     for (let i = 0; i < room && queue.length > 0; i += 1) {
       incoming.push(draftCourse(queue.shift()!, order++))
     }
-    return spreadAccents(
+    const filled = spreadAccents(
       incoming.length > 0 ? { ...term, courses: [...term.courses, ...incoming] } : term
     )
+    /* Each option starts from a different slot, so the three come back as
+       three different weeks rather than the same one three times. */
+    return withSchedule
+      ? scheduleTerm(filled, TERM_OPTIONS.findIndex((o) => o.id === optionId))
+      : filled
   })
 
   return summariseDraft(years, optionId)

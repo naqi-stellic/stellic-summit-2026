@@ -858,6 +858,27 @@ const SECTION_SLOTS: Meeting[][] = [
   ],
 ]
 
+/** Gives every course in a term that has no section one, drawing from the
+ *  slots in turn so the week fills out rather than stacking. `turn` shifts
+ *  where it starts, which is what makes one generated schedule differ from
+ *  another. */
+export function scheduleTerm(term: Term, turn = 0): Term {
+  let next = turn
+  return {
+    ...term,
+    courses: term.courses.map((course) => {
+      if (course.placeholder || course.section) return course
+      const slot = SECTION_SLOTS[next % SECTION_SLOTS.length]
+      next += 1
+      return {
+        ...course,
+        section: `Lec-0${(next % 3) + 1}`,
+        meetings: slot,
+      }
+    }),
+  }
+}
+
 /** Settles a course on a class: the section, where it meets, and everything
  *  else that only exists once one has been picked. Standing in for a real
  *  section search, which would show what is on offer and let you choose. */

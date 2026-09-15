@@ -443,8 +443,16 @@ export function PlanYourPath() {
     if (!generatingTerm) return
     /* Three ways to fill the same term, the way the plan generator offers
        three ways to fill the whole degree. */
+    const term = findTerm(years, generatingTerm)
     const made = TERM_OPTIONS.map((option) =>
-      generateTermDraft(years, generatingTerm, targetCredits, released, option.id)
+      generateTermDraft(
+        years,
+        generatingTerm,
+        targetCredits,
+        released,
+        option.id,
+        term?.scheduled === true
+      )
     )
     setDrafts({ options: TERM_OPTIONS, made })
     setOptionId(TERM_OPTIONS[0].id)
@@ -472,6 +480,7 @@ export function PlanYourPath() {
           <GenerateTermPanel
             term={findTerm(years, generatingTerm)!}
             standing={standing}
+            mode={findTerm(years, generatingTerm)!.scheduled ? "schedule" : "term"}
             options={
               drafts?.options[0]?.id.startsWith("term-")
                 ? drafts.options.map((option, i) => ({

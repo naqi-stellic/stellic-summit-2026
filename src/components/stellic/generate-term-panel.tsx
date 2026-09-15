@@ -22,8 +22,6 @@ import { CREDITS_PER_COURSE, PLANNING_RULES, type PlanStanding, type Term } from
  * how full should this term be, and what in it is settled — so it fits in two
  * steps instead of three. */
 
-const TOTAL_STEPS = 2
-
 type View = 1 | 2 | "summary" | "building"
 
 /** What the slider can ask for. The floor is a half load; the ceiling is two
@@ -82,6 +80,7 @@ function Preview({ kept, adding, empty }: { kept: number; adding: number; empty:
 export function GenerateTermPanel({
   term,
   standing,
+  mode,
   options,
   selectedOption,
   onSelectOption,
@@ -91,6 +90,9 @@ export function GenerateTermPanel({
 }: {
   term: Term
   standing: PlanStanding
+  /** A term whose schedule is out is generated into a timetable, and asks one
+   *  more question to do it. */
+  mode: "term" | "schedule"
   /** The drafts the run produced, once there are any. */
   options?: { id: string; label: string; blurb: string; added: number }[]
   selectedOption?: string
@@ -104,6 +106,10 @@ export function GenerateTermPanel({
 }) {
   const [view, setView] = useState<View>(1)
   const showing = options != null && options.length > 0
+  const scheduling = mode === "schedule"
+  const title = scheduling ? "Generate Schedule" : "Generate Term"
+  /* Scheduling asks about class times as well, which is a step of its own. */
+  const totalSteps = scheduling ? 3 : 2
   const step = view === 2 ? 2 : 1
   const [target, setTarget] = useState(RECOMMENDED)
   const [keepPlanned, setKeepPlanned] = useState("yes")
@@ -173,20 +179,20 @@ export function GenerateTermPanel({
       >
         <div className="flex w-full items-center gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2">
-            <h2 className="text-caption-lg font-semibold text-foreground">Generate Term</h2>
+            <h2 className="text-caption-lg font-semibold text-foreground">{title}</h2>
             {isStep && (
               <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
-                Step {step} of {TOTAL_STEPS}
+                Step {step} of {totalSteps}
               </span>
             )}
           </div>
-          <Button variant="ghost" size="icon" aria-label="Close Generate Term" onClick={onClose}>
+          <Button variant="ghost" size="icon" aria-label={`Close ${title}`} onClick={onClose}>
             <Icon name="s-close" size={16} />
           </Button>
         </div>
         {isStep && (
           <div className="flex w-full items-start gap-2">
-            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+            {Array.from({ length: totalSteps }, (_, i) => (
               <span
                 key={i}
                 className={cn(
@@ -374,7 +380,7 @@ export function GenerateTermPanel({
                 setView(view === 1 ? 2 : view === 2 ? "summary" : "building")
               }
             >
-              {view === "summary" ? "Generate Term" : "Continue"}
+              {view === "summary" ? title : "Continue"}
             </Button>
           </div>
         )}

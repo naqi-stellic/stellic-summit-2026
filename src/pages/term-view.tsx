@@ -93,7 +93,7 @@ export function TermView({
     {
       label: term.scheduled ? "Generate Schedule" : "Generate Term",
       icon: "design-services",
-      toggles: !term.scheduled,
+      toggles: true,
     },
     {
       label: "Plan details",
