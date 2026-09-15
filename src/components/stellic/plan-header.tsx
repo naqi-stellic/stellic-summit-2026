@@ -1,4 +1,5 @@
 import { cn } from "cn"
+import { useEffect, useRef, useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
@@ -75,13 +76,22 @@ export function PlanHeader({
   onAction?: (action: PlanAction) => void
   onToggleField?: (id: string) => void
 }) {
-  return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <h2 className="flex items-center gap-1 text-h400 font-semibold text-gray-100">
-          Primary Plan
-          <Icon name="expand-more" size={16} />
-        </h2>
+  /* The last stretch of header above the toolbar. Once all of it is out of the
+     pane the toolbar has reached the top and is holding there — a band rather
+     than a hairline, because a box sitting exactly on the clip edge is
+     reported as still visible. */
+  const sentinel = useRef<HTMLSpanElement>(null)
+  const [stuck, setStuck] = useState(false)
+
+  useEffect(() => {
+    const mark = sentinel.current
+    if (!mark) return
+    const watcher = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting))
+    watcher.observe(mark)
+    return () => watcher.disconnect()
+  }, [])
+
+  const actionButtons = (
         <div className="flex flex-wrap items-center gap-2">
           {actions.map((action) => {
             const button = (
@@ -134,6 +144,20 @@ export function PlanHeader({
             <Icon name="more-horiz" size={16} />
           </Button>
         </div>
+  )
+
+  return (
+    <>
+    <section className="relative flex flex-col gap-4">
+      <span ref={sentinel} aria-hidden="true" className="absolute inset-x-0 bottom-0 h-6" />
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <h2 className="flex items-center gap-1 text-h400 font-semibold text-gray-100">
+          Primary Plan
+          <Icon name="expand-more" size={16} />
+        </h2>
+        {/* They are in the toolbar once it sticks, so they are never in two
+            places at once. */}
+        {!stuck && actionButtons}
       </div>
 
       <PlanFacet
@@ -142,7 +166,25 @@ export function PlanHeader({
       />
       <PlanFacet label="Pathway:" value="Business Administration: Fall Start 2026 [BSc]" />
 
-      <div className="flex flex-wrap items-center gap-2 pt-2">
+    </section>
+
+    {/* Only this much of the header holds at the top: which years are in view,
+        and what can be done to the plan. Everything above it — the plan's name
+        and what it is for — is read once and scrolls away.
+
+        `-m-6 p-6` takes back the pane's own padding and puts it back inside, so
+        the bar paints edge to edge when it sticks without moving anything. */}
+    <div
+      className={cn(
+        /* -top-6 rather than top-0: the bar's margin box is pulled out by the
+           pane's padding, so it has to be pinned that much higher to come to
+           rest flush against the top of the pane rather than 24px inside it. */
+        "sticky -top-6 z-20 -m-6 flex flex-wrap items-center justify-between gap-x-4",
+        "gap-y-2 border-b p-6 transition-colors",
+        stuck ? "border-gray-40 bg-card" : "border-transparent"
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-2">
         {tabs.map((tab) => {
           const button = (
             <Button
@@ -187,6 +229,9 @@ export function PlanHeader({
           )
         })}
       </div>
-    </section>
+
+      {stuck && actionButtons}
+    </div>
+    </>
   )
 }
