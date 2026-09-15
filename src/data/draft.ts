@@ -552,8 +552,11 @@ export function generateTermDraft(
     )
     /* Each option starts from a different slot, so the three come back as
        three different weeks rather than the same one three times. */
+    /* Offset by one so no option simply reproduces the arrangement the term
+       already had — picking sections by hand fills the slots from the top, and
+       an option that starts there is the same week again. */
     return withSchedule
-      ? scheduleTerm(filled, TERM_OPTIONS.findIndex((o) => o.id === optionId))
+      ? scheduleTerm(filled, TERM_OPTIONS.findIndex((o) => o.id === optionId) + 1)
       : filled
   })
 

@@ -288,93 +288,109 @@ export function GenerateTermPanel({
                     <label
                       key={option.id}
                       className={cn(
-                        "flex w-full cursor-pointer flex-col gap-2 rounded-md border p-[11px] transition-colors",
+                        "flex w-full cursor-pointer flex-col gap-2 rounded-md border p-3 transition-colors",
                         selectedOption === option.id ? "border-primary-50" : "border-gray-40"
                       )}
                     >
-                      <span className="flex w-full items-center gap-3">
-                        <RadioGroupItem value={option.id} />
-                        {/* Numbered, the way the plan's options are: what you
-                            point at on stage is "option two", not its name. */}
-                        <span className="text-body-md font-semibold text-gray-100">
-                          Option {index + 1}
+                      {/* The answer and its reasoning are separated by a rule:
+                          above it is what this option is, below it is why. */}
+                      <span
+                        className={cn(
+                          "flex w-full items-start gap-3",
+                          week && "border-b border-gray-40 pb-4"
+                        )}
+                      >
+                        <span className="flex shrink-0 items-center py-1">
+                          <RadioGroupItem value={option.id} />
                         </span>
-                        {week && rank === 0 && (
-                          <Badge className="bg-primary-0 text-primary-50">
-                            <Icon name="check-circle" size={12} />
-                            Best Match
-                          </Badge>
-                        )}
-                        {week && rank === 1 && (
-                          <Badge variant="secondary">
-                            <Icon name="fiber-manual-record" size={12} />
-                            Strong Match
-                          </Badge>
-                        )}
-                        <span className="min-w-0 flex-1" />
-                        <Badge variant="success">+{option.added}</Badge>
-                      </span>
 
-                      {week && (
-                        <span className="flex w-full flex-wrap items-start justify-between gap-3">
-                          <span className="flex flex-col gap-2">
-                            <span className="flex items-center gap-1">
-                              {DAYS.map((day, i) => (
-                                <span
-                                  key={day}
-                                  className={cn(
-                                    "flex size-5 items-center justify-center rounded-md text-label-md",
-                                    week.days.includes(i + 1)
-                                      ? "bg-gray-5 font-semibold text-gray-100"
-                                      : "text-gray-40"
-                                  )}
-                                >
-                                  {day[0]}
-                                </span>
-                              ))}
-                            </span>
-                            <span className="text-body-md text-gray-80">
-                              {week.earliest == null
-                                ? "No classes timetabled"
-                                : `Earliest class: ${clockTime(week.earliest)}`}
-                              {week.latest != null && (
-                                <>
-                                  <br />
-                                  Latest class: {clockTime(week.latest)}
-                                </>
+                        <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 pt-px">
+                          <span className="flex w-full items-start justify-between gap-2">
+                            <span className="flex items-start gap-2">
+                              {/* Numbered, the way the plan's options are: what
+                                  you point at on stage is "option two". */}
+                              <span className="text-body-md font-semibold text-gray-100">
+                                Option {index + 1}
+                              </span>
+                              {week && rank === 0 && (
+                                <Badge className="bg-primary-50 text-white">
+                                  <Icon name="emoji-events" size={12} />
+                                  Best Match
+                                </Badge>
+                              )}
+                              {week && rank === 1 && (
+                                <Badge variant="secondary">
+                                  <Icon name="check-circle-outline" size={12} />
+                                  Strong Match
+                                </Badge>
                               )}
                             </span>
+                            <Badge variant="success">+{option.added}</Badge>
                           </span>
 
-                          {/* How far each nice to have was met, in the order
-                              they were ranked. */}
-                          <span className="flex shrink-0 flex-col gap-1">
-                            {prefs.nice.map((pref) => {
-                              const met = week.scores[pref.id as keyof typeof week.scores] ?? 0
-                              return (
-                                <span key={pref.id} className="flex items-center gap-2">
-                                  <span className="flex items-center gap-0.5">
-                                    {[0, 1, 2].map((dot) => (
-                                      <span
-                                        key={dot}
-                                        className={cn(
-                                          "size-2 rounded-full",
-                                          dot < met ? "bg-gray-100" : "bg-gray-40"
-                                        )}
-                                      />
-                                    ))}
-                                  </span>
-                                  <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
-                                    {pref.title}
-                                  </span>
+                          {week && (
+                            <span className="flex w-full items-center gap-4 py-2">
+                              <span className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+                                <span className="flex items-center gap-1">
+                                  {DAYS.map((day, i) => (
+                                    <span
+                                      key={day}
+                                      className={cn(
+                                        "flex w-5 items-center justify-center rounded-md px-2 py-0.5",
+                                        "text-overline font-medium tracking-[0.5px] uppercase",
+                                        week.days.includes(i + 1)
+                                          ? "bg-gray-5 text-gray-100"
+                                          : "bg-gray-0 text-gray-5"
+                                      )}
+                                    >
+                                      {day[0]}
+                                    </span>
+                                  ))}
                                 </span>
-                              )
-                            })}
-                          </span>
-                        </span>
-                      )}
+                                <span className="text-body-md text-gray-100">
+                                  {week.earliest == null ? (
+                                    "No classes timetabled"
+                                  ) : (
+                                    <>
+                                      Earliest class: {clockTime(week.earliest)}
+                                      <br />
+                                      Latest class: {clockTime(week.latest!)}
+                                    </>
+                                  )}
+                                </span>
+                              </span>
 
-                      <span className="text-body-md text-gray-80">{option.blurb}</span>
+                              {/* How far each nice to have was met, in the
+                                  order they were ranked. */}
+                              <span className="flex w-[125px] shrink-0 flex-col">
+                                {prefs.nice.map((pref) => {
+                                  const met = week.scores[pref.id as keyof typeof week.scores] ?? 0
+                                  return (
+                                    <span key={pref.id} className="flex items-center gap-[5px]">
+                                      <span className="flex h-2 w-6 items-center">
+                                        {[0, 1, 2].map((dot) => (
+                                          <span
+                                            key={dot}
+                                            className={cn(
+                                              "size-2 rounded-full",
+                                              dot < met ? "bg-gray-100" : "bg-gray-40"
+                                            )}
+                                          />
+                                        ))}
+                                      </span>
+                                      <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
+                                        {pref.title}
+                                      </span>
+                                    </span>
+                                  )
+                                })}
+                              </span>
+                            </span>
+                          )}
+                        </span>
+                      </span>
+
+                      <span className="text-label-md text-gray-100">{option.blurb}</span>
                     </label>
                   )
                 })}

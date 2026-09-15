@@ -29,6 +29,8 @@ export type PlannedCourse = {
   gradeOption?: string
   /** When the term's schedule is out, where the class actually sits. */
   meetings?: Meeting[]
+  /** Where it sat before a draft moved it, so the two can be seen at once. */
+  previousMeetings?: Meeting[]
   /* Detail that arrives with a chosen class. A course nobody has picked a
    * section for has none of it, which is why these are all optional: the card
    * shows what the course actually has, never an empty label. */
@@ -885,13 +887,23 @@ export function scheduleTerm(term: Term, turn = 0): Term {
   return {
     ...term,
     courses: term.courses.map((course) => {
-      if (course.placeholder || course.section) return course
+      /* A seat has no class to time, and a class already registered for is
+       * settled — generating a schedule cannot move it. Everything else is
+       * timetabled afresh, which is what generating a schedule means for a
+       * term that already has one. */
+      if (course.placeholder || course.registered) return course
       const slot = SECTION_SLOTS[next % SECTION_SLOTS.length]
       next += 1
+      /* By value, not by identity: two slots can be the same hours without
+       * being the same array, and comparing the arrays themselves quietly
+       * reports every class as moved — or none of them. */
+      const moved =
+        course.meetings != null && JSON.stringify(course.meetings) !== JSON.stringify(slot)
       return {
         ...course,
         section: `Lec-0${(next % 3) + 1}`,
         meetings: slot,
+        ...(moved ? { previousMeetings: course.meetings } : {}),
       }
     }),
   }

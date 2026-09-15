@@ -221,7 +221,7 @@ const SPANS = [
   { label: "Week (7 Day)", days: 7 },
 ]
 
-function Week({ term }: { term: Term }) {
+function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
   const [span, setSpan] = useState(SPANS[0])
   const days = termWeek(term).slice(0, span.days)
   const { from, to } = termHours(term)
@@ -302,6 +302,16 @@ function Week({ term }: { term: Term }) {
                 .filter((m) => m.day === i + 1)
                 .map((m) => ({ course, meeting: m }))
             )
+            /* Where a class used to sit before the draft moved it. Drawn
+               behind and faded, so the week can be read against the one it is
+               replacing — and dropped entirely when nobody asked to compare. */
+            const before = compare
+              ? term.courses.flatMap((course) =>
+                  (course.previousMeetings ?? [])
+                    .filter((m) => m.day === i + 1)
+                    .map((m) => ({ course, meeting: m }))
+                )
+              : []
 
             return (
               <div key={day.toISOString()} className="min-w-0 flex-1">
@@ -317,6 +327,33 @@ function Week({ term }: { term: Term }) {
                 <div className="relative" style={{ height: hours.length * HOUR }}>
                   {hours.map((hour) => (
                     <div key={hour} style={{ height: HOUR }} className="border-b border-gray-5" />
+                  ))}
+
+                  {before.map(({ course, meeting }) => (
+                    <div
+                      key={`was-${course.id}-${meeting.from}`}
+                      aria-hidden="true"
+                      style={{
+                        top: (meeting.from - from) * HOUR,
+                        height: (meeting.to - meeting.from) * HOUR,
+                      }}
+                      className={cn(
+                        "absolute inset-x-1 flex items-stretch overflow-hidden rounded-md",
+                        "border border-dashed border-gray-40 bg-gray-0 opacity-70 blur-[1px]"
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          "w-1 shrink-0 opacity-50",
+                          course.accent ? ACCENT[course.accent] : "bg-gray-40"
+                        )}
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col gap-1 p-2">
+                        <span className="truncate text-body-md text-gray-80">{course.code}</span>
+                        <span className="truncate text-body-md text-gray-80">was here</span>
+                      </span>
+                    </div>
                   ))}
 
                   {meetings.map(({ course, meeting }) => (
@@ -368,13 +405,6 @@ function Week({ term }: { term: Term }) {
 }
 
 export function TermCalendar({ term, compare = true }: { term: Term; compare?: boolean }) {
-  /* Comparing means seeing the proposal against what the term already held.
-   * With it off, only what this option is proposing is drawn — which is the
-   * quickest way to read one week on its own. */
-  const drafting = term.courses.some((c) => c.draft)
-  const shown =
-    compare || !drafting ? term : { ...term, courses: term.courses.filter((c) => c.draft) }
-
   return (
     /* shrink-0 because the pane it sits in is a fixed-height column: without
        it the card is squeezed to fit and the week is quietly cut off at the
@@ -382,12 +412,12 @@ export function TermCalendar({ term, compare = true }: { term: Term; compare?: b
     <div className="@container/term w-full shrink-0 overflow-hidden rounded-md border border-gray-40 bg-card">
       {/* Side by side when there is room for both; stacked when there is not. */}
       <div className="flex w-full flex-col @3xl/term:flex-row">
-        <Sidebar term={shown} />
+        <Sidebar term={term} />
         <span
           aria-hidden="true"
           className="shrink-0 bg-gray-40 max-@3xl/term:h-px @3xl/term:w-px"
         />
-        <Week term={shown} />
+        <Week term={term} compare={compare} />
       </div>
     </div>
   )
