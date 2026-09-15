@@ -63,13 +63,15 @@ export function PlaceholderPanel({
 
   if (searching) {
     return (
-      <aside className="flex h-full w-full flex-col overflow-x-clip overflow-y-auto bg-card pb-28">
-        {/* Where this came from and the way out of it, on one line. */}
-        <div className="flex w-full shrink-0 items-center gap-2 border-b border-gray-40 p-6">
+      /* The same grey ground the seat's own panel stands on, with the search
+         and its results as two cards on it. */
+      <aside className="flex h-full w-full flex-col gap-4 overflow-x-clip overflow-y-auto bg-background p-6 pb-28">
+        {/* Where this came from, and the way out of it. */}
+        <div className="flex w-full shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => setSearching(false)}
-            className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-body-md text-gray-100"
+            className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-body-md text-gray-80"
           >
             <Icon name="chevron-left" size={14} className="shrink-0" />
             <span className="min-w-0 truncate text-left">Back to {course.name}</span>
@@ -84,16 +86,16 @@ export function PlaceholderPanel({
           </button>
         </div>
 
-        {/* The search this came from. In a working planner the count is the
+        {/* The search that produced this. In a working planner the count is the
             filters it was run with and the chevron folds them open; here it is
             what it says it is. */}
-        <div className="flex w-full shrink-0 items-center gap-2 border-b border-gray-40 px-12 py-6">
+        <div className="flex w-full shrink-0 items-center gap-2 rounded-md bg-card p-6 shadow-sm">
           <h2 className="text-caption-lg font-semibold text-foreground">Course Search</h2>
           <Badge variant="secondary">3</Badge>
           <Icon name="expand-less" size={16} className="text-gray-100" />
         </div>
 
-        <div className="flex w-full flex-col gap-2 px-12 py-6">
+        <div className="flex w-full flex-col gap-2 rounded-md bg-card p-6 shadow-sm">
           <div className="flex h-9 w-full items-center justify-between gap-2">
             <h3 className="min-w-0 truncate text-h300 font-semibold text-gray-100">
               {eligible.length} Course{eligible.length === 1 ? "" : "s"}
