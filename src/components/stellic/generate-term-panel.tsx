@@ -290,16 +290,18 @@ export function GenerateTermPanel({
                     <label
                       key={option.id}
                       className={cn(
-                        "flex w-full cursor-pointer flex-col gap-2 rounded-md border p-3 transition-colors",
+                        "flex w-full cursor-pointer flex-col gap-2 rounded-md border p-[11px] transition-colors",
                         selectedOption === option.id ? "border-primary-50" : "border-gray-40"
                       )}
                     >
-                      {/* The answer and its reasoning are separated by a rule:
-                          above it is what this option is, below it is why. */}
+                      {/* The answer and its reasoning are separated by a rule,
+                          the way the plan's options are: above it is what this
+                          option is, below it is why. A card with nothing to say
+                          for itself ends at the row instead. */}
                       <span
                         className={cn(
                           "flex w-full items-start gap-3",
-                          week && "border-b border-gray-40 pb-4"
+                          option.blurb && "border-b border-gray-40 pb-4"
                         )}
                       >
                         <span className="flex shrink-0 items-center py-1">
@@ -398,7 +400,9 @@ export function GenerateTermPanel({
                         </span>
                       </span>
 
-                      <span className="text-label-md text-gray-100">{option.blurb}</span>
+                      {option.blurb && (
+                        <span className="text-label-md text-gray-100">{option.blurb}</span>
+                      )}
                     </label>
                   )
                 })}
