@@ -858,34 +858,48 @@ export function registerCourses(years: Year[], termId: string, courseIds: string
  * course sits where and not at all in what the week looks like. With slack in
  * the list, starting later means a different set of hours and days. */
 const SECTION_SLOTS: Meeting[][] = [
-  [
+  /* 0 */ [
     { day: 1, from: 9, to: 10.25 },
     { day: 3, from: 9, to: 10.25 },
   ],
-  [
+  /* 1 */ [
     { day: 2, from: 11, to: 12.25 },
     { day: 4, from: 11, to: 12.25 },
   ],
-  [
+  /* 2 */ [
     { day: 1, from: 13, to: 14.25 },
     { day: 3, from: 13, to: 14.25 },
   ],
-  [
+  /* 3 */ [
     { day: 2, from: 14.5, to: 15.75 },
     { day: 4, from: 14.5, to: 15.75 },
   ],
-  [
+  /* 4 */ [
     { day: 1, from: 10.5, to: 11.75 },
     { day: 3, from: 10.5, to: 11.75 },
   ],
-  [{ day: 5, from: 9, to: 11.5 }],
-  [
+  /* 5 */ [{ day: 5, from: 9, to: 11.5 }],
+  /* 6 */ [
     { day: 2, from: 8, to: 9.25 },
     { day: 4, from: 8, to: 9.25 },
   ],
-  [
+  /* 7 */ [
     { day: 1, from: 16, to: 17.25 },
     { day: 3, from: 16, to: 17.25 },
+  ],
+  /* 8 */ [
+    { day: 2, from: 9.5, to: 10.75 },
+    { day: 4, from: 9.5, to: 10.75 },
+  ],
+  /* 9 */ [
+    { day: 1, from: 8, to: 8.75 },
+    { day: 3, from: 8, to: 8.75 },
+    { day: 5, from: 8, to: 8.75 },
+  ],
+  /* 10 */ [{ day: 5, from: 13, to: 15.5 }],
+  /* 11 */ [
+    { day: 2, from: 16, to: 17.25 },
+    { day: 4, from: 16, to: 17.25 },
   ],
 ]
 
@@ -894,25 +908,30 @@ const SECTION_SLOTS: Meeting[][] = [
  *  where it starts, which is what makes one generated schedule differ from
  *  another. */
 /* Which slots each run reaches for, and in what order. Three windows onto one
- * list all land on much the same week — take five from eight and you always
- * pick up the Friday — so each option has a shape of its own instead: one that
- * keeps to four mid-day weekdays, one that uses the whole week and both ends
- * of the day, and one that starts early and finishes by mid-afternoon. */
+ * list all land on much the same week — take five hours from eight and four of
+ * them are the same four every time, so the options differ in which course
+ * sits where and hardly at all in what the week looks like. Each option draws
+ * on its own part of the day instead, and the sets barely meet:
+ *
+ *   1 — mornings, nothing after lunch, over four days
+ *   2 — afternoons and both Friday blocks, the whole week in use
+ *   3 — Tuesdays and Thursdays, which gives Monday and Wednesday back whole
+ *
+ * None of them hands a course back the hour it already had. Picking a section
+ * by hand takes the first free slot from the top of the list, so the orders
+ * are arranged to cross that: a schedule that changes nothing has nothing to
+ * show against the one it replaced. */
 const SCHEDULE_ORDERS = [
-  /* None of them begins at the first slot. Picking a section by hand takes the
-     first hour nothing else is using, so an order starting there hands those
-     courses back the times they already had — and a schedule that changes
-     nothing has nothing to show against what it replaced. */
-  [2, 3, 4, 0, 1],
-  [5, 0, 6, 2, 7],
-  [6, 0, 4, 2, 3],
+  [8, 0, 4, 6, 1, 9],
+  [5, 2, 11, 10, 7, 3],
+  [6, 8, 1, 11, 3, 5],
 ]
 
 export function scheduleTerm(term: Term, turn = 0): Term {
-  /* The option's own five come first, then whatever it did not name. A term
-   * can hold six courses, and an order of five would hand the sixth the hour
-   * the first already has — two classes drawn on top of each other, one of
-   * them invisible. */
+  /* The option's own slots come first, then whatever it did not name. A term
+   * can hold more courses than an order lists, and wrapping round would hand
+   * the extra one the hour the first already has — two classes drawn on top of
+   * each other, one of them invisible. */
   const named = SCHEDULE_ORDERS[turn % SCHEDULE_ORDERS.length]
   const order = [...named, ...SECTION_SLOTS.map((_, i) => i).filter((i) => !named.includes(i))]
   let next = 0
