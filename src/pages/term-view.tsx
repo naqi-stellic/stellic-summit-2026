@@ -7,7 +7,14 @@ import { TermList } from "@/components/stellic/term-list"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { courseStatus, missingLine, termActions, type Term } from "@/data/plan"
+import {
+  METADATA_FIELDS,
+  courseStatus,
+  missingLine,
+  termActions,
+  type MetadataField,
+  type Term,
+} from "@/data/plan"
 
 /* One term on its own. Everything a term can show depends on whether its class
  * schedule is published: until it is, there are no times to put on a calendar,
@@ -63,11 +70,17 @@ function ActionsAlert({ term }: { term: Term }) {
 export function TermView({
   term,
   tabs,
+  metadata,
+  onToggleField,
 }: {
   term: Term
   /** The year filter, with the term's own year marked. It is also the way out:
    *  any other year, or All Years, goes back to the whole plan. */
   tabs: YearTab[]
+  /** Which details the cards are showing. The menu is the same one the whole
+   *  plan uses, so a change made here holds when you go back out to it. */
+  metadata: MetadataField[]
+  onToggleField: (id: string) => void
 }) {
   /* A published schedule is what the calendar is for, so a term that has one
    * opens on it — empty, if no section has been chosen yet, which is itself
@@ -81,12 +94,19 @@ export function TermView({
       label: term.scheduled ? "Generate Schedule" : "Generate Term",
       icon: "design-services",
     },
-    { label: "Plan details", icon: "remove-red-eye" },
+    {
+      label: "Plan details",
+      icon: "remove-red-eye",
+      fields: METADATA_FIELDS.map((field) => ({
+        ...field,
+        shown: metadata.includes(field.id),
+      })),
+    },
   ]
 
   return (
     <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
-      <PlanHeader actions={plannerActions} tabs={tabs} />
+      <PlanHeader actions={plannerActions} tabs={tabs} onToggleField={onToggleField} />
 
       {term.scheduled && term.alert ? (
         <RegistrationAlert term={term} />

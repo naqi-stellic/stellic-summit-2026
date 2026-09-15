@@ -15,7 +15,14 @@ import { DEGREE } from "@/data/plan"
  * are in view. The planner and a term share it — only the actions and the
  * selected year differ. */
 
-export type PlanAction = { label: string; icon: IconName; toggles?: boolean }
+export type PlanAction = {
+  label: string
+  icon: IconName
+  toggles?: boolean
+  /** Given, the action opens a menu of details to show on or hide from the
+   *  course cards, rather than acting on its own. */
+  fields?: { id: string; label: string; shown: boolean }[]
+}
 
 /** A term as the year filter offers it: its own state, not its year's. */
 export type TabTerm = {
@@ -59,12 +66,14 @@ export function PlanHeader({
   tabs,
   pressed,
   onAction,
+  onToggleField,
 }: {
   actions: PlanAction[]
   tabs: YearTab[]
   /** Whether the toggling action is currently showing its panel. */
   pressed?: boolean
   onAction?: (action: PlanAction) => void
+  onToggleField?: (id: string) => void
 }) {
   return (
     <section className="flex flex-col gap-4">
@@ -74,16 +83,50 @@ export function PlanHeader({
           <Icon name="expand-more" size={16} />
         </h2>
         <div className="flex flex-wrap items-center gap-2">
-          {actions.map((action) => (
-            <Button
-              key={action.label}
-              aria-pressed={action.toggles ? pressed : undefined}
-              onClick={() => onAction?.(action)}
-            >
-              <Icon name={action.icon} size={16} />
-              {action.label}
-            </Button>
-          ))}
+          {actions.map((action) => {
+            const button = (
+              <Button
+                aria-pressed={action.toggles ? pressed : undefined}
+                onClick={() => onAction?.(action)}
+                className="data-[state=open]:bg-gray-5"
+              >
+                <Icon name={action.icon} size={16} />
+                {action.label}
+              </Button>
+            )
+
+            if (!action.fields) return <span key={action.label}>{button}</span>
+
+            return (
+              <DropdownMenu key={action.label}>
+                <DropdownMenuTrigger asChild>{button}</DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[200px]">
+                  {action.fields.map((field) => (
+                    <DropdownMenuItem
+                      key={field.id}
+                      /* Switching one detail on is rarely the only one you
+                         want, so the menu stays open to take the next. */
+                      onSelect={(event) => {
+                        event.preventDefault()
+                        onToggleField?.(field.id)
+                      }}
+                      className="gap-2 py-1.5 pr-2 pl-8 text-body-md"
+                    >
+                      <Icon
+                        name={field.shown ? "remove-red-eye" : "visibility-off"}
+                        size={16}
+                        className={cn(
+                          "absolute left-2 shrink-0",
+                          field.shown ? "text-gray-100" : "text-gray-40"
+                        )}
+                      />
+                      {field.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+          })}
           <Button size="icon" aria-label="Toggle sidebar">
             <Icon name="view-sidebar" size={16} />
           </Button>

@@ -7,6 +7,7 @@ import type { ReactNode } from "react"
 import { Icon } from "@/components/icon"
 import { AddCourseMenu } from "@/components/stellic/add-course-menu"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
+import { CourseActivity, CourseTags } from "@/components/stellic/course-metadata"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -133,19 +134,11 @@ export function AuditRow({
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
         {held ? (
-          <>
-            <p
-              className={cn(
-                "text-body-md font-semibold text-foreground",
-                struck && "line-through"
-              )}
-            >
-              {course.name}
-            </p>
-            <span>
-              <Badge variant="secondary">{course.credits} credits</Badge>
-            </span>
-          </>
+          <p
+            className={cn("text-body-md font-semibold text-foreground", struck && "line-through")}
+          >
+            {course.name}
+          </p>
         ) : (
           <>
             <div>
@@ -167,6 +160,11 @@ export function AuditRow({
             )}
           </>
         )}
+
+        {/* What Plan details is showing. Credits are on to begin with, so a
+            card looks the way it always has until something else is added. */}
+        <CourseTags course={course} />
+        <CourseActivity course={course} />
         {draft && (
           <span
             style={joining ? { animationDelay: settleDelay(draft.order) } : undefined}

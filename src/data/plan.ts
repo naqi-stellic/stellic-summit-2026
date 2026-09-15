@@ -26,6 +26,20 @@ export type PlannedCourse = {
   gradeOption?: string
   /** When the term's schedule is out, where the class actually sits. */
   meetings?: Meeting[]
+  /* Detail that arrives with a chosen class. A course nobody has picked a
+   * section for has none of it, which is why these are all optional: the card
+   * shows what the course actually has, never an empty label. */
+  instructor?: string
+  topic?: string
+  building?: string
+  room?: string
+  /** "Writing Intensive", "Service Learning" — how the section is flagged. */
+  attributes?: string
+  /** "Full Term", "First Half" — which part of the term it runs in. */
+  subTerm?: string
+  /** Who last touched this course on the plan, and when. Every course has one,
+   *  including one the generator placed, which reads "Added by pathway". */
+  lastActivity?: string
   /** The colour this course is drawn in, on its card and on the calendar. */
   accent?: "green" | "amber" | "purple" | "brown"
   /** Set only while a generated draft is on screen. `relocated` marks a card
@@ -123,6 +137,11 @@ export const COMPLETED_YEAR: Year = {
             { day: 1, from: 9, to: 10.25 },
             { day: 3, from: 9, to: 10.25 },
           ],
+          instructor: "Dr. R. Okafor",
+          building: "Hale Hall",
+          room: "212",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 12 Aug 2026",
         },
         {
           id: "p2",
@@ -139,6 +158,11 @@ export const COMPLETED_YEAR: Year = {
             { day: 2, from: 11, to: 12.25 },
             { day: 4, from: 11, to: 12.25 },
           ],
+          instructor: "Dr. L. Whitfield",
+          building: "Science Center",
+          room: "104",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 12 Aug 2026",
         },
         {
           id: "p3",
@@ -155,6 +179,12 @@ export const COMPLETED_YEAR: Year = {
             { day: 1, from: 13, to: 14.25 },
             { day: 3, from: 13, to: 14.25 },
           ],
+          instructor: "Prof. M. Alvarez",
+          building: "Hale Hall",
+          room: "118",
+          attributes: "Writing Intensive",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 12 Aug 2026",
         },
         {
           id: "p4",
@@ -168,6 +198,9 @@ export const COMPLETED_YEAR: Year = {
           gradeOption: "Graded",
           accent: "brown",
           meetings: [{ day: 5, from: 10, to: 12.5 }],
+          instructor: "Dr. S. Nakamura",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 12 Aug 2026",
         },
         {
           id: "p9",
@@ -184,6 +217,12 @@ export const COMPLETED_YEAR: Year = {
             { day: 2, from: 13, to: 14.25 },
             { day: 4, from: 13, to: 14.25 },
           ],
+          instructor: "Dr. T. Boateng",
+          topic: "Cognition",
+          building: "Science Center",
+          room: "230",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 12 Aug 2026",
         },
       ],
     },
@@ -212,6 +251,11 @@ export const COMPLETED_YEAR: Year = {
             { day: 1, from: 10.5, to: 11.75 },
             { day: 3, from: 10.5, to: 11.75 },
           ],
+          instructor: "Prof. D. Sullivan",
+          building: "Braddock Hall",
+          room: "301",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 4 Dec 2026",
         },
         {
           id: "p6",
@@ -228,6 +272,11 @@ export const COMPLETED_YEAR: Year = {
             { day: 2, from: 9, to: 10.25 },
             { day: 4, from: 9, to: 10.25 },
           ],
+          instructor: "Dr. A. Petrov",
+          building: "Braddock Hall",
+          room: "115",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 4 Dec 2026",
         },
         {
           id: "p7",
@@ -244,6 +293,11 @@ export const COMPLETED_YEAR: Year = {
             { day: 2, from: 14, to: 15.25 },
             { day: 4, from: 14, to: 15.25 },
           ],
+          instructor: "Prof. K. Iyer",
+          building: "Braddock Hall",
+          room: "Lab 2",
+          subTerm: "Second Half",
+          lastActivity: "Added by pathway, 4 Dec 2026",
         },
         {
           id: "p8",
@@ -257,6 +311,12 @@ export const COMPLETED_YEAR: Year = {
           gradeOption: "Pass/Fail",
           accent: "brown",
           meetings: [{ day: 3, from: 15.5, to: 18 }],
+          instructor: "Prof. J. Moreau",
+          topic: "Modern & Contemporary",
+          building: "Kline Arts",
+          room: "008",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 4 Dec 2026",
         },
         {
           id: "p10",
@@ -273,6 +333,12 @@ export const COMPLETED_YEAR: Year = {
             { day: 1, from: 13, to: 14.25 },
             { day: 3, from: 13, to: 14.25 },
           ],
+          instructor: "Prof. E. Castellanos",
+          building: "Hale Hall",
+          room: "140",
+          attributes: "Oral Communication",
+          subTerm: "Full Term",
+          lastActivity: "Added by pathway, 4 Dec 2026",
         },
       ],
     },
@@ -350,6 +416,11 @@ export const INITIAL_YEARS: Year[] = [
               { day: 1, from: 9, to: 10.25 },
               { day: 3, from: 9, to: 10.25 },
             ],
+            instructor: "Dr. P. Lindqvist",
+            building: "Braddock Hall",
+            room: "220",
+            subTerm: "Full Term",
+            lastActivity: "Added by pathway, 3 Apr 2027",
           },
           {
             id: "c2",
@@ -366,6 +437,11 @@ export const INITIAL_YEARS: Year[] = [
               { day: 2, from: 11, to: 12.25 },
               { day: 4, from: 11, to: 12.25 },
             ],
+            instructor: "Prof. D. Sullivan",
+            building: "Braddock Hall",
+            room: "301",
+            subTerm: "Full Term",
+            lastActivity: "Added by pathway, 3 Apr 2027",
           },
           {
             id: "c3",
@@ -382,6 +458,11 @@ export const INITIAL_YEARS: Year[] = [
               { day: 1, from: 13, to: 14.25 },
               { day: 3, from: 13, to: 14.25 },
             ],
+            instructor: "Dr. A. Petrov",
+            building: "Braddock Hall",
+            room: "115",
+            subTerm: "Full Term",
+            lastActivity: "Added by pathway, 3 Apr 2027",
           },
           {
             id: "c4",
@@ -399,6 +480,12 @@ export const INITIAL_YEARS: Year[] = [
               { day: 2, from: 14.5, to: 15.75 },
               { day: 4, from: 14.5, to: 15.75 },
             ],
+            instructor: "Dr. L. Whitfield",
+            topic: "Applied Regression",
+            building: "Science Center",
+            room: "Lab 1",
+            subTerm: "Full Term",
+            lastActivity: "Added by sabott, 11 Apr 2027",
           },
           {
             id: "c7",
@@ -415,6 +502,12 @@ export const INITIAL_YEARS: Year[] = [
               { day: 1, from: 10.5, to: 11.75 },
               { day: 3, from: 10.5, to: 11.75 },
             ],
+            instructor: "Prof. N. Adeyemi",
+            building: "Braddock Hall",
+            room: "118",
+            attributes: "Service Learning",
+            subTerm: "Full Term",
+            lastActivity: "Added by pathway, 3 Apr 2027",
           },
         ],
       },
@@ -440,6 +533,7 @@ export const INITIAL_YEARS: Year[] = [
             name: "Investments & Portfolio Management",
             credits: 3,
             accent: "purple",
+            lastActivity: "Added by you, 2 Sep 2027",
           },
           {
             id: "c6",
@@ -447,6 +541,7 @@ export const INITIAL_YEARS: Year[] = [
             name: "Financial Modeling & Valuation",
             credits: 3,
             accent: "amber",
+            lastActivity: "Added by you, 2 Sep 2027",
           },
         ],
       },
@@ -625,6 +720,63 @@ export function planCampuses(years: Year[]): string {
     }
   }
   return seen.size > 0 ? [...seen].join(", ") : "—"
+}
+
+/* --------------------------------------------------------- plan details */
+
+/* What "Plan details" can put on a course card. Everything here is off the
+ * card until it is switched on, and a field a course has no value for stays
+ * off whatever the setting says — a card never carries an empty label. */
+
+export type MetadataField =
+  | "credits"
+  | "modality"
+  | "campus"
+  | "instructor"
+  | "topic"
+  | "building"
+  | "room"
+  | "attributes"
+  | "subTerm"
+  | "lastActivity"
+
+export const METADATA_FIELDS: { id: MetadataField; label: string }[] = [
+  { id: "credits", label: "Credits" },
+  { id: "modality", label: "Modality" },
+  { id: "campus", label: "Campus" },
+  { id: "instructor", label: "Instructor" },
+  { id: "topic", label: "Topic" },
+  { id: "building", label: "Building" },
+  { id: "room", label: "Room" },
+  { id: "attributes", label: "Section Attributes" },
+  { id: "subTerm", label: "Sub-term" },
+  { id: "lastActivity", label: "Last activity" },
+]
+
+/** Credits are the only one the planner shows to begin with, which is the card
+ *  as it has always looked. The rest are there to be turned on. */
+export const METADATA_DEFAULT: MetadataField[] = ["credits"]
+
+/** What a course can say about itself, in the order the menu lists it. Last
+ *  activity is left out: it is not a tag, and the card gives it its own line. */
+export function courseTags(course: PlannedCourse, shown: MetadataField[]): string[] {
+  const value: Partial<Record<MetadataField, string | undefined>> = {
+    credits: `${course.credits} credits`,
+    modality: course.modality,
+    campus: course.campus,
+    instructor: course.instructor,
+    topic: course.topic,
+    building: course.building,
+    room: course.room,
+    attributes: course.attributes,
+    subTerm: course.subTerm,
+  }
+
+  return METADATA_FIELDS.flatMap(({ id }) => {
+    if (id === "lastActivity" || !shown.includes(id)) return []
+    const text = value[id]
+    return text ? [text] : []
+  })
 }
 
 /* ------------------------------------------------------------ term view */

@@ -17,6 +17,7 @@ import { useEffect, useState } from "react"
 import { Icon } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
 import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
+import { MetadataProvider } from "@/components/stellic/course-metadata"
 import {
   PlanHeader,
   type PlanAction,
@@ -61,6 +62,8 @@ import {
   COMPLETED,
   COMPLETED_YEAR,
   INITIAL_YEARS,
+  METADATA_DEFAULT,
+  METADATA_FIELDS,
   expectedGraduation,
   findCourse,
   findTerm,
@@ -70,6 +73,7 @@ import {
   planStanding,
   removeCourse,
   selectableTerms,
+  type MetadataField,
   type Term,
   type Year,
 } from "@/data/plan"
@@ -134,11 +138,22 @@ const SETTLE_MS = 1100
 /** The option that collects the student's own changes. */
 const CUSTOM_ID = "custom"
 
-const PLAN_ACTIONS: PlanAction[] = [
-  { label: "Request review", icon: "assignment" },
-  { label: "Generate plan", icon: "design-services", toggles: true },
-  { label: "Plan details", icon: "remove-red-eye" },
-]
+/** Plan details gets its menu built per render, since it has to show which
+ *  details are currently on. The other two act on their own. */
+function planActions(metadata: MetadataField[]): PlanAction[] {
+  return [
+    { label: "Request review", icon: "assignment" },
+    { label: "Generate plan", icon: "design-services", toggles: true },
+    {
+      label: "Plan details",
+      icon: "remove-red-eye",
+      fields: METADATA_FIELDS.map((field) => ({
+        ...field,
+        shown: metadata.includes(field.id),
+      })),
+    },
+  ]
+}
 
 function RegistrationAlert({ closes }: { closes: string }) {
   /* 92px is the design's height; a minimum rather than a fixed value so the
@@ -199,6 +214,9 @@ export function PlanYourPath() {
   const [openTermId, setOpenTermId] = useState<string | null>(null)
   /* The finished year comes folded away; the rest come open. */
   const [collapsed, setCollapsed] = useState<string[]>([COMPLETED_YEAR.label])
+  /* Which details the cards are showing. Plan details owns this, and every
+     card in the plan — canvas or term — answers to the same list. */
+  const [metadata, setMetadata] = useState<MetadataField[]>(METADATA_DEFAULT)
   /* Bumped when a plan arrives on a canvas that had none — generating, or
    * generating again. Swapping between the options it produced, or changing one
    * by hand, is not an arrival: the plan is already there and only its contents
@@ -399,6 +417,13 @@ export function PlanYourPath() {
     setOpenTermId(termId)
   }
 
+  function toggleMetadata(id: string) {
+    const field = id as MetadataField
+    setMetadata((shown) =>
+      shown.includes(field) ? shown.filter((f) => f !== field) : [...shown, field]
+    )
+  }
+
   return (
     <AppShell
       title="Plan Your Path"
@@ -428,6 +453,7 @@ export function PlanYourPath() {
     >
       {/* relative so the draft's ring can be drawn over whatever is on screen
           without moving anything that is already on it. */}
+      <MetadataProvider shown={metadata}>
       <div className="relative flex min-w-0 flex-1 flex-col">
         {/* The bar arrives with the frame, before there is a plan to put in it,
             and fills as the plan lands. */}
@@ -460,6 +486,8 @@ export function PlanYourPath() {
               () => setOpenTermId(null),
               openTermView
             )}
+            metadata={metadata}
+            onToggleField={toggleMetadata}
           />
         ) : (
       <DndContext
@@ -484,10 +512,11 @@ export function PlanYourPath() {
               opening matters as much as the viewport shrinking. */}
           <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
           <PlanHeader
-            actions={PLAN_ACTIONS}
+            actions={planActions(metadata)}
             tabs={yearTabs(shown, undefined, () => setOpenTermId(null), openTermView)}
             pressed={generateOpen}
             onAction={(action) => action.toggles && setGenerateOpen((open) => !open)}
+            onToggleField={toggleMetadata}
           />
 
           {/* Keyed on the option so switching one replays the entrances rather
@@ -535,6 +564,7 @@ export function PlanYourPath() {
 
         {(draft || framing) && <DraftOutline leaving={accepting} pending={draft == null} />}
       </div>
+      </MetadataProvider>
     </AppShell>
   )
 }

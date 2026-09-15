@@ -141,6 +141,10 @@ export function summariseDraft(years: Year[], optionId: string): Draft {
 type QueueEntry = CatalogEntry & { avoid?: string; ghostFor?: string }
 
 let seq = 0
+/** When the generator ran. Fixed rather than "now" so the plan reads the same
+ *  every time it is shown, like every other date in the data. */
+const GENERATED_ON = "15 Sep 2027"
+
 function draftCourse(entry: CatalogEntry, order: number, note?: string): PlannedCourse {
   return {
     id: `d${(seq += 1)}`,
@@ -148,6 +152,9 @@ function draftCourse(entry: CatalogEntry, order: number, note?: string): Planned
     name: entry.name,
     credits: CREDITS_PER_COURSE,
     placeholder: entry.placeholder,
+    /* Nobody has picked a class for these yet, so a room or an instructor
+     * would be inventing one. What is known is who put it here. */
+    lastActivity: `Added by pathway, ${GENERATED_ON}`,
     draft: { mark: "added", note: note ?? entry.reason, order },
   }
 }
@@ -473,6 +480,7 @@ export function addCourse(
     name: entry.name,
     credits: CREDITS_PER_COURSE,
     placeholder: entry.placeholder,
+    lastActivity: `Added by you, ${GENERATED_ON}`,
     ...(marked ? { draft: { mark: "added" as const, note: "You added this", order: 0 } } : {}),
   }
 
