@@ -107,7 +107,11 @@ export function AuditRow({
       className={cn(
         "group relative flex w-full items-center gap-2 rounded-md border bg-card",
         locked ? "px-[15px] py-[7px]" : "p-[7px]",
-        style && !joining ? style.card : "border-gray-40",
+        style && !joining ? style.card : held ? "border-gray-40 bg-gray-0" : "border-gray-40",
+        /* A held seat is drawn as an outline waiting to be filled, and stays
+           that way while a draft is proposing it — the dashes are what say it
+           is a seat rather than a course, whatever colour the draft gives it. */
+        held && "border-dashed",
         !locked && !draft && "cursor-grab transition-colors hover:bg-gray-5",
         /* Same reason as the draft bar: a marked card carries the transition
            all along, so losing its tint is something it can animate. */
@@ -135,10 +139,9 @@ export function AuditRow({
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
         {held ? (
-          <p
-            className={cn("text-body-md font-semibold text-foreground", struck && "line-through")}
-          >
-            {course.name}
+          <p className="flex items-center gap-2 text-body-md font-semibold text-foreground">
+            <Icon name="hourglass-bottom" size={14} className="shrink-0" />
+            <span className={cn("min-w-0 truncate", struck && "line-through")}>{course.name}</span>
           </p>
         ) : (
           <>

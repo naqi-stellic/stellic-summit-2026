@@ -129,19 +129,17 @@ function HeldCard({ course }: { course: PlannedCourse }) {
   return (
     <div
       className={cn(
-        "flex w-full items-center gap-2 rounded-md border p-[7px]",
-        mark ? mark.card : "border-dashed border-gray-40 bg-gray-0"
+        "flex w-full items-center gap-2 rounded-md border border-dashed p-[7px]",
+        mark ? mark.card : "border-gray-40 bg-gray-0"
       )}
     >
       <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-80" />
       <span className="flex min-w-0 flex-1 flex-col justify-center gap-2">
-        <span
-          className={cn(
-            "text-body-md font-semibold text-gray-100",
-            isStruck(course) && "line-through"
-          )}
-        >
-          {course.name}
+        <span className="flex items-center gap-2 text-body-md font-semibold text-gray-100">
+          <Icon name="hourglass-bottom" size={14} className="shrink-0" />
+          <span className={cn("min-w-0 truncate", isStruck(course) && "line-through")}>
+            {course.name}
+          </span>
         </span>
         <DraftNote course={course} />
         <span>

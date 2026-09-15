@@ -243,6 +243,15 @@ const ICONS = {
   },
   /* The eye with a slash, for a detail the card is not showing. Its partner in
      the shown state is "remove-red-eye", which is the same eye without it. */
+  /* A seat the plan is holding until a course is chosen for it. */
+  "hourglass-bottom": {
+    viewBox: "0 0 24 24",
+    parts: [
+      {
+        d: "M18 22l-.01-6L14 12l3.99-4.01L18 2H6v6l4 4-4 3.99V22h12zM8 7.5V4h8v3.5l-4 4-4-4z",
+      },
+    ],
+  },
   "visibility-off": {
     viewBox: "0 0 24 24",
     parts: [
