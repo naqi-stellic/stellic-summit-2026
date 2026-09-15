@@ -4,6 +4,7 @@ import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ELECTIVE_COURSES, ALL_ELECTIVES } from "@/data/catalog"
 import {
   CREDIT_GROUP_LABEL,
@@ -26,12 +27,15 @@ function Section({ label, children }: { label: string; children: React.ReactNode
   )
 }
 
+/* A course as the search lists it: the handle it would be dragged by, its code
+   and its name. The name wraps rather than truncating — the frame's rows grow
+   to two lines and several of them do. */
 function CourseRow({ code, name }: { code: string; name: string }) {
   return (
-    <div className="flex w-full items-center gap-2 rounded-md border border-gray-40 bg-card p-[11px]">
-      <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-40" />
+    <div className="flex w-full cursor-grab items-center gap-2 rounded-md border border-gray-40 bg-card p-[7px]">
+      <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-100" />
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-body-md text-gray-80">{code}</span>
+        <span className="text-body-md text-gray-80">{code}</span>
         <span className="text-body-md font-semibold text-foreground">{name}</span>
       </span>
     </div>
@@ -60,40 +64,56 @@ export function PlaceholderPanel({
   if (searching) {
     return (
       <aside className="flex h-full w-full flex-col overflow-x-clip overflow-y-auto bg-card pb-28">
-        <header className="flex w-full shrink-0 items-center gap-2 px-6 pt-3 pb-[15px]">
+        {/* Where this came from and the way out of it, on one line. */}
+        <div className="flex w-full shrink-0 items-center gap-2 border-b border-gray-40 p-6">
           <button
             type="button"
             onClick={() => setSearching(false)}
-            className="flex min-w-0 flex-1 cursor-pointer items-center gap-1 text-body-md text-gray-80"
+            className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-body-md text-gray-100"
           >
-            <Icon name="chevron-left" size={16} className="shrink-0" />
-            <span className="min-w-0 truncate">Back to {course.name}</span>
+            <Icon name="chevron-left" size={14} className="shrink-0" />
+            <span className="min-w-0 truncate text-left">Back to {course.name}</span>
           </button>
-          <Button variant="ghost" size="icon" aria-label="Close course search" onClick={onClose}>
-            <Icon name="s-close" size={16} />
-          </Button>
-        </header>
-
-        {/* The search this came from, which in a working planner would hold the
-            filters it was run with. Here it is what it says it is. */}
-        <div className="flex w-full shrink-0 items-center gap-2 border-y border-gray-40 px-6 py-3">
-          <h2 className="text-caption-lg font-semibold text-foreground">Course Search</h2>
-          <Badge variant="secondary">3</Badge>
-          <Icon name="expand-less" size={16} className="ml-auto text-gray-80" />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close course search"
+            className="shrink-0 cursor-pointer rounded-md text-gray-100"
+          >
+            <Icon name="close" size={24} />
+          </button>
         </div>
 
-        <div className="flex w-full flex-col gap-2 p-6">
-          <div className="flex w-full items-center justify-between gap-2">
-            <h3 className="text-body-md font-semibold text-gray-100">
+        {/* The search this came from. In a working planner the count is the
+            filters it was run with and the chevron folds them open; here it is
+            what it says it is. */}
+        <div className="flex w-full shrink-0 items-center gap-2 border-b border-gray-40 px-12 py-6">
+          <h2 className="text-caption-lg font-semibold text-foreground">Course Search</h2>
+          <Badge variant="secondary">3</Badge>
+          <Icon name="expand-less" size={16} className="text-gray-100" />
+        </div>
+
+        <div className="flex w-full flex-col gap-2 px-12 py-6">
+          <div className="flex h-9 w-full items-center justify-between gap-2">
+            <h3 className="min-w-0 truncate text-h300 font-semibold text-gray-100">
               {eligible.length} Course{eligible.length === 1 ? "" : "s"}
             </h3>
-            <span className="flex items-center gap-1">
+            <span className="flex shrink-0 items-center gap-2">
               <Button size="icon" aria-label="Sort">
-                <Icon name="list" size={16} />
+                <Icon name="unfold-more" size={16} />
               </Button>
-              <Button size="icon" aria-label="Cards" aria-pressed>
-                <Icon name="grid-view" size={16} />
-              </Button>
+              {/* Cards or a plain list, the way the term view switches between
+                  its own two. Only the one is drawn. */}
+              <Tabs value="cards">
+                <TabsList>
+                  <TabsTrigger value="cards" aria-label="Cards">
+                    <Icon name="grid-view" size={16} />
+                  </TabsTrigger>
+                  <TabsTrigger value="list" aria-label="List">
+                    <Icon name="list" size={16} />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </span>
           </div>
 
