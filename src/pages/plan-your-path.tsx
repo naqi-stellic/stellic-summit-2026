@@ -362,6 +362,10 @@ export function PlanYourPath() {
       setAccepting(false)
       dropDraft()
       setGenerateOpen(false)
+      /* Applying is the end of a Generate Term run as much as of a plan one,
+         so its panel goes with the draft rather than being left open over a
+         term that has already taken the changes. */
+      setGeneratingTerm(null)
     }, SETTLE_MS)
   }
 

@@ -344,7 +344,14 @@ export function GenerateTermPanel({
             term={term}
             standing={standing}
             onLastStep={onFraming}
-            onDone={() => onGenerate(target, released)}
+            onDone={() => {
+              /* Step back off the build before handing over. The draft is what
+                 the panel shows from here; leaving the view on "building"
+                 means that if the draft ever goes away — applied, or thrown
+                 out — this would mount again and run a second time. */
+              setView(1)
+              onGenerate(target, released)
+            }}
           />
         )}
 
