@@ -26,10 +26,8 @@ export function Landing() {
     <main className="flex min-h-screen w-full flex-col items-center justify-center gap-10 bg-background p-6">
       <div className="flex w-full max-w-[860px] flex-col items-center gap-3 text-center">
         <img src="/brand/stellic-wordmark.svg" alt="Stellic" className="h-8 w-[139.156px]" />
-        <h1 className="text-h400 font-semibold text-gray-100">Summit 2026 prototypes</h1>
-        <p className="text-body-md text-gray-80">
-          Two prototypes over one plan. Each opens in its own tab.
-        </p>
+        <h1 className="text-h400 font-semibold text-gray-100">Team Plan prototypes</h1>
+        <p className="text-body-md text-gray-80">Summit 2026</p>
       </div>
 
       <div className="grid w-full max-w-[860px] gap-4 @container md:grid-cols-2">
