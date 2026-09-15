@@ -729,6 +729,14 @@ export function planCampuses(years: Year[]): string {
   return seen.size > 0 ? [...seen].join(", ") : "—"
 }
 
+/** Roughly how much of the catalogue could fill a held seat. Derived from the
+ *  requirement's own code so the same seat always reports the same number — a
+ *  broad requirement has thousands to choose from, a narrow one a few hundred. */
+export function eligibleCourses(course: PlannedCourse): number {
+  const seed = [...course.code].reduce((n, ch) => n + ch.charCodeAt(0), 0)
+  return 180 + (seed % 9) * 84 + (seed % 7) * 11
+}
+
 /* --------------------------------------------------------- plan details */
 
 /* What "Plan details" can put on a course card. Everything here is off the

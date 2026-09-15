@@ -389,7 +389,8 @@ export function generateTermDraft(
   base: Year[],
   termId: string,
   targetCredits: number,
-  released: string[] = []
+  released: string[] = [],
+  optionId: string = TERM_OPTIONS[0].id
 ): Draft {
   seq = 0
   let order = 0
@@ -399,7 +400,7 @@ export function generateTermDraft(
     terms: year.terms.map((term) => ({ ...term, courses: [...term.courses] })),
   }))
 
-  const queue: QueueEntry[] = [...REMAINING_REQUIREMENTS]
+  const queue: QueueEntry[] = termQueue(optionId)
 
   /* Anything let go leaves a struck card behind and its requirement returns to
    * the front of the queue, where the term may well pick it up again. */
@@ -435,12 +436,67 @@ export function generateTermDraft(
     return incoming.length > 0 ? { ...term, courses: [...term.courses, ...incoming] } : term
   })
 
-  return summariseDraft(years, TERM_OPTION_ID)
+  return summariseDraft(years, optionId)
 }
 
-/** The option id a generated term draft carries, so the canvas can tell it
- *  apart from one of the three whole-plan options. */
-export const TERM_OPTION_ID = "term"
+/* Three ways to fill the same term to the same target. The load does not
+ * change — that is the target the student set — so what differs is which of
+ * the outstanding requirements gets taken first. */
+export const TERM_OPTIONS: DraftOption[] = [
+  {
+    id: "term-core",
+    label: "Core first",
+    blurb:
+      "Takes the business core before anything else, which is the order the requirements " +
+      "are meant to be met in and keeps later terms free of prerequisites.",
+    coursesPerTerm: 0,
+    summers: false,
+  },
+  {
+    id: "term-mixed",
+    label: "A bit of each",
+    blurb:
+      "Alternates core, concentration and general education, so no single term is all of " +
+      "one thing and the workload stays even.",
+    coursesPerTerm: 0,
+    summers: false,
+  },
+  {
+    id: "term-general",
+    label: "General education first",
+    blurb:
+      "Clears the general education requirements now and leaves the term free for the " +
+      "concentration later, when more of it is on offer.",
+    coursesPerTerm: 0,
+    summers: false,
+  },
+]
+
+/** Orders the outstanding requirements the way an option wants them taken. */
+function termQueue(optionId: string): QueueEntry[] {
+  const all = [...REMAINING_REQUIREMENTS]
+  if (optionId === "term-general") {
+    const general = all.filter((e) => /general|elective/i.test(e.reason))
+    return [...general, ...all.filter((e) => !general.includes(e))]
+  }
+  if (optionId === "term-mixed") {
+    /* Deal them out one from each reason in turn, so a term takes a spread
+     * rather than the first five of one kind. */
+    const groups = new Map<string, QueueEntry[]>()
+    for (const entry of all) {
+      const list = groups.get(entry.reason) ?? []
+      list.push(entry)
+      groups.set(entry.reason, list)
+    }
+    const lists = [...groups.values()]
+    const out: QueueEntry[] = []
+    for (let i = 0; out.length < all.length; i += 1) {
+      for (const list of lists) if (list[i]) out.push(list[i])
+    }
+    return out
+  }
+  return all
+}
 
 /* ------------------------------------------------- changing a draft by hand
 

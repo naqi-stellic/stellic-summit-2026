@@ -47,7 +47,7 @@ import { Button } from "@/components/ui/button"
 import type { CatalogEntry } from "@/data/catalog"
 import { releasableTerms } from "@/components/stellic/keep-picker"
 import {
-  TERM_OPTION_ID,
+  TERM_OPTIONS,
   acceptDraft,
   generateTermDraft,
   addCourse,
@@ -144,15 +144,7 @@ const SETTLE_MS = 1100
 /** The option that collects the student's own changes. */
 const CUSTOM_ID = "custom"
 
-/** A generated term is a draft of one option, so the sidebar has something to
- *  name it by even though there was never a choice between three. */
-const TERM_DRAFT_OPTION: DraftOption = {
-  id: TERM_OPTION_ID,
-  label: "Generated term",
-  blurb: "Built to the credit target you set, keeping what you asked to keep.",
-  coursesPerTerm: 0,
-  summers: false,
-}
+
 
 /** Plan details gets its menu built per render, since it has to show which
  *  details are currently on. The other two act on their own. */
@@ -445,10 +437,13 @@ export function PlanYourPath() {
 
   function startTermDraft(targetCredits: number, released: string[]) {
     if (!generatingTerm) return
-    const made = generateTermDraft(years, generatingTerm, targetCredits, released)
-    setDrafts({ options: [TERM_DRAFT_OPTION], made: [made] })
-    setOptionId(TERM_DRAFT_OPTION.id)
-    setGeneratingTerm(null)
+    /* Three ways to fill the same term, the way the plan generator offers
+       three ways to fill the whole degree. */
+    const made = TERM_OPTIONS.map((option) =>
+      generateTermDraft(years, generatingTerm, targetCredits, released, option.id)
+    )
+    setDrafts({ options: TERM_OPTIONS, made })
+    setOptionId(TERM_OPTIONS[0].id)
     setStreamId((n) => n + 1)
     setRevealed(0)
   }
@@ -472,8 +467,25 @@ export function PlanYourPath() {
         (generatingTerm && findTerm(years, generatingTerm) ? (
           <GenerateTermPanel
             term={findTerm(years, generatingTerm)!}
+            standing={standing}
+            options={
+              drafts?.options[0]?.id.startsWith("term-")
+                ? drafts.options.map((option, i) => ({
+                    id: option.id,
+                    label: option.label,
+                    blurb: option.blurb,
+                    added: drafts.made[i].added,
+                  }))
+                : undefined
+            }
+            selectedOption={optionId}
+            onSelectOption={setOptionId}
+            onFraming={() => setFraming(true)}
             onGenerate={startTermDraft}
-            onClose={() => setGeneratingTerm(null)}
+            onClose={() => {
+              dropDraft()
+              setGeneratingTerm(null)
+            }}
           />
         ) : null) ||
         (generateOpen && (

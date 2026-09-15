@@ -3,19 +3,28 @@ import { useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { keepChoices } from "@/components/stellic/generate-plan-pace"
+import { GenerateTermBuilding } from "@/components/stellic/generate-term-building"
+import {
+  DEFAULT_FILTERS,
+  GenerateTermNotes,
+  type SeatNote,
+} from "@/components/stellic/generate-term-notes"
+import { SettingsSection, type SettingRow } from "@/components/stellic/plan-settings"
 import { KeepPicker } from "@/components/stellic/keep-picker"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { RadioGroup } from "@/components/ui/radio-group"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Slider } from "@/components/ui/slider"
 import { RadioCard } from "@/components/stellic/primitives"
-import { CREDITS_PER_COURSE, type Term } from "@/data/plan"
+import { CREDITS_PER_COURSE, PLANNING_RULES, type PlanStanding, type Term } from "@/data/plan"
 
 /* Generating one term rather than the whole plan. The question is narrower —
  * how full should this term be, and what in it is settled — so it fits in two
  * steps instead of three. */
 
 const TOTAL_STEPS = 2
+
+type View = 1 | 2 | "summary" | "building"
 
 /** What the slider can ask for. The floor is a half load; the ceiling is two
  *  terms' worth, for anyone who wants to see the plan push back. */
@@ -25,6 +34,18 @@ const MAX_CREDITS = 30
 /** The load the institution calls full-time, which is where the slider starts
  *  and what the badge under it is pointing at. */
 const RECOMMENDED = 15
+
+/** A titled block in the panel, matching the wizard's spacing. */
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="animate-fade flex w-full flex-col gap-2">
+      <div className="flex w-full items-center pb-2">
+        <h3 className="flex-1 text-caption-lg font-semibold text-gray-100">{title}</h3>
+      </div>
+      {children}
+    </div>
+  )
+}
 
 function Step({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -60,61 +81,179 @@ function Preview({ kept, adding, empty }: { kept: number; adding: number; empty:
 
 export function GenerateTermPanel({
   term,
+  standing,
+  options,
+  selectedOption,
+  onSelectOption,
+  onFraming,
   onGenerate,
   onClose,
 }: {
   term: Term
+  standing: PlanStanding
+  /** The drafts the run produced, once there are any. */
+  options?: { id: string; label: string; blurb: string; added: number }[]
+  selectedOption?: string
+  onSelectOption?: (id: string) => void
+  /** The run has reached its last check: frame the playground before the term
+   *  arrives to fill it. */
+  onFraming: () => void
   /** Fill this term to the target, keeping everything but the released. */
   onGenerate: (targetCredits: number, released: string[]) => void
   onClose: () => void
 }) {
-  const [step, setStep] = useState(1)
+  const [view, setView] = useState<View>(1)
+  const showing = options != null && options.length > 0
+  const step = view === 2 ? 2 : 1
   const [target, setTarget] = useState(RECOMMENDED)
   const [keepPlanned, setKeepPlanned] = useState("yes")
   const [released, setReleased] = useState<string[]>([])
+  const [notes, setNotes] = useState("")
+  const [seatNotes, setSeatNotes] = useState<Record<string, SeatNote>>({})
 
   const planned = term.courses.filter((c) => !released.includes(c.id))
-  const courses = planned.filter((c) => !c.placeholder).length
-  const seats = planned.filter((c) => c.placeholder).length
   const kept = planned.reduce((n, c) => n + c.credits, 0)
   /* Only whole courses can be added, so the target rounds down to one. */
   const adding = Math.max(0, Math.floor((target - kept) / CREDITS_PER_COURSE)) * CREDITS_PER_COURSE
+  const seats = planned.filter((c) => c.placeholder)
+  const isStep = !showing && (view === 1 || view === 2)
+
+  /* What the summary reads back: the answers given, then the rules the school
+     applies whatever anybody answers. */
+  const choices: SettingRow[] = [
+    { label: "Target credits", value: `${target} credits`, step: 1 },
+    {
+      label: "Keeping",
+      value:
+        term.courses.length === 0
+          ? "Nothing planned yet"
+          : keepPlanned === "yes"
+            ? "Everything planned"
+            : `${term.courses.length - released.length} of ${term.courses.length} courses`,
+      step: 1,
+    },
+    { label: "Term instructions", value: notes || "None", step: 2 },
+    ...(seats.length > 0
+      ? [
+          {
+            label: "Placeholder instructions",
+            value: seats
+              .map((seat) => {
+                const note = seatNotes[seat.id] ?? { filters: DEFAULT_FILTERS, prefer: "" }
+                const parts = [...note.filters, note.prefer].filter(Boolean)
+                return `${seat.name}: ${parts.join(", ") || "No preferences"}`
+              })
+              .join(" · "),
+            step: 2 as const,
+          },
+        ]
+      : []),
+  ]
+
+  const rules: SettingRow[] = [
+    { label: "Requirement priority", value: PLANNING_RULES.requirementPriority },
+    { label: "Campus", value: term.campus ?? "Main campus" },
+    {
+      label: "Existing credit",
+      value: `${standing.completed.reqs} courses, ${standing.completed.credits} credits`,
+    },
+    { label: "Prerequisites, co-reqs, anti-reqs", value: PLANNING_RULES.prerequisites },
+    { label: "Term offerings", value: `through ${PLANNING_RULES.offeringsThrough}` },
+    { label: "Credit load limits", value: `max ${PLANNING_RULES.maxCreditsPerTerm} per term` },
+    { label: "Double counting rules", value: PLANNING_RULES.doubleCounting },
+  ]
 
   return (
     <aside className="@container flex h-full w-full flex-col overflow-x-clip overflow-y-auto bg-card">
-      <header className="flex shrink-0 flex-col gap-2 border-b border-gray-40 px-6 pt-3 pb-[15px]">
+      <header
+        className={cn(
+          "flex shrink-0 flex-col border-b border-gray-40 px-6 pt-3 pb-[15px]",
+          isStep && "gap-2"
+        )}
+      >
         <div className="flex w-full items-center gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <h2 className="text-caption-lg font-semibold text-foreground">Generate Term</h2>
-            <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
-              Step {step} of {TOTAL_STEPS}
-            </span>
+            {isStep && (
+              <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
+                Step {step} of {TOTAL_STEPS}
+              </span>
+            )}
           </div>
           <Button variant="ghost" size="icon" aria-label="Close Generate Term" onClick={onClose}>
             <Icon name="s-close" size={16} />
           </Button>
         </div>
-        <div className="flex w-full items-start gap-2">
-          {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-            <span
-              key={i}
-              className={cn("h-1 min-w-0 flex-1 rounded-md", i < step ? "bg-primary-50" : "bg-gray-40")}
-            />
-          ))}
-        </div>
+        {isStep && (
+          <div className="flex w-full items-start gap-2">
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "h-1 min-w-0 flex-1 rounded-md",
+                  i < step ? "bg-primary-50" : "bg-gray-40"
+                )}
+              />
+            ))}
+          </div>
+        )}
       </header>
 
       <div className="flex flex-1 flex-col gap-8 p-6">
-        <div className="flex w-full flex-col gap-2">
-          <h3 className="text-h400 font-semibold text-foreground">Let's plan {term.name}</h3>
-          <p className="text-body-md text-gray-80">
-            {step === 1
-              ? "Set a credit target and tell us what to keep. We'll build the rest around it."
-              : "This is what we will do. Generate it and you can still change anything after."}
-          </p>
-        </div>
+        {showing && (
+          <>
+            <Section title="Term instructions">
+              <div className="flex w-full items-center gap-2 rounded-md border border-gray-40 bg-gray-0 p-[11px]">
+                <span className="min-w-0 flex-1 truncate text-body-md text-gray-100">
+                  {term.name} · {target} credits
+                  {notes && ` · ${notes}`}
+                </span>
+                <Button size="sm" className="shrink-0" onClick={() => setView(1)}>
+                  <Icon name="edit" size={16} />
+                  Edit
+                </Button>
+              </div>
+            </Section>
 
-        {step === 1 ? (
+            <Section title="Term options">
+              <RadioGroup
+                value={selectedOption}
+                onValueChange={(next) => onSelectOption?.(next)}
+                className="w-full gap-2"
+              >
+                {options!.map((option) => (
+                  <label
+                    key={option.id}
+                    className={cn(
+                      "flex w-full cursor-pointer flex-col gap-2 rounded-md border p-[11px] transition-colors",
+                      selectedOption === option.id ? "border-primary-50" : "border-gray-40"
+                    )}
+                  >
+                    <span className="flex w-full items-center gap-3">
+                      <RadioGroupItem value={option.id} />
+                      <span className="min-w-0 flex-1 text-body-md font-semibold text-gray-100">
+                        {option.label}
+                      </span>
+                      <Badge variant="success">+{option.added}</Badge>
+                    </span>
+                    <span className="text-body-md text-gray-80">{option.blurb}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </Section>
+          </>
+        )}
+
+        {!showing && view === 1 && (
+          <div className="flex w-full flex-col gap-2">
+            <h3 className="text-h400 font-semibold text-foreground">Let's plan {term.name}</h3>
+            <p className="text-body-md text-gray-80">
+              Set a credit target and tell us what to keep. We'll build the rest around it.
+            </p>
+          </div>
+        )}
+
+        {showing ? null : view === 1 ? (
           <>
             <section className="flex w-full flex-col items-center gap-2">
               <div className="flex w-full items-start">
@@ -171,38 +310,65 @@ export function GenerateTermPanel({
 
             <Preview kept={kept} adding={adding} empty={term.courses.length === 0} />
           </>
-        ) : (
+        ) : view === 2 ? (
+          <GenerateTermNotes
+            seats={seats}
+            notes={notes}
+            onNotesChange={setNotes}
+            seatNotes={seatNotes}
+            onSeatNoteChange={(id, next) => setSeatNotes((all) => ({ ...all, [id]: next }))}
+          />
+        ) : view === "summary" ? (
           <>
-            <Preview kept={kept} adding={adding} empty={term.courses.length === 0} />
-            <Step title="What you asked for">
-              <p className="text-body-md text-gray-100">
-                {term.courses.length === 0
-                  ? `A ${target}-credit ${term.name}, built from what the degree still needs.`
-                  : `A ${target}-credit ${term.name}, keeping ${courses} course${
-                      courses === 1 ? "" : "s"
-                    }${seats > 0 ? ` and ${seats} placeholder${seats === 1 ? "" : "s"}` : ""}.`}
+            <div className="flex w-full flex-col gap-2">
+              <h3 className="text-h400 font-semibold text-black">
+                Here's what plans will be based on
+              </h3>
+              <p className="text-body-md text-gray-80">
+                Change anything that doesn't look right, then generate.
               </p>
-            </Step>
+            </div>
+            <div className="flex w-full flex-col gap-2 rounded-md border border-gray-40 bg-gray-0 p-[15px]">
+              <SettingsSection
+                title="Your choices"
+                rows={choices}
+                onEdit={(edit) => setView(edit === 2 ? 2 : 1)}
+              />
+              <SettingsSection title="Also accounting for" rows={rules} />
+            </div>
           </>
+        ) : (
+          <GenerateTermBuilding
+            term={term}
+            standing={standing}
+            onLastStep={onFraming}
+            onDone={() => onGenerate(target, released)}
+          />
         )}
 
         {/* In flow under the preview, as the design has it — and out from
             under the assistant button, which is fixed to the bottom right. */}
-        <div className="flex w-full items-center gap-2">
-          <Button
-            className="flex-1"
-            onClick={() => (step === 1 ? onClose() : setStep(1))}
-          >
-            Back
-          </Button>
-          <Button
-            variant="primary"
-            className="flex-1"
-            onClick={() => (step === 1 ? setStep(2) : onGenerate(target, released))}
-          >
-            {step === 1 ? "Continue" : "Generate Term"}
-          </Button>
-        </div>
+        {!showing && view !== "building" && (
+          <div className="flex w-full items-center gap-2">
+            <Button
+              className="flex-1"
+              onClick={() =>
+                view === 1 ? onClose() : setView(view === "summary" ? 2 : 1)
+              }
+            >
+              {view === "summary" ? "Start over" : "Back"}
+            </Button>
+            <Button
+              variant="primary"
+              className="flex-1"
+              onClick={() =>
+                setView(view === 1 ? 2 : view === 2 ? "summary" : "building")
+              }
+            >
+              {view === "summary" ? "Generate Term" : "Continue"}
+            </Button>
+          </div>
+        )}
       </div>
     </aside>
   )
