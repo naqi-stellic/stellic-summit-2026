@@ -380,6 +380,68 @@ export function acceptDraft(years: Year[]): Year[] {
   }))
 }
 
+/** Fills one term to a credit target, leaving the rest of the plan alone. The
+ *  same draft the plan generator makes — added cards, a tally, an Apply — only
+ *  the scope is a term rather than the whole degree. Courses the student
+ *  released are struck out and their requirements go back on the queue, so the
+ *  term can be rebuilt around what was kept. */
+export function generateTermDraft(
+  base: Year[],
+  termId: string,
+  targetCredits: number,
+  released: string[] = []
+): Draft {
+  seq = 0
+  let order = 0
+
+  let years: Year[] = base.map((year) => ({
+    ...year,
+    terms: year.terms.map((term) => ({ ...term, courses: [...term.courses] })),
+  }))
+
+  const queue: QueueEntry[] = [...REMAINING_REQUIREMENTS]
+
+  /* Anything let go leaves a struck card behind and its requirement returns to
+   * the front of the queue, where the term may well pick it up again. */
+  for (const courseId of released) {
+    const found = findCourse(years, courseId)
+    if (!found || found.term.id !== termId) continue
+    const at = order++
+    years = mapTerm(years, termId, (term) => ({
+      ...term,
+      courses: term.courses.map((c) =>
+        c.id === courseId
+          ? { ...c, draft: { mark: "removed" as const, note: "You left this one open", order: at } }
+          : c
+      ),
+    }))
+    queue.unshift({
+      code: found.course.code,
+      name: found.course.name,
+      reason: "You left this one open",
+      placeholder: found.course.placeholder,
+    })
+  }
+
+  years = mapTerm(years, termId, (term) => {
+    if (term.locked) return term
+    const kept = keptCourses(term).reduce((n, c) => n + c.credits, 0)
+    const room = Math.floor((targetCredits - kept) / CREDITS_PER_COURSE)
+
+    const incoming: PlannedCourse[] = []
+    for (let i = 0; i < room && queue.length > 0; i += 1) {
+      incoming.push(draftCourse(queue.shift()!, order++))
+    }
+    return incoming.length > 0 ? { ...term, courses: [...term.courses, ...incoming] } : term
+  })
+
+  return summariseDraft(years, TERM_OPTION_ID)
+}
+
+/** The option id a generated term draft carries, so the canvas can tell it
+ *  apart from one of the three whole-plan options. */
+export const TERM_OPTION_ID = "term"
+
 /* ------------------------------------------------- changing a draft by hand
 
    The playground is the planner: courses can be moved, dropped and added

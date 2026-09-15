@@ -45,6 +45,8 @@ function ActionsAlert({
 }: {
   term: Term
   onPickSection?: (termId: string, courseId: string) => void
+  /** Opens the panel that fills this term to a credit target. */
+  onGenerateTerm?: () => void
 }) {
   const actions = termActions(term)
 
@@ -65,6 +67,7 @@ export function TermView({
   onToggleField,
   onRegister,
   onPickSection,
+  onGenerateTerm,
 }: {
   term: Term
   /** The year filter, with the term's own year marked. It is also the way out:
@@ -76,6 +79,8 @@ export function TermView({
   onToggleField: (id: string) => void
   onRegister?: () => void
   onPickSection?: (termId: string, courseId: string) => void
+  /** Opens the panel that fills this term to a credit target. */
+  onGenerateTerm?: () => void
 }) {
   /* A published schedule is what the calendar is for, so a term that has one
    * opens on it — empty, if no section has been chosen yet, which is itself
@@ -88,6 +93,7 @@ export function TermView({
     {
       label: term.scheduled ? "Generate Schedule" : "Generate Term",
       icon: "design-services",
+      toggles: !term.scheduled,
     },
     {
       label: "Plan details",
@@ -101,7 +107,12 @@ export function TermView({
 
   return (
     <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
-      <PlanHeader actions={plannerActions} tabs={tabs} onToggleField={onToggleField} />
+      <PlanHeader
+        actions={plannerActions}
+        tabs={tabs}
+        onToggleField={onToggleField}
+        onAction={(action) => action.toggles && onGenerateTerm?.()}
+      />
 
       {/* These are not alternatives. A term can have registration open and still
           have courses that cannot go through it yet, which is exactly where

@@ -18,6 +18,7 @@ import { Icon } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
 import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { MetadataProvider } from "@/components/stellic/course-metadata"
+import { GenerateTermPanel } from "@/components/stellic/generate-term-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
 import {
   PlanHeader,
@@ -46,7 +47,9 @@ import { Button } from "@/components/ui/button"
 import type { CatalogEntry } from "@/data/catalog"
 import { releasableTerms } from "@/components/stellic/keep-picker"
 import {
+  TERM_OPTION_ID,
   acceptDraft,
+  generateTermDraft,
   addCourse,
   addableCourses,
   draftLength,
@@ -141,6 +144,16 @@ const SETTLE_MS = 1100
 /** The option that collects the student's own changes. */
 const CUSTOM_ID = "custom"
 
+/** A generated term is a draft of one option, so the sidebar has something to
+ *  name it by even though there was never a choice between three. */
+const TERM_DRAFT_OPTION: DraftOption = {
+  id: TERM_OPTION_ID,
+  label: "Generated term",
+  blurb: "Built to the credit target you set, keeping what you asked to keep.",
+  coursesPerTerm: 0,
+  summers: false,
+}
+
 /** Plan details gets its menu built per render, since it has to show which
  *  details are currently on. The other two act on their own. */
 function planActions(metadata: MetadataField[]): PlanAction[] {
@@ -224,6 +237,8 @@ export function PlanYourPath() {
   const [metadata, setMetadata] = useState<MetadataField[]>(METADATA_DEFAULT)
   /* The term whose registration dialog is up, if any. */
   const [registering, setRegistering] = useState<Term | null>(null)
+  /* The term whose Generate Term panel is open, if any. */
+  const [generatingTerm, setGeneratingTerm] = useState<string | null>(null)
   /* Bumped when a plan arrives on a canvas that had none — generating, or
    * generating again. Swapping between the options it produced, or changing one
    * by hand, is not an arrival: the plan is already there and only its contents
@@ -428,6 +443,16 @@ export function PlanYourPath() {
     setYears((current) => chooseSection(current, termId, courseId))
   }
 
+  function startTermDraft(targetCredits: number, released: string[]) {
+    if (!generatingTerm) return
+    const made = generateTermDraft(years, generatingTerm, targetCredits, released)
+    setDrafts({ options: [TERM_DRAFT_OPTION], made: [made] })
+    setOptionId(TERM_DRAFT_OPTION.id)
+    setGeneratingTerm(null)
+    setStreamId((n) => n + 1)
+    setRevealed(0)
+  }
+
   function register(termId: string, courseIds: string[]) {
     setYears((current) => registerCourses(current, termId, courseIds))
   }
@@ -444,7 +469,14 @@ export function PlanYourPath() {
       title="Plan Your Path"
       assistLabel={draft ? "Make changes to Generated plan" : "Generate with Assistant"}
       panel={
-        generateOpen && (
+        (generatingTerm && findTerm(years, generatingTerm) ? (
+          <GenerateTermPanel
+            term={findTerm(years, generatingTerm)!}
+            onGenerate={startTermDraft}
+            onClose={() => setGeneratingTerm(null)}
+          />
+        ) : null) ||
+        (generateOpen && (
           <GeneratePlanPanel
             standing={standing}
             graduation={expectedGraduation(years)}
@@ -463,7 +495,7 @@ export function PlanYourPath() {
               setGenerateOpen(false)
             }}
           />
-        )
+        ))
       }
     >
       {/* relative so the draft's ring can be drawn over whatever is on screen
@@ -505,6 +537,7 @@ export function PlanYourPath() {
             onToggleField={toggleMetadata}
             onRegister={() => setRegistering(openTerm)}
             onPickSection={pickSection}
+            onGenerateTerm={() => setGeneratingTerm(openTerm.id)}
           />
         ) : (
       <DndContext
