@@ -10,7 +10,12 @@
  * There are 23 of them, which is exactly what a full-time pace has room for in
  * the terms left before Spring 2030: ten courses are behind the student, seven
  * are already on the plan, and 10 + 7 + 23 is the degree. Change this list and
- * the four-year plan either overruns or ends short. */
+ * the four-year plan either overruns or ends short.
+ *
+ * Five of the 23 are electives — two for the concentration and three open —
+ * which is what the generator has to hold as seats in the terms nearest the
+ * student. Fewer than that and the near terms come out with nothing left to
+ * choose. */
 
 export type CatalogEntry = {
   code: string
@@ -51,8 +56,8 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "ENGL 210", name: "Advanced Composition", reason: "General education" },
   { code: "PHIL 240", name: "Business Ethics", reason: "General education" },
   { code: "HIST 205", name: "Modern World History", reason: "General education" },
-  { code: "SCI 210", name: "Environmental Science", reason: "General education" },
-  { code: "SPAN 201", name: "Intermediate Spanish I", reason: "General education" },
+  { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
+  { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "BUS 495", name: "Strategic Management", reason: "Capstone, taken last" },
 ]
