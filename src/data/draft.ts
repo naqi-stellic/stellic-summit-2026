@@ -1,5 +1,6 @@
 import {
   ALL_ELECTIVES,
+  ELECTIVE_COURSES,
   REMAINING_REQUIREMENTS,
   REPLACEMENT_SEAT,
   type CatalogEntry,
@@ -429,19 +430,39 @@ export function generateTermDraft(
   const queue: QueueEntry[] = termQueue(optionId, base)
 
   /* A held seat is the whole point of generating: it is a requirement with no
-   * course against it, and the run is what chooses one. Striking it here frees
-   * its credits, and the fill below puts a real course in its place. */
+   * course against it, and the run is what chooses one. The seat becomes that
+   * course where it stands — nothing is taken out and nothing arrives, so it
+   * is not struck through and nothing is counted as removed. What happened is
+   * that a blank was filled in. */
   for (const term of years.flatMap((y) => y.terms)) {
     if (term.id !== termId || term.locked) continue
     for (const course of term.courses) {
       if (!course.placeholder || released.includes(course.id)) continue
+      /* A seat is filled from its own shelf: a finance elective takes a
+         finance course, a general one takes a general course. Falling back to
+         whatever is next would answer the requirement with the wrong kind of
+         course, which is the one thing a seat is specific about. */
+      const shelf = ELECTIVE_COURSES[course.code] ?? []
+      const wanted = queue.findIndex((entry) =>
+        shelf.some((e) => e.code === entry.code && e.name === entry.name)
+      )
+      const at2 = wanted === -1 ? 0 : wanted
+      const [pick] = queue.splice(at2, 1)
+      if (!pick) break
       const at = order++
+      const seat = course.name
       years = mapTerm(years, termId, (t) => ({
         ...t,
         courses: t.courses.map((c) =>
-          c.id === course.id
-            ? { ...c, draft: { mark: "removed" as const, note: "Filled with a course", order: at } }
-            : c
+          c.id !== course.id
+            ? c
+            : {
+                ...c,
+                code: pick.code,
+                name: pick.name,
+                placeholder: undefined,
+                draft: { mark: "added" as const, note: `Fills your ${seat}`, order: at },
+              }
         ),
       }))
     }
