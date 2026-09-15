@@ -33,10 +33,10 @@ B.S. with a Finance concentration. They finished 2026-2027 (10 courses, 30
 credits), are partway through Fall 2027, have started planning Spring 2028, and
 the plan runs out to 2029-2030. Courses are 3 credits each.
 
-Spring 2028 holds one course and one seat: FIN 340, which has no section yet,
-and a Finance elective with no course against it. They are the two kinds of
-outstanding work a term can have, which is why the term reads "2 actions
-required" and why nothing in it can be registered until one of them is settled.
+Spring 2028 holds one course and one seat: FIN 340, whose class has been chosen
+and which is ready to register, and a Finance elective with no course against
+it. So the term reads "1 action required" — the seat — and one of its two
+things can go through registration while the other cannot.
 FIN 415 is on the outstanding list rather than in the plan, and one of the two
 concentration seats is in the plan rather than on the list — the totals are the
 same either way.

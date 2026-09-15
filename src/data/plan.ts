@@ -541,10 +541,9 @@ export const INITIAL_YEARS: Year[] = [
         state: "planned",
         courses: [
           {
-            /* Registration is open for this term, and each of the two things
-               in it is waiting on something different: this course has no
-               section yet, and the seat below it has no course. Between them
-               they are both kinds of outstanding work a term can hold. */
+            /* Registration is open, the schedule is out, and this class has
+               been chosen — so it is ready to register. What the term is still
+               waiting on is the seat below it, which has no course. */
             id: "c5",
             code: "FIN 340",
             name: "Investments & Portfolio Management",
@@ -552,11 +551,20 @@ export const INITIAL_YEARS: Year[] = [
             /* Taught around a theme, which is a thing to have a preference
                about when the schedule is being generated. */
             topic: "Equity Analysis",
+            section: "Lec-02",
             classNo: "2417",
             campus: "Main",
             modality: "In Person",
             gradeOption: "Graded",
             accent: "purple",
+            meetings: [
+              { day: 1, from: 9, to: 10.25 },
+              { day: 3, from: 9, to: 10.25 },
+            ],
+            instructor: "Dr. A. Ferreira",
+            building: "Braddock Hall",
+            room: "118",
+            subTerm: "Full Term",
             lastActivity: "Added by sabott, 2 Sep 2027",
           },
           {
