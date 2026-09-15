@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card"
 import type { CatalogEntry } from "@/data/catalog"
 import {
   CREDIT_GROUP_LABEL,
+  canAddTerm,
   creditGroup,
   termCredits,
   termMeta,
@@ -529,6 +530,7 @@ export function YearSection({
   addable,
   collapsed,
   onToggleCollapse,
+  onAddTerm,
   onRemoveCourse,
   onAddCourse,
   onOpenTerm,
@@ -542,6 +544,8 @@ export function YearSection({
    *  much room it needs. */
   drop: { termId: string; index: number; height: number } | null
   addable: CatalogEntry[]
+  /** Gives the year its summer, which is the only term it can be given. */
+  onAddTerm?: () => void
   /** Folded away to its heading and what it comes to. */
   collapsed?: boolean
   onToggleCollapse?: () => void
@@ -588,9 +592,10 @@ export function YearSection({
         <div className="-mb-px flex w-full flex-col pb-4">
           <div className="flex min-h-9 w-full flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <h3 className="min-w-0">{heading}</h3>
-            {/* A year already behind you takes no more terms. */}
-            {year.phase !== "complete" && (
-              <Button>
+            {/* A year already behind you takes no more terms, and neither
+                does one that has its summer. */}
+            {canAddTerm(year) && (
+              <Button onClick={onAddTerm}>
                 <Icon name="add" size={16} />
                 Add Term
               </Button>

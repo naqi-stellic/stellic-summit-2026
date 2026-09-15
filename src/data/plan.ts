@@ -374,6 +374,36 @@ export const COMPLETED = {
 }
 
 /** Years the student has not planned into yet: two empty terms, nothing locked. */
+/** The summer a year can take, between its spring and the next fall. A year
+ *  runs fall, spring, summer, and only the summer is optional — which is what
+ *  "Add Term" adds, and why a year that already has one offers nothing. */
+export function summerTerm(yearLabel: string): Term {
+  const end = Number(yearLabel.split("-")[1])
+  return {
+    id: `summer-${end}`,
+    name: `Summer ${end}`,
+    window: "Jun - Aug",
+    campus: "Main campus",
+    reviewed: false,
+    state: "planned",
+    courses: [],
+  }
+}
+
+/** Whether this year still has a term to add. */
+export function canAddTerm(year: Year): boolean {
+  return year.phase !== "complete" && !year.terms.some((term) => term.id.startsWith("summer-"))
+}
+
+/** Adds the summer to a year, after its spring. */
+export function addTerm(years: Year[], yearLabel: string): Year[] {
+  return years.map((year) =>
+    year.label !== yearLabel || !canAddTerm(year)
+      ? year
+      : { ...year, terms: [...year.terms, summerTerm(year.label)] }
+  )
+}
+
 export function emptyYear(start: number): Year {
   return {
     label: `${start}-${start + 1}`,

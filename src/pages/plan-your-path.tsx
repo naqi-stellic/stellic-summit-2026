@@ -75,6 +75,7 @@ import {
 import {
   COMPLETED,
   COMPLETED_YEAR,
+  addTerm,
   INITIAL_YEARS,
   METADATA_DEFAULT,
   METADATA_FIELDS,
@@ -520,6 +521,12 @@ export function PlanYourPath({
     setOpenTermId(termId)
   }
 
+  /* The summer a year can take. Nothing else can be added to one, so this is
+     all "Add Term" does. */
+  function addYearTerm(yearLabel: string) {
+    setYears((current) => addTerm(current, yearLabel))
+  }
+
   function pickSection(termId: string, courseId: string) {
     setYears((current) => chooseSection(current, termId, courseId))
   }
@@ -778,6 +785,7 @@ export function PlanYourPath({
                 onRemoveCourse={handleRemoveCourse}
                 onAddCourse={handleAddCourse}
                 onOpenTerm={openTermView}
+                onAddTerm={() => addYearTerm(year.label)}
                 onPickSection={pickSection}
               />
             ))}

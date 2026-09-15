@@ -13,7 +13,9 @@ Figma: [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Ge
 Planned courses can be picked up and dropped into any other planned term
 (`@dnd-kit`). Registered terms are locked — `Term.locked` — so their courses
 have no handle and can't be moved, and nothing can be dropped into them.
-Hovering a movable course reveals a × that removes it.
+Hovering a movable course reveals what can be done to it, at the end of the
+row: a note and a remove button, with a search button before them on a held
+seat. Only the search button is there when the row is not hovered.
 
 Collision detection is `pointerWithin` rather than `closestCorners` on purpose:
 `closestCorners` always resolves to *some* droppable, so releasing over a locked
@@ -23,6 +25,16 @@ no target and the course snaps back.
 
 `moveCourse` and `removeCourse` own the state transitions and re-check `locked`
 themselves, so the rule holds even if a future caller skips the UI.
+
+## Adding a term
+
+A year runs fall, spring, summer, and only the summer is optional — so "Add
+Term" adds that
+([`1020:250321`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1020-250321)),
+after the spring, and stops offering once the year has one. A year already
+behind you never offers it. The new term is a term like any other: it takes
+drops from the plan and from the requirements panel, it opens on its own, and
+it appears in the year filter's menu.
 
 ## Sample data
 
