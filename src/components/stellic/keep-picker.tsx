@@ -2,7 +2,7 @@ import { useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { Checkbox } from "@/components/ui/checkbox"
-import { termCredits, type Term, type Year } from "@/data/plan"
+import { termCredits, type PlannedCourse, type Term, type Year } from "@/data/plan"
 
 /* Shown when the answer to "keep everything already planned?" is no: the terms
  * still ahead of you, everything ticked, so what you actually do here is untick
@@ -66,32 +66,46 @@ function TermRow({
 
       {expanded &&
         term.courses.map((course) => (
-          <label
+          <CourseRow
             key={course.id}
-            className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-gray-40 bg-card p-[7px]"
-          >
-            <Checkbox
-              checked={!released.includes(course.id)}
-              onCheckedChange={(next) => onToggleCourse(course.id, next === true)}
-              aria-label={`Keep ${course.name}`}
-            />
-            <span className="flex min-w-0 flex-1 flex-col justify-center gap-2">
-              <span>
-                <span className="block text-body-md text-gray-80">{course.code}</span>
-                <span className="block text-body-md font-semibold text-foreground">
-                  {course.name}
-                </span>
-              </span>
-              {course.section && (
-                <span className="flex items-center gap-1 text-body-md text-foreground">
-                  <Icon name="calendar-today" size={14} />
-                  {course.section}
-                </span>
-              )}
-            </span>
-          </label>
+            course={course}
+            kept={!released.includes(course.id)}
+            onToggle={(keep) => onToggleCourse(course.id, keep)}
+          />
         ))}
     </div>
+  )
+}
+
+function CourseRow({
+  course,
+  kept,
+  onToggle,
+}: {
+  course: PlannedCourse
+  kept: boolean
+  onToggle: (keep: boolean) => void
+}) {
+  return (
+    <label className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-gray-40 bg-card p-[7px]">
+      <Checkbox
+        checked={kept}
+        onCheckedChange={(next) => onToggle(next === true)}
+        aria-label={`Keep ${course.name}`}
+      />
+      <span className="flex min-w-0 flex-1 flex-col justify-center gap-2">
+        <span>
+          <span className="block text-body-md text-gray-80">{course.code}</span>
+          <span className="block text-body-md font-semibold text-foreground">{course.name}</span>
+        </span>
+        {course.section && (
+          <span className="flex items-center gap-1 text-body-md text-foreground">
+            <Icon name="calendar-today" size={14} />
+            {course.section}
+          </span>
+        )}
+      </span>
+    </label>
   )
 }
 
@@ -119,6 +133,24 @@ export function KeepPicker({
 
   const set = (ids: string[], keep: boolean) =>
     onChange(keep ? released.filter((id) => !ids.includes(id)) : [...new Set([...released, ...ids])])
+
+  /* One term is just its courses. Folding them under a heading only earns its
+     keep across a four-year plan, where there are too many to take in at once;
+     here the heading would be a lid on a list of five. */
+  if (terms.length === 1) {
+    return (
+      <div className="flex w-full flex-col gap-2">
+        {terms[0].courses.map((course) => (
+          <CourseRow
+            key={course.id}
+            course={course}
+            kept={!released.includes(course.id)}
+            onToggle={(keep) => set([course.id], keep)}
+          />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="flex w-full flex-col gap-2">
