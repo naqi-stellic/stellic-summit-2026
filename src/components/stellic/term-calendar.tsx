@@ -20,6 +20,7 @@ import {
   termCredits,
   termHours,
   termWeek,
+  type Meeting,
   type PlannedCourse,
   type Term,
 } from "@/data/plan"
@@ -222,6 +223,25 @@ const SPANS = [
   { label: "Week (7 Day)", days: 7 },
 ]
 
+/** Splits a day's classes into columns so two at the same hour sit beside each
+ *  other. Drawn on top of one another the lower one is simply not there, and a
+ *  class in the list that is missing from the week is worse than a narrow one. */
+function intoLanes<T extends { meeting: Meeting }>(items: T[]): { item: T; lane: number }[] {
+  const ends: number[] = []
+  return [...items]
+    .sort((a, b) => a.meeting.from - b.meeting.from)
+    .map((item) => {
+      let lane = ends.findIndex((end) => end <= item.meeting.from)
+      if (lane === -1) {
+        lane = ends.length
+        ends.push(item.meeting.to)
+      } else {
+        ends[lane] = item.meeting.to
+      }
+      return { item, lane }
+    })
+}
+
 function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
   const [span, setSpan] = useState(SPANS[0])
   const days = termWeek(term).slice(0, span.days)
@@ -313,6 +333,10 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
                     .map((m) => ({ course, meeting: m }))
                 )
               : []
+            const laid = intoLanes(meetings)
+            const lanes = Math.max(1, ...laid.map((l) => l.lane + 1))
+            const laidBefore = intoLanes(before)
+            const beforeLanes = Math.max(1, ...laidBefore.map((l) => l.lane + 1))
 
             return (
               <div key={day.toISOString()} className="min-w-0 flex-1">
@@ -330,17 +354,19 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
                     <div key={hour} style={{ height: HOUR }} className="border-b border-gray-5" />
                   ))}
 
-                  {before.map(({ course, meeting }) => (
+                  {laidBefore.map(({ item: { course, meeting }, lane }) => (
                     <div
                       key={`was-${course.id}-${meeting.from}`}
                       aria-hidden="true"
                       style={{
                         top: (meeting.from - from) * HOUR,
                         height: (meeting.to - meeting.from) * HOUR,
+                        left: `${(lane / beforeLanes) * 100}%`,
+                        width: `${100 / beforeLanes}%`,
                       }}
                       className={cn(
-                        "absolute inset-x-1 flex items-stretch overflow-hidden rounded-md",
-                        "border border-dashed border-gray-40 bg-gray-0 opacity-70 blur-[1px]"
+                        "absolute flex items-stretch overflow-hidden rounded-md",
+                        "mx-1 border border-dashed border-gray-40 bg-gray-0 opacity-70 blur-[1px]"
                       )}
                     >
                       <span
@@ -357,19 +383,21 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
                     </div>
                   ))}
 
-                  {meetings.map(({ course, meeting }) => (
+                  {laid.map(({ item: { course, meeting }, lane }) => (
                     <div
                       key={`${course.id}-${meeting.from}`}
                       style={{
                         top: (meeting.from - from) * HOUR,
                         height: (meeting.to - meeting.from) * HOUR,
+                        left: `${(lane / lanes) * 100}%`,
+                        width: `${100 / lanes}%`,
                       }}
                       /* Solid, even while it is a proposal: on this week the
                          faded, dashed blocks mean "this is where the class used
                          to be", and a proposed class drawn the same way reads
                          as a ghost of a schedule that never existed. What the
                          draft is offering is what you would get. */
-                      className="absolute inset-x-1 flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card"
+                      className="absolute mx-1 flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card"
                     >
                       <span
                         aria-hidden="true"

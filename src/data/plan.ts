@@ -909,7 +909,12 @@ const SCHEDULE_ORDERS = [
 ]
 
 export function scheduleTerm(term: Term, turn = 0): Term {
-  const order = SCHEDULE_ORDERS[turn % SCHEDULE_ORDERS.length]
+  /* The option's own five come first, then whatever it did not name. A term
+   * can hold six courses, and an order of five would hand the sixth the hour
+   * the first already has — two classes drawn on top of each other, one of
+   * them invisible. */
+  const named = SCHEDULE_ORDERS[turn % SCHEDULE_ORDERS.length]
+  const order = [...named, ...SECTION_SLOTS.map((_, i) => i).filter((i) => !named.includes(i))]
   let next = 0
   return {
     ...term,
@@ -1063,10 +1068,14 @@ export function clockTime(hour: number): string {
 
 /** The hours a term's calendar has to cover, with an hour's air either side. */
 export function termHours(term: Term): { from: number; to: number } {
-  const meetings = term.courses.flatMap((c) => c.meetings ?? [])
-  if (meetings.length === 0) return { from: 8, to: 18 }
-  return {
-    from: Math.floor(Math.min(...meetings.map((m) => m.from)) - 1),
-    to: Math.ceil(Math.max(...meetings.map((m) => m.to)) + 2),
-  }
+  const meetings = term.courses.flatMap((c) => [
+    ...(c.meetings ?? []),
+    ...(c.previousMeetings ?? []),
+  ])
+  /* The day always opens at eight, wherever the first class is, so two terms
+   * read against each other without the hours sliding about. It runs to six in
+   * the evening, or later if something does. */
+  const from = meetings.length === 0 ? 8 : Math.min(8, Math.floor(Math.min(...meetings.map((m) => m.from))))
+  const to = meetings.length === 0 ? 18 : Math.max(18, Math.ceil(Math.max(...meetings.map((m) => m.to)) + 1))
+  return { from, to }
 }
