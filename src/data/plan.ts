@@ -956,18 +956,17 @@ const SECTION_SLOTS: Meeting[][] = [
  * list all land on much the same week — take five hours from eight and four of
  * them are the same four every time, so the options differ in which course
  * sits where and hardly at all in what the week looks like. Each option draws
- * on its own part of the day instead, and the sets barely meet:
+ * on its own part of the day instead:
  *
- *   1 — mornings, nothing after lunch, over four days
+ *   1 — an ordinary week: down the middle of the day, over four days
  *   2 — afternoons and both Friday blocks, the whole week in use
  *   3 — Tuesdays and Thursdays, which gives Monday and Wednesday back whole
  *
- * None of them hands a course back the hour it already had. Picking a section
- * by hand takes the first free slot from the top of the list, so the orders
- * are arranged to cross that: a schedule that changes nothing has nothing to
- * show against the one it replaced. */
+ * The first is the one a full term has to look right in, so it is spread from
+ * nine to four rather than pushed into any one part of the day: five classes
+ * packed into a single morning is a week nobody has. */
 const SCHEDULE_ORDERS = [
-  [8, 0, 4, 6, 1, 9],
+  [0, 4, 1, 2, 3, 9],
   [5, 2, 11, 10, 7, 3],
   [6, 8, 1, 11, 3, 5],
 ]
