@@ -10,7 +10,14 @@ import { missingLine, termActions, type Term } from "@/data/plan"
  * count and opens onto the same lines. */
 
 /** One line per course, saying what it is missing and how to settle it. */
-export function ActionLines({ term }: { term: Term }) {
+export function ActionLines({
+  term,
+  onPickSection,
+}: {
+  term: Term
+  /** Settles a course on a section. Stands in for a section search. */
+  onPickSection?: (termId: string, courseId: string) => void
+}) {
   return (
     <>
       {termActions(term).map((course) => {
@@ -22,6 +29,7 @@ export function ActionLines({ term }: { term: Term }) {
             <span>{missing.says}</span>
             <button
               type="button"
+              onClick={() => onPickSection?.(term.id, course.id)}
               className="cursor-pointer underline [text-underline-position:from-font]"
             >
               {missing.action}
@@ -36,7 +44,13 @@ export function ActionLines({ term }: { term: Term }) {
 /** The planner's version: a count that opens onto the lines. Folded to begin
  *  with, because the point on the canvas is that there is something to do
  *  here at all — the detail is one click away. */
-export function TermActions({ term }: { term: Term }) {
+export function TermActions({
+  term,
+  onPickSection,
+}: {
+  term: Term
+  onPickSection?: (termId: string, courseId: string) => void
+}) {
   const [open, setOpen] = useState(false)
   const actions = termActions(term)
   if (actions.length === 0) return null
@@ -62,7 +76,7 @@ export function TermActions({ term }: { term: Term }) {
 
       {open && (
         <Alert variant="warning" className="flex-col items-start gap-2 p-[15px]">
-          <ActionLines term={term} />
+          <ActionLines term={term} onPickSection={onPickSection} />
         </Alert>
       )}
     </div>

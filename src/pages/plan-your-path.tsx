@@ -18,6 +18,7 @@ import { Icon } from "@/components/icon"
 import { AppShell } from "@/components/layout/app-shell"
 import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { MetadataProvider } from "@/components/stellic/course-metadata"
+import { RegisterDialog } from "@/components/stellic/register-dialog"
 import {
   PlanHeader,
   type PlanAction,
@@ -71,6 +72,8 @@ import {
   nextYearNumber,
   planCampuses,
   planStanding,
+  chooseSection,
+  registerCourses,
   removeCourse,
   selectableTerms,
   type MetadataField,
@@ -155,7 +158,7 @@ function planActions(metadata: MetadataField[]): PlanAction[] {
   ]
 }
 
-function RegistrationAlert({ closes }: { closes: string }) {
+function RegistrationAlert({ closes, onRegister }: { closes: string; onRegister?: () => void }) {
   /* 92px is the design's height; a minimum rather than a fixed value so the
      banner can grow when the closing date wraps to a second line. */
   return (
@@ -172,7 +175,7 @@ function RegistrationAlert({ closes }: { closes: string }) {
             Closes: {closes}
           </AlertDescription>
         </AlertHeader>
-        <Button variant="primary" size="sm">
+        <Button variant="primary" size="sm" onClick={onRegister}>
           Register Now
         </Button>
       </AlertBody>
@@ -182,8 +185,10 @@ function RegistrationAlert({ closes }: { closes: string }) {
 
 /** A term's banner: the registration deadline when it has one, and — while a
  *  draft is on the canvas — the reassurance that it needs nothing otherwise. */
-function termBanner(term: Term, drafting: boolean) {
-  if (term.alert) return <RegistrationAlert closes={term.alert.closes} />
+function termBanner(term: Term, drafting: boolean, onRegister: (term: Term) => void) {
+  if (term.alert) {
+    return <RegistrationAlert closes={term.alert.closes} onRegister={() => onRegister(term)} />
+  }
   return drafting && !term.locked ? <NoActionsAlert /> : null
 }
 
@@ -217,6 +222,8 @@ export function PlanYourPath() {
   /* Which details the cards are showing. Plan details owns this, and every
      card in the plan — canvas or term — answers to the same list. */
   const [metadata, setMetadata] = useState<MetadataField[]>(METADATA_DEFAULT)
+  /* The term whose registration dialog is up, if any. */
+  const [registering, setRegistering] = useState<Term | null>(null)
   /* Bumped when a plan arrives on a canvas that had none — generating, or
    * generating again. Swapping between the options it produced, or changing one
    * by hand, is not an arrival: the plan is already there and only its contents
@@ -417,6 +424,14 @@ export function PlanYourPath() {
     setOpenTermId(termId)
   }
 
+  function pickSection(termId: string, courseId: string) {
+    setYears((current) => chooseSection(current, termId, courseId))
+  }
+
+  function register(termId: string, courseIds: string[]) {
+    setYears((current) => registerCourses(current, termId, courseIds))
+  }
+
   function toggleMetadata(id: string) {
     const field = id as MetadataField
     setMetadata((shown) =>
@@ -488,6 +503,8 @@ export function PlanYourPath() {
             )}
             metadata={metadata}
             onToggleField={toggleMetadata}
+            onRegister={() => setRegistering(openTerm)}
+            onPickSection={pickSection}
           />
         ) : (
       <DndContext
@@ -538,10 +555,11 @@ export function PlanYourPath() {
                 revealed={revealed}
                 drop={drop}
                 addable={addable}
-                renderAlert={(term) => termBanner(term, draft != null)}
+                renderAlert={(term) => termBanner(term, draft != null, setRegistering)}
                 onRemoveCourse={handleRemoveCourse}
                 onAddCourse={handleAddCourse}
                 onOpenTerm={openTermView}
+                onPickSection={pickSection}
               />
             ))}
           </div>
@@ -563,6 +581,14 @@ export function PlanYourPath() {
         )}
 
         {(draft || framing) && <DraftOutline leaving={accepting} pending={draft == null} />}
+
+        {/* Kept level with the plan rather than inside a term, so it survives
+            moving between the canvas and a term while it is open. */}
+        <RegisterDialog
+          term={registering && (findTerm(years, registering.id) ?? registering)}
+          onClose={() => setRegistering(null)}
+          onRegister={register}
+        />
       </div>
       </MetadataProvider>
     </AppShell>

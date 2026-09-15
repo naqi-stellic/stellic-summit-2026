@@ -20,6 +20,7 @@ const statusPillVariants = cva(
         reviewed: "bg-success-5 text-success-100",
         unreviewed: "bg-gray-5 text-gray-100",
         ready: "bg-primary-0 text-primary-100",
+        registered: "bg-success-5 text-success-100",
         "needs review": "bg-warning-5 text-warning-50",
       },
     },
@@ -31,6 +32,7 @@ const STATUS_ICON: Record<string, IconName> = {
   reviewed: "check-circle",
   unreviewed: "error-outline",
   ready: "thumb-up",
+  registered: "check-circle",
   "needs review": "warning",
 }
 

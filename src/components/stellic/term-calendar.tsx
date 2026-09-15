@@ -73,6 +73,8 @@ function CourseCard({
             has nothing to offer here. */}
         {mark ? (
           <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
+        ) : course.registered ? (
+          <Icon name="check-circle" size={16} className="mt-0.5 shrink-0 text-success-100" />
         ) : selectable ? (
           <Checkbox
             defaultChecked

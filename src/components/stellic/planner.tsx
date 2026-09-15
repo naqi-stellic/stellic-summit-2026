@@ -146,7 +146,12 @@ export function AuditRow({
         ) : (
           <>
             <div>
-              <p className="text-body-md text-gray-80">{course.code}</p>
+              <p className="flex items-center gap-1 text-body-md text-gray-80">
+                {course.registered && (
+                  <Icon name="check-circle" size={14} className="shrink-0 text-success-100" />
+                )}
+                {course.code}
+              </p>
               <p
                 className={cn(
                   "text-body-md font-semibold text-foreground",
@@ -316,6 +321,7 @@ export function SemesterCard({
   onRemoveCourse,
   onAddCourse,
   onOpen,
+  onPickSection,
 }: {
   term: Term
   alert?: ReactNode
@@ -333,6 +339,8 @@ export function SemesterCard({
   /** Opens the term on its own, with its classes and — when the schedule is
    *  out — its calendar. */
   onOpen?: () => void
+  /** Settles one of this term's courses on a section. */
+  onPickSection?: (termId: string, courseId: string) => void
 }) {
   const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
 
@@ -410,7 +418,7 @@ export function SemesterCard({
 
         {/* Under the invitation to register, the same way the term itself reads:
             here is the window, and here is what is stopping you using it. */}
-        <TermActions term={term} />
+        <TermActions term={term} onPickSection={onPickSection} />
 
         {term.courses.length > 0 && (
           <CreditGroup term={term} settling={settling} revealed={revealed} />
@@ -503,6 +511,7 @@ export function YearSection({
   onRemoveCourse,
   onAddCourse,
   onOpenTerm,
+  onPickSection,
 }: {
   year: Year
   renderAlert?: (term: Term) => ReactNode
@@ -518,6 +527,7 @@ export function YearSection({
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (termId: string, entry: CatalogEntry) => void
   onOpenTerm?: (termId: string) => void
+  onPickSection?: (termId: string, courseId: string) => void
 }) {
   const heading = (
     <button
@@ -587,6 +597,7 @@ export function YearSection({
               onRemoveCourse={onRemoveCourse}
               onAddCourse={(entry) => onAddCourse(term.id, entry)}
               onOpen={onOpenTerm && (() => onOpenTerm(term.id))}
+              onPickSection={onPickSection}
             />
           ))}
         </div>

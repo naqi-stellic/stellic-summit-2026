@@ -100,6 +100,9 @@ function CourseRow({
           {selectable && (
             <Checkbox
               defaultChecked
+              /* Already through: the tick is what it says, not something to
+                 change. */
+              disabled={course.registered}
               aria-label={`Register ${course.name}`}
               className="shrink-0"
             />

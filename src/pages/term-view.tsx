@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   METADATA_FIELDS,
-  courseStatus,
+  registrableCourses,
   termActions,
   type MetadataField,
   type Term,
@@ -20,8 +20,8 @@ import {
  * schedule is published: until it is, there are no times to put on a calendar,
  * so the list is all there is. */
 
-function RegistrationAlert({ term }: { term: Term }) {
-  const ready = term.courses.filter((c) => courseStatus(c, term) === "ready").length
+function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () => void }) {
+  const ready = registrableCourses(term).length
 
   return (
     <Alert className="border-gray-40 px-[23px] py-[15px]">
@@ -30,7 +30,7 @@ function RegistrationAlert({ term }: { term: Term }) {
         <span className="font-semibold">Registration is now open!</span>
         <span className="whitespace-nowrap">Closes: {term.alert?.closes}</span>
       </span>
-      <Button variant="primary" size="sm" className="shrink-0">
+      <Button variant="primary" size="sm" className="shrink-0" onClick={onRegister}>
         {/* Nothing is ready to register until a section is chosen, so the
             button asks you to start rather than counting to zero. */}
         {ready > 0 ? `Register ${ready} course${ready === 1 ? "" : "s"}` : "Register courses"}
@@ -39,7 +39,13 @@ function RegistrationAlert({ term }: { term: Term }) {
   )
 }
 
-function ActionsAlert({ term }: { term: Term }) {
+function ActionsAlert({
+  term,
+  onPickSection,
+}: {
+  term: Term
+  onPickSection?: (termId: string, courseId: string) => void
+}) {
   const actions = termActions(term)
 
   return (
@@ -47,7 +53,7 @@ function ActionsAlert({ term }: { term: Term }) {
       <p className="text-body-md font-semibold text-gray-100">
         {actions.length} action{actions.length === 1 ? "" : "s"} required
       </p>
-      <ActionLines term={term} />
+      <ActionLines term={term} onPickSection={onPickSection} />
     </Alert>
   )
 }
@@ -57,6 +63,8 @@ export function TermView({
   tabs,
   metadata,
   onToggleField,
+  onRegister,
+  onPickSection,
 }: {
   term: Term
   /** The year filter, with the term's own year marked. It is also the way out:
@@ -66,6 +74,8 @@ export function TermView({
    *  plan uses, so a change made here holds when you go back out to it. */
   metadata: MetadataField[]
   onToggleField: (id: string) => void
+  onRegister?: () => void
+  onPickSection?: (termId: string, courseId: string) => void
 }) {
   /* A published schedule is what the calendar is for, so a term that has one
    * opens on it — empty, if no section has been chosen yet, which is itself
@@ -97,8 +107,10 @@ export function TermView({
           have courses that cannot go through it yet, which is exactly where
           Spring 2028 stands: the window is open, and neither course has a
           section to register. The warning sits under the invitation. */}
-      {term.scheduled && term.alert && <RegistrationAlert term={term} />}
-      {actions.length > 0 && <ActionsAlert term={term} />}
+      {term.scheduled && term.alert && (
+        <RegistrationAlert term={term} onRegister={onRegister} />
+      )}
+      {actions.length > 0 && <ActionsAlert term={term} onPickSection={onPickSection} />}
 
       <div className="flex w-full flex-wrap items-center justify-between gap-2">
         <h3 className="min-w-0 truncate text-h300 font-semibold text-gray-100">{term.name}</h3>

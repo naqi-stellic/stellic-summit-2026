@@ -19,6 +19,9 @@ export type PlannedCourse = {
   notes?: number
   /** A requirement with no course chosen for it yet. */
   placeholder?: boolean
+  /** Put through registration. Only possible once a class has been chosen and
+   *  only while the term's registration window is open. */
+  registered?: boolean
   /** Registration detail, known once a class has been chosen. */
   classNo?: string
   campus?: string
@@ -783,6 +786,100 @@ export function courseTags(course: PlannedCourse, shown: MetadataField[]): strin
   })
 }
 
+/* ------------------------------------------------------------ registering */
+
+/** The classes that can go through registration right now: the window has to
+ *  be open, a section has to have been chosen, and it cannot already be in.
+ *  A seat with no course and anything a draft is still proposing are not
+ *  registrable either — there is nothing to put through. */
+export function registrableCourses(term: Term): PlannedCourse[] {
+  if (!term.scheduled || !term.alert) return []
+  return term.courses.filter(
+    (c) => !c.registered && !c.placeholder && c.draft == null && c.classNo != null
+  )
+}
+
+/** Puts the named classes through, which is all registering changes. */
+export function registerCourses(years: Year[], termId: string, courseIds: string[]): Year[] {
+  const ids = new Set(courseIds)
+  return years.map((year) => ({
+    ...year,
+    terms: year.terms.map((term) =>
+      term.id !== termId
+        ? term
+        : {
+            ...term,
+            courses: term.courses.map((c) =>
+              ids.has(c.id) ? { ...c, registered: true } : c
+            ),
+          }
+    ),
+  }))
+}
+
+/* The class times a term's sections are drawn from, in the order they are
+ * handed out, so two courses in the same term never land on each other. */
+const SECTION_SLOTS: Meeting[][] = [
+  [
+    { day: 1, from: 9, to: 10.25 },
+    { day: 3, from: 9, to: 10.25 },
+  ],
+  [
+    { day: 2, from: 11, to: 12.25 },
+    { day: 4, from: 11, to: 12.25 },
+  ],
+  [
+    { day: 1, from: 13, to: 14.25 },
+    { day: 3, from: 13, to: 14.25 },
+  ],
+  [
+    { day: 2, from: 14.5, to: 15.75 },
+    { day: 4, from: 14.5, to: 15.75 },
+  ],
+  [
+    { day: 1, from: 10.5, to: 11.75 },
+    { day: 3, from: 10.5, to: 11.75 },
+  ],
+]
+
+/** Settles a course on a class: the section, where it meets, and everything
+ *  else that only exists once one has been picked. Standing in for a real
+ *  section search, which would show what is on offer and let you choose. */
+export function chooseSection(years: Year[], termId: string, courseId: string): Year[] {
+  return years.map((year) => ({
+    ...year,
+    terms: year.terms.map((term) => {
+      if (term.id !== termId) return term
+      /* Take the first slot nothing in the term is using, so a term fills up
+         its week rather than stacking classes on one hour. */
+      const taken = new Set(
+        term.courses.flatMap((c) => (c.meetings ?? []).map((m) => `${m.day}-${m.from}`))
+      )
+      const slot =
+        SECTION_SLOTS.find((s) => !s.some((m) => taken.has(`${m.day}-${m.from}`))) ??
+        SECTION_SLOTS[0]
+      const used = term.courses.filter((c) => c.classNo).length
+
+      return {
+        ...term,
+        courses: term.courses.map((c) =>
+          c.id !== courseId || c.placeholder
+            ? c
+            : {
+                ...c,
+                section: "Lec-01",
+                classNo: String(3000 + used * 17 + 41),
+                campus: "Main",
+                modality: "In Person",
+                gradeOption: "Graded",
+                meetings: slot,
+              }
+        ),
+      }
+    }),
+  }))
+}
+
 /* ------------------------------------------------------------ term view */
 
 /** What is still missing before a course can be registered: a seat held
@@ -798,7 +895,11 @@ export function courseNeeds(course: PlannedCourse, term: Term): "course" | "sect
   return course.classNo ? null : "section"
 }
 
-export function courseStatus(course: PlannedCourse, term: Term): "ready" | "needs review" {
+export function courseStatus(
+  course: PlannedCourse,
+  term: Term
+): "registered" | "ready" | "needs review" {
+  if (course.registered) return "registered"
   return courseNeeds(course, term) ? "needs review" : "ready"
 }
 
