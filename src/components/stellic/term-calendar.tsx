@@ -40,6 +40,11 @@ const ACCENT: Record<string, string> = {
 /** An hour of calendar, in pixels. Deep enough that a class of an hour and a
  *  quarter has room for its code, its name and its section. */
 const HOUR = 64
+/* Kept clear on either side of a class so Monday's block and Tuesday's
+   never meet at the column line. The width subtracts both sides: an absolute
+   box with a left and a width drops its right margin, which is how they came
+   to touch in the first place. */
+const GUTTER = 4
 
 function hourLabel(hour: number): string {
   const h = hour % 12 === 0 ? 12 : hour % 12
@@ -361,12 +366,12 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
                       style={{
                         top: (meeting.from - from) * HOUR,
                         height: (meeting.to - meeting.from) * HOUR,
-                        left: `${(lane / beforeLanes) * 100}%`,
-                        width: `${100 / beforeLanes}%`,
+                        left: `calc(${(lane / beforeLanes) * 100}% + ${GUTTER}px)`,
+                        width: `calc(${100 / beforeLanes}% - ${GUTTER * 2}px)`,
                       }}
                       className={cn(
                         "absolute flex items-stretch overflow-hidden rounded-md",
-                        "mx-1 border border-dashed border-gray-40 bg-gray-0 opacity-70 blur-[1px]"
+                        "border border-dashed border-gray-40 bg-gray-0 opacity-70 blur-[1px]"
                       )}
                     >
                       <span
@@ -389,15 +394,15 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
                       style={{
                         top: (meeting.from - from) * HOUR,
                         height: (meeting.to - meeting.from) * HOUR,
-                        left: `${(lane / lanes) * 100}%`,
-                        width: `${100 / lanes}%`,
+                        left: `calc(${(lane / lanes) * 100}% + ${GUTTER}px)`,
+                        width: `calc(${100 / lanes}% - ${GUTTER * 2}px)`,
                       }}
                       /* Solid, even while it is a proposal: on this week the
                          faded, dashed blocks mean "this is where the class used
                          to be", and a proposed class drawn the same way reads
                          as a ghost of a schedule that never existed. What the
                          draft is offering is what you would get. */
-                      className="absolute mx-1 flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card"
+                      className="absolute flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card"
                     >
                       <span
                         aria-hidden="true"
