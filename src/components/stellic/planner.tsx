@@ -17,6 +17,7 @@ import { Card } from "@/components/ui/card"
 import type { CatalogEntry } from "@/data/catalog"
 import {
   CREDIT_GROUP_LABEL,
+  creditGroup,
   termCredits,
   termMeta,
   type PlannedCourse,
@@ -146,12 +147,7 @@ export function AuditRow({
         ) : (
           <>
             <div>
-              <p className="flex items-center gap-1 text-body-md text-gray-80">
-                {course.registered && (
-                  <Icon name="check-circle" size={14} className="shrink-0 text-success-100" />
-                )}
-                {course.code}
-              </p>
+              <p className="text-body-md text-gray-80">{course.code}</p>
               <p
                 className={cn(
                   "text-body-md font-semibold text-foreground",
@@ -272,8 +268,8 @@ function CreditGroup({
           term.state === "planned" && "h-6"
         )}
       >
-        <AuditIcon state={term.state} />
-        {CREDIT_GROUP_LABEL[term.state]} ({credits} Credit{credits === 1 ? "" : "s"})
+        <AuditIcon state={creditGroup(term)} />
+        {CREDIT_GROUP_LABEL[creditGroup(term)]} ({credits} Credit{credits === 1 ? "" : "s"})
       </p>
       {eventual > 0 && (
         <div

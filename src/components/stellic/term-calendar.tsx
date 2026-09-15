@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   CREDIT_GROUP_LABEL,
+  creditGroup,
   courseStatus,
   termCredits,
   termHours,
@@ -75,9 +76,7 @@ function CourseCard({
             has nothing to offer here. */}
         {mark ? (
           <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
-        ) : course.registered ? (
-          <Icon name="check-circle" size={16} className="mt-0.5 shrink-0 text-success-100" />
-        ) : selectable ? (
+        ) : course.registered ? null : selectable ? (
           <Checkbox
             defaultChecked
             className="mt-0.5"
@@ -175,9 +174,9 @@ function Sidebar({ term }: { term: Term }) {
         </div>
 
         <div className="flex w-full items-center gap-2">
-          <AuditIcon state={term.state} size={24} />
+          <AuditIcon state={creditGroup(term)} size={24} />
           <span className="min-w-0 flex-1 text-overline font-medium tracking-[0.5px] text-gray-100 uppercase">
-            {CREDIT_GROUP_LABEL[term.state]} ({credits} Credits)
+            {CREDIT_GROUP_LABEL[creditGroup(term)]} ({credits} Credits)
           </span>
           <Button variant="ghost" size="icon" aria-label="Hide these on the calendar">
             <Icon name="remove-red-eye" size={16} />

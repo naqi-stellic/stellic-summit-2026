@@ -666,6 +666,7 @@ export const CREDIT_GROUP_LABEL = {
   registered: "In Progress",
   planned: "Planned",
   completed: "Completed",
+  "pre-registered": "Registered",
 } as const
 
 /** Where the student stands against the degree. Everything sitting in the
@@ -818,6 +819,16 @@ export function registrableCourses(term: Term): PlannedCourse[] {
   return term.courses.filter(
     (c) => !c.registered && !c.placeholder && c.draft == null && c.section != null
   )
+}
+
+/** What a term's credit group is called and marked by. A planned term whose
+ *  classes have all gone through registration is not "planned" any more —
+ *  everything in it has a seat — so it says so, without becoming a term that
+ *  is under way, which it is not until it starts. */
+export function creditGroup(term: Term): Term["state"] | "pre-registered" {
+  if (term.state !== "planned") return term.state
+  const real = term.courses.filter((c) => !c.placeholder && c.draft == null)
+  return real.length > 0 && real.every((c) => c.registered) ? "pre-registered" : term.state
 }
 
 /** Puts the named classes through, which is all registering changes. */

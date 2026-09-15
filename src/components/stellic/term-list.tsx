@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   CREDIT_GROUP_LABEL,
+  creditGroup,
   courseNeeds,
   courseStatus,
   missingLine,
@@ -103,12 +104,11 @@ function CourseRow({
           {/* Registration is what the ticks are for: choosing which of these
               classes to put through. A term not open for it has nothing to
               tick. */}
-          {selectable && (
+          {/* A tick is for choosing what to put through registration. A class
+              already through has no choice left to offer, so it has none. */}
+          {selectable && !course.registered && (
             <Checkbox
               defaultChecked
-              /* Already through: the tick is what it says, not something to
-                 change. */
-              disabled={course.registered}
               aria-label={`Register ${course.name}`}
               className="shrink-0"
             />
@@ -214,9 +214,9 @@ export function TermList({ term }: { term: Term }) {
             </div>
 
             <div className="flex w-full items-center gap-2 border-t border-gray-40 bg-gray-0 py-2 pr-6 pl-6">
-              <AuditIcon state={term.state} />
+              <AuditIcon state={creditGroup(term)} />
               <span className="text-body-md font-semibold text-gray-80">
-                {CREDIT_GROUP_LABEL[term.state]} ({credits} Credits)
+                {CREDIT_GROUP_LABEL[creditGroup(term)]} ({credits} Credits)
               </span>
             </div>
 

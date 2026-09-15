@@ -1,4 +1,3 @@
-import { cn } from "cn"
 import { useEffect, useState } from "react"
 
 import { Icon } from "@/components/icon"
@@ -19,36 +18,21 @@ import { registrableCourses, type PlannedCourse, type Term } from "@/data/plan"
  * one action — closing it halfway through would leave the question of whether
  * it happened. */
 
-const ACCENT: Record<string, string> = {
-  green: "bg-accent-green",
-  amber: "bg-accent-amber",
-  purple: "bg-accent-purple",
-  brown: "bg-accent-brown",
-  teal: "bg-accent-teal",
-  rose: "bg-accent-rose",
-}
-
 /** How long the request appears to take. Long enough to read, short enough
  *  that nobody on stage is waiting on it. */
 const SENDING_MS = 1600
 
 function CourseCard({ course }: { course: PlannedCourse }) {
   return (
-    <div className="flex w-full items-stretch overflow-hidden rounded-md border border-gray-40 bg-card pr-3">
-      <span
-        aria-hidden="true"
-        className={cn("w-1 shrink-0", course.accent ? ACCENT[course.accent] : "bg-gray-40")}
-      />
-      <div className="flex min-w-0 flex-1 flex-col gap-1 p-3">
-        <p className="truncate text-body-md text-gray-80">{course.code}</p>
-        <p className="text-body-md font-semibold text-gray-100">{course.name}</p>
-        {course.section && (
-          <p className="flex items-center gap-1 text-body-md text-gray-100">
-            <Icon name="calendar-today" size={14} className="shrink-0" />
-            {course.section}
-          </p>
-        )}
-      </div>
+    <div className="flex w-full flex-col gap-1 rounded-md border border-gray-40 bg-card p-3">
+      <p className="truncate text-body-md text-gray-80">{course.code}</p>
+      <p className="text-body-md font-semibold text-gray-100">{course.name}</p>
+      {course.section && (
+        <p className="flex items-center gap-1 text-body-md text-gray-100">
+          <Icon name="calendar-today" size={14} className="shrink-0" />
+          {course.section}
+        </p>
+      )}
     </div>
   )
 }
@@ -112,12 +96,12 @@ export function RegisterDialog({
         )}
 
         {stage === "done" ? (
-          <div className="flex w-full flex-col items-center gap-4 text-center">
-            <span className="flex size-12 items-center justify-center rounded-full bg-success-5 text-success-100">
+          <div className="flex w-full flex-col items-center gap-4 pt-6 pb-8 text-center">
+            <span className="flex size-14 items-center justify-center rounded-full bg-success-5 text-success-100">
               <Icon name="event-available" size={24} />
             </span>
-            <DialogHeader className="gap-1.5">
-              <DialogTitle>
+            <DialogHeader className="items-center gap-1.5 text-center sm:text-center">
+              <DialogTitle className="text-h400">
                 {count} Course{count === 1 ? "" : "s"} Registered
               </DialogTitle>
               <DialogDescription>
