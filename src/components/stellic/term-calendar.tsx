@@ -167,7 +167,7 @@ function Sidebar({ term }: { term: Term }) {
   const selectable = term.alert != null
 
   return (
-    <div className="flex w-full shrink-0 flex-col gap-6 p-6 @3xl/term:w-[350px]">
+    <div className="flex w-full shrink-0 flex-col gap-6 p-6 @3xl/term:w-[280px] @6xl/term:w-[350px]">
       <div className="flex w-full flex-col gap-2">
         <div className="flex w-full items-center gap-2">
           <Icon name="class" size={24} className="shrink-0 text-gray-100" />
@@ -307,7 +307,7 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
       </div>
 
       <div className="w-full overflow-x-auto rounded-md border border-gray-40">
-        <div className="flex min-w-[720px] items-start p-2">
+        <div className="flex min-w-[480px] items-start p-2">
           {/* The hour gutter, which the day columns line up against. */}
           <div className="w-[65px] shrink-0">
             <div className="h-[52px] border-b border-gray-5" />
