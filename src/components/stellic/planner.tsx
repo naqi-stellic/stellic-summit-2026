@@ -171,10 +171,11 @@ export function AuditRow({
       </div>
 
       {/* What can be done to this row, at the end of it: a seat is filled by
-          finding a class for it, and anything can be taken out. Remove is only
-          there under the cursor, and takes no room until it is — so a seat at
-          rest has its search button at the end of the row, and the two sit
-          side by side when the row is hovered. */}
+          finding a class for it, anything can be written about, and anything
+          can be taken out. Only the search button is there at rest — the other
+          two take no room until the cursor is on the row — so a seat ends in
+          its search button until it is hovered, and then the three sit side by
+          side. */}
       {!overlay && (held || onRemove) && (
         <span className="flex shrink-0 items-center gap-1">
           {held && (
@@ -184,6 +185,16 @@ export function AuditRow({
               onPointerDown={(e) => e.stopPropagation()}
             >
               <Icon name="s-search" size={16} />
+            </Button>
+          )}
+          {onRemove && (
+            <Button
+              size="icon"
+              aria-label={`Write a note on ${course.name}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="hidden group-hover:inline-flex"
+            >
+              <Icon name="sticky-note-2" size={16} />
             </Button>
           )}
           {onRemove && (
