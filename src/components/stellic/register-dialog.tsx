@@ -5,6 +5,7 @@ import { Icon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -97,11 +98,17 @@ export function RegisterDialog({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent
-        className="gap-4 sm:max-w-[460px]"
-        /* Nothing to close while the request is in the air. */
-        showCloseButton={stage !== "sending"}
-      >
+      <DialogContent className="gap-4 sm:max-w-[460px]" showCloseButton={false}>
+        {/* The design puts the close on its own line above everything, at the
+            left — not floating in the top corner, which is where the shadcn
+            dialog has it. Nothing to close while the request is in the air. */}
+        {stage !== "sending" && (
+          <DialogClose className="cursor-pointer justify-self-start rounded-md text-gray-80 transition-colors hover:text-gray-100">
+            <Icon name="close" size={24} />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+        )}
+
         {stage === "done" ? (
           <div className="flex w-full flex-col items-center gap-4 text-center">
             <span className="flex size-12 items-center justify-center rounded-full bg-success-5 text-success-100">
