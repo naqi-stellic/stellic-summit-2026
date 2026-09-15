@@ -882,8 +882,20 @@ const SECTION_SLOTS: Meeting[][] = [
  *  slots in turn so the week fills out rather than stacking. `turn` shifts
  *  where it starts, which is what makes one generated schedule differ from
  *  another. */
+/* Which slots each run reaches for, and in what order. Three windows onto one
+ * list all land on much the same week — take five from eight and you always
+ * pick up the Friday — so each option has a shape of its own instead: one that
+ * keeps to four mid-day weekdays, one that uses the whole week and both ends
+ * of the day, and one that starts early and finishes by mid-afternoon. */
+const SCHEDULE_ORDERS = [
+  [0, 1, 2, 3, 4],
+  [5, 0, 6, 2, 7],
+  [6, 0, 4, 2, 3],
+]
+
 export function scheduleTerm(term: Term, turn = 0): Term {
-  let next = turn
+  const order = SCHEDULE_ORDERS[turn % SCHEDULE_ORDERS.length]
+  let next = 0
   return {
     ...term,
     courses: term.courses.map((course) => {
@@ -892,7 +904,7 @@ export function scheduleTerm(term: Term, turn = 0): Term {
        * timetabled afresh, which is what generating a schedule means for a
        * term that already has one. */
       if (course.placeholder || course.registered) return course
-      const slot = SECTION_SLOTS[next % SECTION_SLOTS.length]
+      const slot = SECTION_SLOTS[order[next % order.length]]
       next += 1
       /* By value, not by identity: two slots can be the same hours without
        * being the same array, and comparing the arrays themselves quietly

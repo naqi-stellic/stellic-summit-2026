@@ -267,7 +267,9 @@ export function GenerateTermPanel({
 
             {scheduling && (
               <label className="flex w-full cursor-pointer items-center justify-between gap-2">
-                <span className="text-body-md text-gray-100">Compare with current schedule</span>
+                <span className="text-body-md font-semibold text-gray-100">
+                  Compare with current schedule
+                </span>
                 <Switch checked={compare} onCheckedChange={(on) => onCompareChange?.(on)} />
               </label>
             )}
@@ -313,14 +315,14 @@ export function GenerateTermPanel({
                                 Option {index + 1}
                               </span>
                               {week && rank === 0 && (
-                                <Badge className="bg-primary-50 text-white">
+                                <Badge className="bg-primary-50 font-semibold text-white">
                                   <Icon name="emoji-events" size={12} />
                                   Best Match
                                 </Badge>
                               )}
                               {week && rank === 1 && (
-                                <Badge variant="secondary">
-                                  <Icon name="check-circle-outline" size={12} />
+                                <Badge className="bg-primary-0 font-semibold text-primary-50">
+                                  <Icon name="star" size={12} />
                                   Strong Match
                                 </Badge>
                               )}
@@ -371,11 +373,17 @@ export function GenerateTermPanel({
                                         {[0, 1, 2].map((dot) => (
                                           <span
                                             key={dot}
-                                            className={cn(
-                                              "size-2 rounded-full",
-                                              dot < met ? "bg-gray-100" : "bg-gray-40"
-                                            )}
-                                          />
+                                            className="flex w-2 justify-center"
+                                          >
+                                            <span
+                                              className={cn(
+                                                "size-1.5 rounded-full",
+                                                dot < met
+                                                  ? "bg-gray-100"
+                                                  : "border border-gray-40"
+                                              )}
+                                            />
+                                          </span>
                                         ))}
                                       </span>
                                       <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
