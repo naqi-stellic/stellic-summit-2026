@@ -84,10 +84,14 @@ function CourseRow({
   const struck = isStruck(course)
 
   return (
-    <>
+    /* A marked course is one thing — the row and the line saying what the draft
+       did to it — so the colour goes round the pair rather than along the top
+       of each. An unmarked one keeps the rule between rows that the table is
+       ruled by. */
+    <div className={cn(mark ? cn("border", mark.card) : "border-t border-gray-40")}>
       <div
         className={cn(
-          "flex w-full items-stretch border-t border-gray-40",
+          "flex w-full items-stretch",
           mark ? mark.card : held ? "bg-gray-0" : "bg-card"
         )}
       >
@@ -170,7 +174,7 @@ function CourseRow({
           </p>
         </div>
       )}
-    </>
+    </div>
   )
 }
 

@@ -1,5 +1,4 @@
 import {
-  ALL_ELECTIVES,
   ELECTIVE_COURSES,
   REMAINING_REQUIREMENTS,
   REPLACEMENT_SEAT,
@@ -602,8 +601,16 @@ function termQueue(optionId: string, years: Year[]): QueueEntry[] {
    * filled with. The electives are rotated per option, so the three runs
    * resolve the same seat differently — which is the choice being offered. */
   const turn = Math.max(0, TERM_OPTIONS.findIndex((o) => o.id === optionId))
-  const electives = ALL_ELECTIVES.filter((e) => !placed.has(`${e.code} ${e.name}`))
-  const rotated = [...electives.slice(turn * 2), ...electives.slice(0, turn * 2)]
+  /* Each shelf is turned by the option's own number, not the flat list. A seat
+   * is filled from its own shelf, so rotating the whole list only reshuffles
+   * the finance courses and leaves every option reaching for the same general
+   * one — which is how all three came back with the same course. */
+  const rotated = Object.values(ELECTIVE_COURSES).flatMap((shelf) => {
+    const free = shelf.filter((e) => !placed.has(`${e.code} ${e.name}`))
+    if (free.length === 0) return []
+    const by = turn % free.length
+    return [...free.slice(by), ...free.slice(0, by)]
+  })
 
   const all = [
     ...addableCourses(years).filter((entry) => !entry.placeholder),
