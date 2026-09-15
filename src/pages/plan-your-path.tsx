@@ -20,6 +20,9 @@ import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { MetadataProvider } from "@/components/stellic/course-metadata"
 import { GenerateTermPanel } from "@/components/stellic/generate-term-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
+import { ReviewDialog } from "@/components/stellic/review-dialog"
+import { ReviewPanel } from "@/components/stellic/review-panel"
+import { PendingReviewProvider } from "@/components/stellic/review-state"
 import {
   PlanHeader,
   type PlanAction,
@@ -45,6 +48,7 @@ import {
 } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import type { CatalogEntry } from "@/data/catalog"
+import { INITIAL_REVIEWS, requestedLine, type Review } from "@/data/review"
 import { releasableTerms } from "@/components/stellic/keep-picker"
 import {
   TERM_OPTIONS,
@@ -246,6 +250,13 @@ export function PlanYourPath() {
   const [registering, setRegistering] = useState<Term | null>(null)
   /* The term whose Generate Term panel is open, if any. */
   const [generatingTerm, setGeneratingTerm] = useState<string | null>(null)
+  /* Reviews asked for on this plan, newest first. */
+  const [reviews, setReviews] = useState<Review[]>(INITIAL_REVIEWS)
+  /* The review dialog, and which term it was opened from — none means the
+     whole plan, which is the only case that gets to choose terms. */
+  const [requesting, setRequesting] = useState<{ term: Term | null } | null>(null)
+  /* Whether the reviews panel is showing beside the plan. */
+  const [reviewPanel, setReviewPanel] = useState(false)
   /* Whether a generated schedule is shown against what the term already held,
      or on its own. */
   const [compare, setCompare] = useState(true)
@@ -288,6 +299,10 @@ export function PlanYourPath() {
       )
     : 0
   const standing = planStanding(years)
+  /* Terms a request is still out on. Every card that draws one of them marks
+     itself, whether it is on the canvas or opened on its own. */
+  const pendingTerms = reviews.filter((r) => r.status === "pending").flatMap((r) => r.terms)
+  const pending = reviews.find((r) => r.status === "pending")
 
   const optionSummaries = [
     ...(drafts?.made ?? []).map((d) => ({
@@ -482,6 +497,20 @@ export function PlanYourPath() {
     setYears((current) => registerCourses(current, termId, courseIds))
   }
 
+  function submitReview(review: Review) {
+    setReviews((current) => [review, ...current])
+    setRequesting(null)
+    /* The request is the whole of what just happened, so the panel that
+       accounts for it opens with it. */
+    setReviewPanel(true)
+    setGenerateOpen(false)
+    setGeneratingTerm(null)
+  }
+
+  function cancelReview(id: string) {
+    setReviews((current) => current.filter((review) => review.id !== id))
+  }
+
   function toggleMetadata(id: string) {
     const field = id as MetadataField
     setMetadata((shown) =>
@@ -543,12 +572,22 @@ export function PlanYourPath() {
               setGenerateOpen(false)
             }}
           />
+        )) ||
+        /* Last in line: a generator being open is what you are doing now, and
+           the reviews are what you asked for earlier. */
+        (reviewPanel && (
+          <ReviewPanel
+            reviews={reviews}
+            onCancel={cancelReview}
+            onClose={() => setReviewPanel(false)}
+          />
         ))
       }
     >
       {/* relative so the draft's ring can be drawn over whatever is on screen
           without moving anything that is already on it. */}
       <MetadataProvider shown={metadata}>
+      <PendingReviewProvider terms={pendingTerms}>
       <div className="relative flex min-w-0 flex-1 flex-col">
         {/* The bar arrives with the frame, before there is a plan to put in it,
             and fills as the plan lands. */}
@@ -586,6 +625,7 @@ export function PlanYourPath() {
             onRegister={() => setRegistering(openTerm)}
             onPickSection={pickSection}
             onGenerateTerm={() => setGeneratingTerm(openTerm.id)}
+            onRequestReview={() => setRequesting({ term: openTerm })}
             compare={compare}
           />
         ) : (
@@ -614,9 +654,33 @@ export function PlanYourPath() {
             actions={planActions(metadata)}
             tabs={yearTabs(shown, undefined, () => setOpenTermId(null), openTermView)}
             pressed={generateOpen}
-            onAction={(action) => action.toggles && setGenerateOpen((open) => !open)}
+            onAction={(action) => {
+              if (action.toggles) setGenerateOpen((open) => !open)
+              else if (action.label === "Request review") setRequesting({ term: null })
+            }}
             onToggleField={toggleMetadata}
           />
+
+          {/* What was asked for and has not come back. A term carries the same
+              news on its own card; this says it once for the whole plan. */}
+          {pending && (
+            <Alert variant="warning" className="items-start">
+              <Icon name="outlined-flag" size={16} className="mt-0.5 shrink-0 text-warning-50" />
+              <AlertBody className="gap-1">
+                <span className="text-body-md font-semibold text-foreground">Pending Review</span>
+                <span className="text-body-md text-foreground">
+                  {requestedLine(pending)}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setReviewPanel(true)}
+                    className="cursor-pointer underline [text-underline-position:from-font]"
+                  >
+                    View details
+                  </button>
+                </span>
+              </AlertBody>
+            </Alert>
+          )}
 
           {/* Keyed on the option so switching one replays the entrances rather
               than swapping the cards in place. */}
@@ -671,7 +735,22 @@ export function PlanYourPath() {
           onClose={() => setRegistering(null)}
           onRegister={register}
         />
+
+        {/* Keyed so the dialog starts afresh each time it is opened — from a
+            term it opens on its second step, from the plan on its first. The
+            prefix matters: the open term is a sibling here and carries its own
+            id as a key, and two siblings sharing one key makes React draw them
+            both. */}
+        <ReviewDialog
+          key={`review-${requesting?.term?.id ?? "plan"}`}
+          open={requesting != null}
+          years={years}
+          term={requesting?.term}
+          onClose={() => setRequesting(null)}
+          onSubmit={submitReview}
+        />
       </div>
+      </PendingReviewProvider>
       </MetadataProvider>
     </AppShell>
   )

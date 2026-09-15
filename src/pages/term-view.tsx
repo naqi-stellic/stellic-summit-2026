@@ -5,6 +5,8 @@ import { PlanHeader, type PlanAction, type YearTab } from "@/components/stellic/
 import { TermCalendar } from "@/components/stellic/term-calendar"
 import { TermList } from "@/components/stellic/term-list"
 import { ActionLines } from "@/components/stellic/term-actions"
+import { StatusPill } from "@/components/stellic/primitives"
+import { usePendingReview } from "@/components/stellic/review-state"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -56,6 +58,9 @@ function ActionsAlert({
   onPickSection?: (termId: string, courseId: string) => void
   /** Opens the panel that fills this term to a credit target. */
   onGenerateTerm?: () => void
+  /** Asks for a review of this term alone — the plan-wide first step is
+   *  already answered, so the dialog opens on its second. */
+  onRequestReview?: () => void
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -80,6 +85,7 @@ export function TermView({
   onRegister,
   onPickSection,
   onGenerateTerm,
+  onRequestReview,
   compare = true,
 }: {
   term: Term
@@ -94,6 +100,9 @@ export function TermView({
   onPickSection?: (termId: string, courseId: string) => void
   /** Opens the panel that fills this term to a credit target. */
   onGenerateTerm?: () => void
+  /** Asks for a review of this term alone — the plan-wide first step is
+   *  already answered, so the dialog opens on its second. */
+  onRequestReview?: () => void
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -103,6 +112,7 @@ export function TermView({
    * the thing to do next. */
   const [mode, setMode] = useState(term.scheduled ? "calendar" : "list")
   const actions = termActions(term)
+  const pending = usePendingReview(term.id)
 
   const plannerActions: PlanAction[] = [
     { label: "Request review", icon: "assignment" },
@@ -127,7 +137,10 @@ export function TermView({
         actions={plannerActions}
         tabs={tabs}
         onToggleField={onToggleField}
-        onAction={(action) => action.toggles && onGenerateTerm?.()}
+        onAction={(action) => {
+          if (action.toggles) onGenerateTerm?.()
+          else if (action.label === "Request review") onRequestReview?.()
+        }}
       />
 
       {/* These are not alternatives. A term can have registration open and still
@@ -140,7 +153,12 @@ export function TermView({
       {actions.length > 0 && <ActionsAlert term={term} onPickSection={onPickSection} />}
 
       <div className="flex w-full flex-wrap items-center justify-between gap-2">
-        <h3 className="min-w-0 truncate text-h300 font-semibold text-gray-100">{term.name}</h3>
+        <div className="flex min-w-0 items-center gap-2">
+          <h3 className="min-w-0 truncate text-h300 font-semibold text-gray-100">{term.name}</h3>
+          {/* Out for review: said beside the term's name, where the planner
+              says it on the term's card. */}
+          {pending && <StatusPill status="pending review">Pending Review</StatusPill>}
+        </div>
 
         <Tabs value={mode} onValueChange={setMode}>
           <TabsList>

@@ -101,6 +101,41 @@ the frame's "max 30 per term" pacing and "max 18 per term" limit did.
 
 Generate Plan itself does nothing yet — there is no design for what follows.
 
+## Plan review
+
+Figma: [`1017:234293`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-234293)
+(pick terms), [`1017:234286`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-234286)
+(pick request), [`1017:234450`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-234450)
+(notes), and the submitted state on the plan
+([`1017:234461`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-234461))
+and on a term
+([`1017:240068`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-240068)).
+
+"Request review" opens a three-step dialog: which terms, what kind of request,
+and anything to say with it. Opened from a term the first step is already
+answered — the term is the request — so it opens on the second, and its corner
+closes rather than going back.
+
+Only terms still ahead are on offer. A term under way or already taken cannot be
+reviewed: whatever an advisor would say about it, it has happened. That leaves
+Spring 2028 onwards; Fall 2027 is locked and the 2026-2027 year is done.
+
+Submitting does three things: the plan takes a pending banner, every term in the
+request takes a `PENDING REVIEW` mark (the same slot that says `REVIEWED`), and
+the reviews panel opens beside the plan on its timeline — requested, under
+review with the advisor, complete — with Cancel Request under it. A term's mark
+sits beside its name in the term view and on its card in the planner; both read
+it from one context rather than having it threaded down.
+
+`src/data/review.ts` holds the request types, the advisor, and one request that
+has already been round — which is why Fall 2027 carries a reviewed mark, and
+what the panel's history row is.
+
+Departures from the frame: the term groups are headed with the plan's own year
+labels (`2027-2028`) rather than "Year 1", since that is what every other
+surface here calls them; and the Changes and Graduation Clearance tabs are drawn
+but empty, there being no design for either.
+
 ## Responsive
 
 `main` is the `@container`. Term cards sit side by side above `@3xl` (768px of

@@ -10,6 +10,7 @@ import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mar
 import { CourseActivity, CourseTags } from "@/components/stellic/course-metadata"
 import { TermActions } from "@/components/stellic/term-actions"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
+import { usePendingReview } from "@/components/stellic/review-state"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -343,6 +344,9 @@ export function SemesterCard({
   /* Only light up while something is actually being dragged. */
   const isTarget = isOver && active != null
 
+  /* Out with an advisor: the term says so until the request comes back. */
+  const pending = usePendingReview(term.id)
+
   /* The design only gives the header a bottom gap when something follows it
    * other than the course list. */
   const headerHasGap = term.alert != null || term.courses.length === 0
@@ -402,11 +406,13 @@ export function SemesterCard({
             </h4>
             <p className="text-body-md text-gray-80">{termMeta(term)}</p>
           </div>
+          {/* A term waiting on an advisor says so; otherwise it says whether
+              anyone has looked at it. */}
           <StatusPill
-            status={term.reviewed ? "reviewed" : "unreviewed"}
-            className={cn("shrink-0", !term.reviewed && "opacity-0")}
+            status={pending ? "pending review" : term.reviewed ? "reviewed" : "unreviewed"}
+            className={cn("shrink-0", !pending && !term.reviewed && "opacity-0")}
           >
-            {term.reviewed ? "reviewed" : "Unreviewed"}
+            {pending ? "Pending Review" : term.reviewed ? "reviewed" : "Unreviewed"}
           </StatusPill>
         </div>
 

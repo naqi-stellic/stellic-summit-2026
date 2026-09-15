@@ -22,6 +22,8 @@ const statusPillVariants = cva(
         ready: "bg-primary-0 text-primary-100",
         registered: "bg-success-5 text-success-100",
         "needs review": "bg-warning-5 text-warning-50",
+        /* Out with an advisor and not back yet. */
+        "pending review": "bg-warning-5 text-warning-50",
       },
     },
     defaultVariants: { status: "reviewed" },
@@ -34,6 +36,7 @@ const STATUS_ICON: Record<string, IconName> = {
   ready: "thumb-up",
   registered: "check-circle",
   "needs review": "warning",
+  "pending review": "timelapse",
 }
 
 export function StatusPill({
