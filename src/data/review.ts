@@ -105,9 +105,6 @@ export function requestedLine(review: Review): string {
   return `${STUDENT.name} requested a review of ${review.plan} on ${longWhen(review.requestedAt)}.`
 }
 
-/** What the advisor is asked to do before they can close the request. */
-export const REVIEW_INSTRUCTIONS = "Mark all decisions on plan prior to completing"
-
 /** Where every course sat when the request went out, so the plan can be
  *  compared against itself while the advisor is reading it. */
 export function planSignature(years: Year[]): Record<string, string> {

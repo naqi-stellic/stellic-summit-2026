@@ -80,7 +80,6 @@ import {
   planCampuses,
   planStanding,
   chooseSection,
-  markReviewed,
   registerCourses,
   removeCourse,
   selectableTerms,
@@ -512,17 +511,6 @@ export function PlanYourPath() {
     setReviews((current) => current.filter((review) => review.id !== id))
   }
 
-  /* The advisor's end of it. Coming back marks the terms as looked at, which
-     is what the reviewed tick on a term card means. */
-  function completeReview(id: string) {
-    const review = reviews.find((r) => r.id === id)
-    if (!review) return
-    setReviews((current) =>
-      current.map((r) => (r.id === id ? { ...r, status: "complete" as const } : r))
-    )
-    setYears((current) => markReviewed(current, review.terms))
-  }
-
   function toggleMetadata(id: string) {
     const field = id as MetadataField
     setMetadata((shown) =>
@@ -591,7 +579,6 @@ export function PlanYourPath() {
           <ReviewPanel
             reviews={reviews}
             years={years}
-            onComplete={completeReview}
             onCancel={cancelReview}
             onClose={() => setReviewPanel(false)}
           />

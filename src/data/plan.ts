@@ -832,15 +832,6 @@ export function creditGroup(term: Term): Term["state"] | "pre-registered" {
 }
 
 /** Puts the named classes through, which is all registering changes. */
-/** Marks terms as looked at, which is what a review coming back amounts to. */
-export function markReviewed(years: Year[], termIds: string[]): Year[] {
-  const ids = new Set(termIds)
-  return years.map((year) => ({
-    ...year,
-    terms: year.terms.map((term) => (ids.has(term.id) ? { ...term, reviewed: true } : term)),
-  }))
-}
-
 export function registerCourses(years: Year[], termId: string, courseIds: string[]): Year[] {
   const ids = new Set(courseIds)
   return years.map((year) => ({

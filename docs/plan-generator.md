@@ -132,10 +132,9 @@ one white card on the page's own grey, lifted by Figma's shadow/sm (added to
 the theme as `--shadow-sm`) and framed by nothing — the tab strip is the top of
 the card, and the requests are ruled sections under it. The
 card runs a rail down three 24px markers — asked (green), with the advisor
-(amber), complete (open) — against the reference plan, the terms, and the
-advisor's instructions. Complete is the advisor's end of it: pressing it closes
-the request and marks those terms reviewed, which is the tick a term card
-carries afterwards.
+(amber), complete (open) — against the reference plan and the terms. What the
+advisor has to do and the button that closes the request are theirs, not the
+student's, so neither is drawn here; Cancel Request is.
 
 A request records where every course sat when it went out, so "N changes during
 review request" and the Changes tab's count are the plan measured against

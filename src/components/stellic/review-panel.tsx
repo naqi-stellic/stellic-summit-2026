@@ -3,11 +3,9 @@ import { useState, type ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { STUDENT, type Year } from "@/data/plan"
 import {
   ADVISOR,
-  REVIEW_INSTRUCTIONS,
   changesSince,
   longWhen,
   shortWhen,
@@ -43,15 +41,12 @@ function Stage({
   state,
   title,
   last,
-  action,
   children,
 }: {
   state: "done" | "now" | "later"
   title: string
   /** The rail stops at the last stage rather than running past it. */
   last?: boolean
-  /** What can be done at this step, drawn at the end of its first row. */
-  action?: ReactNode
   children?: ReactNode
 }) {
   return (
@@ -63,24 +58,19 @@ function Stage({
         {!last && <span className="w-px flex-1 bg-gray-40" />}
       </div>
 
-      <div className={cn("flex min-w-0 flex-1 flex-col gap-4", !last && "pb-4")}>
-        <div className="flex w-full items-start gap-2">
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            {/* The step that has happened is stated; the ones still to come
-                are only labelled. */}
-            <span
-              className={cn(
-                state === "done"
-                  ? "text-body-md leading-4 font-semibold text-foreground"
-                  : "text-label-md text-foreground"
-              )}
-            >
-              {title}
-            </span>
-            {children}
-          </div>
-          {action}
-        </div>
+      <div className={cn("flex min-w-0 flex-1 flex-col gap-1", !last && "pb-4")}>
+        {/* The step that has happened is stated; the ones still to come are
+            only labelled. */}
+        <span
+          className={cn(
+            state === "done"
+              ? "text-body-md leading-4 font-semibold text-foreground"
+              : "text-label-md text-foreground"
+          )}
+        >
+          {title}
+        </span>
+        {children}
       </div>
     </div>
   )
@@ -101,7 +91,6 @@ function RequestCard({
   changes,
   open,
   onToggle,
-  onComplete,
   onCancel,
 }: {
   review: Review
@@ -109,7 +98,6 @@ function RequestCard({
   changes: number
   open: boolean
   onToggle: () => void
-  onComplete: () => void
   onCancel: () => void
 }) {
   const pending = review.status === "pending"
@@ -134,7 +122,7 @@ function RequestCard({
           {pending ? "Pending" : "Complete"}
         </Badge>
         <Icon
-          name={open ? "expand-less" : "expand-more"}
+          name={open ? "expand-less" : pending ? "expand-more" : "chevron-right"}
           size={24}
           className="shrink-0 text-gray-100"
         />
@@ -160,22 +148,11 @@ function RequestCard({
               </span>
             </Stage>
 
-            <Stage
-              state={pending ? "now" : "done"}
-              title="Review"
-              action={
-                pending && (
-                  <Button variant="primary" onClick={onComplete}>
-                    Complete
-                  </Button>
-                )
-              }
-            >
+            {/* The advisor's own step. What they have to do before they can
+                close it, and the button that closes it, are theirs — this is
+                the student's side of the request. */}
+            <Stage state={pending ? "now" : "done"} title="Review">
               <span className="text-body-md text-foreground">{ADVISOR.name}</span>
-              <span className="flex gap-4 pt-3 text-body-md text-gray-80">
-                <span className="w-[100px] shrink-0">Instructions:</span>
-                <span className="min-w-0 flex-1">{REVIEW_INSTRUCTIONS}</span>
-              </span>
             </Stage>
 
             <Stage state={pending ? "later" : "done"} title="Complete" last />
@@ -206,7 +183,6 @@ function RequestCard({
 export function ReviewPanel({
   reviews,
   years,
-  onComplete,
   onCancel,
   onClose,
 }: {
@@ -214,7 +190,6 @@ export function ReviewPanel({
   reviews: Review[]
   /** The plan as it stands, for counting what has moved since a request. */
   years: Year[]
-  onComplete: (id: string) => void
   onCancel: (id: string) => void
   onClose: () => void
 }) {
@@ -247,7 +222,7 @@ export function ReviewPanel({
           what the strip is showing is the rest. Lifted off the page rather
           than framed — the only line in it is under the tabs. */}
       <div className="flex w-full min-w-0 flex-col overflow-hidden rounded-md bg-card shadow-sm">
-        <div className="flex w-full shrink-0 items-end overflow-x-auto border-b border-gray-40">
+        <div className="flex h-[52px] w-full shrink-0 items-end overflow-x-auto border-b border-gray-40">
           {TABS.map((name) => {
             const active = tab === name
             const count = counts[name]
@@ -303,7 +278,6 @@ export function ReviewPanel({
                         : [...current, review.id]
                     )
                   }
-                  onComplete={() => onComplete(review.id)}
                   onCancel={() => onCancel(review.id)}
                 />
               </div>
