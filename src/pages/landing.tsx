@@ -5,20 +5,8 @@ import { Icon } from "@/components/icon"
  * navigated out of by accident. */
 
 const PROTOTYPES = [
-  {
-    href: "/generator.html",
-    name: "Plan Generator",
-    blurb:
-      "Generate the four-year plan, a term, or a term's schedule; weigh the options against " +
-      "each other and apply one. Registration and plan review are in here too.",
-  },
-  {
-    href: "/planner.html",
-    name: "Planner",
-    blurb:
-      "The same planner on a plan already made, with nothing on offer to generate: read a " +
-      "term, register for one, ask for a review.",
-  },
+  { href: "/planner.html", name: "Planner" },
+  { href: "/generator.html", name: "Plan Generator" },
 ]
 
 export function Landing() {
@@ -37,12 +25,12 @@ export function Landing() {
             href={prototype.href}
             target="_blank"
             rel="noreferrer"
-            className="group flex min-h-[220px] flex-col justify-between gap-6 rounded-md border border-gray-40 bg-card p-6 shadow-sm transition-colors hover:border-primary-50 hover:bg-gray-0"
+            /* A name and the way in, centred: with nothing under the name to
+               read, a card tall enough to hold a paragraph would be mostly
+               empty. */
+            className="group flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-md border border-gray-40 bg-card p-6 shadow-sm transition-colors hover:border-primary-50 hover:bg-gray-0"
           >
-            <span className="flex flex-col gap-2">
-              <span className="text-h300 font-semibold text-gray-100">{prototype.name}</span>
-              <span className="text-body-md text-gray-80">{prototype.blurb}</span>
-            </span>
+            <span className="text-h300 font-semibold text-gray-100">{prototype.name}</span>
             <span className="flex items-center gap-1 text-body-md font-semibold text-primary-50">
               Open
               <Icon name="chevron-right" size={16} />
