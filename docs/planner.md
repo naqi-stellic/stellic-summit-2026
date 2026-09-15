@@ -27,8 +27,17 @@ than by writing a second plan out by hand:
 
 1. `generateDraft` at the steady pace, accepted — four years of courses with
    elective seats held in the nearest terms;
-2. `generateTermDraft` over Spring 2028 with its schedule, accepted — the seats
-   in that term become real courses and every class in it gets a section.
+2. `generateTermDraft` over Spring 2028, accepted — the seats in that term
+   become real courses;
+3. `scheduleTerm(term, SETTLED_WEEK)` over the same term — every class gets a
+   section, taken straight down the slot list.
+
+The week comes from `SETTLED_WEEK` rather than from one of the generator's
+three, because each of those leans on one part of the day on purpose — that is
+how the options tell themselves apart — and a term the student settled
+themselves should read as neither. Straight down the list spreads it over four
+days and both halves of the day: 9:00 and 10:30 and 1:00 on Monday and
+Wednesday, 11:00 and 2:30 on Tuesday and Thursday.
 
 So the two prototypes cannot disagree about the degree: same 40 courses, same
 120 credits, same graduation in Spring 2030. Spring 2028 has nothing outstanding
