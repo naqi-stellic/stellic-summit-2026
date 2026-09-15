@@ -17,9 +17,11 @@ Polling sidesteps the daemon; drop it if `fseventsd` is behaving.
 
 ## Prototypes
 
+`/` is a landing page with a link to each; both open in their own tab.
+
 | Prototype | Opens at | Figma | Entry | Notes |
 | --- | --- | --- | --- | --- |
-| Plan Generator | `/` | [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392) | `src/pages/plan-your-path.tsx` | [docs](docs/plan-generator.md) |
+| Plan Generator | `/generator.html` | [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392) | `src/pages/plan-your-path.tsx` | [docs](docs/plan-generator.md) |
 | Planner | `/planner.html` | same frames, minus the generators | `src/pages/planner.tsx` | [docs](docs/planner.md) |
 
 ### Adding one
@@ -30,8 +32,9 @@ gets for free — tokens, the app shell, the icon set, the retuned shadcn
 primitives. Anything worth writing down about the prototype itself goes in
 `docs/<name>.md`, not here.
 
-Each prototype is its own page in the Vite sense: an `<name>.html` at the root
-with a `src/main-<name>.tsx` beside it, both listed in `build.rollupOptions.input`.
+Each prototype is its own page in the Vite sense: a `<name>.html` at the root
+with a `src/main-<name>.tsx` beside it, both listed in `build.rollupOptions.input`,
+and a line on the landing page.
 That is what gives each one its own link, in the dev server and in `dist` alike,
 with no router and no shared shell to fall out of step.
 

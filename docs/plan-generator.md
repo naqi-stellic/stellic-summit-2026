@@ -1,8 +1,8 @@
 # Plan Generator
 
-A term-by-term degree planner. Page in `src/pages/plan-your-path.tsx`, plan model
-and its moves in `src/data/plan.ts`, planner components in
-`src/components/stellic/`.
+A term-by-term degree planner. Opens at `/generator.html`. Page in
+`src/pages/plan-your-path.tsx`, plan model and its moves in `src/data/plan.ts`,
+planner components in `src/components/stellic/`.
 
 Figma: [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392)
 (page) and [`361:165640`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-37071)

@@ -14,11 +14,13 @@ export default defineConfig({
     watch: { usePolling: true, interval: 300 },
   },
   build: {
-    /* Two prototypes, two pages. They share every component and all the data;
-       what differs is which one a link opens. */
+    /* A page each: the way in, and the two prototypes it opens. They share
+       every component and all the data; what differs is which one a link
+       opens. */
     rollupOptions: {
       input: {
         index: path.resolve(import.meta.dirname, 'index.html'),
+        generator: path.resolve(import.meta.dirname, 'generator.html'),
         planner: path.resolve(import.meta.dirname, 'planner.html'),
       },
     },
