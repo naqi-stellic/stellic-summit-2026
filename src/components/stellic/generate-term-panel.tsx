@@ -2,6 +2,7 @@ import { cn } from "cn"
 import { useState } from "react"
 
 import { Icon } from "@/components/icon"
+import { keepChoices } from "@/components/stellic/generate-plan-pace"
 import { KeepPicker } from "@/components/stellic/keep-picker"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -141,37 +142,32 @@ export function GenerateTermPanel({
               </div>
             </section>
 
-            {planned.length > 0 || released.length > 0 ? (
-            <Step title="Keep everything already planned?">
-              <RadioGroup
-                value={keepPlanned}
-                onValueChange={(next) => {
-                  setKeepPlanned(next)
-                  if (next === "yes") setReleased([])
-                }}
-                className="gap-2"
-              >
-                <RadioCard
-                  value="yes"
-                  label="Yes"
-                  detail={`Keep my ${courses} course${courses === 1 ? "" : "s"}${
-                    seats > 0 ? ` and ${seats} placeholder${seats === 1 ? "" : "s"}` : ""
-                  } and fill in the blanks to complete my journey`}
-                  selected={keepPlanned === "yes"}
-                />
-                <RadioCard
-                  value="no"
-                  label="No"
-                  detail="Choose the courses and placeholders to keep and which can be moved or swapped"
-                  selected={keepPlanned === "no"}
+            {term.courses.length > 0 && (
+              <Step title="Keep everything already planned?">
+                <RadioGroup
+                  value={keepPlanned}
+                  onValueChange={(next) => {
+                    setKeepPlanned(next)
+                    if (next === "yes") setReleased([])
+                  }}
+                  className="w-full gap-2"
                 >
-                  {keepPlanned === "no" && (
-                    <KeepPicker terms={[term]} released={released} onChange={setReleased} />
-                  )}
-                </RadioCard>
-              </RadioGroup>
-            </Step>
-            ) : null}
+                  {keepChoices(term.courses.length).map((choice) => (
+                    <RadioCard
+                      key={choice.value}
+                      value={choice.value}
+                      label={choice.label}
+                      detail={choice.detail}
+                      selected={keepPlanned === choice.value}
+                    />
+                  ))}
+                </RadioGroup>
+
+                {keepPlanned === "no" && (
+                  <KeepPicker terms={[term]} released={released} onChange={setReleased} />
+                )}
+              </Step>
+            )}
 
             <Preview kept={kept} adding={adding} empty={term.courses.length === 0} />
           </>

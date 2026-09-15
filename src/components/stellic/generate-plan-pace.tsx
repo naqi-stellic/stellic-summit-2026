@@ -115,7 +115,9 @@ export const INITIAL_PACE: PaceState = {
 }
 
 /** The two ways to treat what is already planned. */
-function keepChoices(planned: number) {
+/** The two answers, worded to fit on one line beside the label — the same
+ *  question is asked of a single term, so it is written once here. */
+export function keepChoices(planned: number) {
   return [
     {
       value: "yes",
