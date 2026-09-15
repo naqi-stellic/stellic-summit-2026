@@ -361,7 +361,10 @@ function Week({ term }: { term: Term }) {
 
 export function TermCalendar({ term }: { term: Term }) {
   return (
-    <div className="@container/term w-full overflow-hidden rounded-md border border-gray-40 bg-card">
+    /* shrink-0 because the pane it sits in is a fixed-height column: without
+       it the card is squeezed to fit and the week is quietly cut off at the
+       bottom instead of the pane scrolling to reach it. */
+    <div className="@container/term w-full shrink-0 overflow-hidden rounded-md border border-gray-40 bg-card">
       {/* Side by side when there is room for both; stacked when there is not. */}
       <div className="flex w-full flex-col @3xl/term:flex-row">
         <Sidebar term={term} />

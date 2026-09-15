@@ -168,7 +168,9 @@ export function TermList({ term }: { term: Term }) {
   const selectable = term.alert != null
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    /* Same reason as the calendar: keep the natural height and let the pane
+       scroll, rather than being compressed into it. */
+    <div className="flex w-full shrink-0 flex-col gap-6">
       <section className="w-full overflow-hidden rounded-md border border-gray-40 bg-card">
         <CardHeader icon="class" title="My Courses" count={term.courses.length} />
 
