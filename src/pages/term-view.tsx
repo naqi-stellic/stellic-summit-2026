@@ -85,6 +85,9 @@ export function TermView({
   onPickSection?: (termId: string, courseId: string) => void
   /** Opens the panel that fills this term to a credit target. */
   onGenerateTerm?: () => void
+  /** While a draft is up: show what the term already held alongside what is
+   *  proposed, rather than the proposal on its own. */
+  compare?: boolean
 }) {
   /* A published schedule is what the calendar is for, so a term that has one
    * opens on it — empty, if no section has been chosen yet, which is itself

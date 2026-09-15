@@ -91,7 +91,9 @@ function HoverMenu({ trigger, children }: { trigger: ReactNode; children: ReactN
         className="w-[200px]"
         onPointerEnter={enter}
         onPointerLeave={leave}
-        onOpenAutoFocus={(event) => hovered.current && event.preventDefault()}
+        /* Opened by pointing, so it must not take the focus off whatever the
+           keyboard was on; opened by pressing, it should. */
+        onCloseAutoFocus={(event) => hovered.current && event.preventDefault()}
       >
         {children}
       </DropdownMenuContent>

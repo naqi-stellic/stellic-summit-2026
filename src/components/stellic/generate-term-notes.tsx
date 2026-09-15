@@ -54,24 +54,6 @@ function SeatBlock({
             </button>
           </Badge>
         ))}
-        {note.filters.length < DEFAULT_FILTERS.length && (
-          <button
-            type="button"
-            /* Puts back the next one that was taken off, in the order they
-               started in, so the row does not reshuffle as you go. */
-            onClick={() =>
-              onChange({
-                ...note,
-                filters: DEFAULT_FILTERS.filter(
-                  (f) => note.filters.includes(f) || f === DEFAULT_FILTERS.find((d) => !note.filters.includes(d))
-                ),
-              })
-            }
-            className="cursor-pointer text-label-md text-gray-80 underline [text-underline-position:from-font]"
-          >
-            + Add filter
-          </button>
-        )}
       </div>
 
       <label className="flex w-full flex-col gap-2">

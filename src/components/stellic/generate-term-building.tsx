@@ -32,11 +32,13 @@ function StatusIcon({ status }: { status: Status }) {
 export function GenerateTermBuilding({
   term,
   standing,
+  mode,
   onLastStep,
   onDone,
 }: {
   term: Term
   standing: PlanStanding
+  mode: "term" | "schedule"
   onLastStep: () => void
   onDone: () => void
 }) {
@@ -87,7 +89,9 @@ export function GenerateTermBuilding({
   return (
     <>
       <div className="animate-fade flex w-full flex-col gap-2">
-        <h3 className="text-h400 font-semibold text-black">Building your term</h3>
+        <h3 className="text-h400 font-semibold text-black">
+          Building your {mode === "schedule" ? "schedule" : "term"}
+        </h3>
         <p className="text-body-md text-gray-80">
           Finding a place for your remaining requirements.
         </p>

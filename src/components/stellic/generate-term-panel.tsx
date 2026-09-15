@@ -482,6 +482,7 @@ export function GenerateTermPanel({
           <GenerateTermBuilding
             term={term}
             standing={standing}
+            mode={mode}
             onLastStep={onFraming}
             onDone={() => {
               /* Step back off the build before handing over. The draft is what

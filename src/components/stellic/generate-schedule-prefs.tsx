@@ -184,30 +184,43 @@ function PrefRow({
   return (
     <div className="flex w-full items-start gap-2">
       {rank != null && (
-        <span className="w-3 shrink-0 pt-[13px] text-body-md font-semibold text-gray-100">
+        <span className="w-3 shrink-0 pt-[19px] text-body-md font-semibold text-gray-100">
           {rank}
         </span>
       )}
-      <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-md border border-gray-40 bg-card px-4 py-2">
-        <div className="flex w-full items-center justify-between gap-2">
-          <span className="flex h-[42px] min-w-0 items-center gap-2">
-            {handle}
-            <span className="flex min-w-0 flex-col justify-center">
-              <span className="truncate text-body-md text-gray-100">{title}</span>
-              <span className="truncate text-label-md text-gray-80">{value}</span>
-            </span>
-          </span>
+      {/* The card is the target, not the chevron on the end of it. */}
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col overflow-hidden rounded-md border border-gray-40 bg-card",
+          "transition-colors",
+          !open && "hover:bg-gray-0"
+        )}
+      >
+        <div className="flex w-full items-center">
+          {/* Outside the button, or picking the card up would also open it. */}
+          {handle && <span className="flex shrink-0 items-center pl-4">{handle}</span>}
           <button
             type="button"
             onClick={onToggle}
             aria-expanded={open}
             aria-label={`${open ? "Hide" : "Show"} ${title} options`}
-            className="flex shrink-0 cursor-pointer items-center text-gray-100"
+            className={cn(
+              "flex h-[58px] min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 px-4 text-left",
+              handle && "pl-2"
+            )}
           >
-            <Icon name={open ? "expand-more" : "chevron-right"} size={24} />
+            <span className="flex min-w-0 flex-col justify-center">
+              <span className="truncate text-body-md text-gray-100">{title}</span>
+              <span className="truncate text-label-md text-gray-80">{value}</span>
+            </span>
+            <Icon
+              name={open ? "expand-more" : "chevron-right"}
+              size={24}
+              className="shrink-0 text-gray-100"
+            />
           </button>
         </div>
-        {open && <div className="flex w-full flex-col gap-2 pb-2">{children}</div>}
+        {open && <div className="flex w-full flex-col gap-2 px-4 pb-4">{children}</div>}
       </div>
     </div>
   )
@@ -223,7 +236,6 @@ function Chips({
   pref: Pref
   onChange: (chosen: string[]) => void
 }) {
-  const rest = pref.options.filter((o) => !pref.chosen.includes(o))
   return (
     <div className="flex w-full flex-col gap-2">
       <span className="text-body-md font-semibold text-gray-100">{label}</span>
@@ -243,20 +255,6 @@ function Chips({
           </Badge>
         ))}
       </div>
-      {rest.length > 0 && (
-        <div className="flex w-full flex-wrap items-center gap-1">
-          {rest.map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => onChange([...pref.chosen, value])}
-              className="cursor-pointer rounded-md border border-dashed border-gray-40 px-[7px] py-px text-label-md text-gray-80"
-            >
-              + {value}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   )
 }
@@ -524,16 +522,16 @@ export function GenerateSchedulePrefs({
               className="w-full gap-2"
             >
               <RadioCard
-                value="yes"
-                label="Yes"
-                detail="I have additional preferences for courses already in my plan (e.g. specific instructor)"
-                selected={prefs.extras === "yes"}
-              />
-              <RadioCard
                 value="no"
                 label="No"
                 detail="I don't have any additional preferences"
                 selected={prefs.extras === "no"}
+              />
+              <RadioCard
+                value="yes"
+                label="Yes"
+                detail="e.g. specific instructor"
+                selected={prefs.extras === "yes"}
               />
             </RadioGroup>
 
