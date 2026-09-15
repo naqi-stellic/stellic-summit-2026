@@ -1,5 +1,5 @@
 import { cn } from "cn"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
@@ -42,6 +42,61 @@ export type YearTab = {
   /** Given, the tab opens onto the year's terms rather than acting on its own. */
   terms?: TabTerm[]
   onSelectTerm?: (termId: string) => void
+}
+
+/** A menu that opens on hover as well as on click. Hover is the quicker way
+ *  to look down a year when you are pointing at it anyway; click stays the way
+ *  it works, because on a touch screen it is the only way there is.
+ *
+ *  Both the trigger and the menu keep it open, with a moment's grace between
+ *  them so crossing the gap does not close it. */
+function HoverMenu({ trigger, children }: { trigger: ReactNode; children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  /* Whether this was opened by pointing rather than pressing. A hovered menu
+     must not pull focus off whatever the keyboard was on. */
+  const hovered = useRef(false)
+  const leaving = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(leaving.current), [])
+
+  const enter = (event: React.PointerEvent) => {
+    /* Touch reports as "touch" and fires this on tap, which would open the
+       menu and then let the click close it again. */
+    if (event.pointerType !== "mouse") return
+    window.clearTimeout(leaving.current)
+    hovered.current = true
+    setOpen(true)
+  }
+  const leave = (event: React.PointerEvent) => {
+    if (event.pointerType !== "mouse") return
+    leaving.current = window.setTimeout(() => setOpen(false), 140)
+  }
+
+  return (
+    <DropdownMenu
+      open={open}
+      onOpenChange={(next) => {
+        hovered.current = false
+        setOpen(next)
+      }}
+      /* Not modal: a modal menu swallows the pointer everywhere else, so
+         moving from one year to the next would not reach the next tab. */
+      modal={false}
+    >
+      <DropdownMenuTrigger asChild onPointerEnter={enter} onPointerLeave={leave}>
+        {trigger}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="w-[200px]"
+        onPointerEnter={enter}
+        onPointerLeave={leave}
+        onOpenAutoFocus={(event) => hovered.current && event.preventDefault()}
+      >
+        {children}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 }
 
 function PlanFacet({ label, value }: { label: string; value: string }) {
@@ -213,27 +268,24 @@ export function PlanHeader({
           }
 
           return (
-            <DropdownMenu key={tab.label}>
-              <DropdownMenuTrigger asChild>{button}</DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[200px]">
-                {tab.terms.map((term) => (
-                  <DropdownMenuItem
-                    key={term.id}
-                    onSelect={() => tab.onSelectTerm?.(term.id)}
-                    className="gap-2 py-1.5 pr-2 pl-8 text-body-md"
-                  >
-                    {/* In the checkmark's place, so the labels line up whether
-                        or not a term carries a mark. */}
-                    <Icon
-                      name={term.icon}
-                      size={16}
-                      className={cn("absolute left-2 shrink-0", term.tone)}
-                    />
-                    {term.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <HoverMenu key={tab.label} trigger={button}>
+              {tab.terms.map((term) => (
+                <DropdownMenuItem
+                  key={term.id}
+                  onSelect={() => tab.onSelectTerm?.(term.id)}
+                  className="gap-2 py-1.5 pr-2 pl-8 text-body-md"
+                >
+                  {/* In the checkmark's place, so the labels line up whether
+                      or not a term carries a mark. */}
+                  <Icon
+                    name={term.icon}
+                    size={16}
+                    className={cn("absolute left-2 shrink-0", term.tone)}
+                  />
+                  {term.label}
+                </DropdownMenuItem>
+              ))}
+            </HoverMenu>
           )
         })}
       </div>
