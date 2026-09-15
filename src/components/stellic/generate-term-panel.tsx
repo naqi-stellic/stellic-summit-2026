@@ -5,6 +5,11 @@ import { Icon } from "@/components/icon"
 import { keepChoices } from "@/components/stellic/generate-plan-pace"
 import { GenerateTermBuilding } from "@/components/stellic/generate-term-building"
 import {
+  GenerateSchedulePrefs,
+  defaultPrefs,
+  type SchedulePrefs,
+} from "@/components/stellic/generate-schedule-prefs"
+import {
   DEFAULT_FILTERS,
   GenerateTermNotes,
   type SeatNote,
@@ -22,7 +27,7 @@ import { CREDITS_PER_COURSE, PLANNING_RULES, type PlanStanding, type Term } from
  * how full should this term be, and what in it is settled — so it fits in two
  * steps instead of three. */
 
-type View = 1 | 2 | "summary" | "building"
+type View = 1 | 2 | 3 | "summary" | "building"
 
 /** What the slider can ask for. The floor is a half load; the ceiling is two
  *  terms' worth, for anyone who wants to see the plan push back. */
@@ -110,19 +115,20 @@ export function GenerateTermPanel({
   const title = scheduling ? "Generate Schedule" : "Generate Term"
   /* Scheduling asks about class times as well, which is a step of its own. */
   const totalSteps = scheduling ? 3 : 2
-  const step = view === 2 ? 2 : 1
+  const step = view === 3 ? 3 : view === 2 ? 2 : 1
   const [target, setTarget] = useState(RECOMMENDED)
   const [keepPlanned, setKeepPlanned] = useState("yes")
   const [released, setReleased] = useState<string[]>([])
   const [notes, setNotes] = useState("")
   const [seatNotes, setSeatNotes] = useState<Record<string, SeatNote>>({})
+  const [prefs, setPrefs] = useState<SchedulePrefs>(() => defaultPrefs(term))
 
   const planned = term.courses.filter((c) => !released.includes(c.id))
   const kept = planned.reduce((n, c) => n + c.credits, 0)
   /* Only whole courses can be added, so the target rounds down to one. */
   const adding = Math.max(0, Math.floor((target - kept) / CREDITS_PER_COURSE)) * CREDITS_PER_COURSE
   const seats = planned.filter((c) => c.placeholder)
-  const isStep = !showing && (view === 1 || view === 2)
+  const isStep = !showing && (view === 1 || view === 2 || view === 3)
 
   /* What the summary reads back: the answers given, then the rules the school
      applies whatever anybody answers. */
@@ -139,6 +145,20 @@ export function GenerateTermPanel({
       step: 1,
     },
     { label: "Term instructions", value: notes || "None", step: 2 },
+    ...(scheduling
+      ? [
+          {
+            label: "Must haves",
+            value: prefs.must.map((p) => `${p.title}: ${p.chosen.join(", ") || "Any"}`).join(" · "),
+            step: 3 as const,
+          },
+          {
+            label: "Nice to haves",
+            value: prefs.nice.map((p, i) => `${i + 1}. ${p.title}`).join(" · "),
+            step: 3 as const,
+          },
+        ]
+      : []),
     ...(seats.length > 0
       ? [
           {
@@ -205,7 +225,10 @@ export function GenerateTermPanel({
         )}
       </header>
 
-      <div className="flex flex-1 flex-col gap-8 p-6">
+      {/* pb-28 keeps the footer clear of the assistant button, which is fixed
+            over this corner of the screen and will otherwise take the click
+            meant for Continue. */}
+      <div className="flex flex-1 flex-col gap-8 p-6 pb-28">
         {showing && (
           <>
             <Section title="Term instructions">
@@ -326,6 +349,8 @@ export function GenerateTermPanel({
             seatNotes={seatNotes}
             onSeatNoteChange={(id, next) => setSeatNotes((all) => ({ ...all, [id]: next }))}
           />
+        ) : view === 3 ? (
+          <GenerateSchedulePrefs term={term} prefs={prefs} onChange={setPrefs} />
         ) : view === "summary" ? (
           <>
             <div className="flex w-full flex-col gap-2">
@@ -340,7 +365,7 @@ export function GenerateTermPanel({
               <SettingsSection
                 title="Your choices"
                 rows={choices}
-                onEdit={(edit) => setView(edit === 2 ? 2 : 1)}
+                onEdit={(edit) => setView(edit === 3 ? 3 : edit === 2 ? 2 : 1)}
               />
               <SettingsSection title="Also accounting for" rows={rules} />
             </div>
@@ -368,7 +393,11 @@ export function GenerateTermPanel({
             <Button
               className="flex-1"
               onClick={() =>
-                view === 1 ? onClose() : setView(view === "summary" ? 2 : 1)
+                view === 1
+                  ? onClose()
+                  : view === "summary"
+                    ? setView(scheduling ? 3 : 2)
+                    : setView(view === 3 ? 2 : 1)
               }
             >
               {view === "summary" ? "Start over" : "Back"}
@@ -377,7 +406,17 @@ export function GenerateTermPanel({
               variant="primary"
               className="flex-1"
               onClick={() =>
-                setView(view === 1 ? 2 : view === 2 ? "summary" : "building")
+                setView(
+                  view === 1
+                    ? 2
+                    : view === 2
+                      ? scheduling
+                        ? 3
+                        : "summary"
+                      : view === 3
+                        ? "summary"
+                        : "building"
+                )
               }
             >
               {view === "summary" ? title : "Continue"}

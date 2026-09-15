@@ -539,6 +539,9 @@ export const INITIAL_YEARS: Year[] = [
             code: "FIN 340",
             name: "Investments & Portfolio Management",
             credits: 3,
+            /* Taught around a theme, which is a thing to have a preference
+               about when the schedule is being generated. */
+            topic: "Equity Analysis",
             classNo: "2417",
             campus: "Main",
             modality: "In Person",
