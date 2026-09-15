@@ -534,9 +534,10 @@ export const INITIAL_YEARS: Year[] = [
         state: "planned",
         courses: [
           {
-            /* Registration is open for this term, but no section has been
-               chosen for either course: both still need one before there is
-               anything to register or to draw on a calendar. */
+            /* Registration is open for this term, and each of the two things
+               in it is waiting on something different: this course has no
+               section yet, and the seat below it has no course. Between them
+               they are both kinds of outstanding work a term can hold. */
             id: "c5",
             code: "FIN 340",
             name: "Investments & Portfolio Management",
@@ -552,14 +553,13 @@ export const INITIAL_YEARS: Year[] = [
             lastActivity: "Added by sabott, 2 Sep 2027",
           },
           {
+            /* A requirement with no course against it yet. A seat has no class
+               number, campus or modality — there is no course to have them. */
             id: "c6",
-            code: "FIN 415",
-            name: "Financial Modeling & Valuation",
+            code: "FIN ELEC",
+            name: "Finance elective",
             credits: 3,
-            classNo: "2438",
-            campus: "Main",
-            modality: "Hybrid",
-            gradeOption: "Graded",
+            placeholder: true,
             accent: "amber",
             lastActivity: "Added by sabott, 2 Sep 2027",
           },
@@ -927,19 +927,12 @@ const SCHEDULE_ORDERS = [
   [6, 8, 1, 11, 3, 5],
 ]
 
-/** The week a student ends up with picking sections one at a time: straight
- *  down the list, which spreads the term over four days and both halves of the
- *  day rather than favouring any part of it. It is what a term that was never
- *  generated looks like. */
-export const SETTLED_WEEK = [0, 1, 2, 3, 4, 5]
-
-export function scheduleTerm(term: Term, plan: number | number[] = 0): Term {
-  /* A number is one of the generator's three options; a list is a week asked
-   * for outright. The named slots come first, then whatever they left out: a
-   * term can hold more courses than an order lists, and wrapping round would
-   * hand the extra one the hour the first already has — two classes drawn on
-   * top of each other, one of them invisible. */
-  const named = Array.isArray(plan) ? plan : SCHEDULE_ORDERS[plan % SCHEDULE_ORDERS.length]
+export function scheduleTerm(term: Term, turn = 0): Term {
+  /* The option's own slots come first, then whatever it did not name. A term
+   * can hold more courses than an order lists, and wrapping round would hand
+   * the extra one the hour the first already has — two classes drawn on top of
+   * each other, one of them invisible. */
+  const named = SCHEDULE_ORDERS[turn % SCHEDULE_ORDERS.length]
   const order = [...named, ...SECTION_SLOTS.map((_, i) => i).filter((i) => !named.includes(i))]
   let next = 0
   return {

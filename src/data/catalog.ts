@@ -40,13 +40,12 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "FIN 445", name: "Real Estate Finance", reason: "Finance concentration" },
   { code: "FIN 460", name: "Mergers & Acquisitions", reason: "Finance concentration" },
   { code: "FIN 470", name: "Fixed Income Analysis", reason: "Finance concentration" },
+  /* Planned once, in Spring 2028 — the seat held there now stands in its
+     place, so the course itself is outstanding again. */
+  { code: "FIN 415", name: "Financial Modeling & Valuation", reason: "Finance concentration" },
   { code: "STAT 320", name: "Econometrics for Business", reason: "Finance concentration" },
-  {
-    code: "FIN ELEC",
-    name: "Finance elective",
-    reason: "Concentration elective",
-    placeholder: true,
-  },
+  /* One of the two concentration seats; the other is already held in Spring
+     2028, so it is not outstanding. */
   {
     code: "FIN ELEC",
     name: "Finance elective",

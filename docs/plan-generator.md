@@ -29,9 +29,17 @@ themselves, so the rule holds even if a future caller skips the UI.
 Figma is the source for layout, not content — its placeholder data contradicts
 itself — so the sample plan is invented to hold together. The story: a student
 who started Fall 2026 on a 120-credit, 40-requirement Business Administration
-B.S. with a Finance concentration. They finished 2026-2027 (8 courses, 24
+B.S. with a Finance concentration. They finished 2026-2027 (10 courses, 30
 credits), are partway through Fall 2027, have started planning Spring 2028, and
-the plan runs out to 2030-2031. Courses are 3 credits each.
+the plan runs out to 2029-2030. Courses are 3 credits each.
+
+Spring 2028 holds one course and one seat: FIN 340, which has no section yet,
+and a Finance elective with no course against it. They are the two kinds of
+outstanding work a term can have, which is why the term reads "2 actions
+required" and why nothing in it can be registered until one of them is settled.
+FIN 415 is on the outstanding list rather than in the plan, and one of the two
+concentration seats is in the plan rather than on the list — the totals are the
+same either way.
 
 Anything visibly derived from that — year filter tabs, the "+ Add Year N"
 label, expected graduation, the registration deadline — comes from the plan
