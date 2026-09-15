@@ -213,6 +213,21 @@ to forty: after generating the whole plan the panel reads 10 taken, 30 planned,
 The panel's refresh button is not built: there is nothing behind it to re-read,
 the list being derived from the plan on screen.
 
+## What a generated schedule moves
+
+A class the student chose stays where it is: `PlannedCourse.settled` marks one
+picked by hand — Spring 2028's FIN 340, and anything settled through "Search
+sections" — and a run fills the term's unscheduled courses around it rather than
+moving it. Its hour is struck off the option's order so nothing lands on top.
+
+A class an earlier run proposed carries no such claim, so generating again
+times it afresh and draws where it used to be behind it. That is what "Compare
+with current schedule" has to show, and why a first run over a term nobody has
+timetabled shows no ghosts at all.
+
+No slot is shorter than an hour and a quarter — eighty pixels — which is what a
+block needs for its code, its name and its section.
+
 ## Responsive
 
 `main` is the `@container`. Term cards sit side by side above `@3xl` (768px of

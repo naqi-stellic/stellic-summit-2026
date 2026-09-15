@@ -19,6 +19,9 @@ export type PlannedCourse = {
   notes?: number
   /** A requirement with no course chosen for it yet. */
   placeholder?: boolean
+  /** The student picked this class themselves. A generated schedule fills in
+   *  around it rather than moving it; one a run proposed has no such claim. */
+  settled?: boolean
   /** Which of the degree's outstanding requirements this answers, by its place
    *  in that list. Set when one is dragged out of the panel, so a seat leaves
    *  the list once it has a term — a seat cannot be recognised by its name the
@@ -582,6 +585,7 @@ export const INITIAL_YEARS: Year[] = [
                about when the schedule is being generated. */
             topic: "Equity Analysis",
             section: "Lec-02",
+            settled: true,
             classNo: "2417",
             campus: "Main",
             modality: "In Person",
@@ -937,9 +941,9 @@ const SECTION_SLOTS: Meeting[][] = [
     { day: 4, from: 9.5, to: 10.75 },
   ],
   /* 9 */ [
-    { day: 1, from: 8, to: 8.75 },
-    { day: 3, from: 8, to: 8.75 },
-    { day: 5, from: 8, to: 8.75 },
+    { day: 1, from: 15, to: 16.25 },
+    { day: 3, from: 15, to: 16.25 },
+    { day: 5, from: 15, to: 16.25 },
   ],
   /* 10 */ [{ day: 5, from: 13, to: 15.5 }],
   /* 11 */ [
@@ -978,16 +982,31 @@ export function scheduleTerm(term: Term, turn = 0): Term {
    * each other, one of them invisible. */
   const named = SCHEDULE_ORDERS[turn % SCHEDULE_ORDERS.length]
   const order = [...named, ...SECTION_SLOTS.map((_, i) => i).filter((i) => !named.includes(i))]
+
+  /* A class the student chose keeps its hour: a run fills in what has none, it
+   * does not move what was settled by hand. The hours those hold are struck
+   * off the order so nothing is put on top of them. A class an earlier run
+   * proposed has no such claim — it is timetabled afresh, and where it used to
+   * be is what the week is compared against. */
+  const settles = (course: PlannedCourse) =>
+    !course.placeholder && (course.registered === true || course.settled === true)
+  const held = new Set(
+    term.courses
+      .filter(settles)
+      .map((course) =>
+        SECTION_SLOTS.findIndex((slot) => JSON.stringify(slot) === JSON.stringify(course.meetings))
+      )
+      .filter((index) => index !== -1)
+  )
+  const free = order.filter((index) => !held.has(index))
+
   let next = 0
   return {
     ...term,
     courses: term.courses.map((course) => {
-      /* A seat has no class to time, and a class already registered for is
-       * settled — generating a schedule cannot move it. Everything else is
-       * timetabled afresh, which is what generating a schedule means for a
-       * term that already has one. */
-      if (course.placeholder || course.registered) return course
-      const slot = SECTION_SLOTS[order[next % order.length]]
+      /* A seat has no class to time. */
+      if (course.placeholder || settles(course)) return course
+      const slot = SECTION_SLOTS[free[next % free.length]]
       next += 1
       /* By value, not by identity: two slots can be the same hours without
        * being the same array, and comparing the arrays themselves quietly
@@ -1030,6 +1049,8 @@ export function chooseSection(years: Year[], termId: string, courseId: string): 
             : {
                 ...c,
                 section: "Lec-01",
+                /* Chosen by hand, so a generated schedule leaves it be. */
+                settled: true,
                 classNo: c.classNo ?? String(3000 + used * 17 + 41),
                 meetings: slot,
               }
