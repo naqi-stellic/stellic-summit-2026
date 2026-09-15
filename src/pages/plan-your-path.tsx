@@ -48,7 +48,7 @@ import {
 } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import type { CatalogEntry } from "@/data/catalog"
-import { INITIAL_REVIEWS, requestedLine, type Review } from "@/data/review"
+import { INITIAL_REVIEWS, planSignature, requestedLine, type Review } from "@/data/review"
 import { releasableTerms } from "@/components/stellic/keep-picker"
 import {
   TERM_OPTIONS,
@@ -80,6 +80,7 @@ import {
   planCampuses,
   planStanding,
   chooseSection,
+  markReviewed,
   registerCourses,
   removeCourse,
   selectableTerms,
@@ -498,7 +499,7 @@ export function PlanYourPath() {
   }
 
   function submitReview(review: Review) {
-    setReviews((current) => [review, ...current])
+    setReviews((current) => [{ ...review, at: planSignature(years) }, ...current])
     setRequesting(null)
     /* The request is the whole of what just happened, so the panel that
        accounts for it opens with it. */
@@ -509,6 +510,17 @@ export function PlanYourPath() {
 
   function cancelReview(id: string) {
     setReviews((current) => current.filter((review) => review.id !== id))
+  }
+
+  /* The advisor's end of it. Coming back marks the terms as looked at, which
+     is what the reviewed tick on a term card means. */
+  function completeReview(id: string) {
+    const review = reviews.find((r) => r.id === id)
+    if (!review) return
+    setReviews((current) =>
+      current.map((r) => (r.id === id ? { ...r, status: "complete" as const } : r))
+    )
+    setYears((current) => markReviewed(current, review.terms))
   }
 
   function toggleMetadata(id: string) {
@@ -578,6 +590,8 @@ export function PlanYourPath() {
         (reviewPanel && (
           <ReviewPanel
             reviews={reviews}
+            years={years}
+            onComplete={completeReview}
             onCancel={cancelReview}
             onClose={() => setReviewPanel(false)}
           />

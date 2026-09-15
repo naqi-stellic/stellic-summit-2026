@@ -46,6 +46,8 @@ export type Review = {
   notes: string
   requestedAt: Date
   status: "pending" | "complete"
+  /** The plan as it stood when the request went out. */
+  at: Record<string, string>
 }
 
 /* Where the demo stands: Fall 2027 is under way and Spring 2028 registration
@@ -64,6 +66,7 @@ export const INITIAL_REVIEWS: Review[] = [
     notes: "",
     requestedAt: new Date(2027, 7, 20, 13, 21),
     status: "complete",
+    at: {},
   },
 ]
 
@@ -100,4 +103,30 @@ function clock(date: Date): string {
 /** The sentence the planner's banner leads with. */
 export function requestedLine(review: Review): string {
   return `${STUDENT.name} requested a review of ${review.plan} on ${longWhen(review.requestedAt)}.`
+}
+
+/** What the advisor is asked to do before they can close the request. */
+export const REVIEW_INSTRUCTIONS = "Mark all decisions on plan prior to completing"
+
+/** Where every course sat when the request went out, so the plan can be
+ *  compared against itself while the advisor is reading it. */
+export function planSignature(years: Year[]): Record<string, string> {
+  const at: Record<string, string> = {}
+  for (const year of years) {
+    for (const term of year.terms) {
+      for (const course of term.courses) at[course.id] = term.id
+    }
+  }
+  return at
+}
+
+/** How much has moved since: a course added, dropped, or in another term than
+ *  the one it was in when the request was made. */
+export function changesSince(before: Record<string, string>, years: Year[]): number {
+  const now = planSignature(years)
+  let changed = 0
+  for (const id of new Set([...Object.keys(before), ...Object.keys(now)])) {
+    if (before[id] !== now[id]) changed += 1
+  }
+  return changed
 }

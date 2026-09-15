@@ -165,6 +165,8 @@ export function ReviewDialog({
       notes,
       requestedAt: NOW,
       status: "pending",
+      /* Filled in by the plan, which is what it is a signature of. */
+      at: {},
     })
   }
 

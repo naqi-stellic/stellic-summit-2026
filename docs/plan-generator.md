@@ -122,10 +122,22 @@ Spring 2028 onwards; Fall 2027 is locked and the 2026-2027 year is done.
 
 Submitting does three things: the plan takes a pending banner, every term in the
 request takes a `PENDING REVIEW` mark (the same slot that says `REVIEWED`), and
-the reviews panel opens beside the plan on its timeline — requested, under
-review with the advisor, complete — with Cancel Request under it. A term's mark
-sits beside its name in the term view and on its card in the planner; both read
-it from one context rather than having it threaded down.
+the reviews panel opens beside the plan. A term's mark sits beside its name in
+the term view and on its card in the planner; both read it from one context
+rather than having it threaded down.
+
+The panel is the frame at
+[`1096:66987`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1096-66987):
+a tab strip over white cards on the page's own grey, one card per request. The
+card runs a rail down three 24px markers — asked (green), with the advisor
+(amber), complete (open) — against the reference plan, the terms, and the
+advisor's instructions. Complete is the advisor's end of it: pressing it closes
+the request and marks those terms reviewed, which is the tick a term card
+carries afterwards.
+
+A request records where every course sat when it went out, so "N changes during
+review request" and the Changes tab's count are the plan measured against
+itself rather than a number kept by hand.
 
 `src/data/review.ts` holds the request types, the advisor, and one request that
 has already been round — which is why Fall 2027 carries a reviewed mark, and
