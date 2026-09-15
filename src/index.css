@@ -85,6 +85,8 @@
 
   /* ---- Elevation ---- */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  /* Figma's shadow/sm: what a card lifted off the page carries. */
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px 0 rgb(0 0 0 / 0.1);
   --shadow-secondary: 0 6px 16px 0 rgb(0 0 0 / 0.12);
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
 }
@@ -148,6 +150,7 @@
   --radius-md: var(--radius);
 
   --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
   --shadow-secondary: var(--shadow-secondary);
   --shadow-2xl: var(--shadow-2xl);
 

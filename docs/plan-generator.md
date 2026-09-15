@@ -128,7 +128,9 @@ rather than having it threaded down.
 
 The panel is the frame at
 [`1096:66987`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1096-66987):
-a tab strip over white cards on the page's own grey, one card per request. The
+one white card on the page's own grey, lifted by Figma's shadow/sm (added to
+the theme as `--shadow-sm`) and framed by nothing — the tab strip is the top of
+the card, and the requests are ruled sections under it. The
 card runs a rail down three 24px markers — asked (green), with the advisor
 (amber), complete (open) — against the reference plan, the terms, and the
 advisor's instructions. Complete is the advisor's end of it: pressing it closes

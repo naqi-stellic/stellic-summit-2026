@@ -115,12 +115,12 @@ function RequestCard({
   const pending = review.status === "pending"
 
   return (
-    <div className="flex w-full flex-col rounded-md border border-gray-40 bg-card shadow-secondary">
+    <div className="flex w-full flex-col bg-card">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full cursor-pointer items-center gap-2 px-6 py-[15px] text-left"
+        className="flex w-full cursor-pointer items-center gap-2 p-6 text-left"
       >
         <span className="min-w-0 flex-1 truncate text-body-md font-semibold text-foreground">
           Requested {shortWhen(review.requestedAt)}
@@ -243,9 +243,11 @@ export function ReviewPanel({
         <Icon name="close" size={24} />
       </button>
 
-      <div className="flex w-full min-w-0 flex-col gap-4">
-        {/* The strip the panel is read through, and what it is showing. */}
-        <div className="flex w-full items-end gap-0 overflow-x-auto border-b border-gray-40">
+      {/* One card: the strip the panel is read through is the top of it, and
+          what the strip is showing is the rest. Lifted off the page rather
+          than framed — the only line in it is under the tabs. */}
+      <div className="flex w-full min-w-0 flex-col overflow-hidden rounded-md bg-card shadow-sm">
+        <div className="flex w-full shrink-0 items-end overflow-x-auto border-b border-gray-40">
           {TABS.map((name) => {
             const active = tab === name
             const count = counts[name]
@@ -280,30 +282,35 @@ export function ReviewPanel({
 
         {tab === "Plan Reviews" ? (
           reviews.length === 0 ? (
-            <p className="text-body-md text-gray-80">
+            <p className="p-6 text-body-md text-gray-80">
               No reviews have been asked for on this plan yet.
             </p>
           ) : (
-            reviews.map((review) => (
-              <RequestCard
+            /* The requests are one list in one card, ruled apart. */
+            reviews.map((review, index) => (
+              <div
                 key={review.id}
-                review={review}
-                changes={review.status === "pending" ? changes : 0}
-                open={open.includes(review.id)}
-                onToggle={() =>
-                  setOpen((current) =>
-                    current.includes(review.id)
-                      ? current.filter((id) => id !== review.id)
-                      : [...current, review.id]
-                  )
-                }
-                onComplete={() => onComplete(review.id)}
-                onCancel={() => onCancel(review.id)}
-              />
+                className={cn("w-full", index > 0 && "border-t border-gray-40")}
+              >
+                <RequestCard
+                  review={review}
+                  changes={review.status === "pending" ? changes : 0}
+                  open={open.includes(review.id)}
+                  onToggle={() =>
+                    setOpen((current) =>
+                      current.includes(review.id)
+                        ? current.filter((id) => id !== review.id)
+                        : [...current, review.id]
+                    )
+                  }
+                  onComplete={() => onComplete(review.id)}
+                  onCancel={() => onCancel(review.id)}
+                />
+              </div>
             ))
           )
         ) : (
-          <p className="text-body-md text-gray-80">
+          <p className="p-6 text-body-md text-gray-80">
             {tab === "Changes"
               ? changes > 0
                 ? `${changes} course${changes === 1 ? " has" : "s have"} moved since the review was asked for.`
