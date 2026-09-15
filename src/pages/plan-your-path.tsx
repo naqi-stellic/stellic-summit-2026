@@ -89,6 +89,7 @@ import {
   planStanding,
   chooseSection,
   registerCourses,
+  registrableCourses,
   removeCourse,
   selectableTerms,
   type MetadataField,
@@ -180,11 +181,14 @@ function planActions(metadata: MetadataField[], generators: boolean): PlanAction
 function RegistrationAlert({
   closes,
   drafting,
+  ready,
   onRegister,
 }: {
   closes: string
   /** A draft is up, so there is nothing settled to register. */
   drafting?: boolean
+  /** How many of the term's courses would go through registration. */
+  ready: number
   onRegister?: () => void
 }) {
   /* 92px is the design's height; a minimum rather than a fixed value so the
@@ -203,7 +207,14 @@ function RegistrationAlert({
             Closes: {closes}
           </AlertDescription>
         </AlertHeader>
-        <Button variant="primary" size="sm" disabled={drafting} onClick={onRegister}>
+        {/* Nothing to press when nothing would go through: no class chosen
+            yet, or everything with one already registered. */}
+        <Button
+          variant="primary"
+          size="sm"
+          disabled={drafting || ready === 0}
+          onClick={onRegister}
+        >
           Register Now
         </Button>
       </AlertBody>
@@ -219,6 +230,7 @@ function termBanner(term: Term, drafting: boolean, onRegister: (term: Term) => v
       <RegistrationAlert
         closes={term.alert.closes}
         drafting={drafting}
+        ready={registrableCourses(term).length}
         onRegister={() => onRegister(term)}
       />
     )

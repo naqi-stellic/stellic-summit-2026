@@ -35,16 +35,17 @@ function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () =
         <span className="font-semibold">Registration is now open!</span>
         <span className="whitespace-nowrap">Closes: {term.alert?.closes}</span>
       </span>
+      {/* It counts what would go through, and there is nothing to press when
+          that is none of them — whether because no class has been chosen yet
+          or because everything with one has already been registered. */}
       <Button
         variant="primary"
         size="sm"
         className="shrink-0"
-        disabled={drafting}
+        disabled={drafting || ready === 0}
         onClick={onRegister}
       >
-        {/* Nothing is ready to register until a section is chosen, so the
-            button asks you to start rather than counting to zero. */}
-        {ready > 0 ? `Register ${ready} course${ready === 1 ? "" : "s"}` : "Register courses"}
+        Register {ready} course{ready === 1 ? "" : "s"}
       </Button>
     </Alert>
   )
