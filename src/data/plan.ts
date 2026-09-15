@@ -753,9 +753,9 @@ export const METADATA_FIELDS: { id: MetadataField; label: string }[] = [
   { id: "lastActivity", label: "Last activity" },
 ]
 
-/** Credits are the only one the planner shows to begin with, which is the card
- *  as it has always looked. The rest are there to be turned on. */
-export const METADATA_DEFAULT: MetadataField[] = ["credits"]
+/** Nothing to begin with. A card opens as the course and its section alone,
+ *  and every detail on it is one somebody chose to show. */
+export const METADATA_DEFAULT: MetadataField[] = []
 
 /** What a course can say about itself, in the order the menu lists it. Last
  *  activity is left out: it is not a tag, and the card gives it its own line. */

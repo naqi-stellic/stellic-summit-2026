@@ -161,8 +161,7 @@ export function AuditRow({
           </>
         )}
 
-        {/* What Plan details is showing. Credits are on to begin with, so a
-            card looks the way it always has until something else is added. */}
+        {/* What Plan details is showing — nothing, until it is asked for. */}
         <CourseTags course={course} />
         <CourseActivity course={course} />
         {draft && (
