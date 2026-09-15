@@ -96,7 +96,7 @@ export function RegisterDialog({
         )}
 
         {stage === "done" ? (
-          <div className="flex w-full flex-col items-center gap-4 pt-6 pb-8 text-center">
+          <div className="flex w-full flex-col items-center gap-4 pt-2 text-center">
             <span className="flex size-14 items-center justify-center rounded-full bg-success-5 text-success-100">
               <Icon name="event-available" size={24} />
             </span>
