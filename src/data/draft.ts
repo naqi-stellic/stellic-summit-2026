@@ -293,8 +293,18 @@ export function generateDraft(
   /* Fills one term to the option's load from the front of the queue. Terms are
    * reached in order, so the queue's own priority — core, then concentration,
    * then general — becomes the order of the plan. */
+  /* The nearest term the student can still plan into gets its elective seats
+   * held rather than filled. Registration for it is days away, so an elective
+   * is the one thing worth choosing yourself — the generator reserves the room
+   * and leaves the choice. Every term after it is far enough out that a named
+   * course is the more useful answer. */
+  const SEATS_IN_FIRST_TERM = 2
+  let firstTerm = true
+
   const fillTerm = (term: Term): Term => {
     if (term.locked) return term
+    const nearest = firstTerm
+    firstTerm = false
 
     const incoming: PlannedCourse[] = []
     if (moving && moving.to === term.id) {
@@ -310,6 +320,17 @@ export function generateDraft(
     }
 
     let room = option.coursesPerTerm - keptCourses(term).length - incoming.length
+
+    if (nearest) {
+      for (let held = 0; held < SEATS_IN_FIRST_TERM && room > 0; held += 1) {
+        const seat = queue.findIndex((entry) => entry.placeholder && entry.avoid !== term.id)
+        if (seat === -1) break
+        const [entry] = queue.splice(seat, 1)
+        incoming.push(draftCourse(entry, order++))
+        room -= 1
+      }
+    }
+
     while (room > 0) {
       /* The first entry that is allowed to be here. */
       const next = queue.findIndex((entry) => entry.avoid !== term.id)
