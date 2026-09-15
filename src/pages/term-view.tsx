@@ -108,11 +108,12 @@ export function TermView({
     <main className="@container flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
       <PlanHeader actions={plannerActions} tabs={tabs} onToggleField={onToggleField} />
 
-      {term.scheduled && term.alert ? (
-        <RegistrationAlert term={term} />
-      ) : actions.length > 0 ? (
-        <ActionsAlert term={term} />
-      ) : null}
+      {/* These are not alternatives. A term can have registration open and still
+          have courses that cannot go through it yet, which is exactly where
+          Spring 2028 stands: the window is open, and neither course has a
+          section to register. The warning sits under the invitation. */}
+      {term.scheduled && term.alert && <RegistrationAlert term={term} />}
+      {actions.length > 0 && <ActionsAlert term={term} />}
 
       <div className="flex w-full flex-wrap items-center justify-between gap-2">
         <h3 className="min-w-0 truncate text-h300 font-semibold text-gray-100">{term.name}</h3>
