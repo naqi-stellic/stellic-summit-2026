@@ -112,7 +112,10 @@ export function DraftOutline({ leaving, pending }: { leaving?: boolean; pending?
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 z-10",
+        /* Above the plan's own sticky toolbar, which holds at z-20: the frame
+           is drawn around everything, and a header sliding over its edge would
+           break the one thing the frame is for. */
+        "pointer-events-none absolute inset-0 z-30",
         leaving ? "animate-dissolve" : "animate-fade"
       )}
     >

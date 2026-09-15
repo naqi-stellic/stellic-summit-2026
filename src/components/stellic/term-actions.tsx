@@ -42,7 +42,10 @@ export function TermActions({ term }: { term: Term }) {
   if (actions.length === 0) return null
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    /* pt-4 for the same reason the credit group has it: the card separates its
+       blocks by 24px and its list by 8px, and 8px of that 24 is the stack's own
+       gap. Without it this block alone sits tight under the banner. */
+    <div className="flex w-full flex-col gap-2 pt-4">
       <button
         type="button"
         aria-expanded={open}
