@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { PlanHeader, type PlanAction, type YearTab } from "@/components/stellic/plan-header"
@@ -117,10 +117,20 @@ export function TermView({
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
 }) {
-  /* A published schedule is what the calendar is for, so a term that has one
-   * opens on it — empty, if no section has been chosen yet, which is itself
-   * the thing to do next. */
-  const [mode, setMode] = useState(term.scheduled ? "calendar" : "list")
+  /* A term under way or already taken opens on its calendar: the week is
+   * settled and the week is the thing to look at. A term still being planned
+   * opens on its list, even once its schedule is published — what is being
+   * done there is choosing courses, and half of them may have no class yet. */
+  const [mode, setMode] = useState(
+    term.scheduled && term.state !== "planned" ? "calendar" : "list"
+  )
+
+  /* Unless a generated week arrives, which is a week to be read against the
+   * one it replaces — so the term turns to its calendar to show it. */
+  const proposing = term.scheduled === true && term.courses.some((c) => c.draft != null)
+  useEffect(() => {
+    if (proposing) setMode("calendar")
+  }, [proposing])
   const actions = termActions(term)
   const pending = usePendingReview(term.id)
 
