@@ -24,6 +24,8 @@ const ACCENT: Record<string, string> = {
   amber: "bg-accent-amber",
   purple: "bg-accent-purple",
   brown: "bg-accent-brown",
+  teal: "bg-accent-teal",
+  rose: "bg-accent-rose",
 }
 
 function Empty({ children }: { children: string }) {

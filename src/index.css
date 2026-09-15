@@ -41,6 +41,11 @@
   --stellic-accent-amber: #f9a825;
   --stellic-accent-purple: #ac76da;
   --stellic-accent-brown: #8d6e63;
+  /* A term holds up to six courses under the credit ceiling, and four colours
+     cannot give six of them one each. These two keep the muted key of the
+     other four. */
+  --stellic-accent-teal: #4a9e9b;
+  --stellic-accent-rose: #cf7189;
 
   --stellic-alert-5: #ffeaea;
   --stellic-alert-50: #d30303;
@@ -134,6 +139,8 @@
   --color-accent-amber: var(--stellic-accent-amber);
   --color-accent-purple: var(--stellic-accent-purple);
   --color-accent-brown: var(--stellic-accent-brown);
+  --color-accent-teal: var(--stellic-accent-teal);
+  --color-accent-rose: var(--stellic-accent-rose);
   --color-alert-5: var(--stellic-alert-5);
   --color-alert-50: var(--stellic-alert-50);
   --color-alert-100: var(--stellic-alert-100);

@@ -163,7 +163,16 @@ function planActions(metadata: MetadataField[]): PlanAction[] {
   ]
 }
 
-function RegistrationAlert({ closes, onRegister }: { closes: string; onRegister?: () => void }) {
+function RegistrationAlert({
+  closes,
+  drafting,
+  onRegister,
+}: {
+  closes: string
+  /** A draft is up, so there is nothing settled to register. */
+  drafting?: boolean
+  onRegister?: () => void
+}) {
   /* 92px is the design's height; a minimum rather than a fixed value so the
      banner can grow when the closing date wraps to a second line. */
   return (
@@ -180,7 +189,7 @@ function RegistrationAlert({ closes, onRegister }: { closes: string; onRegister?
             Closes: {closes}
           </AlertDescription>
         </AlertHeader>
-        <Button variant="primary" size="sm" onClick={onRegister}>
+        <Button variant="primary" size="sm" disabled={drafting} onClick={onRegister}>
           Register Now
         </Button>
       </AlertBody>
@@ -192,7 +201,13 @@ function RegistrationAlert({ closes, onRegister }: { closes: string; onRegister?
  *  draft is on the canvas — the reassurance that it needs nothing otherwise. */
 function termBanner(term: Term, drafting: boolean, onRegister: (term: Term) => void) {
   if (term.alert) {
-    return <RegistrationAlert closes={term.alert.closes} onRegister={() => onRegister(term)} />
+    return (
+      <RegistrationAlert
+        closes={term.alert.closes}
+        drafting={drafting}
+        onRegister={() => onRegister(term)}
+      />
+    )
   }
   return drafting && !term.locked ? <NoActionsAlert /> : null
 }

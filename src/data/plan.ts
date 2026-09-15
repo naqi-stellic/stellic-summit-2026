@@ -46,7 +46,7 @@ export type PlannedCourse = {
    *  including one the generator placed, which reads "Added by pathway". */
   lastActivity?: string
   /** The colour this course is drawn in, on its card and on the calendar. */
-  accent?: "green" | "amber" | "purple" | "brown"
+  accent?: "green" | "amber" | "purple" | "brown" | "teal" | "rose"
   /** Set only while a generated draft is on screen. `relocated` marks a card
    *  that left somewhere to be here, so it counts as an addition and a removal
    *  at once. */
@@ -221,7 +221,7 @@ export const COMPLETED_YEAR: Year = {
           campus: "Main",
           modality: "In Person",
           gradeOption: "Graded",
-          accent: "purple",
+          accent: "teal",
           meetings: [
             { day: 2, from: 13, to: 14.25 },
             { day: 4, from: 13, to: 14.25 },
@@ -337,7 +337,7 @@ export const COMPLETED_YEAR: Year = {
           campus: "Main",
           modality: "In Person",
           gradeOption: "Graded",
-          accent: "amber",
+          accent: "rose",
           meetings: [
             { day: 1, from: 13, to: 14.25 },
             { day: 3, from: 13, to: 14.25 },
@@ -506,7 +506,7 @@ export const INITIAL_YEARS: Year[] = [
             campus: "Main",
             modality: "In Person",
             gradeOption: "Graded",
-            accent: "amber",
+            accent: "teal",
             meetings: [
               { day: 1, from: 10.5, to: 11.75 },
               { day: 3, from: 10.5, to: 11.75 },

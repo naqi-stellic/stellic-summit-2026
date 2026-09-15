@@ -21,6 +21,9 @@ import {
  * so the list is all there is. */
 
 function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () => void }) {
+  /* A draft is a proposal. Nothing in it can be put through registration until
+     it has been applied, so the invitation is there but not open. */
+  const drafting = term.courses.some((c) => c.draft)
   const ready = registrableCourses(term).length
 
   return (
@@ -30,7 +33,13 @@ function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () =
         <span className="font-semibold">Registration is now open!</span>
         <span className="whitespace-nowrap">Closes: {term.alert?.closes}</span>
       </span>
-      <Button variant="primary" size="sm" className="shrink-0" onClick={onRegister}>
+      <Button
+        variant="primary"
+        size="sm"
+        className="shrink-0"
+        disabled={drafting}
+        onClick={onRegister}
+      >
         {/* Nothing is ready to register until a section is chosen, so the
             button asks you to start rather than counting to zero. */}
         {ready > 0 ? `Register ${ready} course${ready === 1 ? "" : "s"}` : "Register courses"}

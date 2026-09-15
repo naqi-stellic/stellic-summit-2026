@@ -150,7 +150,7 @@ let seq = 0
 /* The colours a course is drawn in down the side of a list and across a
  * calendar. Handed out in turn as courses are created, so a generated term
  * reads like any other rather than a run of gray bars. */
-const ACCENTS = ["green", "amber", "purple", "brown"] as const
+const ACCENTS = ["green", "amber", "purple", "brown", "teal", "rose"] as const
 
 function nextAccent(): PlannedCourse["accent"] {
   return ACCENTS[seq % ACCENTS.length]
@@ -742,13 +742,16 @@ export function addCourse(
   const term = findTerm(years, termId)
   if (!term || term.locked) return years
 
+  const taken = new Set(term.courses.map((c) => c.accent))
   const course: PlannedCourse = {
     id: `u${(seq += 1)}`,
     code: entry.code,
     name: entry.name,
     credits: CREDITS_PER_COURSE,
     placeholder: entry.placeholder,
-    accent: nextAccent(),
+    /* Its own colour if the term has one spare, which under the credit ceiling
+       it always does. */
+    accent: ACCENTS.find((a) => !taken.has(a)) ?? nextAccent(),
     ...(entry.placeholder
       ? {}
       : {

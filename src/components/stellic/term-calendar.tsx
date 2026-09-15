@@ -31,6 +31,8 @@ const ACCENT: Record<string, string> = {
   amber: "bg-accent-amber",
   purple: "bg-accent-purple",
   brown: "bg-accent-brown",
+  teal: "bg-accent-teal",
+  rose: "bg-accent-rose",
 }
 
 /** An hour of calendar, in pixels. Deep enough that a class of an hour and a
