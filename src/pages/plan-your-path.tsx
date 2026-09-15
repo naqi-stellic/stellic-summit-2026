@@ -231,6 +231,9 @@ export function PlanYourPath() {
   const [registering, setRegistering] = useState<Term | null>(null)
   /* The term whose Generate Term panel is open, if any. */
   const [generatingTerm, setGeneratingTerm] = useState<string | null>(null)
+  /* Whether a generated schedule is shown against what the term already held,
+     or on its own. */
+  const [compare, setCompare] = useState(true)
   /* Bumped when a plan arrives on a canvas that had none — generating, or
    * generating again. Swapping between the options it produced, or changing one
    * by hand, is not an arrival: the plan is already there and only its contents
@@ -488,11 +491,16 @@ export function PlanYourPath() {
                     label: option.label,
                     blurb: option.blurb,
                     added: drafts.made[i].added,
+                    /* The week this option came out as, which is what its card
+                       reports on when the term has a schedule. */
+                    term: findTerm(drafts.made[i].years, generatingTerm) ?? undefined,
                   }))
                 : undefined
             }
             selectedOption={optionId}
             onSelectOption={setOptionId}
+            compare={compare}
+            onCompareChange={setCompare}
             onFraming={() => setFraming(true)}
             onGenerate={startTermDraft}
             onClose={() => {
@@ -563,6 +571,7 @@ export function PlanYourPath() {
             onRegister={() => setRegistering(openTerm)}
             onPickSection={pickSection}
             onGenerateTerm={() => setGeneratingTerm(openTerm.id)}
+            compare={compare}
           />
         ) : (
       <DndContext

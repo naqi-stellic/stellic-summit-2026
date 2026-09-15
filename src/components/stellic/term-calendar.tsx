@@ -367,7 +367,14 @@ function Week({ term }: { term: Term }) {
   )
 }
 
-export function TermCalendar({ term }: { term: Term }) {
+export function TermCalendar({ term, compare = true }: { term: Term; compare?: boolean }) {
+  /* Comparing means seeing the proposal against what the term already held.
+   * With it off, only what this option is proposing is drawn — which is the
+   * quickest way to read one week on its own. */
+  const drafting = term.courses.some((c) => c.draft)
+  const shown =
+    compare || !drafting ? term : { ...term, courses: term.courses.filter((c) => c.draft) }
+
   return (
     /* shrink-0 because the pane it sits in is a fixed-height column: without
        it the card is squeezed to fit and the week is quietly cut off at the
@@ -375,12 +382,12 @@ export function TermCalendar({ term }: { term: Term }) {
     <div className="@container/term w-full shrink-0 overflow-hidden rounded-md border border-gray-40 bg-card">
       {/* Side by side when there is room for both; stacked when there is not. */}
       <div className="flex w-full flex-col @3xl/term:flex-row">
-        <Sidebar term={term} />
+        <Sidebar term={shown} />
         <span
           aria-hidden="true"
           className="shrink-0 bg-gray-40 max-@3xl/term:h-px @3xl/term:w-px"
         />
-        <Week term={term} />
+        <Week term={shown} />
       </div>
     </div>
   )

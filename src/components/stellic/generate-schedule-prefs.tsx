@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
-import type { PlannedCourse, Term } from "@/data/plan"
+import { termShape, type PlannedCourse, type Term } from "@/data/plan"
 
 /* Step 3, and only for a term whose schedule is out: what the run should hold
  * to when it picks class times. Must haves are absolute; nice to haves are
@@ -45,7 +45,7 @@ export type SchedulePrefs = {
   course: Record<string, CoursePref>
 }
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 /** Who might be teaching, for a preference that has to name somebody. */
 const STAFF = ["Dr. P. Lindqvist", "Prof. D. Sullivan", "Dr. A. Petrov", "Prof. N. Adeyemi"]
@@ -105,6 +105,52 @@ export function defaultPrefs(term: Term): SchedulePrefs {
     extras: "no",
     course: {},
   }
+}
+
+/** How well one generated week answers the nice to haves, nought to three per
+ *  preference. Nothing here is a guess about the student: each is measured off
+ *  the week itself against what they asked for. */
+export function scoreSchedule(term: Term, prefs: SchedulePrefs) {
+  const shape = termShape(term)
+  const wanted = new Map(prefs.nice.map((p) => [p.id, p.chosen]))
+
+  const dayNames = shape.days.map((d) => DAYS[d - 1])
+  const asked = wanted.get("days") ?? DAYS
+  const onAskedDays = dayNames.filter((d) => asked.includes(d)).length
+  const days = dayNames.length === 0 ? 1 : score(onAskedDays / dayNames.length)
+
+  const time = (() => {
+    const when = (wanted.get("time") ?? ["Any"])[0]
+    if (!shape.earliest || when === "Any") return 3
+    if (when === "Morning") return score(shape.latest! <= 12 ? 1 : shape.earliest <= 10 ? 0.6 : 0.2)
+    if (when === "Afternoon") return score(shape.earliest >= 12 ? 1 : 0.4)
+    return score(shape.latest! >= 17 ? 1 : 0.3)
+  })()
+
+  /* Evenly distributed wants the week used; the other two want it compressed.
+   * Counted in days rather than as a ratio, because the difference between a
+   * four-day week and a five-day one is the whole question here and a ratio
+   * rounds it away. */
+  const density = (() => {
+    const how = (wanted.get("density") ?? ["Evenly distributed"])[0]
+    const used = shape.days.length
+    if (how === "Evenly distributed") return used >= 5 ? 3 : used === 4 ? 2 : 1
+    return used <= 2 ? 3 : used === 3 ? 2 : 1
+  })()
+
+  const scores = { days, time, density }
+  /* The ranking is the point: the first nice to have counts for most, so
+   * reordering them can change which option comes out on top. */
+  const weights = [3, 2, 1]
+  const total = prefs.nice.reduce(
+    (n, pref, i) => n + (scores[pref.id as keyof typeof scores] ?? 0) * weights[i],
+    0
+  )
+  return { ...shape, dayNames, scores, total }
+}
+
+function score(ratio: number): 1 | 2 | 3 {
+  return ratio >= 0.8 ? 3 : ratio >= 0.45 ? 2 : 1
 }
 
 /** What a row says under its title when it is closed. */

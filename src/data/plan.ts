@@ -837,7 +837,13 @@ export function registerCourses(years: Year[], termId: string, courseIds: string
 }
 
 /* The class times a term's sections are drawn from, in the order they are
- * handed out, so two courses in the same term never land on each other. */
+ * handed out, so two courses in the same term never land on each other.
+ *
+ * There are more of them than a term has courses on purpose. A run starts from
+ * a different one each time, and if the list were only as long as the term it
+ * would always end up using every slot — three schedules that differ in which
+ * course sits where and not at all in what the week looks like. With slack in
+ * the list, starting later means a different set of hours and days. */
 const SECTION_SLOTS: Meeting[][] = [
   [
     { day: 1, from: 9, to: 10.25 },
@@ -858,6 +864,15 @@ const SECTION_SLOTS: Meeting[][] = [
   [
     { day: 1, from: 10.5, to: 11.75 },
     { day: 3, from: 10.5, to: 11.75 },
+  ],
+  [{ day: 5, from: 9, to: 11.5 }],
+  [
+    { day: 2, from: 8, to: 9.25 },
+    { day: 4, from: 8, to: 9.25 },
+  ],
+  [
+    { day: 1, from: 16, to: 17.25 },
+    { day: 3, from: 16, to: 17.25 },
   ],
 ]
 
@@ -980,6 +995,31 @@ export function termWeek(term: Term): Date[] {
     day.setUTCDate(monday.getUTCDate() + i)
     return day
   })
+}
+
+/** The shape of a term's week: which days it meets on, and how early and late
+ *  it runs. What a schedule is, reduced to what you would compare. */
+export function termShape(term: Term): {
+  days: number[]
+  earliest: number | null
+  latest: number | null
+} {
+  const meetings = term.courses.flatMap((c) => (c.draft?.mark === "removed" ? [] : (c.meetings ?? [])))
+  if (meetings.length === 0) return { days: [], earliest: null, latest: null }
+  return {
+    days: [...new Set(meetings.map((m) => m.day))].sort(),
+    earliest: Math.min(...meetings.map((m) => m.from)),
+    latest: Math.max(...meetings.map((m) => m.to)),
+  }
+}
+
+/** "9:30am", from the decimal hours the data keeps. */
+export function clockTime(hour: number): string {
+  const h = Math.floor(hour)
+  const m = Math.round((hour - h) * 60)
+  const suffix = h < 12 ? "am" : "pm"
+  const twelve = h % 12 === 0 ? 12 : h % 12
+  return `${twelve}:${String(m).padStart(2, "0")}${suffix}`
 }
 
 /** The hours a term's calendar has to cover, with an hour's air either side. */

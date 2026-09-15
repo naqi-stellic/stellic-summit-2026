@@ -47,6 +47,9 @@ function ActionsAlert({
   onPickSection?: (termId: string, courseId: string) => void
   /** Opens the panel that fills this term to a credit target. */
   onGenerateTerm?: () => void
+  /** While a draft is up: show what the term already held alongside what is
+   *  proposed, rather than the proposal on its own. */
+  compare?: boolean
 }) {
   const actions = termActions(term)
 
@@ -68,6 +71,7 @@ export function TermView({
   onRegister,
   onPickSection,
   onGenerateTerm,
+  compare = true,
 }: {
   term: Term
   /** The year filter, with the term's own year marked. It is also the way out:
@@ -142,7 +146,7 @@ export function TermView({
       </div>
 
       {mode === "calendar" && term.scheduled ? (
-        <TermCalendar term={term} />
+        <TermCalendar term={term} compare={compare} />
       ) : (
         <TermList term={term} />
       )}

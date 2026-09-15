@@ -5,8 +5,10 @@ import { Icon } from "@/components/icon"
 import { keepChoices } from "@/components/stellic/generate-plan-pace"
 import { GenerateTermBuilding } from "@/components/stellic/generate-term-building"
 import {
+  DAYS,
   GenerateSchedulePrefs,
   defaultPrefs,
+  scoreSchedule,
   type SchedulePrefs,
 } from "@/components/stellic/generate-schedule-prefs"
 import {
@@ -20,8 +22,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
 import { RadioCard } from "@/components/stellic/primitives"
-import { CREDITS_PER_COURSE, PLANNING_RULES, type PlanStanding, type Term } from "@/data/plan"
+import {
+  CREDITS_PER_COURSE,
+  PLANNING_RULES,
+  clockTime,
+  type PlanStanding,
+  type Term,
+} from "@/data/plan"
 
 /* Generating one term rather than the whole plan. The question is narrower —
  * how full should this term be, and what in it is settled — so it fits in two
@@ -89,6 +98,8 @@ export function GenerateTermPanel({
   options,
   selectedOption,
   onSelectOption,
+  compare,
+  onCompareChange,
   onFraming,
   onGenerate,
   onClose,
@@ -99,9 +110,13 @@ export function GenerateTermPanel({
    *  more question to do it. */
   mode: "term" | "schedule"
   /** The drafts the run produced, once there are any. */
-  options?: { id: string; label: string; blurb: string; added: number }[]
+  options?: { id: string; label: string; blurb: string; added: number; term?: Term }[]
   selectedOption?: string
   onSelectOption?: (id: string) => void
+  /** Whether the calendar is showing what the term already held alongside what
+   *  the option proposes. */
+  compare?: boolean
+  onCompareChange?: (next: boolean) => void
   /** The run has reached its last check: frame the playground before the term
    *  arrives to fill it. */
   onFraming: () => void
@@ -128,6 +143,12 @@ export function GenerateTermPanel({
   /* Only whole courses can be added, so the target rounds down to one. */
   const adding = Math.max(0, Math.floor((target - kept) / CREDITS_PER_COURSE)) * CREDITS_PER_COURSE
   const seats = planned.filter((c) => c.placeholder)
+  /* Option ids best first, by how well each week answers the ranking. */
+  const ranked = (options ?? [])
+    .filter((o) => o.term)
+    .map((o) => ({ id: o.id, total: scoreSchedule(o.term!, prefs).total }))
+    .sort((a, b) => b.total - a.total)
+    .map((o) => o.id)
   const isStep = !showing && (view === 1 || view === 2 || view === 3)
 
   /* What the summary reads back: the answers given, then the rules the school
@@ -231,7 +252,7 @@ export function GenerateTermPanel({
       <div className="flex flex-1 flex-col gap-8 p-6 pb-28">
         {showing && (
           <>
-            <Section title="Term instructions">
+            <Section title={scheduling ? "Schedule instructions" : "Term instructions"}>
               <div className="flex w-full items-center gap-2 rounded-md border border-gray-40 bg-gray-0 p-[11px]">
                 <span className="min-w-0 flex-1 truncate text-body-md text-gray-100">
                   {term.name} · {target} credits
@@ -244,32 +265,119 @@ export function GenerateTermPanel({
               </div>
             </Section>
 
-            <Section title="Term options">
+            {scheduling && (
+              <label className="flex w-full cursor-pointer items-center justify-between gap-2">
+                <span className="text-body-md text-gray-100">Compare with current schedule</span>
+                <Switch checked={compare} onCheckedChange={(on) => onCompareChange?.(on)} />
+              </label>
+            )}
+
+            <Section title={scheduling ? "Schedule options" : "Term options"}>
               <RadioGroup
                 value={selectedOption}
                 onValueChange={(next) => onSelectOption?.(next)}
                 className="w-full gap-2"
               >
-                {options!.map((option, index) => (
-                  <label
-                    key={option.id}
-                    className={cn(
-                      "flex w-full cursor-pointer flex-col gap-2 rounded-md border p-[11px] transition-colors",
-                      selectedOption === option.id ? "border-primary-50" : "border-gray-40"
-                    )}
-                  >
-                    <span className="flex w-full items-center gap-3">
-                      <RadioGroupItem value={option.id} />
-                      {/* Numbered, the way the plan's options are: what you
-                          point at on stage is "option two", not its name. */}
-                      <span className="min-w-0 flex-1 text-body-md font-semibold text-gray-100">
-                        Option {index + 1}
+                {options!.map((option, index) => {
+                  /* A schedule is judged on the week it comes out as, so its
+                     card shows the week rather than only the reasoning. */
+                  const week = scheduling && option.term ? scoreSchedule(option.term, prefs) : null
+                  const rank = ranked.indexOf(option.id)
+
+                  return (
+                    <label
+                      key={option.id}
+                      className={cn(
+                        "flex w-full cursor-pointer flex-col gap-2 rounded-md border p-[11px] transition-colors",
+                        selectedOption === option.id ? "border-primary-50" : "border-gray-40"
+                      )}
+                    >
+                      <span className="flex w-full items-center gap-3">
+                        <RadioGroupItem value={option.id} />
+                        {/* Numbered, the way the plan's options are: what you
+                            point at on stage is "option two", not its name. */}
+                        <span className="text-body-md font-semibold text-gray-100">
+                          Option {index + 1}
+                        </span>
+                        {week && rank === 0 && (
+                          <Badge className="bg-primary-0 text-primary-50">
+                            <Icon name="check-circle" size={12} />
+                            Best Match
+                          </Badge>
+                        )}
+                        {week && rank === 1 && (
+                          <Badge variant="secondary">
+                            <Icon name="fiber-manual-record" size={12} />
+                            Strong Match
+                          </Badge>
+                        )}
+                        <span className="min-w-0 flex-1" />
+                        <Badge variant="success">+{option.added}</Badge>
                       </span>
-                      <Badge variant="success">+{option.added}</Badge>
-                    </span>
-                    <span className="text-body-md text-gray-80">{option.blurb}</span>
-                  </label>
-                ))}
+
+                      {week && (
+                        <span className="flex w-full flex-wrap items-start justify-between gap-3">
+                          <span className="flex flex-col gap-2">
+                            <span className="flex items-center gap-1">
+                              {DAYS.map((day, i) => (
+                                <span
+                                  key={day}
+                                  className={cn(
+                                    "flex size-5 items-center justify-center rounded-md text-label-md",
+                                    week.days.includes(i + 1)
+                                      ? "bg-gray-5 font-semibold text-gray-100"
+                                      : "text-gray-40"
+                                  )}
+                                >
+                                  {day[0]}
+                                </span>
+                              ))}
+                            </span>
+                            <span className="text-body-md text-gray-80">
+                              {week.earliest == null
+                                ? "No classes timetabled"
+                                : `Earliest class: ${clockTime(week.earliest)}`}
+                              {week.latest != null && (
+                                <>
+                                  <br />
+                                  Latest class: {clockTime(week.latest)}
+                                </>
+                              )}
+                            </span>
+                          </span>
+
+                          {/* How far each nice to have was met, in the order
+                              they were ranked. */}
+                          <span className="flex shrink-0 flex-col gap-1">
+                            {prefs.nice.map((pref) => {
+                              const met = week.scores[pref.id as keyof typeof week.scores] ?? 0
+                              return (
+                                <span key={pref.id} className="flex items-center gap-2">
+                                  <span className="flex items-center gap-0.5">
+                                    {[0, 1, 2].map((dot) => (
+                                      <span
+                                        key={dot}
+                                        className={cn(
+                                          "size-2 rounded-full",
+                                          dot < met ? "bg-gray-100" : "bg-gray-40"
+                                        )}
+                                      />
+                                    ))}
+                                  </span>
+                                  <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
+                                    {pref.title}
+                                  </span>
+                                </span>
+                              )
+                            })}
+                          </span>
+                        </span>
+                      )}
+
+                      <span className="text-body-md text-gray-80">{option.blurb}</span>
+                    </label>
+                  )
+                })}
               </RadioGroup>
             </Section>
           </>
