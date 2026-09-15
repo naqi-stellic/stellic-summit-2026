@@ -91,7 +91,7 @@ function CourseRow({
           mark ? mark.card : held ? "bg-gray-0" : "bg-card"
         )}
       >
-        <Accent course={held ? undefined : course} />
+        <Accent course={course} />
         <div className="flex min-w-0 flex-1 items-center gap-4 pr-4 pl-6">
           <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-80" />
           {/* Registration is what the ticks are for: choosing which of these
@@ -146,7 +146,7 @@ function CourseRow({
           unsettled one says what it is waiting for. */}
       {course.draft && (
         <div className={cn("flex w-full items-stretch", mark?.card)}>
-          <Accent course={held ? undefined : course} />
+          <Accent course={course} />
           <span className="flex min-w-0 flex-1 items-center px-4 py-[9px]">
             <DraftNote course={course} />
           </span>
@@ -157,7 +157,7 @@ function CourseRow({
           and the same colour down its edge. */}
       {missing && !course.draft && (
         <div className={cn("flex w-full items-stretch", held ? "bg-gray-0" : "bg-card")}>
-          <Accent course={held ? undefined : course} />
+          <Accent course={course} />
           <p className="flex min-w-0 flex-1 items-center gap-1 px-4 py-[9px] text-body-md text-gray-100">
             <Icon name="error-outline" size={12} className="shrink-0 text-alert-50" />
             {missing.says}{" "}

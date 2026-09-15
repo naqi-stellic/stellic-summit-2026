@@ -147,6 +147,34 @@ export function summariseDraft(years: Year[], optionId: string): Draft {
 type QueueEntry = CatalogEntry & { avoid?: string; ghostFor?: string }
 
 let seq = 0
+/* The colours a course is drawn in down the side of a list and across a
+ * calendar. Handed out in turn as courses are created, so a generated term
+ * reads like any other rather than a run of gray bars. */
+const ACCENTS = ["green", "amber", "purple", "brown"] as const
+
+function nextAccent(): PlannedCourse["accent"] {
+  return ACCENTS[seq % ACCENTS.length]
+}
+
+/** Re-colours what a run just put in a term so no two courses in it share a
+ *  colour while a spare one is going unused. Handing them out in sequence is
+ *  enough on its own until a course arrives carrying a colour of its own —
+ *  then two of the same end up side by side. */
+function spreadAccents(term: Term): Term {
+  const taken = new Set(
+    term.courses.filter((c) => c.draft?.mark !== "added").map((c) => c.accent)
+  )
+  return {
+    ...term,
+    courses: term.courses.map((course) => {
+      if (course.draft?.mark !== "added") return course
+      const free = ACCENTS.find((a) => !taken.has(a)) ?? course.accent
+      taken.add(free)
+      return { ...course, accent: free }
+    }),
+  }
+}
+
 /** When the generator ran. Fixed rather than "now" so the plan reads the same
  *  every time it is shown, like every other date in the data. */
 const GENERATED_ON = "15 Sep 2027"
@@ -161,6 +189,7 @@ function draftCourse(entry: CatalogEntry, order: number, note?: string): Planned
     /* What the course is, which is known from the catalogue. Which sitting of
      * it to attend is not, so there is no section and no room or instructor —
      * those come with one. A seat has none of it: there is no course yet. */
+    accent: nextAccent(),
     ...(entry.placeholder
       ? {}
       : {
@@ -351,7 +380,9 @@ export function generateDraft(
       room -= 1
     }
 
-    return incoming.length > 0 ? { ...term, courses: [...term.courses, ...incoming] } : term
+    return incoming.length > 0
+      ? spreadAccents({ ...term, courses: [...term.courses, ...incoming] })
+      : term
   }
 
   years = years.map((year) => ({ ...year, terms: year.terms.map(fillTerm) }))
@@ -513,7 +544,9 @@ export function generateTermDraft(
     for (let i = 0; i < room && queue.length > 0; i += 1) {
       incoming.push(draftCourse(queue.shift()!, order++))
     }
-    return incoming.length > 0 ? { ...term, courses: [...term.courses, ...incoming] } : term
+    return spreadAccents(
+      incoming.length > 0 ? { ...term, courses: [...term.courses, ...incoming] } : term
+    )
   })
 
   return summariseDraft(years, optionId)
@@ -699,6 +732,7 @@ export function addCourse(
     name: entry.name,
     credits: CREDITS_PER_COURSE,
     placeholder: entry.placeholder,
+    accent: nextAccent(),
     ...(entry.placeholder
       ? {}
       : {
