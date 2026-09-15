@@ -19,6 +19,7 @@ import { AppShell } from "@/components/layout/app-shell"
 import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { MetadataProvider } from "@/components/stellic/course-metadata"
 import { GenerateTermPanel } from "@/components/stellic/generate-term-panel"
+import { PlaceholderPanel } from "@/components/stellic/placeholder-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
 import {
   RequirementRow,
@@ -279,6 +280,9 @@ export function PlanYourPath({
   /* Whether what the degree still wants is showing beside the plan, to be
      dragged into it. */
   const [reqsOpen, setReqsOpen] = useState(false)
+  /* The held seat opened on its own, and whether it opened on the courses that
+     could fill it. */
+  const [openSeat, setOpenSeat] = useState<{ id: string; view: "detail" | "search" } | null>(null)
   /* Whether a generated schedule is shown against what the term already held,
      or on its own. */
   const [compare, setCompare] = useState(true)
@@ -330,6 +334,8 @@ export function PlanYourPath({
       )
     : 0
   const standing = planStanding(years)
+  /* The seat whose panel is open, if it is still in the plan. */
+  const seat = openSeat ? findCourse(shown, openSeat.id) : null
   /* Terms a request is still out on. Every card that draws one of them marks
      itself, whether it is on the canvas or opened on its own. */
   const pendingTerms = reviews.filter((r) => r.status === "pending").flatMap((r) => r.terms)
@@ -567,10 +573,17 @@ export function PlanYourPath({
     setGeneratingTerm(null)
   }
 
-  /* One panel at a time: the two answer different questions and the space
-     beside the plan only holds one of them. */
+  /* One panel at a time: they answer different questions and the space beside
+     the plan only holds one of them. */
   function openRequirements() {
     setReqsOpen((open) => !open)
+    setReviewPanel(false)
+    setOpenSeat(null)
+  }
+
+  function openSeatPanel(courseId: string, view: "detail" | "search") {
+    setOpenSeat({ id: courseId, view })
+    setReqsOpen(false)
     setReviewPanel(false)
   }
 
@@ -665,6 +678,18 @@ export function PlanYourPath({
         )) ||
         /* Last in line: a generator being open is what you are doing now, and
            the reviews are what you asked for earlier. */
+        (seat && (
+          <PlaceholderPanel
+            /* Keyed on the seat and the view it opened on, so opening another
+               — or the same one from its search button — starts there rather
+               than wherever the last one was left. */
+            key={`${seat.course.id}-${openSeat?.view}`}
+            course={seat.course}
+            term={seat.term}
+            initialView={openSeat!.view}
+            onClose={() => setOpenSeat(null)}
+          />
+        )) ||
         (reqsOpen && <RequirementsPanel entries={requirements} years={shown} />) ||
         (reviewPanel && (
           <ReviewPanel
@@ -785,6 +810,8 @@ export function PlanYourPath({
                 onRemoveCourse={handleRemoveCourse}
                 onAddCourse={handleAddCourse}
                 onOpenTerm={openTermView}
+                onOpenSeat={openSeatPanel}
+                openSeatId={openSeat?.id ?? null}
                 onAddTerm={() => addYearTerm(year.label)}
                 onPickSection={pickSection}
               />

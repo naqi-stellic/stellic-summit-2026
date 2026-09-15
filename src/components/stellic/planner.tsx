@@ -68,6 +68,11 @@ type AuditRowProps = {
   streaming?: boolean
   /** Present only where the course can leave the plan; reveals the × on hover. */
   onRemove?: () => void
+  /** Opens a held seat on its own — on what it is holding a place for, or
+   *  straight on the courses that could fill it. */
+  onOpenSeat?: (view: "detail" | "search") => void
+  /** This seat's panel is the one open. */
+  selected?: boolean
 }
 
 export function AuditRow({
@@ -78,6 +83,8 @@ export function AuditRow({
   settling,
   streaming,
   onRemove,
+  onOpenSeat,
+  selected,
 }: AuditRowProps) {
   const draft = course.draft
   const style = draft ? DRAFT_STYLE[draft.mark] : null
@@ -115,6 +122,9 @@ export function AuditRow({
            that way while a draft is proposing it — the dashes are what say it
            is a seat rather than a course, whatever colour the draft gives it. */
         held && "border-dashed",
+        held && onOpenSeat && !overlay && "cursor-pointer",
+        /* The seat whose panel is open says so. */
+        selected && "border-primary-50 bg-primary-0/40",
         !locked && !draft && "cursor-grab transition-colors hover:bg-gray-5",
         /* Same reason as the draft bar: a marked card carries the transition
            all along, so losing its tint is something it can animate. */
@@ -128,7 +138,10 @@ export function AuditRow({
     >
       {!locked && <Icon name="drag-indicator" size={16} className="text-foreground" />}
 
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
+      <div
+        className="flex min-w-0 flex-1 flex-col justify-center gap-2"
+        onClick={held && onOpenSeat && !overlay ? () => onOpenSeat("detail") : undefined}
+      >
         {held ? (
           <p className="flex items-center gap-2 text-body-md font-semibold text-foreground">
             <Icon name="hourglass-bottom" size={14} className="shrink-0" />
@@ -184,6 +197,7 @@ export function AuditRow({
               size="icon"
               aria-label={`Search classes for ${course.name}`}
               onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onOpenSeat?.("search")}
             >
               <Icon name="s-search" size={16} />
             </Button>
@@ -228,11 +242,15 @@ function SortableAuditRow({
   settling,
   streaming,
   onRemove,
+  onOpenSeat,
+  selected,
 }: {
   course: PlannedCourse
   settling?: boolean
   streaming?: boolean
   onRemove: () => void
+  onOpenSeat?: (view: "detail" | "search") => void
+  selected?: boolean
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -253,6 +271,8 @@ function SortableAuditRow({
         settling={settling}
         streaming={streaming}
         onRemove={onRemove}
+        onOpenSeat={onOpenSeat}
+        selected={selected}
       />
     </div>
   )
@@ -337,6 +357,8 @@ export function SemesterCard({
   onRemoveCourse,
   onAddCourse,
   onOpen,
+  onOpenSeat,
+  openSeatId,
   onPickSection,
 }: {
   term: Term
@@ -355,6 +377,10 @@ export function SemesterCard({
   /** Opens the term on its own, with its classes and — when the schedule is
    *  out — its calendar. */
   onOpen?: () => void
+  /** Opens one of this term's held seats on its own. */
+  onOpenSeat?: (courseId: string, view: "detail" | "search") => void
+  /** The seat whose panel is open, if it is one of this term's. */
+  openSeatId?: string | null
   /** Settles one of this term's courses on a section. */
   onPickSection?: (termId: string, courseId: string) => void
 }) {
@@ -390,6 +416,10 @@ export function SemesterCard({
         settling={settling}
         streaming={streaming}
         onRemove={() => onRemoveCourse(course.id)}
+        onOpenSeat={
+          onOpenSeat ? (view) => onOpenSeat(course.id, view) : undefined
+        }
+        selected={openSeatId === course.id}
       />
     )
   })
@@ -534,6 +564,8 @@ export function YearSection({
   onRemoveCourse,
   onAddCourse,
   onOpenTerm,
+  onOpenSeat,
+  openSeatId,
   onPickSection,
 }: {
   year: Year
@@ -546,6 +578,10 @@ export function YearSection({
   addable: CatalogEntry[]
   /** Gives the year its summer, which is the only term it can be given. */
   onAddTerm?: () => void
+  /** Opens a held seat on its own. */
+  onOpenSeat?: (courseId: string, view: "detail" | "search") => void
+  /** The seat whose panel is open. */
+  openSeatId?: string | null
   /** Folded away to its heading and what it comes to. */
   collapsed?: boolean
   onToggleCollapse?: () => void
@@ -623,6 +659,8 @@ export function YearSection({
               onRemoveCourse={onRemoveCourse}
               onAddCourse={(entry) => onAddCourse(term.id, entry)}
               onOpen={onOpenTerm && (() => onOpenTerm(term.id))}
+              onOpenSeat={onOpenSeat}
+              openSeatId={openSeatId}
               onPickSection={onPickSection}
             />
           ))}

@@ -169,6 +169,24 @@ labels (`2027-2028`) rather than "Year 1", since that is what every other
 surface here calls them; and the Changes and Graduation Clearance tabs are drawn
 but empty, there being no design for either.
 
+## A seat on its own
+
+Figma: [`1017:207673`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-207673)
+(the seat) and
+[`1017:208517`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-208517)
+(the search it opens).
+
+Clicking a held seat opens it beside the plan: what it is holding a place for,
+the term holding it, the note it has not got, and the credits it stands for.
+The seat itself is outlined while its panel is open. "Find eligible courses"
+turns the panel into the course search — the courses that could fill this seat,
+a finance one for a finance seat — and "Back to …" returns. The seat's own
+search button goes straight there.
+
+The search is a list, not a search: nothing filters it, and the count beside
+its heading is the design's. Choosing a course from it is not wired either —
+a seat is filled by generating the term, or by dropping a course on it.
+
 ## Add remaining courses
 
 Figma: [`1017:189481`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-189481).
