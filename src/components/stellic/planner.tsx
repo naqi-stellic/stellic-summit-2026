@@ -125,18 +125,6 @@ export function AuditRow({
         overlay && "cursor-grabbing shadow-secondary"
       )}
     >
-      {onRemove && (
-        <button
-          type="button"
-          aria-label={`Remove ${course.name}`}
-          /* Keep the drag sensor out of it, or the press starts a drag. */
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={onRemove}
-          className="absolute top-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md text-gray-80 opacity-0 transition-opacity hover:bg-gray-40 hover:text-gray-100 focus-visible:opacity-100 group-hover:opacity-100"
-        >
-          <Icon name="close" size={12} />
-        </button>
-      )}
       {!locked && <Icon name="drag-indicator" size={16} className="text-foreground" />}
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
@@ -182,16 +170,35 @@ export function AuditRow({
         )}
       </div>
 
-      {/* A seat is filled by finding a class for it. */}
-      {held && !overlay && (
-        <Button
-          size="icon"
-          aria-label={`Search classes for ${course.name}`}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="shrink-0"
-        >
-          <Icon name="s-search" size={16} />
-        </Button>
+      {/* What can be done to this row, at the end of it: a seat is filled by
+          finding a class for it, and anything can be taken out. They sit side
+          by side and keep their place whether or not the row is under the
+          cursor, so nothing lands on top of anything else and nothing moves
+          when the cursor arrives. */}
+      {!overlay && (held || onRemove) && (
+        <span className="flex shrink-0 items-center gap-1">
+          {held && (
+            <Button
+              size="icon"
+              aria-label={`Search classes for ${course.name}`}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <Icon name="s-search" size={16} />
+            </Button>
+          )}
+          {onRemove && (
+            <Button
+              size="icon"
+              aria-label={`Remove ${course.name}`}
+              /* Keep the drag sensor out of it, or the press starts a drag. */
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={onRemove}
+              className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+            >
+              <Icon name="close" size={16} />
+            </Button>
+          )}
+        </span>
       )}
 
       {course.notes != null && (
