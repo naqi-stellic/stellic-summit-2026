@@ -137,5 +137,6 @@ because scoping itself to what is open is the one useful thing it knows.
 
 ## What is drawn and not wired
 
-The other four tabs, the scope select, the recompute button, the constraint
-search and the profile's actions. The mappings search works.
+The scope select, the recompute button, the constraint search and the
+profile's actions. The four other tabs are drawn but greyed and do not press.
+The mappings search works.

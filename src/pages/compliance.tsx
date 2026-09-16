@@ -27,7 +27,6 @@ import { COMPLIANCE_TABS, LAST_COMPUTED, RULESET, SHORTFALL } from "@/data/compl
  * the requirements. */
 
 export function Compliance() {
-  const [tab, setTab] = useState("compliance")
   const [view, setView] = useState("official")
 
   return (
@@ -46,29 +45,23 @@ export function Compliance() {
 
           <AuditControls
             tabs={COMPLIANCE_TABS}
-            active={tab}
-            onSelectTab={setTab}
+            active="compliance"
+            live={["compliance"]}
             views={AUDIT_VIEWS}
             view={view}
             onSelectView={setView}
             lastComputed={LAST_COMPUTED}
           />
 
-          {tab === "compliance" ? (
-            <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
-              <ComplianceTree ruleset={RULESET} />
-              {/* The one thing on the page worth acting on, said once, where
-                  the eye lands after the tree rather than before it. */}
-              <p className="text-body-md text-gray-80">
-                {SHORTFALL} credits short of what the third year asks for. Nothing on Progress
-                would say so — the degree is on track.
-              </p>
-            </section>
-          ) : (
-            <section className="rounded-md bg-card p-6 text-body-md text-gray-80 shadow-card">
-              Nothing is designed behind this tab yet.
-            </section>
-          )}
+          <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
+            <ComplianceTree ruleset={RULESET} />
+            {/* The one thing on the page worth acting on, said once, where
+                the eye lands after the tree rather than before it. */}
+            <p className="text-body-md text-gray-80">
+              {SHORTFALL} credits short of what the third year asks for. Nothing on Progress
+              would say so — the degree is on track.
+            </p>
+          </section>
         </div>
       </main>
     </AppShell>

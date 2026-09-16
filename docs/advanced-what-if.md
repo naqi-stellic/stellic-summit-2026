@@ -302,8 +302,9 @@ theirs and the shape is the wizard's.
 Everything on the page is the frame's, and almost none of it acts yet — there is
 one screen, so there is nowhere for anything to go:
 
-- the five tabs switch, but only Progress has a design behind it; the other four
-  say so rather than pretending;
+- only Progress leads anywhere. The other four are drawn — they are part of
+  the record, and leaving them out would misrepresent it — but they are greyed
+  and do not press, because there is nothing behind them to press onto;
 - Official / Planned switches and lights up, and both read the same tree, since
   there is no second audit to compute yet;
 - the scope select, the recompute button, the unmatched filter, Request to

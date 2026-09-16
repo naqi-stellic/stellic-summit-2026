@@ -278,6 +278,7 @@ export function TermStrip() {
 export function AuditControls({
   tabs,
   active,
+  live,
   onSelectTab,
   views,
   view,
@@ -288,7 +289,13 @@ export function AuditControls({
 }: {
   tabs: { id: string; label: string; count?: number }[]
   active: string
-  onSelectTab: (id: string) => void
+  /** The tabs that lead somewhere. The rest are drawn — they are part of the
+   *  record and leaving them out would misrepresent it — but they do not
+   *  pretend to open, because there is nothing behind them to open onto. */
+  live: string[]
+  /** Absent where only one tab leads anywhere, which is every prototype so
+   *  far: there is nothing to switch to. */
+  onSelectTab?: (id: string) => void
   views: { id: string; label: string; bar: { taken: number; inProgress: number; planned: number } }[]
   view: string
   onSelectView: (id: string) => void
@@ -303,22 +310,25 @@ export function AuditControls({
       <div className="flex flex-wrap items-end justify-center border-b border-gray-40">
         {tabs.map((tab) => {
           const on = tab.id === active
+          const open = live.includes(tab.id)
 
           return (
             <button
               key={tab.id}
               type="button"
-              onClick={() => onSelectTab(tab.id)}
+              disabled={!open}
+              onClick={() => onSelectTab?.(tab.id)}
               aria-current={on ? "page" : undefined}
               className={cn(
-                "flex h-[38px] cursor-pointer flex-col items-center justify-between",
+                "flex h-[38px] flex-col items-center justify-between",
+                open ? "cursor-pointer" : "cursor-default",
                 tab.count === undefined ? "w-[150px]" : "px-4"
               )}
             >
               <span
                 className={cn(
                   "flex flex-1 items-center gap-3.5 text-caption-lg font-semibold",
-                  on ? "text-primary-50" : "text-gray-100"
+                  on ? "text-primary-50" : open ? "text-gray-100" : "text-gray-60"
                 )}
               >
                 {tab.label}

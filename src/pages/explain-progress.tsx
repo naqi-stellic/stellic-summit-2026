@@ -38,7 +38,6 @@ import {
  * moves as the pointer travels down it. */
 
 export function ExplainProgress() {
-  const [tab, setTab] = useState("progress")
   const [view, setView] = useState("official")
   /** Which requirement the panel is explaining. Null is the panel closed. */
   const [explaining, setExplaining] = useState<AuditGroup | null>(null)
@@ -65,8 +64,8 @@ export function ExplainProgress() {
 
           <AuditControls
             tabs={AUDIT_TABS}
-            active={tab}
-            onSelectTab={setTab}
+            active="progress"
+            live={["progress"]}
             views={AUDIT_VIEWS}
             view={view}
             onSelectView={setView}
@@ -75,28 +74,22 @@ export function ExplainProgress() {
             lastComputed={LAST_COMPUTED}
           />
 
-          {tab === "progress" ? (
-            <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
-              <AuditTree
-                audit={AUDIT}
-                explain={{
-                  onExplain: setExplaining,
-                  constraints: (group) => (
-                    <ConstraintsCard group={group} onExplain={setExplaining} />
-                  ),
-                }}
-              />
-              <UnmatchedSection
-                count={unmatched.length}
-                blurb={UNMATCHED_BLURB}
-                courses={unmatched}
-              />
-            </section>
-          ) : (
-            <section className="rounded-md bg-card p-6 text-body-md text-gray-80 shadow-card">
-              Nothing is designed behind this tab yet.
-            </section>
-          )}
+          <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
+            <AuditTree
+              audit={AUDIT}
+              explain={{
+                onExplain: setExplaining,
+                constraints: (group) => (
+                  <ConstraintsCard group={group} onExplain={setExplaining} />
+                ),
+              }}
+            />
+            <UnmatchedSection
+              count={unmatched.length}
+              blurb={UNMATCHED_BLURB}
+              courses={unmatched}
+            />
+          </section>
         </div>
       </main>
     </AppShell>

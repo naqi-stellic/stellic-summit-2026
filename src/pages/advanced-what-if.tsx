@@ -36,7 +36,6 @@ import {
  * panes — there is no second thing to look at, and the audit wants the width. */
 
 export function AdvancedWhatIf() {
-  const [tab, setTab] = useState("progress")
   const [view, setView] = useState("planned")
   /* The what-if opens beside the audit rather than over it: the question is
      "what would this tree look like instead", so the tree has to stay in
@@ -93,8 +92,8 @@ export function AdvancedWhatIf() {
 
           <AuditControls
             tabs={AUDIT_TABS}
-            active={tab}
-            onSelectTab={setTab}
+            active="progress"
+            live={["progress"]}
             views={AUDIT_VIEWS}
             view={view}
             onSelectView={setView}
@@ -105,32 +104,26 @@ export function AdvancedWhatIf() {
 
           {/* Only Progress has a design; the other four tabs are named and
               nothing more, which is what the frame shows of them. */}
-          {tab === "progress" ? (
-            <section /* 40 between the tree, the unmatched list and the banner: three
-                     separate things in one card, and at 24 they read as one
-                     list that changes its mind twice. */
-                  className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
-              <AuditTree audit={primary} />
-              {/* A second program sits under the degree and above the courses
-                  nothing has claimed, which is where it would fall on the
-                  record: another thing the transcript is being read against. */}
-              {second && <AuditTree audit={second} />}
-              <UnmatchedSection
-                count={unmatched.length}
-                blurb={UNMATCHED_BLURB}
-                courses={unmatched}
-              />
-              {/* The foot of the audit, and the way into the what-if. It
-                  stands on the card's own padding, as the tree and the
-                  unmatched list do — one edge down each side, whatever is
-                  against it. */}
-              <DiscoverPrograms onOpen={() => setDiscovering(true)} />
-            </section>
-          ) : (
-            <section className="rounded-md bg-card p-6 text-body-md text-gray-80 shadow-card">
-              Nothing is designed behind this tab yet.
-            </section>
-          )}
+          <section /* 40 between the tree, the unmatched list and the banner: three
+                   separate things in one card, and at 24 they read as one
+                   list that changes its mind twice. */
+                className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
+            <AuditTree audit={primary} />
+            {/* A second program sits under the degree and above the courses
+                nothing has claimed, which is where it would fall on the
+                record: another thing the transcript is being read against. */}
+            {second && <AuditTree audit={second} />}
+            <UnmatchedSection
+              count={unmatched.length}
+              blurb={UNMATCHED_BLURB}
+              courses={unmatched}
+            />
+            {/* The foot of the audit, and the way into the what-if. It
+                stands on the card's own padding, as the tree and the
+                unmatched list do — one edge down each side, whatever is
+                against it. */}
+            <DiscoverPrograms onOpen={() => setDiscovering(true)} />
+          </section>
         </div>
       </main>
     </AppShell>
