@@ -296,6 +296,8 @@ export function CoursePanel({
   const [campus, setCampus] = useState(detail.campus)
   const [termId, setTermId] = useState(terms[0]?.id ?? "")
   const [more, setMore] = useState(false)
+  /* Whether the foot card — planning this course again elsewhere — is open. */
+  const [again, setAgain] = useState(false)
   const term = planned?.term ?? terms.find((t) => t.id === termId)
 
   return (
@@ -339,37 +341,62 @@ export function CoursePanel({
       </div>
 
       <div className="flex w-full flex-col rounded-md bg-card shadow-sm">
-        <div className="flex w-full items-center justify-between gap-4 border-b border-gray-40 p-6">
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <p className="text-caption-lg font-semibold text-gray-100">Course Details</p>
-            <p className="text-body-md text-gray-80">
-              Plan this course for a current or upcoming semester
-            </p>
-          </div>
-          <Icon name="unfold-less" size={16} className="shrink-0 text-gray-100" />
-        </div>
-
-        <div className="flex w-full flex-col gap-6 p-6">
-          {planned ? (
-            <>
-              {/* The term it is in, and what can be done to it there. */}
-              <div className="flex w-full flex-wrap items-center gap-2">
+        {planned ? (
+          /* A course already in the plan is headed by the term holding it and
+             the class it is in, on the blue the plan uses for the term a thing
+             belongs to. */
+          <div className="flex w-full items-center gap-4 rounded-t-md bg-primary-0 p-6">
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <p className="flex flex-wrap items-center gap-2">
                 <span className="text-caption-lg font-semibold text-gray-100">
                   {planned.term.name}
                 </span>
                 <Badge variant="warning">{CREDIT_GROUP_LABEL[creditGroup(planned.term)]}</Badge>
-                <span className="ml-auto flex shrink-0 items-center gap-2">
-                  <Button size="sm">
+              </p>
+              <p className="flex flex-wrap items-center gap-4 text-body-md text-gray-80">
+                <span>Topic: {planned.course.topic ?? "General"}</span>
+                {planned.course.section && (
+                  <span className="flex items-center gap-2">
+                    <Icon name="calendar-today" size={14} />
+                    {planned.course.section}
+                  </span>
+                )}
+              </p>
+            </div>
+            <span className="flex shrink-0 items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm">Actions</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuItem className="gap-2 py-1.5 text-body-md">
                     <Icon name="sticky-note-2" size={16} />
-                    Comment
-                  </Button>
-                  <Button size="sm" onClick={onRemove}>
+                    Write a note
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={onRemove} className="gap-2 py-1.5 text-body-md">
                     <Icon name="close" size={16} />
-                    Remove
-                  </Button>
-                </span>
-              </div>
+                    Remove from plan
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Icon name="unfold-less" size={16} className="text-gray-100" />
+            </span>
+          </div>
+        ) : (
+          <div className="flex w-full items-center justify-between gap-4 border-b border-gray-40 p-6">
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <p className="text-caption-lg font-semibold text-gray-100">Course Details</p>
+              <p className="text-body-md text-gray-80">
+                Plan this course for a current or upcoming semester
+              </p>
+            </div>
+            <Icon name="unfold-less" size={16} className="shrink-0 text-gray-100" />
+          </div>
+        )}
 
+        <div className="flex w-full flex-col gap-6 p-6">
+          {planned ? (
+            <>
               {/* What the plan chose about it, each changeable on its own. */}
               <div className="grid w-full grid-cols-2 gap-4 @sm:grid-cols-3">
                 <Property label="Campus" value={planned.course.campus ?? "Main"} />
@@ -555,6 +582,57 @@ export function CoursePanel({
           </div>
         </div>
       </div>
+
+      {planned && (
+        /* Already planned once, so what is left to offer is planning it again:
+           the card that heads an unplanned course goes to the foot here, folded
+           away until it is asked for. */
+        <div className="flex w-full flex-col rounded-md bg-card shadow-sm">
+          <button
+            type="button"
+            onClick={() => setAgain((was) => !was)}
+            aria-expanded={again}
+            className="flex w-full cursor-pointer items-center gap-4 p-6 text-left"
+          >
+            <span className="flex min-w-0 flex-1 flex-col gap-2">
+              <span className="text-caption-lg font-semibold text-gray-100">Course Details</span>
+              <span className="text-body-md text-gray-80">
+                Plan this course again for a current or upcoming semester
+              </span>
+            </span>
+            <Icon
+              name={again ? "unfold-less" : "unfold-more"}
+              size={16}
+              className="shrink-0 text-gray-100"
+            />
+          </button>
+
+          {again && (
+            <div className="flex w-full flex-wrap items-end gap-4 px-6 pb-6">
+              <Picker
+                label="Campus"
+                value={campus}
+                options={["Main", "Downtown"]}
+                onChange={setCampus}
+              />
+              <Picker
+                label="Term"
+                value={terms.find((t) => t.id === termId)?.name ?? "No term"}
+                options={terms.map((t) => t.name)}
+                onChange={(name) => setTermId(terms.find((t) => t.name === name)?.id ?? termId)}
+              />
+              <Button
+                variant="primary"
+                disabled={!termId}
+                onClick={() => termId && onAdd(termId)}
+                className="shrink-0"
+              >
+                Add to Plan
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </aside>
   )
 }
