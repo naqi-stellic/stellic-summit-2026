@@ -55,7 +55,10 @@ export function AdvancedWhatIf() {
           {/* Only Progress has a design; the other four tabs are named and
               nothing more, which is what the frame shows of them. */}
           {tab === "progress" ? (
-            <section className="flex flex-col gap-6 overflow-x-auto rounded-md bg-card px-6 py-6 shadow-card">
+            <section /* 40 between the tree, the unmatched list and the banner: three
+                     separate things in one card, and at 24 they read as one
+                     list that changes its mind twice. */
+                  className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
               <AuditTree audit={AUDIT} />
               <UnmatchedSection
                 count={UNMATCHED.count}

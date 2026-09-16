@@ -362,7 +362,7 @@ export function UnmatchedSection({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-start justify-between gap-4 py-2">
+      <div className="flex items-start justify-between gap-4 pb-2">
         <div className="flex min-w-0 items-start gap-2">
           {/* A count, not a warning: these courses are fine, they are simply
               spoken for by nothing. */}
