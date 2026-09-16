@@ -75,13 +75,17 @@ mark:
 
 | | Marked | Because |
 | --- | --- | --- |
-| `progress` | red when short | the requirement itself — it fails by being unfinished |
+| `progress` | an empty red ring when short | the requirement itself — it fails by being unfinished |
 | `limit` | green with a fraction | a cap — it fails by being exceeded |
 | neither | grey | descriptive. There is nothing to satisfy, so nothing is ticked |
 
 That third row is the one worth getting right. "Courses may double count
 without limit with other programs" is not an achievement; ticking it green
 would say the student had done something.
+
+The unmet mark is an **open ring with nothing in it**, not a circled
+exclamation. The requirement is not finished, which is not the same as
+something having gone wrong.
 
 The first constraint is derived rather than written, because it is a claim
 about the tree and the tree is right there — and **which** claim comes from the

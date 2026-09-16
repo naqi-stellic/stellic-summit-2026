@@ -443,6 +443,18 @@ const ICONS = {
       },
     ],
   },
+  /* An open ring, and nothing in it. What an unmet constraint carries: it has
+     not gone wrong, it is simply not done, and an exclamation mark inside it
+     would be saying something stronger than that. */
+  "circle-outline": {
+    viewBox: "0 0 16 16",
+    parts: [
+      {
+        d: "M7.99902 1.59961C11.5336 1.59961 14.3994 4.46541 14.3994 8C14.3994 11.5346 11.5336 14.4004 7.99902 14.4004C4.46446 14.4003 1.59961 11.5346 1.59961 8C1.59965 4.46545 4.46449 1.59968 7.99902 1.59961ZM7.99902 3.2002C5.34815 3.20028 3.20018 5.34911 3.20015 8C3.20015 10.6509 5.34903 12.7997 7.99902 12.7998C10.65 12.7998 12.7988 10.651 12.7988 8C12.7988 5.34906 10.65 3.2002 7.99902 3.2002Z",
+      },
+    ],
+  },
+
   /* A filled disc with an i, which is the one the toggles carry — the outlined
      `info` beside a heading is a different mark. */
   "info-filled": {

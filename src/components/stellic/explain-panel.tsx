@@ -23,11 +23,13 @@ import {
  * about — and it is the plan generator's panel, at the plan generator's width,
  * for the same reason every other panel here is. */
 
-const STATUS: Record<ConstraintStatus, { icon: "check-circle" | "error-outline"; tone: string }> = {
+const STATUS: Record<ConstraintStatus, { icon: "check-circle" | "circle-outline"; tone: string }> = {
   /* Nothing to satisfy: a rule about what may count, not a bar to clear. */
   rule: { icon: "check-circle", tone: "text-gray-60" },
   ok: { icon: "check-circle", tone: "text-success-50" },
-  unmet: { icon: "error-outline", tone: "text-alert-100" },
+  /* An empty ring. The requirement is not finished, which is not the same as
+     something having gone wrong — an exclamation mark would overstate it. */
+  unmet: { icon: "circle-outline", tone: "text-alert-100" },
 }
 
 function CodeChips({ codes, shown = 4 }: { codes: string[]; shown?: number }) {
