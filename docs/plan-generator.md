@@ -206,6 +206,26 @@ labels (`2027-2028`) rather than "Year 1", since that is what every other
 surface here calls them; and the Changes and Graduation Clearance tabs are drawn
 but empty, there being no design for either.
 
+## A course on its own
+
+Clicking a course in the remaining list opens it beside the plan, built from
+the course sidebar Ali shared: the course and its credits, then one card of
+details — campus, term and Add to Plan; the sections on offer with their times,
+instructors and seats; attributes, topics, description, required sections,
+instructors; the prerequisite tree; equivalents, what it can count for, and
+whether it repeats.
+
+`src/data/course-detail.ts` builds all of that from the catalogue entry, the
+way terms get their sections: seeded off the course code, so the same course
+reads the same every time it is opened. The plan has no data about a course
+nobody has taken, and inventing it per render would make the panel lie
+differently each time.
+
+Add to Plan does what it says — the course lands in the term the picker names
+and leaves the remaining list. The section rows' pluses and the bookmark are
+drawn but not wired, and a nested group inside an option cannot be folded away
+on its own, only the option can.
+
 ## A seat on its own
 
 Figma: [`1017:207673`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-207673)

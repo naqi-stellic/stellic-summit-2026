@@ -20,6 +20,7 @@ import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { MetadataProvider } from "@/components/stellic/course-metadata"
 import { GenerateTermPanel } from "@/components/stellic/generate-term-panel"
 import { IncomingCredits, INCOMING_LABEL } from "@/components/stellic/incoming-credits"
+import { CoursePanel } from "@/components/stellic/course-panel"
 import { PlaceholderPanel } from "@/components/stellic/placeholder-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
 import {
@@ -293,6 +294,9 @@ export function PlanYourPath({
   /* Whether what the degree still wants is showing beside the plan, to be
      dragged into it. */
   const [reqsOpen, setReqsOpen] = useState(false)
+  /* A course from the remaining list, opened on its own before it is anywhere
+     in the plan. */
+  const [openCourse, setOpenCourse] = useState<number | null>(null)
   /* The held seat opened on its own, and whether it opened on the courses that
      could fill it. */
   const [openSeat, setOpenSeat] = useState<{ id: string; view: "detail" | "search" } | null>(null)
@@ -347,6 +351,10 @@ export function PlanYourPath({
       )
     : 0
   const standing = planStanding(years)
+  /* The course from the remaining list that is open, if it is still on it. */
+  const course = requirements.find((r) => r.index === openCourse)
+  /* Where a course opened like that could be put: every term that takes one. */
+  const plannableTerms = shown.flatMap((year) => year.terms.filter((term) => !term.locked))
   /* The seat whose panel is open, if it is still in the plan. */
   const seat = openSeat ? findCourse(shown, openSeat.id) : null
   /* Terms a request is still out on. Every card that draws one of them marks
@@ -592,6 +600,7 @@ export function PlanYourPath({
     setReqsOpen((open) => !open)
     setReviewPanel(false)
     setOpenSeat(null)
+    setOpenCourse(null)
   }
 
   function openSeatPanel(courseId: string, view: "detail" | "search") {
@@ -708,7 +717,29 @@ export function PlanYourPath({
             onClose={() => setOpenSeat(null)}
           />
         )) ||
-        (reqsOpen && <RequirementsPanel entries={requirements} years={shown} />) ||
+        (course && (
+          <CoursePanel
+            key={course.entry.code}
+            entry={course.entry}
+            terms={plannableTerms}
+            onAdd={(termId) => {
+              handleAddCourse(termId, course.entry, course.index)
+              setOpenCourse(null)
+            }}
+            onBack={() => setOpenCourse(null)}
+            onClose={() => {
+              setOpenCourse(null)
+              setReqsOpen(false)
+            }}
+          />
+        )) ||
+        (reqsOpen && (
+          <RequirementsPanel
+            entries={requirements}
+            years={shown}
+            onOpenCourse={setOpenCourse}
+          />
+        )) ||
         (reviewPanel && (
           <ReviewPanel
             reviews={reviews}

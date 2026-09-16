@@ -25,11 +25,15 @@ export function RequirementRow({
   entry,
   id,
   overlay,
+  onOpen,
 }: {
   entry: CatalogEntry
   id?: string
   /** Drawn under the cursor rather than in the list. */
   overlay?: boolean
+  /** Opens the course on its own. A press that does not travel far enough to
+   *  start a drag is a click, which is what this answers. */
+  onOpen?: () => void
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: id ?? `${REQUIREMENT_ID}overlay`,
@@ -41,8 +45,10 @@ export function RequirementRow({
       ref={overlay ? undefined : setNodeRef}
       {...(overlay ? {} : listeners)}
       {...(overlay ? {} : attributes)}
+      onClick={overlay ? undefined : onOpen}
       className={cn(
         "flex w-full cursor-grab items-center gap-2 rounded-md border border-gray-40 bg-card p-[11px]",
+        !overlay && onOpen && "transition-colors hover:bg-gray-0",
         overlay && "cursor-grabbing shadow-secondary",
         isDragging && "opacity-40"
       )}
@@ -99,12 +105,15 @@ function Meter({ total, shares }: { total: number; shares: Share[] }) {
 export function RequirementsPanel({
   entries,
   years,
+  onOpenCourse,
 }: {
   /** What is still to place, in the order the degree asks for it, each with
    *  its place in that list. */
   entries: { entry: CatalogEntry; index: number }[]
   /** The plan as it stands, for the shares at the top. */
   years: Year[]
+  /** Opens one of them on its own, by its place in the outstanding list. */
+  onOpenCourse?: (index: number) => void
 }) {
   const placed = years.reduce(
     (sum, year) => sum + year.terms.reduce((n, term) => n + term.courses.length, 0),
@@ -222,6 +231,7 @@ export function RequirementsPanel({
               key={`${entry.code}-${index}`}
               id={`${REQUIREMENT_ID}${index}`}
               entry={entry}
+              onOpen={onOpenCourse && (() => onOpenCourse(index))}
             />
           ))}
         </div>

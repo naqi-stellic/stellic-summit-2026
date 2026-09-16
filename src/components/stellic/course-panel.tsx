@@ -1,0 +1,477 @@
+import { cn } from "cn"
+import { useState } from "react"
+
+import { Icon } from "@/components/icon"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import type { CatalogEntry } from "@/data/catalog"
+import {
+  courseDetail,
+  type PrereqNode,
+  type PrereqOption,
+  type PrereqState,
+} from "@/data/course-detail"
+import type { Term } from "@/data/plan"
+
+/* A course opened on its own, before it is anywhere in the plan: what it is,
+ * which classes are on offer, and everything the audit knows about where it
+ * would count. Built from the course sidebar, which is where the shape of it
+ * comes from — heading, then one card of details, with the prerequisite tree
+ * inside it. */
+
+/* ------------------------------------------------------------- prereq marks */
+
+/** The square beside a prerequisite, in the audit's own colours: filled where
+ *  it is done, outlined where it is not, and quiet where it is a group rather
+ *  than a course. */
+function Mark({ state }: { state?: PrereqState }) {
+  const style = {
+    earned: "border-success-100 bg-success-5 text-success-100",
+    progress: "border-success-100 bg-success-5 text-success-100",
+    planned: "border-warning-50 bg-warning-5 text-warning-50",
+    remaining: "border-alert-50 bg-alert-5 text-alert-50",
+    blocked: "border-alert-50 bg-alert-5 text-alert-50",
+  }[state ?? "remaining"]
+
+  const glyph =
+    state === "earned" ? "check" : state === "progress" ? "watch-later" : state === "planned" ? "check" : null
+
+  return (
+    <span
+      className={cn(
+        "flex size-[18px] shrink-0 items-center justify-center rounded-[3px] border",
+        style
+      )}
+    >
+      {glyph && <Icon name={glyph} size={12} />}
+    </span>
+  )
+}
+
+/** The lines running down the left of the tree: a stem where a branch carries
+ *  on past this row, and an elbow where it stops here. */
+function Trail({ prefix, connector }: { prefix: boolean[]; connector: "tee" | "elbow" }) {
+  return (
+    <span aria-hidden="true" className="flex shrink-0">
+      {prefix.map((carry, i) => (
+        <span key={i} className="relative w-[18px] shrink-0">
+          {carry && <span className="absolute top-0 bottom-0 left-2 w-px bg-gray-40" />}
+        </span>
+      ))}
+      <span className="relative w-[18px] shrink-0">
+        <span
+          className={cn(
+            "absolute left-2 w-px bg-gray-40",
+            connector === "tee" ? "top-0 bottom-0" : "top-0 h-[15px]"
+          )}
+        />
+        <span className="absolute top-[15px] left-2 h-px w-[10px] bg-gray-40" />
+      </span>
+    </span>
+  )
+}
+
+type Row = { node: PrereqNode; prefix: boolean[]; last: boolean }
+
+/** The tree, flattened to rows that each know which lines to draw. */
+function flatten(node: PrereqNode, prefix: boolean[], last: boolean, out: Row[]) {
+  out.push({ node, prefix, last })
+  const kids = node.open === false ? [] : (node.children ?? [])
+  kids.forEach((kid, i) => flatten(kid, [...prefix, !last], i === kids.length - 1, out))
+}
+
+function PrereqRow({ row }: { row: Row }) {
+  const { node } = row
+  const group = node.children != null
+
+  return (
+    <div className="flex items-stretch">
+      <Trail prefix={row.prefix} connector={row.last ? "elbow" : "tee"} />
+      <div className="flex min-h-[30px] min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-[5px]">
+        {!group && <Mark state={node.state} />}
+        {node.code ? (
+          <>
+            <span className="shrink-0 text-body-md text-gray-100">{node.code}</span>
+            {node.note && <span className="text-label-md text-gray-80">{node.note}</span>}
+          </>
+        ) : (
+          <span className={cn("min-w-0 text-body-md text-gray-100", group && "pl-[26px]")}>
+            {node.label}
+          </span>
+        )}
+        {node.meta && (
+          <span
+            className={cn(
+              "ml-auto shrink-0 pl-2.5 text-label-md whitespace-nowrap",
+              node.tone === "good"
+                ? "text-success-100"
+                : node.tone === "bad"
+                  ? "text-alert-100"
+                  : "text-gray-80"
+            )}
+          >
+            {node.meta}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Option({ option }: { option: PrereqOption }) {
+  const [open, setOpen] = useState(option.open !== false)
+  const rows: Row[] = []
+  option.children.forEach((child, i) =>
+    flatten(child, [], i === option.children.length - 1, rows)
+  )
+
+  return (
+    <div className="flex w-full flex-col py-1">
+      <button
+        type="button"
+        onClick={() => setOpen((was) => !was)}
+        aria-expanded={open}
+        disabled={option.children.length === 0}
+        className={cn(
+          "flex min-h-[30px] w-full cursor-pointer items-center gap-2 rounded-md px-1.5 py-[5px]",
+          option.children.length > 0 && "hover:bg-gray-5"
+        )}
+      >
+        <Mark state={option.state} />
+        <span className="text-overline font-medium tracking-[0.5px] text-gray-100 uppercase">
+          {option.name}
+        </span>
+        {option.children.length > 0 && (
+          <Icon
+            name={open ? "expand-more" : "chevron-right"}
+            size={14}
+            className="shrink-0 text-gray-80"
+          />
+        )}
+        <span
+          className={cn(
+            "ml-auto shrink-0 pl-2.5 text-label-md whitespace-nowrap",
+            option.tone === "good"
+              ? "text-success-100"
+              : option.tone === "bad"
+                ? "text-alert-100"
+                : "text-gray-80"
+          )}
+        >
+          {option.meta}
+        </span>
+      </button>
+
+      {!open && option.summary && (
+        <p className="pb-1 pl-8 text-label-md text-gray-80">{option.summary}</p>
+      )}
+
+      {open && (
+        <div className="flex flex-col pt-0.5">
+          {rows.map((row, i) => (
+            <PrereqRow key={i} row={row} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ panel */
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <h3 className="text-body-md font-semibold text-foreground">{title}</h3>
+      {children}
+    </div>
+  )
+}
+
+function Chips({ items }: { items: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <Badge key={item} variant="outline" className="font-semibold">
+          {item}
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
+function Picker({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: string
+  options: string[]
+  onChange: (next: string) => void
+}) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <span className="text-body-md font-semibold text-foreground">{label}</span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="flex h-9 w-full cursor-pointer items-center gap-2 rounded-md border border-input bg-card px-[11px] text-body-md text-foreground shadow-xs"
+          >
+            <span className="min-w-0 flex-1 truncate text-left">{value}</span>
+            <Icon name="expand-more" size={16} className="shrink-0 text-gray-60" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+          {options.map((option) => (
+            <DropdownMenuItem
+              key={option}
+              onSelect={() => onChange(option)}
+              className="py-1.5 text-body-md"
+            >
+              {option}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}
+
+export function CoursePanel({
+  entry,
+  terms,
+  onAdd,
+  onBack,
+  onClose,
+}: {
+  entry: CatalogEntry
+  /** Where it could be planned: the terms that would take it. */
+  terms: Term[]
+  onAdd: (termId: string) => void
+  onBack: () => void
+  onClose: () => void
+}) {
+  const detail = courseDetail(entry)
+  const [campus, setCampus] = useState(detail.campus)
+  const [termId, setTermId] = useState(terms[0]?.id ?? "")
+  const [more, setMore] = useState(false)
+  const term = terms.find((t) => t.id === termId)
+
+  return (
+    <aside className="flex h-full w-full flex-col gap-4 overflow-x-clip overflow-y-auto bg-background p-6 pb-28">
+      <div className="flex w-full shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-body-md text-gray-80"
+        >
+          <Icon name="chevron-left" size={14} className="shrink-0" />
+          <span className="min-w-0 truncate text-left">Back to remaining courses</span>
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close course"
+          className="shrink-0 cursor-pointer rounded-md text-gray-100"
+        >
+          <Icon name="close" size={24} />
+        </button>
+      </div>
+
+      {/* What it is. */}
+      <div className="flex w-full items-center gap-6 rounded-md bg-card p-6 shadow-sm">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <h2 className="text-h400 font-semibold text-gray-100">{entry.name}</h2>
+          <div className="flex flex-wrap items-center gap-4 text-body-md text-gray-80">
+            <span>{entry.code}</span>
+            <span className="flex items-center gap-2">
+              <Icon name="watch-later" size={14} />
+              {detail.credits} Credits
+            </span>
+          </div>
+        </div>
+        <Button size="icon" aria-label="Save course" className="shrink-0">
+          <Icon name="outlined-flag" size={16} />
+        </Button>
+      </div>
+
+      <div className="flex w-full flex-col rounded-md bg-card shadow-sm">
+        <div className="flex w-full items-center justify-between gap-4 border-b border-gray-40 p-6">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <p className="text-caption-lg font-semibold text-gray-100">Course Details</p>
+            <p className="text-body-md text-gray-80">
+              Plan this course for a current or upcoming semester
+            </p>
+          </div>
+          <Icon name="unfold-less" size={16} className="shrink-0 text-gray-100" />
+        </div>
+
+        <div className="flex w-full flex-col gap-6 p-6">
+          {/* Where and when it would be taken, and the way to put it there. */}
+          <div className="flex w-full flex-wrap items-end gap-4">
+            <Picker label="Campus" value={campus} options={["Main", "Downtown"]} onChange={setCampus} />
+            <Picker
+              label="Term"
+              value={term?.name ?? "No term"}
+              options={terms.map((t) => t.name)}
+              onChange={(name) => setTermId(terms.find((t) => t.name === name)?.id ?? termId)}
+            />
+            <Button
+              variant="primary"
+              disabled={!term}
+              onClick={() => term && onAdd(term.id)}
+              className="shrink-0"
+            >
+              Add to Plan
+            </Button>
+          </div>
+
+          <Section title={`Sections (${detail.sections.length})`}>
+            <div className="flex w-full flex-col gap-2">
+              {detail.sections.map((section) => (
+                <div
+                  key={section.code}
+                  className="flex w-full items-stretch rounded-md border border-gray-40 bg-card"
+                >
+                  <button
+                    type="button"
+                    aria-label={`Add ${section.code} to plan`}
+                    className="flex cursor-pointer items-center border-r border-gray-40 px-3 text-gray-100 hover:bg-gray-5"
+                  >
+                    <Icon name="add" size={16} />
+                  </button>
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 p-3">
+                    <span className="w-[50px] shrink-0 text-body-md font-semibold text-gray-100">
+                      {section.code}
+                    </span>
+                    <span className="min-w-0 flex-1 text-body-md text-gray-100">
+                      {section.when.map((line) => (
+                        <span key={line} className="block">
+                          {line}
+                        </span>
+                      ))}
+                    </span>
+                    <span className="shrink-0 text-body-md text-gray-80">{section.who}</span>
+                    <span className="shrink-0 text-body-md text-success-100">{section.seats}</span>
+                  </div>
+                </div>
+              ))}
+
+              <p className="flex w-full items-center gap-3 rounded-md border border-gray-40 bg-card p-3 text-body-md text-gray-80">
+                <Icon name="unfold-more" size={16} className="shrink-0 text-gray-100" />
+                Showing sections with seat availability, see {detail.hidden} more available section
+                {detail.hidden === 1 ? "" : "s"}
+              </p>
+            </div>
+          </Section>
+
+          <div className="flex w-full flex-col gap-8">
+            <Section title={`Attributes (${detail.attributes.length})`}>
+              <Chips items={detail.attributes} />
+            </Section>
+
+            <Section title={`Topics (${detail.topics.length})`}>
+              <Chips items={detail.topics} />
+            </Section>
+
+            <Section title="Description">
+              <p className="text-body-md text-gray-80">
+                {more ? detail.description : `${detail.description.slice(0, 180)}…`}
+              </p>
+              <button
+                type="button"
+                onClick={() => setMore((was) => !was)}
+                className="w-fit cursor-pointer text-body-md text-gray-100 underline [text-underline-position:from-font]"
+              >
+                {more ? "Show less" : "Show more"}
+              </button>
+            </Section>
+
+            <Section title="Required Sections">
+              <ul className="list-disc pl-5 text-body-md text-gray-100">
+                {detail.requiredSections.map((row) => (
+                  <li key={row.kind}>
+                    {row.kind}: {row.available} available
+                  </li>
+                ))}
+              </ul>
+            </Section>
+
+            <Section title={`Instructors (${detail.instructors.length})`}>
+              <div className="flex w-full flex-col gap-4">
+                {detail.instructors.map((person) => (
+                  <div key={person.name} className="flex items-start gap-4">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-caption-lg text-white">
+                      {person.name
+                        .replace(/^(Dr|Prof)\. /, "")
+                        .split(/[ .]/)
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((part) => part[0])
+                        .join("")}
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="text-body-md font-semibold text-gray-100">{person.name}</span>
+                      <span className="text-body-md text-gray-80">
+                        {person.semesters} semesters
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            {/* What has to be true before it can be taken, as a tree: the
+                options, and inside each the courses and conditions it asks
+                for, with what the audit makes of them. */}
+            <div className="flex w-full flex-col gap-3">
+              <div className="flex w-full flex-col gap-0.5">
+                <div className="flex w-full items-center justify-between gap-3">
+                  <h3 className="text-body-md font-semibold text-foreground">Prerequisites</h3>
+                  <span className="shrink-0 text-label-md text-gray-80">
+                    Evaluated for {term?.name ?? "this plan"}
+                  </span>
+                </div>
+                <p className="text-body-md text-gray-100">{detail.prerequisites.directive}</p>
+              </div>
+              <div className="flex w-full flex-col">
+                {detail.prerequisites.options.map((option) => (
+                  <Option key={option.name} option={option} />
+                ))}
+              </div>
+            </div>
+
+            <Section title="Course Equivalents">
+              <Chips items={detail.equivalents} />
+            </Section>
+
+            <Section title="Can count for">
+              <ul className="list-disc pl-5 text-body-md text-gray-100">
+                {detail.countsFor.map((row) => (
+                  <li key={row.name}>
+                    {row.name}
+                    <br />
+                    <span className="text-gray-80">{row.under}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+
+            <Section title="Repeatable">
+              <p className="text-body-md text-gray-80">{detail.repeatable}</p>
+            </Section>
+          </div>
+        </div>
+      </div>
+    </aside>
+  )
+}
