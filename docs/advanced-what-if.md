@@ -164,18 +164,55 @@ one has used the other, and a second kind of side panel would be a second thing
 to learn for no reason — same header, same step counter, same progress bars,
 same pair of full-width buttons at the foot. What differs is the question.
 
-Step 1 asks what the student is here to do: add a major, change one, or just
-look. The answer is what decides what step 2 asks, which is why it is asked
-first, and Continue stays disabled until it has one.
+Two questions, a review, a moment's work, and what the transcript is worth
+elsewhere. Only the questions are numbered, which is the rule the plan wizard
+follows too.
 
-The frame is a sketch rather than a drawn screen — it counts four steps where
-there are two, and has nothing behind the second — so the content is the
-sketch's and the shape is the wizard's. Step 2 says there is no design behind
-it yet rather than inventing one, and keeps the way back.
+**Step 1** asks what the student is here to do: add a major, change one, or just
+look. Continue stays disabled until it has an answer. The options stack their
+sentence under their label rather than beside it, which is why they are not
+`RadioCard`: that card puts the two on one row, which works only while the line
+is four or five words.
 
-The options stack their sentence under their label rather than beside it, which
-is why they are not `RadioCard`: that card puts the two on one row, which works
-only while the line is four or five words.
+**Step 2** narrows the catalogue. Three buttons — Offered By, Type, Level — each
+opening onto the fields it asks, and everything chosen collected in one row
+underneath whichever button it came from, with a count of what is left. A
+button holding something says so with the tertiary `Button`'s `aria-pressed`,
+which is already the design's active state, and carries a cross that clears its
+whole group. The filters may ask for everything, so Continue is never blocked
+here.
+
+**The summary** reads the answers back — the intent, then one row per filter
+that was actually set, each with the way back to the step that set it. A filter
+nobody touched is not an answer, so it is not a row.
+
+**The check** is three seconds of spinner and no copy. Nothing is computed —
+the standings are already known — but a result that arrives the instant you ask
+for it does not read as having been checked against anything.
+
+**The results** are one card per program, sorted by what is left to earn,
+because that is the thing anyone actually weighs. Each card is the audit's own
+reading of the program: the same four shares in the same colours, counted the
+same way, so a student who can read the tree can read this without being taught
+anything new. The chosen card carries Add Program and Program Details; neither
+is wired, there being nothing behind them yet.
+
+`src/data/programs.ts` holds the catalogue and the matching. A program is the
+same thing an audit is — a number of requirements and how many of them the
+student already meets — so "N credits to go" is the remainder times three
+rather than a figure written down beside it, and the filter options are read
+off the programs themselves: a filter that offers something nothing is would
+return nothing.
+
+The programs are deliberately close to home. This student is on a Business
+Administration B.S. with a Finance concentration, so what is worth discovering
+is what their transcript already half-answers, which is why a Data Analytics
+minor comes out on top — and why the plan prototypes already carry a
+"What-if: Minor in Data Analytics" in `src/data/review.ts`.
+
+The frames are sketches rather than drawn screens: they count four steps where
+there are two, and their sample data is another institution's. The content is
+theirs and the shape is the wizard's.
 
 ## What is drawn and not wired
 
