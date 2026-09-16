@@ -97,7 +97,38 @@ function NavRing({ item }: { item: NavItem }) {
   )
 }
 
-export function Sidebar({ section = "plan" }: { section?: NavSection }) {
+export function Sidebar({
+  section = "plan",
+  open = true,
+  onToggle,
+}: {
+  section?: NavSection
+  open?: boolean
+  onToggle?: () => void
+}) {
+  /* Collapsed, the nav is only its own masthead: a 60px square of parchment
+     holding the way back. The column below it goes entirely rather than
+     becoming a rail of glyphs — a rail would have to abbreviate ten labels
+     into ten icons, and the point of collapsing is to stop reading the nav,
+     not to read a harder version of it. */
+  if (!open) {
+    return (
+      <aside className="sticky top-0 flex h-screen w-[60px] shrink-0 flex-col bg-background">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={false}
+          aria-label="Expand navigation"
+          className="flex h-18 w-full shrink-0 cursor-pointer items-center justify-center border-r border-b border-gray-40 bg-parchment text-gray-100"
+        >
+          {/* The same glyph the expanded masthead carries, turned about: its
+              chevron points out of the nav rather than into it. */}
+          <Icon name="s-menu-collapse" size={20} className="h-5 w-8 -scale-x-100" />
+        </button>
+      </aside>
+    )
+  }
+
   return (
     <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-4 bg-gray-100 text-white">
       <div className="flex h-18 shrink-0 items-start border-b border-gray-40 bg-parchment p-5">
@@ -107,7 +138,15 @@ export function Sidebar({ section = "plan" }: { section?: NavSection }) {
             alt="Stellic"
             className="h-8 w-[139.156px] shrink-0"
           />
-          <Icon name="s-menu-collapse" size={20} className="h-5 w-7 text-gray-100" />
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-expanded={true}
+            aria-label="Collapse navigation"
+            className="shrink-0 cursor-pointer text-gray-100"
+          >
+            <Icon name="s-menu-collapse" size={20} className="h-5 w-7" />
+          </button>
         </div>
       </div>
 

@@ -136,7 +136,14 @@ that list.**
 ## App shell
 
 `AppShell` owns the viewport: `h-screen overflow-hidden`, so the sidebar and top
-bar stay put and each content column scrolls on its own. Pass a `panel` and the
+bar stay put and each content column scrolls on its own.
+
+The nav collapses from its own masthead, in every prototype at once. Collapsed
+it is a 60px square of parchment holding the way back and nothing else — the
+column goes rather than becoming a rail of glyphs, since a rail would have to
+abbreviate ten labels into ten icons and the point of collapsing is to stop
+reading the nav, not to read a harder version of it. The shell holds the state,
+because the shell is what has to give the width back. Pass a `panel` and the
 content area becomes a resizable two-column split (shadcn `resizable`). The
 panel group stays mounted whether or not a panel is showing — swapping the
 wrapper would remount the page and throw away its scroll and interaction state.

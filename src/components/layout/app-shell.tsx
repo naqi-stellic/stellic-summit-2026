@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
 import { useMediaQuery } from "@/lib/use-media-query"
@@ -50,6 +50,9 @@ export function AppShell({
   /* Below the tablet breakpoint there is no room for two columns side by side,
    * so the split turns on its side and the panel sits under the planner. */
   const wide = useMediaQuery("(min-width: 768px)")
+  /* Whether the nav is showing. Held here rather than in the sidebar because
+     the shell is what has to give the width back. */
+  const [nav, setNav] = useState(true)
 
   return (
     <>
@@ -57,7 +60,7 @@ export function AppShell({
         {/* The nav is 240px of a phone's 390 — it goes away, and the planner
             gets the width. */}
         <div className="max-md:hidden">
-          <Sidebar section={section} />
+          <Sidebar section={section} open={nav} onToggle={() => setNav(!nav)} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar title={title ?? SECTION_TITLE[section]} />
