@@ -24,8 +24,9 @@ is what the rule says and not a measurement of anyone.
 
 **explain** opens the panel beside the tree, which is that same wording
 measured against this student. It sits on the row, and again in the card's
-header next to its search — from the card you should not have to go back to the
-row to ask.
+header — from the card you should not have to go back to the row to ask. In
+both places it comes before the search, because it is the thing anyone is
+there for.
 
 `explain` and a search sit on every requirement row, and hold their space until
 the row is pointed at (`group-hover`, `group-focus-within`) so nothing moves as

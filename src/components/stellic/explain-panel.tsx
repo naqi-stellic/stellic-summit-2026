@@ -224,9 +224,6 @@ export function ConstraintsCard({
             against the student. Offering it from the card means you do not
             have to go back to the row to ask. */}
         <div className="flex shrink-0 items-center gap-2">
-          <Button size="icon" aria-label="Search constraints" className="size-5">
-            <Icon name="s-search" size={14} />
-          </Button>
           {onExplain && (
             <button
               type="button"
@@ -236,6 +233,9 @@ export function ConstraintsCard({
               explain
             </button>
           )}
+          <Button size="icon" aria-label="Search constraints" className="size-5">
+            <Icon name="s-search" size={14} />
+          </Button>
         </div>
       </div>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-body-md text-gray-80">

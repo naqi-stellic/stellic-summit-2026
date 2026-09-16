@@ -236,15 +236,15 @@ function RowTools({
 
   return (
     <>
+      <button type="button" onClick={() => onExplain(group)} className={cn(shown, "px-[7px] py-px")}>
+        explain
+      </button>
       <button
         type="button"
         aria-label={`Search within ${group.name}`}
         className={cn(shown, "flex size-5 items-center justify-center")}
       >
         <Icon name="s-search" size={12} />
-      </button>
-      <button type="button" onClick={() => onExplain(group)} className={cn(shown, "px-[7px] py-px")}>
-        explain
       </button>
     </>
   )
