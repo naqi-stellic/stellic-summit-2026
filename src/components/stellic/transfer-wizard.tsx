@@ -57,9 +57,12 @@ export function SectionLabel({ className, ...props }: ComponentProps<"p">) {
 /* ============================================================ ChoiceCard */
 
 /** The two-up tile the flow asks every either/or question with: credit type,
- *  then upload-or-type. Drawn at 80% in the file — the design's resting state
- *  for a tile nobody has touched — so hover takes it to full rather than
- *  adding a colour the design does not have.
+ *  then upload-or-type.
+ *
+ *  The file draws these at 80%, and that is where the file and the browser
+ *  part company: at 80% the 13px label is greyed rather than quiet, and a tile
+ *  you are being asked to choose between should not read as the disabled one.
+ *  Full strength, and hover moves the edge instead.
  *
  *  `disabled` is for a branch this prototype does not carry. It stays drawn,
  *  because leaving it out would misreport the design. */
@@ -80,10 +83,10 @@ export function ChoiceCard({
       type="button"
       disabled={disabled}
       className={cn(
-        "flex min-w-0 flex-1 flex-col items-start gap-1 rounded-md border border-gray-40 p-[15px] text-left opacity-80 transition-all",
+        "flex min-w-0 flex-1 flex-col items-start gap-1 rounded-md border border-gray-40 p-[15px] text-left transition-all",
         disabled
-          ? "cursor-not-allowed"
-          : "hover:border-primary-50 hover:bg-gray-0 hover:opacity-100",
+          ? "cursor-not-allowed opacity-60"
+          : "hover:border-primary-50 hover:bg-gray-0",
         className
       )}
       {...props}

@@ -20,30 +20,22 @@ import { INTERESTS, PROFILE_QUESTIONS } from "@/data/transfer"
 
 export type Answers = Record<string, string | undefined>
 
-/** The design draws an unanswered group at 80%. Answering one brings it up,
- *  so the card quietly tracks how far down it you are. */
+/** The file draws an unanswered group at 80%. Greying a question you have not
+ *  answered yet is backwards — it is the one you still have to read — so every
+ *  group is at full strength and the chip says which one is answered. */
 function QuestionGroup({
   label,
-  answered,
   gap = "gap-2.5",
   className,
   children,
 }: {
   label: string
-  answered: boolean
   gap?: string
   className?: string
   children: ReactNode
 }) {
   return (
-    <div
-      className={cn(
-        "flex w-full flex-col transition-opacity",
-        gap,
-        answered ? "opacity-100" : "opacity-80",
-        className
-      )}
-    >
+    <div className={cn("flex w-full flex-col", gap, className)}>
       <SectionLabel>{label}</SectionLabel>
       {children}
     </div>
@@ -83,7 +75,6 @@ export function TransferQuestions({
           <QuestionGroup
             key={question.id}
             label={question.label}
-            answered={Boolean(answers[question.id])}
           >
             <div className="flex flex-wrap items-start gap-2">
               {question.options.map((option) => (
@@ -102,7 +93,6 @@ export function TransferQuestions({
 
         <QuestionGroup
           label="What areas interest you?"
-          answered={interests.length > 0}
           gap="gap-2"
           className="pb-6"
         >

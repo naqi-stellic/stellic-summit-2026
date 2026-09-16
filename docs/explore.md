@@ -74,10 +74,16 @@ because it is the only thing on the page that is not about this person. The
 rail holds what they gave us, and the one thing we want them to do with it.
 
 The shell owns the viewport the way `AppShell` does, so the bar never leaves
-and, once there is room for two columns, neither does the rail: it is short
-enough never to earn a scrollbar of its own, and `Start application` should not
-have to be scrolled back to. Only the answer beside it moves. Stacked, the page
-scrolls as a page.
+and, once there is room for two columns, neither does the rail — it sticks at
+the padding it starts on, so it does not travel at all and `Start application`
+never has to be scrolled back to. Only the answer beside it moves.
+
+It sticks rather than sitting in a scroll box of its own, and there is one
+scroller for the page rather than one per column, because a scrollbar belonging
+to the middle column runs down the middle of the window and sits on top of the
+cards. The vertical padding belongs inside that scroller too: on the row around
+it, it becomes a dead margin that clips the cards short of the bar above and
+the window below.
 
 **The verdict is said twice** — once as a sentence, once as a three-segment
 bar. The bar is not decoration: it is the only place the three totals are in
@@ -115,9 +121,12 @@ Small, deliberate, and each one for a reason:
 - **The institution search has a dropdown.** The file cuts from an empty field
   to a filled one. A field you cannot pick from is not a search, so there is a
   list — the plainest one that does the job.
-- **The tiles have a hover state.** They are drawn at 80% and nothing else is
-  drawn, so hover takes them to full rather than introducing a colour the
-  design does not have.
+- **Nothing is drawn at 80%.** The file sets every tile, program card,
+  Discover card and unanswered question group to 80% opacity. That is a resting
+  state on a canvas and a greyed-out control in a browser: at 80% a 13px label
+  reads as disabled, and the question you have not answered yet is the one you
+  most need to read. Everything is at full strength, hover moves the edge
+  instead, and 60% is kept for the one tile that really is inert.
 - **The courses are business rather than health sciences.** The credit totals
   are the file's own — 14 confirmed, 8 pending, 3 with no credit out of 25 —
   so the headline sentence reads exactly as designed, but the transcript

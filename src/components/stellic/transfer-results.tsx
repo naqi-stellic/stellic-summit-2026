@@ -173,7 +173,7 @@ export function ProgramsCard() {
           {PROGRAMS.map((program) => (
             <div
               key={program.name}
-              className="flex flex-col gap-4 rounded-md border border-gray-40 p-[15px] opacity-80 transition-all hover:border-primary-50 hover:opacity-100"
+              className="flex flex-col gap-4 rounded-md border border-gray-40 p-[15px] transition-all hover:border-primary-50"
             >
               <p className="text-body-md font-semibold text-gray-100">{program.name}</p>
               {/* The badges are the recommendation's reasoning, said in the
@@ -204,7 +204,7 @@ export function DiscoverCard() {
             <a
               key={item.title}
               href="#"
-              className="flex flex-col overflow-hidden rounded-md border border-gray-40 opacity-80 transition-all hover:border-primary-50 hover:opacity-100"
+              className="flex flex-col overflow-hidden rounded-md border border-gray-40 transition-all hover:border-primary-50"
             >
               <img
                 src={item.image}
@@ -277,7 +277,7 @@ export function VisitorRail({
             </button>
           </div>
           {transcripts.map((transcript) => (
-            <div key={transcript.id} className="flex items-center gap-2 opacity-80">
+            <div key={transcript.id} className="flex items-center gap-2">
               <Icon
                 name={transcript.kind === "college" ? "school" : "fact-check"}
                 size={16}
