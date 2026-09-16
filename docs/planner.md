@@ -9,9 +9,13 @@ already been made.
 ## What differs
 
 One thing, passed to `PlanYourPath`: `generators={false}`, which takes Generate
-plan off the plan header, Generate Term and Generate Schedule off a term's, and
-the assistant's "Generate with Assistant" pill off the panel. The assistant's
-own button stays — it is the shell's, not the generator's.
+plan off the plan header, Generate Term off a term's, and the assistant's
+"Generate with Assistant" pill off the panel. The assistant's own button stays
+— it is the shell's, not the generator's.
+
+Generate Schedule stays, because the scheduler is already a product: it appears
+on a term reading its published week and nowhere else — not on the canvas, not
+on a term without a schedule — and it opens nothing. Scenery, deliberately.
 
 Everything else it has, including the requirements panel behind the sidebar
 button, dragging out of it, and the incoming credits above the first year, is

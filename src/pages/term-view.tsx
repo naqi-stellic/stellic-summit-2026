@@ -10,6 +10,7 @@ import { usePendingReview } from "@/components/stellic/review-state"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import type { CatalogEntry } from "@/data/catalog"
 import {
   METADATA_FIELDS,
   registrableCourses,
@@ -66,6 +67,9 @@ function ActionsAlert({
   generators?: boolean
   /** The requirements panel the header's sidebar button opens. */
   sidebar?: { open: boolean; onToggle: () => void }
+  /** What can be planned into this term, and what to do when one is. */
+  addable?: CatalogEntry[]
+  onAddCourse?: (entry: CatalogEntry) => void
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -93,6 +97,8 @@ export function TermView({
   onRequestReview,
   generators = true,
   sidebar,
+  addable,
+  onAddCourse,
   compare = true,
 }: {
   term: Term
@@ -114,6 +120,9 @@ export function TermView({
   generators?: boolean
   /** The requirements panel the header's sidebar button opens. */
   sidebar?: { open: boolean; onToggle: () => void }
+  /** What can be planned into this term, and what to do when one is. */
+  addable?: CatalogEntry[]
+  onAddCourse?: (entry: CatalogEntry) => void
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -145,7 +154,13 @@ export function TermView({
             toggles: true,
           },
         ]
-      : []),
+      : /* A prototype without the generators still has the scheduler, which is
+           already a product — but only where a schedule could be generated, so
+           it appears on a term reading its week and nowhere else. It opens
+           nothing here. */
+        mode === "calendar" && term.scheduled
+        ? [{ label: "Generate Schedule", icon: "design-services" as const }]
+        : []),
     {
       label: "Plan details",
       icon: "remove-red-eye",
@@ -202,9 +217,14 @@ export function TermView({
       </div>
 
       {mode === "calendar" && term.scheduled ? (
-        <TermCalendar term={term} compare={compare} />
+        <TermCalendar
+          term={term}
+          compare={compare}
+          addable={addable}
+          onAddCourse={onAddCourse}
+        />
       ) : (
-        <TermList term={term} />
+        <TermList term={term} addable={addable} onAddCourse={onAddCourse} />
       )}
     </main>
   )

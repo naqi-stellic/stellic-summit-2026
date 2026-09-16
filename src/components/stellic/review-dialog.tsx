@@ -218,7 +218,14 @@ export function ReviewDialog({
             </div>
 
             {/* Past and current terms are not here to be ticked: whatever an
-                advisor would say about them, they have already happened. */}
+                advisor would say about them, they have already happened. Nor
+                are empty ones — there is nothing in them to look at. */}
+            {groups.length === 0 && (
+              <p className="text-body-md text-gray-80">
+                Nothing ahead of you has any courses in it yet, so there is nothing to review.
+              </p>
+            )}
+
             {groups.map((group) => (
               <div key={group.label} className="flex w-full flex-col gap-2">
                 <span className="text-body-md font-semibold text-foreground">{group.label}</span>

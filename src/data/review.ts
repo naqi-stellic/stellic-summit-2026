@@ -72,12 +72,15 @@ export const INITIAL_REVIEWS: Review[] = [
 
 /** Terms a review can be asked about: still ahead of you, and holding
  *  something to look at. A term under way or already taken is not up for
- *  review — whatever an advisor said about it, it has happened. */
+ *  review — whatever an advisor said about it, it has happened — and neither
+ *  is an empty one: there is nothing in it to have an opinion about. */
 export function reviewableYears(years: Year[]): { label: string; terms: Term[] }[] {
   return years
     .map((year) => ({
       label: year.label,
-      terms: year.terms.filter((term) => !term.locked && term.state !== "completed"),
+      terms: year.terms.filter(
+        (term) => !term.locked && term.state !== "completed" && term.courses.length > 0
+      ),
     }))
     .filter((year) => year.terms.length > 0)
 }

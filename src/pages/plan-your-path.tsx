@@ -763,6 +763,8 @@ export function PlanYourPath({
             onRequestReview={() => setRequesting({ term: openTerm })}
             generators={generators}
             sidebar={{ open: reqsOpen, onToggle: openRequirements }}
+            addable={addable}
+            onAddCourse={(entry) => handleAddCourse(openTerm.id, entry)}
             compare={compare}
           />
         ) : (

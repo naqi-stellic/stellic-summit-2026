@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 
 import { AddSlot } from "@/components/stellic/primitives"
 import {
@@ -18,17 +18,19 @@ import type { CatalogEntry } from "@/data/catalog"
 export function AddCourseMenu({
   options,
   onPick,
+  trigger,
 }: {
   options: CatalogEntry[]
   onPick: (entry: CatalogEntry) => void
+  /** What opens it. The dashed slot at the foot of a term card by default; in
+   *  a term view it is the card header's own plus. */
+  trigger?: ReactNode
 }) {
   const [open, setOpen] = useState(false)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <AddSlot>+ Add to Term</AddSlot>
-      </PopoverTrigger>
+      <PopoverTrigger asChild>{trigger ?? <AddSlot>+ Add to Term</AddSlot>}</PopoverTrigger>
       <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] min-w-64 p-0">
         <Command>
           <CommandInput placeholder="Search courses" className="text-body-md" />

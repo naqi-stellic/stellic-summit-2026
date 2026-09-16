@@ -73,7 +73,7 @@ export function IncomingCredits({
   onToggleCollapse: () => void
 }) {
   const { items, credits } = incomingTotals(groups)
-  const summary = `${credits} credits · ${items} item${items === 1 ? "" : "s"}`
+  const summary = `${items} item${items === 1 ? "" : "s"}, ${credits} credits earned`
 
   const heading = (
     <button

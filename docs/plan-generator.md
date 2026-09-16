@@ -171,9 +171,11 @@ and anything to say with it. Opened from a term the first step is already
 answered — the term is the request — so it opens on the second, and its corner
 closes rather than going back.
 
-Only terms still ahead are on offer. A term under way or already taken cannot be
-reviewed: whatever an advisor would say about it, it has happened. That leaves
-Spring 2028 onwards; Fall 2027 is locked and the 2026-2027 year is done.
+Only terms still ahead and holding something are on offer. A term under way or
+already taken cannot be reviewed — whatever an advisor would say about it, it
+has happened — and neither can an empty one, since there is nothing in it to
+have an opinion about. On the plan as it opens that is Spring 2028 alone; after
+a plan is generated it is every term.
 
 Submitting does three things: the plan takes a pending banner, every term in the
 request takes a `PENDING REVIEW` mark (the same slot that says `REVIEWED`), and
@@ -237,6 +239,12 @@ The drag context wraps the whole shell rather than the planner alone, because a
 row is picked up in the panel and let go over a term and both ends have to be
 inside it. A requirement has no place in the plan to leave, so it is always
 added at the end of the term it lands on, and the drop preview says so.
+
+A term opened on its own takes drops too: its course list registers the same
+droppable under the same term id, so a requirement dragged out of the panel
+lands in the term being read rather than only on the canvas. The card header's
+plus opens the same menu the planner's "+ Add to Term" opens, so a term can be
+planned into with or without the panel.
 
 A requirement leaves the list once it has a term. A course is recognised by its
 name wherever it was placed from; a seat cannot be — every seat reads alike —

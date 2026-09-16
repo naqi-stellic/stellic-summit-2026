@@ -1,7 +1,10 @@
+import { useDroppable } from "@dnd-kit/core"
 import { cn } from "cn"
 import { useState } from "react"
 
 import { Icon } from "@/components/icon"
+import { AddCourseMenu } from "@/components/stellic/add-course-menu"
+import type { CatalogEntry } from "@/data/catalog"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon } from "@/components/stellic/primitives"
 import { Badge } from "@/components/ui/badge"
@@ -162,7 +165,15 @@ function HeldCard({ course }: { course: PlannedCourse }) {
   )
 }
 
-function Sidebar({ term }: { term: Term }) {
+function Sidebar({
+  term,
+  addable,
+  onAddCourse,
+}: {
+  term: Term
+  addable?: CatalogEntry[]
+  onAddCourse?: (entry: CatalogEntry) => void
+}) {
   const credits = termCredits(term)
   const selectable = term.alert != null
 
@@ -174,9 +185,22 @@ function Sidebar({ term }: { term: Term }) {
           <h4 className="min-w-0 flex-1 truncate text-body-md font-semibold text-gray-100">
             My Courses ({term.courses.length})
           </h4>
-          <Button size="icon" aria-label="Add a course">
-            <Icon name="plus" size={16} />
-          </Button>
+          {/* The same menu the planner's cards open, behind the same plus. */}
+          {addable && onAddCourse ? (
+            <AddCourseMenu
+              options={addable}
+              onPick={onAddCourse}
+              trigger={
+                <Button size="icon" aria-label="Add a course">
+                  <Icon name="plus" size={16} />
+                </Button>
+              }
+            />
+          ) : (
+            <Button size="icon" aria-label="Add a course">
+              <Icon name="plus" size={16} />
+            </Button>
+          )}
         </div>
 
         <div className="flex w-full items-center gap-2">
@@ -440,15 +464,35 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
   )
 }
 
-export function TermCalendar({ term, compare = true }: { term: Term; compare?: boolean }) {
+export function TermCalendar({
+  term,
+  compare = true,
+  addable,
+  onAddCourse,
+}: {
+  term: Term
+  compare?: boolean
+  /** What the plus offers, and what a requirement dropped here becomes. */
+  addable?: CatalogEntry[]
+  onAddCourse?: (entry: CatalogEntry) => void
+}) {
+  /* The same droppable the planner's card registers, under the same id. */
+  const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
+
   return (
     /* shrink-0 because the pane it sits in is a fixed-height column: without
        it the card is squeezed to fit and the week is quietly cut off at the
        bottom instead of the pane scrolling to reach it. */
-    <div className="@container/term w-full shrink-0 overflow-hidden rounded-md border border-gray-40 bg-card">
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "@container/term w-full shrink-0 overflow-hidden rounded-md border border-gray-40 bg-card transition-colors",
+        isOver && active != null && "border-primary bg-primary-0/40"
+      )}
+    >
       {/* Side by side when there is room for both; stacked when there is not. */}
       <div className="flex w-full flex-col @3xl/term:flex-row">
-        <Sidebar term={term} />
+        <Sidebar term={term} addable={addable} onAddCourse={onAddCourse} />
         <span
           aria-hidden="true"
           className="shrink-0 bg-gray-40 max-@3xl/term:h-px @3xl/term:w-px"

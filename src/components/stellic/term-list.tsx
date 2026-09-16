@@ -1,6 +1,10 @@
 import { cn } from "cn"
 
+import { useDroppable } from "@dnd-kit/core"
+
 import { Icon, type IconName } from "@/components/icon"
+import { AddCourseMenu } from "@/components/stellic/add-course-menu"
+import type { CatalogEntry } from "@/data/catalog"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Button } from "@/components/ui/button"
@@ -39,20 +43,33 @@ function CardHeader({
   icon,
   title,
   count,
+  addable,
+  onAddCourse,
 }: {
   icon: IconName
   title: string
   count: number
+  /** Given, the plus opens the same menu the planner's cards open. */
+  addable?: CatalogEntry[]
+  onAddCourse?: (entry: CatalogEntry) => void
 }) {
+  const plus = (
+    <Button size="icon" aria-label={`Add to ${title}`}>
+      <Icon name="plus" size={16} />
+    </Button>
+  )
+
   return (
     <div className="flex w-full items-center gap-2 px-[23px] py-[15px]">
       <Icon name={icon} size={24} className="shrink-0 text-gray-100" />
       <h4 className="min-w-0 flex-1 truncate text-caption-lg font-semibold text-gray-100">
         {title} ({count})
       </h4>
-      <Button size="icon" aria-label={`Add to ${title}`}>
-        <Icon name="plus" size={16} />
-      </Button>
+      {addable && onAddCourse ? (
+        <AddCourseMenu options={addable} onPick={onAddCourse} trigger={plus} />
+      ) : (
+        plus
+      )}
     </div>
   )
 }
@@ -180,16 +197,40 @@ function CourseRow({
   )
 }
 
-export function TermList({ term }: { term: Term }) {
+export function TermList({
+  term,
+  addable,
+  onAddCourse,
+}: {
+  term: Term
+  /** What the plus can offer, and what a requirement dropped here becomes. */
+  addable?: CatalogEntry[]
+  onAddCourse?: (entry: CatalogEntry) => void
+}) {
   const credits = termCredits(term)
   const selectable = term.alert != null
+  /* The same droppable the planner's card registers, under the same id: a
+     requirement dragged out of the panel lands in the term being read. */
+  const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
 
   return (
     /* Same reason as the calendar: keep the natural height and let the pane
        scroll, rather than being compressed into it. */
     <div className="flex w-full shrink-0 flex-col gap-6">
-      <section className="w-full overflow-hidden rounded-md border border-gray-40 bg-card">
-        <CardHeader icon="class" title="My Courses" count={term.courses.length} />
+      <section
+        ref={setNodeRef}
+        className={cn(
+          "w-full overflow-hidden rounded-md border border-gray-40 bg-card transition-colors",
+          isOver && active != null && "border-primary bg-primary-0/40"
+        )}
+      >
+        <CardHeader
+          icon="class"
+          title="My Courses"
+          count={term.courses.length}
+          addable={addable}
+          onAddCourse={onAddCourse}
+        />
 
         {/* A term nobody has planned into has no columns worth heading. */}
         {term.courses.length === 0 ? (
