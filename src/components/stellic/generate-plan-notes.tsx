@@ -1,3 +1,4 @@
+import { InstitutionInstructions } from "@/components/stellic/institution-instructions"
 import { Textarea } from "@/components/ui/textarea"
 
 /* Step 3: free-text context for the generator. */
@@ -30,9 +31,11 @@ export function GeneratePlanNotes({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={PLACEHOLDER}
-          className="h-[214px] resize-none px-3 py-2 text-body-md placeholder:text-gray-80"
+          className="h-[150px] resize-none px-3 py-2 text-body-md placeholder:text-gray-80"
         />
       </div>
+
+      <InstitutionInstructions />
     </>
   )
 }

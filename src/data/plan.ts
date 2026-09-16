@@ -100,6 +100,11 @@ export const STUDENT = { name: "Scott Abott", username: "sabott" }
 export const DEGREE = {
   program: "Business Administration, B.S.",
   concentration: "Finance",
+  /** Declared alongside the concentration. Three of the degree's requirements
+   *  answer to it rather than to the major, which is what makes the pair worth
+   *  saying out loud: no pathway is built for every programme, concentration
+   *  and minor there could be. */
+  minor: "Data Analytics",
   requirements: 40,
   credits: 120,
   /** Non-course checkpoints: declare major, internship, capstone proposal… */
@@ -122,6 +127,24 @@ export const PLANNING_RULES = {
    *  clamps to. A full-time term is five. */
   maxCreditsPerTerm: 18,
 }
+
+/** The same rules said the way instructions are said: what the school has told
+ *  the generator to do, which the student can read but not change. */
+export const INSTITUTION_INSTRUCTIONS = [
+  "Take core requirements before general ones.",
+  "Respect prerequisites, co-requisites and anti-requisites.",
+  "Count a course toward every requirement it satisfies.",
+  `Only plan classes published through ${PLANNING_RULES.offeringsThrough}.`,
+  `Keep every term at or under ${PLANNING_RULES.maxCreditsPerTerm} credits.`,
+]
+
+/** The same, for a week rather than a degree. */
+export const SCHEDULE_INSTITUTION_INSTRUCTIONS = [
+  "Only offer sections with seats available.",
+  "Keep to the campuses, modalities and sub-terms your programme allows.",
+  "Never timetable two of your classes over each other.",
+  "Leave classes you have already chosen where they are.",
+]
 
 /** The year already behind the student. It is not part of the editable plan —
  *  nothing in it can be moved, dropped or generated into — so it sits outside

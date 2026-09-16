@@ -29,7 +29,7 @@ export type CatalogEntry = {
 export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "MGMT 210", name: "Principles of Management", reason: "Business core" },
   { code: "ACCT 310", name: "Intermediate Accounting I", reason: "Business core" },
-  { code: "MIS 250", name: "Management Information Systems", reason: "Business core" },
+  { code: "MIS 250", name: "Management Information Systems", reason: "Data Analytics minor" },
   { code: "BLAW 301", name: "Business Law & Ethics", reason: "Business core" },
   { code: "OPS 320", name: "Operations & Supply Chain Management", reason: "Business core" },
   { code: "BUS 390", name: "Business Communication", reason: "Business core" },
@@ -43,7 +43,7 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   /* Planned once, in Spring 2028 — the seat held there now stands in its
      place, so the course itself is outstanding again. */
   { code: "FIN 415", name: "Financial Modeling & Valuation", reason: "Finance concentration" },
-  { code: "STAT 320", name: "Econometrics for Business", reason: "Finance concentration" },
+  { code: "STAT 320", name: "Econometrics for Business", reason: "Data Analytics minor" },
   /* One of the two concentration seats; the other is already held in Spring
      2028, so it is not outstanding. */
   {
@@ -57,7 +57,14 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "HIST 205", name: "Modern World History", reason: "General education" },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
-  { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
+  /* The minor's own elective, held like any other seat but filled from the
+     data shelf rather than the general one. */
+  {
+    code: "DATA ELEC",
+    name: "Data analytics elective",
+    reason: "Data Analytics minor",
+    placeholder: true,
+  },
   { code: "BUS 495", name: "Strategic Management", reason: "Capstone, taken last" },
 ]
 
@@ -74,6 +81,12 @@ export const ELECTIVE_COURSES: Record<string, CatalogEntry[]> = {
     { code: "FIN 465", name: "Venture Capital", reason: "Concentration elective" },
     { code: "FIN 475", name: "Commodities & Energy Markets", reason: "Concentration elective" },
     { code: "FIN 485", name: "Credit Risk Analysis", reason: "Concentration elective" },
+  ],
+  "DATA ELEC": [
+    { code: "DATA 310", name: "Data Visualisation", reason: "Data Analytics minor" },
+    { code: "DATA 330", name: "Predictive Modelling", reason: "Data Analytics minor" },
+    { code: "DATA 350", name: "Database Systems", reason: "Data Analytics minor" },
+    { code: "DATA 370", name: "Machine Learning for Business", reason: "Data Analytics minor" },
   ],
   "GEN ELEC": [
     { code: "ANTH 210", name: "Cultural Anthropology", reason: "Open elective" },

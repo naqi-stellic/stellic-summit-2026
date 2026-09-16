@@ -101,14 +101,16 @@ function HoverMenu({ trigger, children }: { trigger: ReactNode; children: ReactN
   )
 }
 
-function PlanFacet({ label, value }: { label: string; value: string }) {
+function PlanFacet({ label, values }: { label: string; values: string[] }) {
   return (
     <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
       <span className="text-body-md font-semibold text-foreground">{label}</span>
-      <Badge variant="outline" className="max-w-full">
-        <span className="min-w-0 truncate">{value}</span>
-        <Icon name="close" size={12} className="shrink-0" />
-      </Badge>
+      {values.map((value) => (
+        <Badge key={value} variant="outline" className="max-w-full">
+          <span className="min-w-0 truncate">{value}</span>
+          <Icon name="close" size={12} className="shrink-0" />
+        </Badge>
+      ))}
       <a
         href="#"
         className="text-body-md text-gray-80 underline [text-underline-position:from-font]"
@@ -235,11 +237,16 @@ export function PlanHeader({
         {!stuck && actionButtons}
       </div>
 
+      {/* The programme and the minor beside it: two of them, because a plan
+          that answers to both is the case no pathway is ever built for. */}
       <PlanFacet
         label="Programs:"
-        value={`BSc in ${DEGREE.program.replace(", B.S.", "")} (concentration: ${DEGREE.concentration})`}
+        values={[
+          `BSc in ${DEGREE.program.replace(", B.S.", "")} (concentration: ${DEGREE.concentration})`,
+          `Minor in ${DEGREE.minor}`,
+        ]}
       />
-      <PlanFacet label="Pathway:" value="Business Administration: Fall Start 2026 [BSc]" />
+      <PlanFacet label="Pathway:" values={["Business Administration: Fall Start 2026 [BSc]"]} />
 
     </section>
 

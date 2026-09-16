@@ -41,7 +41,11 @@ it appears in the year filter's menu.
 Figma is the source for layout, not content — its placeholder data contradicts
 itself — so the sample plan is invented to hold together. The story: a student
 who started Fall 2026 on a 120-credit, 40-requirement Business Administration
-B.S. with a Finance concentration. They finished 2026-2027 (10 courses, 30
+B.S. with a Finance concentration and a Data Analytics minor — the pair being
+the point: no pathway is built for every programme, concentration and minor
+there could be. Three of the outstanding requirements answer to the minor
+rather than the major (MIS 250, STAT 320 and a data elective seat), so it is
+real in the plan without changing the forty or the hundred and twenty. They finished 2026-2027 (10 courses, 30
 credits), are partway through Fall 2027, have started planning Spring 2028, and
 the plan runs out to 2029-2030. Courses are 3 credits each.
 
@@ -85,6 +89,16 @@ degree's credits rather than the design's fixed pixel widths — the one place
 the numbers being real costs a literal match to the frame.
 
 Expected graduation is the last term the plan reaches, not a stored date.
+
+## Two kinds of instructions
+
+The instructions step has the student's box and, under it, the school's:
+`INSTITUTION_INSTRUCTIONS` says what the run always honours — core before
+general, prerequisites, double counting, offerings through the published term,
+the credit ceiling — read-only and locked, with the same rules the summary
+lists under "Also accounting for". Generate Schedule shows its own four, about
+seats, campus, clashes and classes already chosen. Both are derived from
+`PLANNING_RULES` and the scheduler's own rule rather than written twice.
 
 ## Generate Plan panel
 

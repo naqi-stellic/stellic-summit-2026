@@ -61,6 +61,7 @@ export function GeneratePlanScope({
   const planning = [
     { label: "Programs", value: DEGREE.program },
     { label: "Concentration", value: DEGREE.concentration },
+    { label: "Minor", value: DEGREE.minor },
     { label: "Expected Graduation", value: graduation },
   ]
 

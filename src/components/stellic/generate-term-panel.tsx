@@ -27,6 +27,7 @@ import { RadioCard } from "@/components/stellic/primitives"
 import {
   CREDITS_PER_COURSE,
   PLANNING_RULES,
+  SCHEDULE_INSTITUTION_INSTRUCTIONS,
   clockTime,
   type PlanStanding,
   type Term,
@@ -484,6 +485,7 @@ export function GenerateTermPanel({
             onNotesChange={setNotes}
             seatNotes={seatNotes}
             onSeatNoteChange={(id, next) => setSeatNotes((all) => ({ ...all, [id]: next }))}
+            institution={scheduling ? SCHEDULE_INSTITUTION_INSTRUCTIONS : undefined}
           />
         ) : view === 3 ? (
           <GenerateSchedulePrefs term={term} prefs={prefs} onChange={setPrefs} />
