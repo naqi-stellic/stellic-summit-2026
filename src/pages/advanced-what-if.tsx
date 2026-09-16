@@ -31,7 +31,7 @@ export function AdvancedWhatIf() {
   const [view, setView] = useState("planned")
 
   return (
-    <AppShell title="Students Progress" section="progress" assistant={false}>
+    <AppShell title="Student Progress" section="progress" assistant={false}>
       {/* The pane scrolls, not the shell. `@container` so the cards reflow
           against the width they actually have rather than the window's. */}
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 py-8">
@@ -55,20 +55,18 @@ export function AdvancedWhatIf() {
           {/* Only Progress has a design; the other four tabs are named and
               nothing more, which is what the frame shows of them. */}
           {tab === "progress" ? (
-            <section className="flex flex-col gap-6 overflow-x-auto rounded-md bg-card px-[10px] py-6 shadow-card">
+            <section className="flex flex-col gap-6 overflow-x-auto rounded-md bg-card px-6 py-6 shadow-card">
               <AuditTree audit={AUDIT} />
               <UnmatchedSection
                 count={UNMATCHED.count}
                 blurb={UNMATCHED.blurb}
                 courses={UNMATCHED.courses}
               />
-              {/* The foot of the audit, and the way into the what-if. Stood
-                  off the card's edge by as much as the degree row is, so it
-                  reads as the last thing in the tree rather than a strip
-                  glued to the card. */}
-              <div className="pl-5">
-                <DiscoverPrograms />
-              </div>
+              {/* The foot of the audit, and the way into the what-if. It
+                  stands on the card's own padding, as the tree and the
+                  unmatched list do — one edge down each side, whatever is
+                  against it. */}
+              <DiscoverPrograms />
             </section>
           ) : (
             <section className="rounded-md bg-card p-6 text-body-md text-gray-80 shadow-card">

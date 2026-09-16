@@ -119,16 +119,13 @@ function Trail({ cells }: { cells: { line: boolean; elbow?: boolean; last?: bool
 
 function TreeElement({
   trail,
-  indent,
   children,
 }: {
   trail: { line: boolean; elbow?: boolean; last?: boolean }[]
-  /** 20px on the degree, which has no trail to stand off; 12px under it. */
-  indent: 12 | 20
   children: ReactNode
 }) {
   return (
-    <div className="flex items-stretch gap-1 bg-card" style={{ paddingLeft: indent }}>
+    <div className="flex items-stretch gap-1 bg-card">
       <Trail cells={trail} />
       {children}
     </div>
@@ -275,7 +272,7 @@ function EntryRows({
   const open = entry.kind === "group" && !folded.has(entry.id)
 
   const row = (
-    <TreeElement trail={trail} indent={12}>
+    <TreeElement trail={trail}>
       {entry.kind === "course" ? (
         <CourseRow course={entry} />
       ) : (
@@ -332,7 +329,7 @@ export function AuditTree({ audit }: { audit: AuditGroup }) {
     <div className="flex flex-col gap-2">
       {/* The degree heads the tree rather than hanging off it, so it is the one
           row with no trail beside it. */}
-      <TreeElement trail={[]} indent={20}>
+      <TreeElement trail={[]}>
         <GroupRow group={audit} />
       </TreeElement>
       {audit.children.map((child, i) => (
@@ -364,10 +361,12 @@ export function UnmatchedSection({
   courses: AuditCourse[]
 }) {
   return (
-    <div className="flex flex-col gap-2 pl-4">
-      <div className="flex items-start justify-between gap-4 py-2 pl-5">
+    <div className="flex flex-col gap-2">
+      <div className="flex items-start justify-between gap-4 py-2">
         <div className="flex min-w-0 items-start gap-2">
-          <span className="mt-2.5 flex size-6 shrink-0 items-center justify-center rounded-md border border-alert-50 text-body-md font-semibold text-alert-50">
+          {/* A count, not a warning: these courses are fine, they are simply
+              spoken for by nothing. */}
+          <span className="mt-2.5 flex size-6 shrink-0 items-center justify-center rounded-md border border-gray-100 text-body-md font-semibold text-gray-100">
             {count}
           </span>
           <div className="flex min-w-0 flex-col">
@@ -385,7 +384,7 @@ export function UnmatchedSection({
         </Button>
       </div>
       {courses.map((course, i) => (
-        <div key={course.id} className="flex items-stretch gap-1 pl-3">
+        <div key={course.id} className="flex items-stretch gap-1">
           <Trail cells={[{ line: true, elbow: true, last: i === courses.length - 1 }]} />
           <CourseRow course={course} bare />
         </div>

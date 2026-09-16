@@ -71,6 +71,11 @@ Milestones are `DEGREE.milestonesDone` of `DEGREE.milestones` — 3 of 13.
 Every row is the same three parts — the trail that says where it sits, the mark
 that says how it stands, and the row.
 
+The audit card pads itself and nothing inside it adds a second inset: the
+degree row, the unmatched heading and the Discover banner all stand on the same
+left edge, and every row runs to the same right one. A `TreeElement` has no
+indent of its own — depth is the trail's business.
+
 **The trail** is one 40px cell per level above the row, with a 1px line down
 each cell's middle (`--stellic-divider`, `#e4e7ec`). The line overruns its row
 by the 8px gap between rows, so it reads as one line running behind the tree
