@@ -1,4 +1,5 @@
 import { Icon } from "@/components/icon"
+import { CourseTags } from "@/components/stellic/course-metadata"
 import { TimelineRail } from "@/components/stellic/planner"
 import { AuditIcon } from "@/components/stellic/primitives"
 import { Card } from "@/components/ui/card"
@@ -27,9 +28,12 @@ function CreditRow({ item }: { item: IncomingCredit }) {
         </div>
         {/* Where a course card says which class you are in, this says the one
             thing worth knowing about credit that has already been earned. */}
-        <p className="text-body-md text-gray-80">
-          {item.detail} · {item.credits} credits
-        </p>
+        <p className="text-body-md text-gray-80">{item.detail}</p>
+        {/* The credits are a detail like any other, so they are shown when Plan
+            details is showing them and not otherwise. */}
+        <CourseTags
+          course={{ id: item.id, code: item.code, name: item.name, credits: item.credits }}
+        />
       </div>
     </div>
   )

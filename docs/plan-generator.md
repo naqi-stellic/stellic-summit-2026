@@ -59,7 +59,9 @@ on a timetable this plan knows about, so `src/data/incoming.ts` keeps it as
 what it is rather than as two invented semesters.
 
 The total is said twice — beside the heading and again above the cards, where
-"View in Progress" leads to the audit. Those credits are extra rather than
+"View in Progress" leads to the audit. Each row's credits are a tag like any
+other detail, so they answer to Plan details and are not there until it asks
+for them; what stays on the row is the one fact the kind is worth knowing by. Those credits are extra rather than
 requirements, so the degree's forty and its hundred and twenty are untouched
 and the generator has the same work to do. Make them count instead by folding
 them into `COMPLETED` and striking the matching entries off
