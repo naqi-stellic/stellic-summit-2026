@@ -29,10 +29,11 @@ import {
 
 const TOTAL_STEPS = 2
 
-/** How long the check appears to take. Nothing is actually computed — the
- *  standings are already known — but a result that arrives the instant you ask
- *  for it does not read as having been checked against anything. */
-const CHECKING_MS = 3000
+/** How long the whole list takes to finish auditing itself. Nothing is really
+ *  computed — the standings are already known — but a result that arrives the
+ *  instant you ask for it does not read as having been checked against
+ *  anything, and the list is worth reading while it lands. */
+const CHECKING_MS = 5000
 
 /** What the student is here to do. The answer is what a second question would
  *  narrow, which is why it is asked first. */
@@ -41,8 +42,8 @@ export type DiscoverIntent = "add" | "change" | "explore"
 const INTENTS: { id: DiscoverIntent; label: string; detail: string }[] = [
   {
     id: "add",
-    label: "Add an additional major",
-    detail: "Keep existing programs and add new programs to your profile",
+    label: "Add an additional program",
+    detail: "Keep existing programs and add new programs",
   },
   {
     id: "change",
@@ -52,13 +53,13 @@ const INTENTS: { id: DiscoverIntent; label: string; detail: string }[] = [
   {
     id: "explore",
     label: "Just exploring",
-    detail: "Look how your current courses would map to other program requirements",
+    detail: "Check how your current courses would map to other program requirements",
   },
 ]
 
-/** The questions, then the review, the check, and what it found. Only the
+/** The questions, then the review, then what the check found. Only the
  *  questions are numbered steps. */
-type View = 1 | 2 | "summary" | "checking" | "results"
+type View = 1 | 2 | "summary" | "results"
 
 /** A choice with a sentence under it rather than beside it. `RadioCard` puts
  *  the two on one row, which only works while the line is four or five words;
@@ -68,7 +69,7 @@ function IntentCard({ intent, selected }: { intent: (typeof INTENTS)[number]; se
     <label
       className={cn(
         "flex w-full cursor-pointer items-center gap-4 rounded-md border p-[15px] transition-colors",
-        selected ? "border-primary-50" : "border-gray-40 hover:border-gray-60"
+        selected ? "border-primary-50 bg-primary-0" : "border-gray-40 hover:border-gray-60"
       )}
     >
       <RadioGroupItem value={intent.id} />
@@ -197,30 +198,6 @@ function DiscoverSummary({
   )
 }
 
-/** The check, which is only a moment of held breath. No copy: there is nothing
- *  to say that the spinner does not. */
-function DiscoverChecking({ onDone }: { onDone: () => void }) {
-  useEffect(() => {
-    const timer = window.setTimeout(onDone, CHECKING_MS)
-    return () => window.clearTimeout(timer)
-  }, [onDone])
-
-  return (
-    <div className="flex flex-1 items-center justify-center py-16" role="status" aria-label="Checking progress">
-      <span className="size-8 animate-spin rounded-full border-2 border-gray-40 border-t-primary-50" />
-    </div>
-  )
-}
-
-/** What the chosen intent does to the record, and what the button that does it
- *  is called. Only a major can replace a major, which is why changing one is
- *  offered nothing else. */
-const OUTCOME: Record<DiscoverIntent, { label: string; majorsOnly: boolean }> = {
-  add: { label: "Add Program", majorsOnly: false },
-  change: { label: "Change to this Program", majorsOnly: true },
-  explore: { label: "", majorsOnly: false },
-}
-
 export function DiscoverPanel({
   onApply,
   onClose,
@@ -233,18 +210,36 @@ export function DiscoverPanel({
   const [intent, setIntent] = useState<DiscoverIntent | null>(null)
   const [filters, setFilters] = useState<FilterState>({})
   const [chosen, setChosen] = useState<string | null>(null)
+  /** The programs whose audit has come back. Every one of them is on screen
+   *  from the moment the check starts; this is only which have filled in. */
+  const [loaded, setLoaded] = useState<string[]>([])
 
-  const outcome = OUTCOME[intent ?? "explore"]
-  const onOffer = outcome.majorsOnly
-    ? PROGRAMS.filter((program) => program.kind === "Major")
-    : PROGRAMS
+  /* Every intent is offered the whole catalogue now. Changing major used to
+     narrow it to majors, which the card says better: a minor shows Add
+     Program and no Switch to, because it cannot take a major's place. The
+     intent decides whether the record can be changed at all, not by what. */
+  const onOffer = PROGRAMS
   const programs = matchPrograms(filters, onOffer)
   const isStep = view === 1 || view === 2
+
+  /* The check: every program reports in turn across the five seconds, so the
+     list ranks itself as the answers land rather than appearing ranked. */
+  const ids = programs.map((program) => program.id).join(",")
+  useEffect(() => {
+    if (view !== "results") return
+    const waiting = ids ? ids.split(",") : []
+    const step = CHECKING_MS / Math.max(waiting.length, 1)
+    const timers = waiting.map((id, i) =>
+      window.setTimeout(() => setLoaded((done) => [...done, id]), step * (i + 1))
+    )
+    return () => timers.forEach(window.clearTimeout)
+  }, [view, ids])
 
   function startOver() {
     setIntent(null)
     setFilters({})
     setChosen(null)
+    setLoaded([])
     setView(1)
   }
 
@@ -258,33 +253,33 @@ export function DiscoverPanel({
       >
         <div className="flex w-full items-center gap-2">
           {/* Baseline, not centre: two runs of text on one line read as
-              aligned when they sit on the same baseline, and cap-centring a
-              small label beside a larger title leaves it floating two pixels
-              high. */}
+            aligned when they sit on the same baseline, and cap-centring a
+            small label beside a larger title leaves it floating two pixels
+            high. */}
           <div className="flex min-w-0 flex-1 items-baseline gap-2">
-            <h2 className="text-caption-lg font-semibold text-foreground">Discover Programs</h2>
-            {isStep && (
-              <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
-                Step {view} of {TOTAL_STEPS}
-              </span>
-            )}
+          <h2 className="text-caption-lg font-semibold text-foreground">Discover Programs</h2>
+          {isStep && (
+            <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
+              Step {view} of {TOTAL_STEPS}
+            </span>
+          )}
           </div>
           <Button variant="ghost" size="icon" aria-label="Close Discover Programs" onClick={onClose}>
-            <Icon name="s-close" size={16} />
+          <Icon name="s-close" size={16} />
           </Button>
         </div>
 
         {isStep && (
           <div className="flex w-full items-start gap-2">
-            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "h-1 min-w-0 flex-1 rounded-md",
-                  i < (view as number) ? "bg-primary-50" : "bg-gray-40"
-                )}
-              />
-            ))}
+          {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+            <span
+              key={i}
+              className={cn(
+                "h-1 min-w-0 flex-1 rounded-md",
+                i < (view as number) ? "bg-primary-50" : "bg-gray-40"
+              )}
+            />
+          ))}
           </div>
         )}
       </header>
@@ -294,88 +289,89 @@ export function DiscoverPanel({
 
         {view === 2 && (
           <DiscoverFilters
-            filters={filters}
-            onChange={setFilters}
-            onOffer={onOffer}
-            matches={programs.length}
+          filters={filters}
+          onChange={setFilters}
+          onOffer={onOffer}
+          matches={programs.length}
           />
         )}
 
         {view === "summary" && (
           <DiscoverSummary
-            intent={intent}
-            filters={filters}
-            matches={programs.length}
-            onEdit={(step) => setView(step)}
+          intent={intent}
+          filters={filters}
+          matches={programs.length}
+          onEdit={(step) => setView(step)}
           />
         )}
-
-        {view === "checking" && <DiscoverChecking onDone={() => setView("results")} />}
 
         {view === "results" && (
           <DiscoverResults
-            programs={programs}
-            selected={chosen}
-            onSelect={setChosen}
-            canAdd={intent !== "explore"}
-            addLabel={outcome.label}
-            onAdd={(program) => {
-              onApply(program, intent === "change" ? "change" : "add")
-              onClose()
-            }}
+          programs={programs}
+          loaded={loaded}
+          selected={chosen}
+          onSelect={setChosen}
+          actions={intent !== "explore"}
+          onAdd={(program) => {
+            onApply(program, "add")
+            onClose()
+          }}
+          onSwitch={(program) => {
+            onApply(program, "change")
+            onClose()
+          }}
           />
         )}
 
-        {/* The check finishes on its own and has nothing to press in the
-            meantime. */}
-        {view !== "checking" && (
-          <div className="flex w-full items-center gap-2">
-            {view === "results" ? (
-              <>
-                <Button className="flex-1" onClick={() => setView("summary")}>
+        <div className="flex w-full items-center gap-2">
+          {view === "results" ? (
+            <>
+              <Button className="flex-1" onClick={() => setView("summary")}>
+                Back
+              </Button>
+              <Button className="flex-1" onClick={startOver}>
+                Start over
+              </Button>
+            </>
+          ) : view === "summary" ? (
+            <>
+              <Button className="flex-1" onClick={() => setView(2)}>
+                Back
+              </Button>
+              <Button
+                variant="primary"
+                className="flex-1"
+                onClick={() => {
+                  /* Nothing is chosen for the student: the list arrives
+                     unranked and picks its own order as it fills. */
+                  setChosen(null)
+                  setLoaded([])
+                  setView("results")
+                }}
+              >
+                Check Progress
+              </Button>
+            </>
+          ) : (
+            <>
+              {view === 2 && (
+                <Button className="flex-1" onClick={() => setView(1)}>
                   Back
                 </Button>
-                <Button className="flex-1" onClick={startOver}>
-                  Start over
-                </Button>
-              </>
-            ) : view === "summary" ? (
-              <>
-                <Button className="flex-1" onClick={() => setView(2)}>
-                  Back
-                </Button>
-                <Button
-                  variant="primary"
-                  className="flex-1"
-                  onClick={() => {
-                    setChosen(programs[0]?.id ?? null)
-                    setView("checking")
-                  }}
-                >
-                  Check Progress
-                </Button>
-              </>
-            ) : (
-              <>
-                {view === 2 && (
-                  <Button className="flex-1" onClick={() => setView(1)}>
-                    Back
-                  </Button>
-                )}
-                <Button
-                  variant="primary"
-                  className="flex-1"
-                  /* Nothing to continue to until the first question has an
-                     answer; the filters are allowed to ask for everything. */
-                  disabled={view === 1 && intent === null}
-                  onClick={() => setView(view === 1 ? 2 : "summary")}
-                >
-                  Continue
-                </Button>
-              </>
-            )}
-          </div>
-        )}
+              )}
+              <Button
+                variant="primary"
+                className="flex-1"
+                /* Nothing to continue to until the first question has an
+                   answer; the filters are allowed to ask for everything. */
+                disabled={view === 1 && intent === null}
+                onClick={() => setView(view === 1 ? 2 : "summary")}
+              >
+                Continue
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </aside>
   )

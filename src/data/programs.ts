@@ -381,10 +381,18 @@ export function programTotal(program: Program): number {
   return program.requirements.reduce((sum, r) => sum + r.courses.length, 0)
 }
 
-/** What is left to earn, which is what the results are sorted by: the thing a
- *  student actually weighs when deciding whether a program is worth taking on. */
+/** What is left to earn. */
 export function creditsToGo(program: Program): number {
   return programStanding(program).remaining * CREDITS_PER_COURSE
+}
+
+/** What the transcript already answers — which is what the results are ranked
+ *  by. It is the better question of the two: "how much of this have I done"
+ *  ranks a 120-credit major above a minor that is nearly free, and that is the
+ *  right way round when the question was what else this record is worth. */
+export function reusedCredits(program: Program): number {
+  const { taken, inProgress, planned } = programStanding(program)
+  return (taken + inProgress + planned) * CREDITS_PER_COURSE
 }
 
 /* ------------------------------------------------------------------ filters */
@@ -433,7 +441,7 @@ export function fieldOptions(field: FilterField["id"], within: Program[] = PROGR
 export type FilterState = Partial<Record<FilterField["id"], string[]>>
 
 /** Every field with a value has to be satisfied; a field with none asks
- *  nothing. Sorted by what is left to earn. */
+ *  nothing. Ranked by how much of the record each program already answers. */
 export function matchPrograms(filters: FilterState, within: Program[] = PROGRAMS): Program[] {
   return within
     .filter((program) =>
@@ -442,7 +450,7 @@ export function matchPrograms(filters: FilterState, within: Program[] = PROGRAMS
         return values.includes(program[field as FilterField["id"]])
       })
     )
-    .sort((a, b) => creditsToGo(a) - creditsToGo(b))
+    .sort((a, b) => reusedCredits(b) - reusedCredits(a))
 }
 
 export function activeFilters(filters: FilterState): { field: FilterField; values: string[] }[] {

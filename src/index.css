@@ -243,6 +243,17 @@
 }
 
 /* The draft frame seeing itself out, once the plan under it has settled. */
+@keyframes ellipsis {
+  0%,
+  80%,
+  100% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
 @keyframes dissolve {
   to {
     opacity: 0;
@@ -252,6 +263,7 @@
 @theme inline {
   --animate-rise: rise 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-dissolve: dissolve 0.3s ease-out 0.5s both;
+  --animate-ellipsis: ellipsis 1.4s ease-in-out infinite;
   --animate-settle: settle 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-fade: fade 0.4s ease-out both;
   --animate-vanish: vanish 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
@@ -261,6 +273,7 @@
    the information. Left alone, the spinner still spins. */
 @media (prefers-reduced-motion: reduce) {
   .animate-rise,
+  .animate-ellipsis,
   .animate-settle,
   .animate-fade,
   .animate-vanish,
