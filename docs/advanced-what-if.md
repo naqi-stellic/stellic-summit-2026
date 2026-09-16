@@ -324,8 +324,8 @@ so the tallies above the tree are the same whether a group is open or shut.
 
 Two seams were added to the shell rather than a second copy of it:
 
-- `AppShell`'s `section="progress"` stands the sidebar on Track Progress and
-  closes Schedule down to one row. The nav is otherwise the plan prototypes'
+- `AppShell`'s `section="progress"` stands the sidebar on Track Progress, names
+  the top bar after it, and closes Schedule down to one row. The nav is otherwise the plan prototypes'
   nav, in the same order — `src/components/layout/sidebar.tsx` builds both from
   one list and only opens Schedule onto its terms where a term is the thing you
   came to work on;

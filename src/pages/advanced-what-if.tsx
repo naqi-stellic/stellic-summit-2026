@@ -72,7 +72,6 @@ export function AdvancedWhatIf() {
 
   return (
     <AppShell
-      title="Student Progress"
       section="progress"
       assistant={false}
       panel={

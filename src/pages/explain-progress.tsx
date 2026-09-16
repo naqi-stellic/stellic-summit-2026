@@ -47,7 +47,6 @@ export function ExplainProgress() {
 
   return (
     <AppShell
-      title="Student Progress"
       section="progress"
       /* The assistant's pill scopes itself to whatever is being explained,
          which is the one thing it can usefully know here. */

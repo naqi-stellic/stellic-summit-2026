@@ -19,8 +19,10 @@ It is a **staff** screen, which is the first thing the page says. The sidebar
 is the institution's list of everything — Students, Programs, Courses,
 Pathways, Appointments, Transfer, Requests, Reviews, Staff, Analytics — rather
 than one student's path through a degree, and `AppShell` gained a third
-`section` for it. The profile carries one action a student's would not: **Mark
-Changes as Reviewed**.
+`section` for it. The bar at the top says **Student Progress** where the
+student's own copy says Track Progress: whose progress it is is the difference
+between the two screens. The profile carries one action a student's would not:
+**Mark Changes as Reviewed**.
 
 ## Why it earns a screen
 

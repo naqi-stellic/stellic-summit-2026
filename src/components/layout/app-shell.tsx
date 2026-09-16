@@ -15,6 +15,16 @@ import {
  * stay put and each content column scrolls on its own. That is also what makes
  * the resizable split work — the panel group needs a bounded height. */
 
+/** What the top bar says, which is a fact about the nav rather than about the
+ *  page: a student is tracking their own progress, and a staff member is
+ *  looking at a student's. Three prototypes share the progress screen and all
+ *  three say the same thing, because it is the same screen. */
+const SECTION_TITLE: Record<NavSection, string> = {
+  plan: "Plan Your Path",
+  progress: "Track Progress",
+  staff: "Student Progress",
+}
+
 export function AppShell({
   title,
   children,
@@ -23,7 +33,8 @@ export function AppShell({
   assistant = true,
   assistLabel = "Generate with Assistant",
 }: {
-  title: string
+  /** Overrides the section's own heading, which is almost never wanted. */
+  title?: string
   children: ReactNode
   /** When present, the content area splits into a resizable two-column view. */
   panel?: ReactNode
@@ -49,7 +60,7 @@ export function AppShell({
           <Sidebar section={section} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
-          <Topbar title={title} />
+          <Topbar title={title ?? SECTION_TITLE[section]} />
 
           {/* The panel group is always mounted so `children` keeps its place in
               the tree; swapping the wrapper would remount the whole planner and

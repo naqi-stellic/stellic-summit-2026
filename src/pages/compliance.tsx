@@ -31,7 +31,7 @@ export function Compliance() {
   const [view, setView] = useState("official")
 
   return (
-    <AppShell title="Student Progress" section="staff" assistant={false}>
+    <AppShell section="staff" assistant={false}>
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 py-8">
         <div className="mx-auto flex w-full max-w-[1518px] flex-col gap-4">
           {/* A staff member is looking at a student's record, so the record

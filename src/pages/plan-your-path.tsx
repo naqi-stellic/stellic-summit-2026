@@ -639,7 +639,6 @@ export function PlanYourPath({
       }}
     >
     <AppShell
-      title="Plan Your Path"
       assistLabel={
         generators ? (draft ? "Make changes to Generated plan" : "Generate with Assistant") : null
       }
