@@ -222,6 +222,73 @@ const ICONS = {
   },
 
   /* ---- Material: Outlined ---- */
+
+  /* Transfer Credits' set, taken from the Figma exports rather than written
+   * from memory: the file uses Material's Outlined weight throughout that
+   * flow, and the Filled versions of the same names are a different glyph.
+   * The negative viewBox origin is the glyph's own offset inside the 24px
+   * frame — Figma crops an export to its content, so the padding it dropped is
+   * added back here rather than baked into every coordinate. */
+  search: {
+    viewBox: "-3.255 -3.255 24 24",
+    parts: [
+      {
+        d: "M12.5 11H11.71L11.43 10.73C12.41 9.59 13 8.11 13 6.5C13 2.91 10.09 0 6.5 0C2.91 0 0 2.91 0 6.5C0 10.09 2.91 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z",
+      },
+    ],
+  },
+  "fact-check": {
+    viewBox: "-2 -3 24 24",
+    parts: [
+      { d: "M18 0H2C0.9 0 0 0.9 0 2V16C0 17.1 0.9 18 2 18H18C19.1 18 20 17.1 20 16V2C20 0.9 19.1 0 18 0ZM18 16H2V2H18V16Z" },
+      { d: "M17.41 7.42L15.99 6L12.82 9.17L11.41 7.75L10 9.16L12.82 12L17.41 7.42Z" },
+      { d: "M8 4H3V6H8V4Z" },
+      { d: "M8 8H3V10H8V8Z" },
+      { d: "M8 12H3V14H8V12Z" },
+    ],
+  },
+  "file-upload": {
+    viewBox: "-4 -4 24 24",
+    parts: [
+      {
+        d: "M14 11V14H2V11H0V14C0 15.1 0.9 16 2 16H14C15.1 16 16 15.1 16 14V11H14ZM3 5L4.41 6.41L7 3.83V12H9V3.83L11.59 6.41L13 5L8 0L3 5Z",
+      },
+    ],
+  },
+  keyboard: {
+    viewBox: "-2 -5 24 24",
+    parts: [
+      {
+        d: "M18 2V12H2V2H18ZM18 0H2C0.9 0 0.00999999 0.9 0.00999999 2L0 12C0 13.1 0.9 14 2 14H18C19.1 14 20 13.1 20 12V2C20 0.9 19.1 0 18 0ZM9 3H11V5H9V3ZM9 6H11V8H9V6ZM6 3H8V5H6V3ZM6 6H8V8H6V6ZM3 6H5V8H3V6ZM3 3H5V5H3V3ZM6 9H14V11H6V9ZM12 6H14V8H12V6ZM12 3H14V5H12V3ZM15 6H17V8H15V6ZM15 3H17V5H15V3Z",
+      },
+    ],
+  },
+  delete: {
+    viewBox: "-5 -3 24 24",
+    parts: [
+      {
+        d: "M11 6V16H3V6H11ZM9.5 0H4.5L3.5 1H0V3H14V1H10.5L9.5 0ZM13 4H1V16C1 17.1 1.9 18 3 18H11C12.1 18 13 17.1 13 16V4Z",
+      },
+    ],
+  },
+  "open-in-new": {
+    viewBox: "-3 -3 24 24",
+    parts: [
+      {
+        d: "M16 16H2V2H9V0H2C0.89 0 0 0.9 0 2V16C0 17.1 0.89 18 2 18H16C17.1 18 18 17.1 18 16V9H16V16ZM11 0V2H14.59L4.76 11.83L6.17 13.24L16 3.41V7H18V0H11Z",
+      },
+    ],
+  },
+  /* The articulation arrow between a course and what it counts for. Exported
+   * at its own 16px frame, so it carries absolute coordinates. */
+  east: {
+    viewBox: "0 0 16 16",
+    parts: [
+      {
+        d: "M10 3.33333L9.06 4.27333L12.1133 7.33333H1.33333V8.66667H12.1133L9.05333 11.7267L10 12.6667L14.6667 8L10 3.33333Z",
+      },
+    ],
+  },
   "grid-view": {
     viewBox: "0 0 24 24",
     parts: [
@@ -481,14 +548,11 @@ const ICONS = {
     viewBox: "0 0 16 16",
     parts: [{ d: "M8 12L14 4H2L8 12Z", fillRule: "evenodd" }],
   },
-  /* Drawn as strokes in the file rather than as a filled silhouette. */
   school: {
-    viewBox: "0 0 16 16",
+    viewBox: "-1 -3 24 24",
     parts: [
       {
-        d: "M14 6V12.3333M4.66667 7V10.3333C5.66667 11.4444 8.46667 13 11.6667 10.3333V7M2 5.82051L7.82857 3.66667L14 5.82051L7.82857 8.33333L2 5.82051Z",
-        stroke: true,
-        strokeWidth: 1,
+        d: "M11 0L0 6L4 8.18V14.18L11 18L18 14.18V8.18L20 7.09V14H22V6L11 0ZM17.82 6L11 9.72L4.18 6L11 2.28L17.82 6ZM16 12.99L11 15.72L6 12.99V9.27L11 12L16 9.27V12.99Z",
       },
     ],
   },

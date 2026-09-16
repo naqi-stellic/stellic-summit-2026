@@ -35,11 +35,19 @@ they open in their own tab.
 | Proactive Compliance | `/compliance.html` | from a static mock, not a frame | `src/pages/compliance.tsx` | [docs](docs/compliance.md) |
 | Explain Progress | `/explain.html` | from a static mock, not a frame | `src/pages/explain-progress.tsx` | [docs](docs/explain-progress.md) |
 
-The two products share the shell, the tokens and the icon set and nothing else.
+**Team Explore**
+
+| Prototype | Opens at | Figma | Entry | Notes |
+| --- | --- | --- | --- | --- |
+| Prospective Student Lite | `/explore.html` | [`2362:4464`](https://www.figma.com/design/8OuDzmowzaVkdMBm0SbQCr/Prostu-Transfer-Experience?node-id=2362-4464) | `src/pages/explore.tsx` | [docs](docs/explore.md) |
+
+The products share the shell, the tokens and the icon set and nothing else.
 Team Plan's two prototypes share their data and their components; Team
 Progress' three share the student, the profile cards and the audit tree.
 Compliance is that page with one more tab on it; Explain Progress is the same
-tab with one more question.
+tab with one more question. Team Explore shares less still — it is the one
+surface here that is not somebody signed in to Stellic, so it brings its own
+chrome and takes only the tokens and the icon set.
 
 ### Adding one
 
@@ -66,6 +74,14 @@ and nothing below it, so what it needed from the shell it asked for by prop:
 `AppShell` takes `section` (which nav row to stand on) and `assistant` (whether
 the assistant floats at all). Adding a case to a shared component beats
 branching on which page is calling.
+
+There is a limit to that, and Prospective Student Lite is on the other side of
+it. It
+is a prospective student on the university's own site, so it has no nav, no
+section title and no assistant — a "none of the above" mode would have left an
+`AppShell` that is only a shell for some of its callers. It gets a second
+shell (`ExploreShell`) instead, and shares the layer below: tokens, the
+retuned shadcn primitives, and the icon set.
 
 ## Stack
 

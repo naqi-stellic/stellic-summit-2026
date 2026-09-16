@@ -29,6 +29,10 @@ const SECTIONS = [
       { href: "/explain.html", name: "Explain Progress" },
     ],
   },
+  {
+    name: "Team Explore",
+    prototypes: [{ href: "/explore.html", name: "Prospective Student Lite" }],
+  },
 ]
 
 const REPO = "https://github.com/naqi-stellic/stellic-summit-2026"
@@ -65,8 +69,8 @@ export function Landing() {
           <h1 className="text-h400 font-semibold text-gray-100">Summit 2026</h1>
         </div>
 
-        {/* One column. Five cards do not tile evenly into two, and a list of
-            five names is short enough not to need to. */}
+        {/* One column. The headings are what the eye is scanning for, and a
+            list this short reads faster down than across. */}
         <div className="flex w-full max-w-[720px] flex-col gap-10">
           {SECTIONS.map((section) => (
             <section key={section.name} className="flex flex-col gap-3">
