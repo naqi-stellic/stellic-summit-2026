@@ -3,7 +3,9 @@
 Opens at `/staff-home.html`. Entry: `src/pages/staff-home.tsx`.
 
 Built from a static mock rather than a Figma frame, rebuilt on the repo's own
-shell, tokens and shadcn primitives.
+shell, tokens and shadcn primitives. `src/pages/staff-home.tsx` is the page both
+this and [Transfer Insights](transfer-insights.md) stand on; the entry point
+names the person.
 
 The other side of the desk. Every other prototype here is a student's record
 read by somebody; this is the page they land on before they get there — what is
@@ -36,12 +38,13 @@ staying apart:
 | **jobs** | what they have chosen to keep on their Home |
 | **tabs** | what that puts on the page |
 
-The case that justifies the separation is Priya, a curriculum admin with
-`auditEdit` but not `auditPublish`. She gets the Audits **job** — the findings
-about the programs she owns are hers to act on — while the Audits **tab** never
-appears, because there is no publish request she could approve. A job is not a
-tab, and `jobAllowed()` is wider than `tabAllowed()` for exactly two jobs:
-Audits and Transfer, whose insights are worth having without the queue.
+A job is not a tab. `jobAllowed()` is deliberately wider than `tabAllowed()` for
+two of them — Audits and Transfer — because their insights are worth having to
+somebody who cannot act on the queue. An editor who may change an audit but not
+publish one gets the Audits job, and the findings about the programs she owns,
+while the Audits tab never appears: there is no publish request she could
+approve. Neither prototype currently stands on that case, but the rule is what
+keeps the two ideas from collapsing into one.
 
 A job is described in Customize Home by what it brings, in the words of the
 person turning it on: "Brings a Notes tab and the Quick Actions button for
@@ -54,40 +57,31 @@ Customize is not onboarding, and nothing opens it on arrival. A new staff member
 does not yet know what these words mean; what they arrive with is an admin
 setting, and teaching them the page is its own piece of work.
 
-## View as
+## Who is looking
 
-Seven personas, switched from the account circle in the top bar
-(`staff-persona.tsx`), captioned "prototype only" because it is not a feature.
+Marcus, a registrar: he may publish an audit, edit one, decide an exception, and
+graduation clearance steps route to him.
 
-| | Role | Has |
-| --- | --- | --- |
-| Naqi | Registrar | everything |
-| Priya | Curriculum admin | `auditEdit`, no `auditPublish` |
-| Marcus | Advisor | exceptions, grad clearance, notes, appointments |
-| Jessica | Transfer office | articulations, transfer |
-| Renata Souza | Graduation Certification | grad clearance only |
-| Yusuf Demir | Study Abroad Coordinator | one workflow category |
-| Grace Okonkwo | Faculty Advisor | notes only |
+| | |
+| --- | --- |
+| Permissions | `auditPublish`, `auditEdit`, `makeException`, the `grad` and `exc` workflows |
+| Tabs | Audits, Exceptions, Graduation Clearance |
+| Insight tabs | Audits, Exceptions |
 
-It is the only way to read the page for what it is. As one person Staff Home is
-a dashboard; as seven it is a permission model, and the seven are the argument.
-Marcus has no Insights section at all. Priya has no Open Items section at all.
-Grace has a single tab.
+He is named once, in `src/main-staff-home.tsx`, and passed to `StaffHome` as
+`who`. Nothing switches: the account circle is the plain grey disc every other
+prototype carries.
 
-Both panels are keyed on the persona, so switching who is looking starts them
-afresh: the tab, the search and anything unfolded belonged to the last person.
+Jessica, a transfer officer, is the other person defined in
+`src/data/staff-home.ts`, and she is what [Transfer Insights](transfer-insights.md)
+stands on. Same page, same file, different `who` — which is the argument the
+permission model is making: one URL, and what is on it is decided by who opened
+it.
 
 Where a person lands is a fact about them rather than a default the queue holds,
 so a persona can carry `landsOn`. Jessica's tabs are Appointments and Transfer,
 in that priority order, but Transfer is what she opened Home for — so that is
-where she starts.
-
-## Transfer Insights
-
-`StaffHome` takes one optional prop, `only`, which pins the page to a single
-persona: no switcher, and the account circle goes back to being the plain grey
-circle every other prototype carries. `src/pages/transfer-insights.tsx` is that
-one line. See [docs](transfer-insights.md).
+where she starts. Marcus takes the first tab he is allowed, which is Audits.
 
 ## Open Items
 
@@ -114,10 +108,9 @@ Rows behave differently on purpose:
 - **Exceptions** splits on whether there is a workflow behind the request. A
   direct one is decided here in one press. One with a workflow opens onto the
   rail instead and offers Open.
-- **Workflows** open onto the rail. **Transfer** is credit reviews only. It once
-  carried the articulations as well, which blurred the line the page is built
-  on: an articulation is not waiting on anybody, so it belongs in Insights and
-  nowhere else.
+- **Workflows** open onto the rail. Marcus has one category, Graduation
+  Clearance. Transfer is the other, and it is Jessica's — credit reviews only,
+  since an articulation is not waiting on anybody and so belongs in Insights.
 
 ### The step rail
 
@@ -128,9 +121,9 @@ their step, who it is sitting with now and how long it has been there.
 
 The actions hang off the step that is waiting on **you**, not off the row,
 because a workflow that enforces no order between two steps is waiting on both
-and only one of them is yours. Study Abroad Course Approval is the case: the
-registrar's step takes the buttons, and the study abroad office's says "Waiting
-since Aug 2, not waiting on you."
+and only one of them is yours. `openSteps()` names every open step and
+`yourStep()` picks the one the buttons belong to; no row in the data currently
+has two open at once, so the case is supported rather than shown.
 
 ## Insights
 
@@ -151,31 +144,22 @@ reader who cannot tell the red from the amber. All three glyphs are outlined:
 a filled one among two hollow ones reads as a third state rather than as the
 top of a scale.
 
-### Transfers
-
-Figma: [`16:13521`](https://www.figma.com/design/gcskEkzwNusd12TOommFW0/Staff-Home?node-id=16-13521).
-
-The Transfers tab is the one place on the page where nothing belongs to a
-program. A row is an incoming course that staff keep articulating by hand, so it
-leads with that course and the institution it comes from, and the body leads
-with the size of the pile a rule would clear — "38 pending articulations".
-
-Its second line is the only thing on Home that Stellic is guessing at: it has
-matched an incoming course to a home one. So it is the only line that carries
-the assistant's mark, and the only one that says **Suggestion** where every
-other finding says **Suggested**. Those findings are a fact with a fix; this is
-a proposal, and the wording keeps them apart.
-
 Sort is Urgency by default, which reads down the severities in turn and then by
 how many students stand behind the program. The tier filter (All / Needs fixing
 / Opportunities) marks its button with a dot, because a funnel looks the same
 either way.
 
+There is a third kind of insight that belongs to no program — an incoming course
+articulated by hand often enough to deserve a rule. It has its own tab and its
+own row, and it is on [Transfer Insights](transfer-insights.md), because it
+needs articulation rights that Marcus does not have.
+
 ### Hiding
 
-Dismissal is **per-user**: `hidden` is held per persona and every toast says
-"Other staff still see it." Nothing is destroyed — hidden findings go to a
-drawer at the foot of the same panel, as the same rows.
+Dismissal is **per-user**: a dismissal is a reading decision rather than a
+resolution, so every toast says "Other staff still see it." Nothing is destroyed
+— hidden findings go to a drawer at the foot of the same panel, as the same
+rows.
 
 There is no Restore in the drawer. An insight leaves the list by being fixed,
 not by being put back.
@@ -197,8 +181,7 @@ Three small things, shared rather than forked:
 
 - `Sidebar` grew a Home row with a Beta chip on the staff nav, and `nav()` now
   takes which row to stand on rather than hard-coding Students.
-- `AppShell` takes `navCurrent` and an `account` slot; Staff Home hangs the
-  persona menu on the account circle.
+- `AppShell` takes `navCurrent` and an `account` slot.
 - Six icons: `report`, `lightbulb`, `swap-vert`, `tune`, `inbox`, `person`.
 
 ## Not carried over

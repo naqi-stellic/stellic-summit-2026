@@ -66,7 +66,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 210,
     published: "Sep 2024",
     iso: "2024-09-10",
-    vis: ["naqi"],
+    vis: ["marcus"],
     items: [
       {
         severity: "crit",
@@ -162,7 +162,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 142,
     published: "Jan 12",
     iso: "2026-01-12",
-    vis: ["naqi"],
+    vis: ["marcus"],
     items: [
       {
         severity: "crit",
@@ -219,7 +219,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 96,
     published: "Mar 3",
     iso: "2026-03-03",
-    vis: ["naqi"],
+    vis: ["marcus"],
     items: [
       {
         severity: "crit",
@@ -245,7 +245,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 388,
     published: "Jul 28",
     iso: "2026-07-28",
-    vis: ["naqi", "priya"],
+    vis: ["marcus"],
     items: [
       {
         severity: "warn",
@@ -295,7 +295,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 41,
     published: "Jun 19",
     iso: "2026-06-19",
-    vis: ["naqi", "priya"],
+    vis: ["marcus"],
     items: [
       {
         severity: "warn",
@@ -321,7 +321,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 58,
     published: "Jul 2",
     iso: "2026-07-02",
-    vis: ["naqi", "priya"],
+    vis: ["marcus"],
     items: [
       {
         severity: "opp",
@@ -350,7 +350,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 176,
     published: "May 8",
     iso: "2026-05-08",
-    vis: ["naqi"],
+    vis: ["marcus"],
     items: [
       {
         severity: "opp",
@@ -392,7 +392,7 @@ export const ARTICULATIONS: Articulation[] = [
     impact: "38 pending articulations",
     pending: 38,
     iso: "2026-08-04",
-    vis: ["naqi", "jessica"],
+    vis: ["jessica"],
   },
   {
     id: "eq2",
@@ -402,7 +402,7 @@ export const ARTICULATIONS: Articulation[] = [
     impact: "24 pending articulations",
     pending: 24,
     iso: "2026-08-03",
-    vis: ["naqi", "jessica"],
+    vis: ["jessica"],
   },
   {
     id: "eq3",
@@ -412,7 +412,7 @@ export const ARTICULATIONS: Articulation[] = [
     impact: "17 pending articulations",
     pending: 17,
     iso: "2026-08-01",
-    vis: ["naqi", "jessica"],
+    vis: ["jessica"],
   },
 ]
 

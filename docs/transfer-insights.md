@@ -2,31 +2,22 @@
 
 Opens at `/transfer-insights.html`. Entry: `src/pages/transfer-insights.tsx`.
 
-Staff Home with the switcher taken off and one person left standing in it.
+Staff Home with the transfer officer standing in it rather than the registrar.
 
 ## What differs
 
-One thing, passed to `StaffHome`: `only="jessica"`. That pins the page to a
-single persona, which has two consequences and no others.
-
-The **account circle** goes back to being an account circle — the plain grey
-disc with initials that every other prototype carries — rather than the "View
-as" menu. There is nothing to switch to.
-
-The **greeting** uses the cleared-items tally rather than the "viewing Home with
-Jessica's permissions" line. That second line exists to explain why the page
-just changed shape under you, and here nothing did.
-
-Everything else is Staff Home's, so a change to either lands in both.
+One thing, passed to `StaffHome`: `who="jessica"` where Staff Home passes
+`who="marcus"`. There is no second difference — the permission model does the
+rest, and a change to either prototype lands in both.
 
 ## Why it is worth having twice
 
-Read as seven people, Staff Home argues that one URL can be seven pages, and the
-permission model is the argument. That is a long way round if what you want to
-show is a transfer office.
+Because the page is not one page. Staff Home is a registrar's morning: publish
+requests to approve, exceptions to decide, graduation clearances sitting with
+him, and twenty-six things wrong with the audits he can edit. Nothing on it is
+Jessica's.
 
-Read as Jessica alone the page argues something narrower. Her Home is two
-panels and the line between them:
+Hers is two panels and the line between them:
 
 - **Open Items · Transfer** — two credit reviews waiting on her decision, each
   opening onto the rail that says who has already signed and how long it has
@@ -35,13 +26,28 @@ panels and the line between them:
   hand often enough that a rule would clear the pile, each with the home course
   Stellic suggests mapping it onto.
 
-The same distinction the whole page is built on, with nothing else in the frame
-to dilute it: one panel is work somebody sent her, the other is work nobody
-sent her.
+One panel is work somebody sent her; the other is work nobody sent her. That is
+the distinction the whole page is built on, with nothing else in the frame to
+dilute it.
+
+### The Transfers row
+
+Figma: [`16:13521`](https://www.figma.com/design/gcskEkzwNusd12TOommFW0/Staff-Home?node-id=16-13521).
+
+The one place in either prototype where an insight belongs to no program. The
+row is an incoming course, so it leads with that course and the institution it
+comes from, and the body leads with the size of the pile a rule would clear —
+"38 pending articulations".
+
+Its second line is the only thing on Home that Stellic is guessing at: it has
+matched an incoming course to a home one. So it is the only line that carries
+the assistant's mark, and the only one that says **Suggestion** where every
+other finding says **Suggested**. Those findings are a fact with a fix; this is
+a proposal, and the wording keeps them apart.
 
 ## Jessica
 
-Defined once, in `src/data/staff-home.ts`, and used by both prototypes:
+Defined in `src/data/staff-home.ts` beside Marcus, who is the other one:
 
 | | |
 | --- | --- |

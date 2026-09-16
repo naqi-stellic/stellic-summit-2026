@@ -9,23 +9,17 @@ import { Face, Panel, Section } from "@/components/stellic/staff-chrome"
 import { Customize } from "@/components/stellic/staff-customize"
 import { Insights } from "@/components/stellic/staff-insights"
 import { OpenItems } from "@/components/stellic/staff-open-items"
-import { PersonaMenu } from "@/components/stellic/staff-persona"
 import { ToastProvider, useToast } from "@/components/stellic/staff-toast"
-import {
-  PERSONAS,
-  defaultJobs,
-  personaOf,
-  type PersonaKey,
-} from "@/data/staff-home"
+import { defaultJobs, personaOf, type PersonaKey } from "@/data/staff-home"
 import { EXCEPTIONS, PUBLISH_REQUESTS, REPORTS, TODAY } from "@/data/staff-queue"
 
 /* Staff Home.
  *
- * One page that has to be several pages. A registrar, an advisor and a transfer
- * officer open the same URL to do entirely different work, so what is on it is
- * decided twice over: by what the institution granted them, and by what they
- * have said they want to see. The account circle switches between seven of
- * them, which is the only way to read the page for what it is.
+ * One page that has to be several pages. A registrar and a transfer officer
+ * open it to do entirely different work, so what is on it is decided twice
+ * over: by what the institution granted them, and by what they have said they
+ * want to see. Each prototype standing on this file names its person and gets
+ * their page — `who` is the only thing that differs between them.
  *
  * Under the greeting it is two panels, and the whole design is the line between
  * them. Open Items is work somebody sent you: it is routed, it is waiting, and
@@ -33,43 +27,28 @@ import { EXCEPTIONS, PUBLISH_REQUESTS, REPORTS, TODAY } from "@/data/staff-queue
  * the audits you can change, and it wants a fix. Both are built out of the same
  * furniture and read in the same three moves, so the page is learned once. */
 
-export function StaffHome({ only }: { only?: PersonaKey }) {
+export function StaffHome({ who }: { who: PersonaKey }) {
   return (
     <TooltipProvider delayDuration={200}>
       <ToastProvider>
-        <Home only={only} />
+        <Home who={who} />
       </ToastProvider>
     </TooltipProvider>
   )
 }
 
-function Home({ only }: { only?: PersonaKey }) {
+function Home({ who }: { who: PersonaKey }) {
   const toast = useToast()
-  /* Given, the page is that one person's Home and nobody else's: no switcher,
-     and the account circle goes back to being the account circle. */
-  const [key, setKey] = useState<PersonaKey>(only ?? "naqi")
-  /* Held per persona, because it is a per-user setting: switching who is
-     looking must not carry the last person's choices over. */
-  const [jobs, setJobs] = useState(() =>
-    Object.fromEntries(
-      PERSONAS.map((person) => [person.key, defaultJobs(person.perms)])
-    ) as Record<PersonaKey, Record<string, boolean>>
-  )
-  /* Same again for dismissals. A dismissal is a reading decision, not a
-     resolution, so it never leaves anybody else's list. */
-  const [hidden, setHidden] = useState(
-    () => Object.fromEntries(PERSONAS.map((person) => [person.key, new Set<string>()])) as Record<
-      PersonaKey,
-      Set<string>
-    >
-  )
+  const persona = personaOf(who)
+
+  const [jobs, setJobs] = useState(() => defaultJobs(persona.perms))
+  /* A dismissal is a reading decision rather than a resolution, so it is this
+     person's alone — it never leaves anybody else's list. */
+  const [hidden, setHidden] = useState(() => new Set<string>())
   const [publishes, setPublishes] = useState(PUBLISH_REQUESTS)
   const [exceptions, setExceptions] = useState(EXCEPTIONS)
   const [cleared, setCleared] = useState(45)
   const [customizing, setCustomizing] = useState(false)
-
-  const persona = personaOf(key)
-  const mine = jobs[key]
 
   const elsewhere = (what: string) => toast(`${what} (Exists in the real app)`)
 
@@ -80,13 +59,9 @@ function Home({ only }: { only?: PersonaKey }) {
       title="Home"
       assistant={false}
       account={
-        only ? (
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-field text-gray-0">
-            {persona.initials}
-          </span>
-        ) : (
-          <PersonaMenu persona={persona} onSelect={setKey} />
-        )
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-field text-gray-0">
+          {persona.initials}
+        </span>
       }
     >
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 pt-8 pb-24">
@@ -98,20 +73,8 @@ function Home({ only }: { only?: PersonaKey }) {
             <div>
               <h2 className="text-h400 font-semibold text-gray-100">Welcome, {persona.name}!</h2>
               <p className="mt-1 text-body-md text-gray-80">
-                {/* The second line belongs to the switcher, not to the product:
-                    it is there to say why the page just changed shape. Where
-                    there is no switcher, the tally is the real line. */}
-                {!only && key !== "naqi" ? (
-                  <>
-                    {persona.role} · viewing Home with {persona.name}'s permissions
-                  </>
-                ) : (
-                  <>
-                    Keep it up! You've cleared{" "}
-                    <span className="font-semibold text-gray-100">{cleared}</span> items this week
-                    🙌
-                  </>
-                )}
+                Keep it up! You've cleared{" "}
+                <span className="font-semibold text-gray-100">{cleared}</span> items this week 🙌
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -123,7 +86,7 @@ function Home({ only }: { only?: PersonaKey }) {
                 <Icon name="tune" size={16} />
               </Button>
               {/* Quick Actions is a note action, so it arrives with Notes. */}
-              {mine.notes && (
+              {jobs.notes && (
                 <Button
                   variant="primary"
                   onClick={() =>
@@ -137,7 +100,7 @@ function Home({ only }: { only?: PersonaKey }) {
             </div>
           </div>
 
-          {mine.reports && (
+          {jobs.reports && (
             <Section
               title="Reports"
               controls={
@@ -177,7 +140,7 @@ function Home({ only }: { only?: PersonaKey }) {
 
           {/* Today's schedule rides with the Appointments job rather than
               standing on its own: it is the same work, read two ways. */}
-          {mine.appts && (
+          {jobs.appts && (
             <Section
               title="Today's Appointments"
               controls={
@@ -225,13 +188,9 @@ function Home({ only }: { only?: PersonaKey }) {
             </Section>
           )}
 
-          {/* Keyed on the persona so switching who is looking starts the queue
-              afresh — the tab, the search and anything unfolded belonged to the
-              last person, not to this one. */}
           <OpenItems
-            key={key}
             persona={persona}
-            jobs={mine}
+            jobs={jobs}
             publishes={publishes}
             exceptions={exceptions}
             onResolve={(kind, id) =>
@@ -243,18 +202,15 @@ function Home({ only }: { only?: PersonaKey }) {
           />
 
           <Insights
-            key={`insights-${key}`}
             persona={persona}
-            jobs={mine}
-            hidden={hidden[key]}
-            onHide={(ids) =>
-              setHidden((all) => ({ ...all, [key]: new Set([...all[key], ...ids]) }))
-            }
+            jobs={jobs}
+            hidden={hidden}
+            onHide={(ids) => setHidden((all) => new Set([...all, ...ids]))}
             onRestore={(ids) =>
               setHidden((all) => {
-                const next = new Set(all[key])
+                const next = new Set(all)
                 ids.forEach((id) => next.delete(id))
-                return { ...all, [key]: next }
+                return next
               })
             }
             onCleared={(n) => setCleared((total) => total + n)}
@@ -266,10 +222,8 @@ function Home({ only }: { only?: PersonaKey }) {
         open={customizing}
         onOpenChange={setCustomizing}
         persona={persona}
-        jobs={mine}
-        onToggle={(job, on) =>
-          setJobs((all) => ({ ...all, [key]: { ...all[key], [job]: on } }))
-        }
+        jobs={jobs}
+        onToggle={(job, on) => setJobs((all) => ({ ...all, [job]: on }))}
       />
     </AppShell>
   )

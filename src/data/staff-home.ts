@@ -1,21 +1,22 @@
 /* Who is looking, and what that lets them see.
  *
- * Staff Home is one page that has to be several pages, because a registrar, an
- * advisor and a transfer officer open it to do entirely different work. The
- * model has three layers and the whole design depends on them staying apart:
+ * Staff Home is one page that has to be several pages, because a registrar and a
+ * transfer officer open it to do entirely different work. Two prototypes stand
+ * on this file, each pinned to one of them, and what they have in common is the
+ * model rather than the screen: three layers, kept apart.
  *
  *   permissions  what the institution granted this person
  *   jobs         what they have chosen to keep on their Home
  *   tabs         what that puts on the page
  *
- * The case that justifies the separation is a curriculum admin who may edit an
- * audit but not publish one. She gets the Audits *job* — the insights about the
- * programs she owns are hers to act on — while the Audits *tab* never appears,
- * because there is no publish request she could approve. A job is not a tab. */
+ * A job is not a tab. Audits and Transfer are jobs wider than their tabs,
+ * because their insights are worth having to somebody who cannot act on the
+ * queue — an editor who may change an audit but not publish one still wants to
+ * know what is wrong with it. */
 
 /* ============================================================ Tabs */
 
-export type TabKey = "notes" | "appts" | "audits" | "exceptions" | "grad" | "transfer" | "other"
+export type TabKey = "notes" | "appts" | "audits" | "exceptions" | "grad" | "transfer"
 
 /** Display order, which is priority order rather than the alphabetical order
  *  Customize Home uses: a person's own record-keeping first, then the requests
@@ -27,7 +28,6 @@ export const ALL_TABS: TabKey[] = [
   "exceptions",
   "grad",
   "transfer",
-  "other",
 ]
 
 export const TAB_LABELS: Record<TabKey, string> = {
@@ -37,20 +37,12 @@ export const TAB_LABELS: Record<TabKey, string> = {
   exceptions: "Exceptions",
   grad: "Graduation Clearance",
   transfer: "Transfer",
-  other: "Other Requests",
 }
 
-export type PersonaKey =
-  | "naqi"
-  | "priya"
-  | "marcus"
-  | "jessica"
-  | "records"
-  | "abroad"
-  | "faculty"
+export type PersonaKey = "marcus" | "jessica"
 
 /** A workflow category whose steps can route to a person. */
-export type WorkflowKey = "grad" | "transfer" | "other" | "exc"
+export type WorkflowKey = "grad" | "transfer" | "exc"
 
 export type Perms = {
   /** May approve a publish request, which is what puts the Audits tab on Home. */
@@ -71,8 +63,8 @@ export type Persona = {
   key: PersonaKey
   name: string
   initials: string
-  /** Avatar ground. Not a token — these are people, not states. */
-  color: string
+  /** Not rendered anywhere. It is here because a permission set on its own does
+   *  not say what job somebody does, and the next reader will want to know. */
   role: string
   /** The tab this person opens on, where the first one in priority order is
    *  not the reason they came. Falls back to the first tab they are allowed. */
@@ -82,56 +74,22 @@ export type Persona = {
 
 export const PERSONAS: Persona[] = [
   {
-    key: "naqi",
-    name: "Naqi",
-    initials: "NQ",
-    color: "#6941c6",
+    key: "marcus",
+    name: "Marcus",
+    initials: "ML",
     role: "Registrar",
     perms: {
       auditPublish: true,
       auditEdit: true,
       makeException: true,
-      articulations: true,
-      wf: ["grad", "transfer", "other", "exc"],
-    },
-  },
-  {
-    key: "priya",
-    name: "Priya",
-    initials: "PR",
-    color: "#0b7a6b",
-    role: "Curriculum admin",
-    /* Edits audits, cannot publish them. The reason the job and the tab are
-       two different things. */
-    perms: {
-      auditPublish: false,
-      auditEdit: true,
-      makeException: false,
-      articulations: false,
-      wf: [],
-    },
-  },
-  {
-    key: "marcus",
-    name: "Marcus",
-    initials: "ML",
-    color: "#175cd3",
-    role: "Advisor",
-    perms: {
-      auditPublish: false,
-      auditEdit: false,
-      makeException: true,
       articulations: false,
       wf: ["grad", "exc"],
-      notes: true,
-      appts: true,
     },
   },
   {
     key: "jessica",
     name: "Jessica",
     initials: "J",
-    color: "#0e7090",
     role: "Transfer office",
     /* Transfer is the work she is here for, so it is where she lands — ahead
        of the appointments that would otherwise take the first slot. */
@@ -143,49 +101,6 @@ export const PERSONAS: Persona[] = [
       articulations: true,
       wf: ["transfer"],
       appts: true,
-    },
-  },
-  {
-    key: "records",
-    name: "Renata Souza",
-    initials: "RS",
-    color: "#b54708",
-    role: "Graduation Certification",
-    perms: {
-      auditPublish: false,
-      auditEdit: false,
-      makeException: false,
-      articulations: false,
-      wf: ["grad"],
-    },
-  },
-  {
-    key: "abroad",
-    name: "Yusuf Demir",
-    initials: "YD",
-    color: "#9f1ab1",
-    role: "Study Abroad Coordinator",
-    perms: {
-      auditPublish: false,
-      auditEdit: false,
-      makeException: false,
-      articulations: false,
-      wf: ["other"],
-    },
-  },
-  {
-    key: "faculty",
-    name: "Grace Okonkwo",
-    initials: "GO",
-    color: "#3e4784",
-    role: "Faculty Advisor",
-    perms: {
-      auditPublish: false,
-      auditEdit: false,
-      makeException: false,
-      articulations: false,
-      wf: [],
-      notes: true,
     },
   },
 ]
@@ -202,7 +117,6 @@ export type JobKey =
   | "exc"
   | "grad"
   | "transfer"
-  | "other"
 
 export type Job = {
   key: JobKey
@@ -276,14 +190,6 @@ export const JOBS: Job[] = [
     tab: "transfer",
     insights: true,
   },
-  {
-    key: "other",
-    name: "Other requests",
-    detail:
-      "Study abroad approvals and any other custom workflow that routes a step to you.",
-    tab: "other",
-    insights: false,
-  },
 ]
 
 export const JOB_OF_TAB: Record<TabKey, JobKey> = {
@@ -293,7 +199,6 @@ export const JOB_OF_TAB: Record<TabKey, JobKey> = {
   exceptions: "exc",
   grad: "grad",
   transfer: "transfer",
-  other: "other",
 }
 
 /* ============================================================ Gating */

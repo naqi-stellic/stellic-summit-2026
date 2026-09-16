@@ -82,7 +82,6 @@ const PLACEHOLDER: Record<TabKey, string> = {
   exceptions: "Student name, keyword",
   grad: "Student or workflow",
   transfer: "Student or workflow",
-  other: "Student or workflow",
 }
 
 const hay = (row: unknown) => JSON.stringify(row).toLowerCase()
@@ -141,7 +140,6 @@ export function OpenItems({
         perms.makeException || perms.wf.includes("exc") ? routedTo(exceptions, persona.key) : [],
       grad: perms.wf.includes("grad") ? routedTo(WORKFLOWS.grad.rows, persona.key) : [],
       transfer: perms.wf.includes("transfer") ? routedTo(WORKFLOWS.transfer.rows, persona.key) : [],
-      other: perms.wf.includes("other") ? routedTo(WORKFLOWS.other.rows, persona.key) : [],
       notes: perms.notes ? NOTES : [],
       appts: perms.appts ? APPTS : [],
     }),
@@ -156,7 +154,7 @@ export function OpenItems({
     if (key === "appts") return mine.appts.filter((appt) => appt.attended === null).length
     if (key === "audits") return mine.publishes.length
     if (key === "exceptions") return mine.exceptions.length
-    return mine[key as "grad" | "transfer" | "other"].length
+    return mine[key as "grad" | "transfer"].length
   }
 
   /* Switching a job off can take the tab you were standing on away, so where
@@ -174,7 +172,7 @@ export function OpenItems({
     const item = { id: key, label: TAB_LABELS[key], count }
     /* A workflow category between cycles has nothing in it and should not cost
        the bar a slot — unless you are standing in it. */
-    if (["grad", "transfer", "other"].includes(key) && count === 0 && here !== key) more.push(item)
+    if (["grad", "transfer"].includes(key) && count === 0 && here !== key) more.push(item)
     else shown.push(item)
   }
 
@@ -311,7 +309,7 @@ export function OpenItems({
             />
           )}
 
-          {(here === "grad" || here === "transfer" || here === "other") && (
+          {(here === "grad" || here === "transfer") && (
             <Workflows
               category={here}
               rows={arrange(mine[here], sort, query)}
@@ -601,7 +599,7 @@ function Workflows({
   onToggle,
   elsewhere,
 }: {
-  category: "grad" | "transfer" | "other"
+  category: "grad" | "transfer"
   rows: WorkflowRow[]
   all: number
   query: string

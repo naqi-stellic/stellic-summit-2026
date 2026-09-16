@@ -122,7 +122,7 @@ export const PUBLISH_REQUESTS: PublishRequest[] = [
     date: "Jul 31",
     iso: "2026-07-31",
     large: true,
-    vis: ["naqi"],
+    vis: ["marcus"],
   },
   {
     id: "ap2",
@@ -133,7 +133,7 @@ export const PUBLISH_REQUESTS: PublishRequest[] = [
     date: "Aug 3",
     iso: "2026-08-03",
     large: false,
-    vis: ["naqi"],
+    vis: ["marcus"],
   },
 ]
 
@@ -177,7 +177,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     date: "Aug 3",
     iso: "2026-08-03",
     code: "BS-CS",
-    vis: ["naqi", "marcus"],
+    vis: ["marcus"],
   },
   {
     id: "ex2",
@@ -195,7 +195,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     date: "Aug 1",
     iso: "2026-08-01",
     code: "BA-POLSCI",
-    vis: ["naqi"],
+    vis: ["marcus"],
   },
   {
     id: "ex3",
@@ -213,7 +213,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     date: "Jul 30",
     iso: "2026-07-30",
     code: "BS-BIOL",
-    vis: ["naqi"],
+    vis: ["marcus"],
     workflow: {
       name: "Make an Exception: Science Core",
       fields: [
@@ -266,42 +266,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     date: "Aug 4",
     iso: "2026-08-04",
     code: "BFA-GD",
-    vis: ["naqi", "marcus"],
-  },
-  {
-    id: "ex5",
-    student: "Luca Ferreira",
-    username: "lferreira",
-    initials: "LF",
-    color: "#b42318",
-    program: "Environmental Eng (MS)",
-    kind: "wf",
-    title: "Waive or Modify Requirement Constraint",
-    requirement: "Thesis Track",
-    justification: "Fieldwork season shifted data collection by six weeks.",
-    requestedBy: "Luca Ferreira (student)",
-    date: "Aug 2",
-    iso: "2026-08-02",
-    code: "MS-ENVE",
     vis: ["marcus"],
-    workflow: {
-      name: "Make an Exception: Thesis Track",
-      fields: [
-        ["Requested change", "Proposal deadline from Sep 1 to Oct 15"],
-        ["Supporting file", "fieldwork-schedule.xlsx"],
-        ["Student note", "Sampling window moved due to late thaw; committee is aware."],
-      ],
-      steps: [
-        { state: "done", label: "Program director", who: "Dr. H. Osei · approved", when: "Aug 2" },
-        { state: "cur", label: "Advisor input", who: "You", when: "now", since: "Aug 2" },
-        {
-          state: "todo",
-          label: "Registrar review",
-          who: "Registrar office",
-          when: "Final step, needs exception permission",
-        },
-      ],
-    },
   },
 ]
 
@@ -324,7 +289,7 @@ export type WorkflowRow = {
   steps?: Step[]
 }
 
-export const WORKFLOWS: Record<"grad" | "transfer" | "other", { label: string; rows: WorkflowRow[] }> =
+export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: WorkflowRow[] }> =
   {
     grad: {
       label: "Graduation Clearance",
@@ -338,7 +303,7 @@ export const WORKFLOWS: Record<"grad" | "transfer" | "other", { label: string; r
           program: "Biology (BSc)",
           date: "Jul 29",
           iso: "2026-07-29",
-          vis: ["naqi", "marcus", "records"],
+          vis: ["marcus"],
           status: "In Review",
           openedAs: "Graduation application",
           fields: [
@@ -374,7 +339,7 @@ export const WORKFLOWS: Record<"grad" | "transfer" | "other", { label: string; r
           program: "Computer Science (BSc)",
           date: "Jul 31",
           iso: "2026-07-31",
-          vis: ["naqi", "marcus", "records"],
+          vis: ["marcus"],
           status: "In Review",
           openedAs: "Graduation application",
           fields: [
@@ -409,7 +374,7 @@ export const WORKFLOWS: Record<"grad" | "transfer" | "other", { label: string; r
           program: "Political Science (BA)",
           date: "Aug 2",
           iso: "2026-08-02",
-          vis: ["naqi", "records"],
+          vis: ["marcus"],
           status: "In Review",
           openedAs: "Graduation application",
           fields: [
@@ -443,7 +408,7 @@ export const WORKFLOWS: Record<"grad" | "transfer" | "other", { label: string; r
           program: "Computer Science (BSc)",
           date: "Aug 3",
           iso: "2026-08-03",
-          vis: ["naqi", "jessica"],
+          vis: ["jessica"],
           fields: [
             ["Incoming course", "MATH 1210 Calculus, Seneca College"],
             ["Proposed equivalency", "MATH 1200 Calculus I"],
@@ -470,7 +435,7 @@ export const WORKFLOWS: Record<"grad" | "transfer" | "other", { label: string; r
           program: "Biology (BSc)",
           date: "Aug 4",
           iso: "2026-08-04",
-          vis: ["naqi", "jessica"],
+          vis: ["jessica"],
           fields: [
             ["Institution", "University College Cork"],
             [
@@ -489,40 +454,6 @@ export const WORKFLOWS: Record<"grad" | "transfer" | "other", { label: string; r
               fields: [["Finding", "2 equivalent, 1 as elective credit"]],
             },
             { state: "cur", label: "Registrar decision", who: "You", when: "now", since: "Aug 4" },
-          ],
-        },
-      ],
-    },
-    other: {
-      label: "Other Requests",
-      rows: [
-        {
-          id: "o1",
-          name: "Study Abroad Course Approval",
-          student: "Nadia Haddad",
-          initials: "NH",
-          color: "#9f1ab1",
-          program: "Political Science (BA)",
-          date: "Aug 2",
-          iso: "2026-08-02",
-          vis: ["naqi", "abroad"],
-          fields: [
-            ["Host institution", "Sciences Po Lyon, Spring 2027"],
-            ["Courses to pre-approve", "4, list attached"],
-            ["Counts toward", "Regional Studies, 6 credits"],
-            ["Financial aid", "Confirmed portable"],
-          ],
-          steps: [
-            { state: "done", label: "Advisor review", who: "Nessa Whitfield · approved", when: "Aug 2" },
-            { state: "cur", label: "Registrar approval", who: "You", when: "now", since: "Aug 2" },
-            /* Two current steps: this workflow enforces no order between them,
-               and only one of the two is yours. */
-            {
-              state: "cur",
-              label: "Study abroad office",
-              who: "Yusuf Demir",
-              when: "Waiting since Aug 2, not waiting on you",
-            },
           ],
         },
       ],

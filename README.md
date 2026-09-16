@@ -41,7 +41,7 @@ they open in their own tab.
 | Prototype | Opens at | Figma | Entry | Notes |
 | --- | --- | --- | --- | --- |
 | Prospective Student Lite | `/explore.html` | [`2362:4464`](https://www.figma.com/design/8OuDzmowzaVkdMBm0SbQCr/Prostu-Transfer-Experience?node-id=2362-4464) | `src/pages/explore.tsx` | [docs](docs/explore.md) |
-| Transfer Insights | `/transfer-insights.html` | Staff Home, pinned to one persona | `src/pages/transfer-insights.tsx` | [docs](docs/transfer-insights.md) |
+| Transfer Insights | `/transfer-insights.html` | Staff Home with a different `who` | `src/pages/transfer-insights.tsx` | [docs](docs/transfer-insights.md) |
 
 The products share the shell, the tokens and the icon set and nothing else.
 Team Plan's two prototypes share their data and their components; three of Team
@@ -49,8 +49,8 @@ Progress' four share the student, the profile cards and the audit tree.
 Compliance is that page with one more tab on it; Explain Progress is the same
 tab with one more question. Staff Home is the exception: it is the other side
 of the desk, so it shares the shell and the design system and brings its own
-data — and Transfer Insights, filed under Team Explore, is Staff Home with one
-prop set. Prospective Student Lite shares less still — it is the one surface
+data — and Transfer Insights, filed under Team Explore, is the same page
+standing on a different person. Prospective Student Lite shares less still — it is the one surface
 here that is nobody signed in to Stellic, so it brings its own chrome and takes
 only the tokens and the icon set.
 
