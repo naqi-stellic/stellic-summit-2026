@@ -44,12 +44,45 @@ export type Program = {
 
 const seat = (name: string) => ({ code: "", name })
 
-/* Three, chosen rather than listed. This student is two years into a Business
- * Administration B.S. with a Finance concentration, so what is worth putting
- * in front of them is what their transcript already half-answers: a minor that
- * is nearly free, a major that their business core almost covers, and a major
- * that would put their unmatched dual-enrolment credit to work. */
+/* Four, chosen rather than listed, and sized the way the registrar sizes them:
+ * a certificate is five courses, a minor is six, and a bachelor's is forty —
+ * the same forty the student's own degree asks for, because it is the same
+ * institution and the same 120 credits. Getting that wrong is the quickest way
+ * to make a what-if lie: a major that asks for 84 credits would look like a
+ * bargain next to the one the student is already on.
+ *
+ * This student is two years into a Business Administration B.S. with a Finance
+ * concentration, so what is worth putting in front of them is what their
+ * transcript already half-answers. */
 export const PROGRAMS: Program[] = [
+  {
+    id: "business-analytics-certificate",
+    name: "Business Analytics",
+    kind: "Certificate",
+    school: "College of Business",
+    department: "Management",
+    campus: "Downtown campus",
+    level: "Undergraduate",
+    requirements: [
+      {
+        id: "cert-core",
+        name: "Certificate Core",
+        tags: ["fulfill all"],
+        courses: [
+          { code: "MIS 120", name: "Business Technology Essentials" },
+          { code: "STAT 210", name: "Business Statistics" },
+          { code: "DATA 220", name: "Foundations of Data Analytics" },
+          { code: "DATA 330", name: "Business Intelligence" },
+        ],
+      },
+      {
+        id: "cert-elective",
+        name: "Certificate Elective",
+        tags: ["at least 3 credits"],
+        courses: [seat("Analytics elective")],
+      },
+    ],
+  },
   {
     id: "data-analytics-minor",
     name: "Data Analytics",
@@ -66,7 +99,6 @@ export const PROGRAMS: Program[] = [
         courses: [
           { code: "MATH 140", name: "Business Calculus" },
           { code: "STAT 210", name: "Business Statistics" },
-          { code: "MIS 120", name: "Business Technology Essentials" },
           { code: "DATA 220", name: "Foundations of Data Analytics" },
           { code: "DATA 310", name: "Data Visualization" },
         ],
@@ -97,12 +129,17 @@ export const PROGRAMS: Program[] = [
         tags: ["fulfill all"],
         courses: [
           { code: "ENGL 101", name: "Composition I" },
+          { code: "ENGL 210", name: "Advanced Composition" },
+          { code: "COMM 230", name: "Public Speaking" },
           { code: "HIST 110", name: "World Civilizations" },
+          { code: "HIST 205", name: "Modern World History" },
           { code: "PSYC 101", name: "Introduction to Psychology" },
           { code: "ART 105", name: "Visual Culture" },
-          { code: "COMM 230", name: "Public Speaking" },
-          { code: "ENGL 210", name: "Advanced Composition" },
           { code: "PHIL 240", name: "Business Ethics" },
+          { code: "MATH 140", name: "Business Calculus" },
+          { code: "BIOL 105", name: "Principles of Biology" },
+          { code: "GEOG 120", name: "World Regional Geography" },
+          seat("General education elective"),
         ],
       },
       {
@@ -111,17 +148,17 @@ export const PROGRAMS: Program[] = [
         tags: ["fulfill all"],
         courses: [
           { code: "BUS 101", name: "Introduction to Business" },
-          { code: "MATH 140", name: "Business Calculus" },
           { code: "ACCT 201", name: "Financial Accounting" },
-          { code: "ECON 201", name: "Principles of Microeconomics" },
-          { code: "MIS 120", name: "Business Technology Essentials" },
           { code: "ACCT 202", name: "Managerial Accounting" },
+          { code: "ECON 201", name: "Principles of Microeconomics" },
           { code: "ECON 202", name: "Principles of Macroeconomics" },
+          { code: "MIS 120", name: "Business Technology Essentials" },
           { code: "STAT 210", name: "Business Statistics" },
           { code: "MKTG 201", name: "Principles of Marketing" },
           { code: "MGMT 210", name: "Principles of Management" },
           { code: "BLAW 301", name: "Business Law & Ethics" },
           { code: "OPS 320", name: "Operations & Supply Chain Management" },
+          { code: "BUS 390", name: "Business Communication" },
         ],
       },
       {
@@ -135,13 +172,21 @@ export const PROGRAMS: Program[] = [
           { code: "ACCT 410", name: "Auditing" },
           { code: "ACCT 420", name: "Federal Taxation" },
           { code: "ACCT 450", name: "Accounting Information Systems" },
+          { code: "ACCT 460", name: "Advanced Financial Accounting" },
+          { code: "ACCT 495", name: "Accounting Capstone" },
         ],
       },
       {
         id: "acct-electives",
-        name: "Open Electives",
+        name: "Accounting Electives",
         tags: ["at least 9 credits"],
-        courses: [seat("Open elective"), seat("Open elective"), seat("Open elective")],
+        courses: Array.from({ length: 3 }, () => seat("Accounting elective")),
+      },
+      {
+        id: "acct-open",
+        name: "Open Electives",
+        tags: ["at least 15 credits"],
+        courses: Array.from({ length: 5 }, () => seat("Open elective")),
       },
     ],
   },
@@ -160,15 +205,20 @@ export const PROGRAMS: Program[] = [
         tags: ["fulfill all"],
         courses: [
           { code: "ENGL 101", name: "Composition I" },
-          { code: "HIST 110", name: "World Civilizations" },
-          { code: "PSYC 101", name: "Introduction to Psychology" },
-          { code: "ART 105", name: "Visual Culture" },
+          { code: "ENGL 210", name: "Advanced Composition" },
           { code: "COMM 230", name: "Public Speaking" },
+          { code: "HIST 110", name: "World Civilizations" },
           /* Two the business degree had no use for. A language and a second
              history are exactly what an arts degree asks for, which is the
              whole argument for reading the unmatched list. */
-          { code: "SPAN 101", name: "Elementary Spanish I" },
           { code: "HIST 101", name: "United States History I" },
+          { code: "SPAN 101", name: "Elementary Spanish I" },
+          { code: "SPAN 102", name: "Elementary Spanish II" },
+          { code: "PSYC 101", name: "Introduction to Psychology" },
+          { code: "ART 105", name: "Visual Culture" },
+          { code: "PHIL 240", name: "Business Ethics" },
+          { code: "BIOL 105", name: "Principles of Biology" },
+          { code: "GEOG 120", name: "World Regional Geography" },
         ],
       },
       {
@@ -181,6 +231,8 @@ export const PROGRAMS: Program[] = [
           { code: "ECON 310", name: "Money & Banking" },
           { code: "ECON 320", name: "Intermediate Microeconomics" },
           { code: "ECON 330", name: "Intermediate Macroeconomics" },
+          { code: "ECON 340", name: "Public Finance" },
+          { code: "ECON 410", name: "International Economics" },
           { code: "ECON 400", name: "Economic Research Seminar" },
         ],
       },
@@ -198,19 +250,14 @@ export const PROGRAMS: Program[] = [
       {
         id: "econ-electives",
         name: "Economics Electives",
-        tags: ["at least 12 credits"],
-        courses: [
-          seat("Economics elective"),
-          seat("Economics elective"),
-          seat("Economics elective"),
-          seat("Economics elective"),
-        ],
+        tags: ["at least 15 credits"],
+        courses: Array.from({ length: 5 }, () => seat("Economics elective")),
       },
       {
         id: "econ-open",
         name: "Open Electives",
-        tags: ["at least 18 credits"],
-        courses: Array.from({ length: 6 }, () => seat("Open elective")),
+        tags: ["at least 33 credits"],
+        courses: Array.from({ length: 11 }, () => seat("Open elective")),
       },
     ],
   },
@@ -273,6 +320,10 @@ export function auditProgram(program: Program, alongside: boolean): AuditGroup {
       name: requirement.name,
       mark: groupMark(courses),
       tags: requirement.tags,
+      /* A group of nothing but seats has nothing to read — every row of it
+         says the same thing — so it opens folded, as the degree's own
+         elective groups do. */
+      collapsed: requirement.courses.every((want) => !want.code),
       children: courses,
     }
   })
@@ -334,12 +385,6 @@ export function programTotal(program: Program): number {
  *  student actually weighs when deciding whether a program is worth taking on. */
 export function creditsToGo(program: Program): number {
   return programStanding(program).remaining * CREDITS_PER_COURSE
-}
-
-/** How much of the program the transcript already answers. */
-export function alreadyCounting(program: Program): number {
-  const { taken, inProgress, planned } = programStanding(program)
-  return taken + inProgress + planned
 }
 
 /* ------------------------------------------------------------------ filters */

@@ -248,9 +248,37 @@ shows. When the two disagreed during the build it was a real bug — seats share
 an empty course code, and keying a record on one made every seat answer for
 every other.
 
-Three programs, chosen rather than listed: a minor the transcript nearly
-answers already, a major the business core almost covers, and a major that
-would put the unmatched dual-enrolment credit to work.
+Four programs, chosen rather than listed, and **sized the way a registrar
+sizes them**:
+
+| | | |
+| --- | --- | --- |
+| Business Analytics | certificate | 5 courses · 15 credits |
+| Data Analytics | minor | 6 courses · 18 credits |
+| Accounting, B.S. | major | 40 courses · 120 credits |
+| Economics, B.A. | major | 40 courses · 120 credits |
+
+The majors are forty requirements because that is what this institution's own
+degree asks for — `DEGREE.credits` is 120 and a requirement is one three-credit
+course everywhere in this repo. Getting that wrong is the quickest way to make
+a what-if lie: an 84-credit "major" would look like a bargain beside the degree
+the student is already on, and every credits-to-go on the results would be
+understated. A certificate and a minor really are a third and a fifth of that,
+and the cards show it.
+
+Each is chosen for what this transcript already half-answers: the certificate
+is nearly free, Accounting is what the business core almost covers, and
+Economics is the one that puts the unmatched dual-enrolment credit to work.
+
+## What is left over
+
+The unmatched section is not a list. It is `unmatchedAgainst()` — everything
+the student holds that nothing on screen has claimed — so it is asked again
+whenever the what-if changes what is on screen. Switch this student to
+Accounting and their two finance courses fall into it, because an accounting
+major has no use for Corporate Finance; switch to Economics and the Spanish
+comes out of it while five business courses go in. That is the real cost of
+changing major, and it is the one place the audit shows it.
 
 `src/data/programs.ts` holds the catalogue and the matching. A program is the
 same thing an audit is — a number of requirements and how many of them the

@@ -412,13 +412,17 @@ export const AUDIT_VIEWS = [
 
 export const AUDIT_TOTAL = DEGREE.requirements
 
-/** The dual-enrolment terms the student came in with. Real credit — twelve of
- *  it — that the degree asked for none of, which is exactly what the unmatched
- *  section is for. The plan prototypes hold the same four courses above their
- *  first year for the same reason. */
-export const UNMATCHED = {
-  count: 4,
-  blurb: "These courses are in plan, but are not fulfilling any requirement",
+/** The dual-enrolment terms the student came in with: real credit — twelve of
+ *  it — that the degree asked for none of, which is why it is what the
+ *  unmatched section opens on. The plan prototypes hold the same four courses
+ *  above their first year for the same reason.
+ *
+ *  How many of them are unmatched is not written here. That depends on what is
+ *  on screen, so `unmatchedAgainst()` answers it. */
+export const UNMATCHED_BLURB =
+  "These courses are in plan, but are not fulfilling any requirement"
+
+export const DUAL_ENROLMENT = {
   courses: [
     course("MATH 110", "College Algebra", "taken", "Taken in Fall '24", "A"),
     course("ENGL 100", "Academic Writing Basics", "taken", "Taken in Fall '24", "A-"),
@@ -452,7 +456,7 @@ export const STUDENT_RECORD: Map<string, AuditCourse> = (() => {
   walk(TREE)
   /* The unmatched courses are held too. The degree has no use for them, which
      is exactly why they are worth offering to another one. */
-  UNMATCHED.courses.forEach((course) => held.set(course.code, course))
+  DUAL_ENROLMENT.courses.forEach((course) => held.set(course.code, course))
 
   return held
 })()
@@ -477,3 +481,27 @@ export const COUNTING_NOW: Set<string> = (() => {
 
   return counting
 })()
+
+/** What no program on screen has a use for. The degree's own unmatched list is
+ *  this same question asked of the degree alone — so once a what-if puts a
+ *  second program up, or swaps the degree out, the answer has to be asked
+ *  again: an Economics B.A. wants the Spanish the business degree ignored, and
+ *  wants nothing to do with the finance courses it prized.
+ *
+ *  An additional check is stepped over. It consumes nothing, so a course it
+ *  lists is not thereby spoken for. */
+export function unmatchedAgainst(trees: AuditGroup[]): AuditCourse[] {
+  const claimed = new Set<string>()
+
+  const walk = (entry: AuditEntry) => {
+    if (entry.kind === "course") {
+      if (entry.code && entry.mark !== "remaining") claimed.add(entry.code)
+      return
+    }
+    if (entry.restated) return
+    entry.children.forEach(walk)
+  }
+  trees.forEach(walk)
+
+  return [...STUDENT_RECORD.values()].filter((course) => !claimed.has(course.code))
+}

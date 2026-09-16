@@ -23,7 +23,8 @@ import {
   AUDIT_TABS,
   AUDIT_VIEWS,
   LAST_COMPUTED,
-  UNMATCHED,
+  UNMATCHED_BLURB,
+  unmatchedAgainst,
 } from "@/data/audit"
 
 /* Advanced What-If — the first screen: a student's progress against the degree
@@ -55,6 +56,11 @@ export function AdvancedWhatIf() {
         second
         ? markDoubleCounting(AUDIT, countedBy(applied!.program))
         : AUDIT
+
+  /* Asked again of whatever is on screen: a program that takes up a course
+     the degree ignored has matched it, and one that drops a course the degree
+     wanted has unmatched it. */
+  const unmatched = unmatchedAgainst(second ? [primary, second] : [primary])
 
   /* The profile says what the student is on, so it has to say this as well. */
   const programs =
@@ -111,9 +117,9 @@ export function AdvancedWhatIf() {
                   record: another thing the transcript is being read against. */}
               {second && <AuditTree audit={second} />}
               <UnmatchedSection
-                count={UNMATCHED.count}
-                blurb={UNMATCHED.blurb}
-                courses={UNMATCHED.courses}
+                count={unmatched.length}
+                blurb={UNMATCHED_BLURB}
+                courses={unmatched}
               />
               {/* The foot of the audit, and the way into the what-if. It
                   stands on the card's own padding, as the tree and the
