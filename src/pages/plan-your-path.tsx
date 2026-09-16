@@ -296,7 +296,13 @@ export function PlanYourPath({
   const [reqsOpen, setReqsOpen] = useState(false)
   /* A course from the remaining list, opened on its own before it is anywhere
      in the plan. */
-  const [openCourse, setOpenCourse] = useState<number | null>(null)
+  const [openCourse, setOpenCourse] = useState<{
+    entry: CatalogEntry
+    /** Its place in the outstanding list, where it came from there. */
+    requirement?: number
+    /** What the way back says, which depends on where it was opened from. */
+    from: string
+  } | null>(null)
   /* A course already in the plan, opened on its own. */
   const [openPlanned, setOpenPlanned] = useState<string | null>(null)
   /* The held seat opened on its own, and whether it opened on the courses that
@@ -353,8 +359,9 @@ export function PlanYourPath({
       )
     : 0
   const standing = planStanding(years)
-  /* The course from the remaining list that is open, if it is still on it. */
-  const course = requirements.find((r) => r.index === openCourse)
+  /* The course opened on its own, from the remaining list or from the courses
+     that could fill a seat. */
+  const course = openCourse
   /* Or one already planned, which brings its term with it. */
   const plannedOpen = openPlanned ? findCourse(shown, openPlanned) : null
   /* Where a course opened like that could be put: every term that takes one. */
@@ -719,7 +726,7 @@ export function PlanYourPath({
         )) ||
         /* Last in line: a generator being open is what you are doing now, and
            the reviews are what you asked for earlier. */
-        (seat && (
+        (course == null && seat && (
           <PlaceholderPanel
             /* Keyed on the seat and the view it opened on, so opening another
                — or the same one from its search button — starts there rather
@@ -728,6 +735,13 @@ export function PlanYourPath({
             course={seat.course}
             term={seat.term}
             initialView={openSeat!.view}
+            /* The seat stays open underneath, and is remembered on its list
+               rather than its detail, so coming back from a course lands where
+               the course was picked from. */
+            onOpenCourse={(entry) => {
+              setOpenSeat({ id: seat!.course.id, view: "search" })
+              setOpenCourse({ entry, from: seat!.course.name })
+            }}
             onClose={() => setOpenSeat(null)}
           />
         )) ||
@@ -755,13 +769,15 @@ export function PlanYourPath({
             key={course.entry.code}
             entry={course.entry}
             terms={plannableTerms}
+            backLabel={course.from}
             onAdd={(termId) => {
-              handleAddCourse(termId, course.entry, course.index)
+              handleAddCourse(termId, course.entry, course.requirement)
               setOpenCourse(null)
             }}
             onBack={() => setOpenCourse(null)}
             onClose={() => {
               setOpenCourse(null)
+              setOpenSeat(null)
               setReqsOpen(false)
             }}
           />
@@ -770,7 +786,16 @@ export function PlanYourPath({
           <RequirementsPanel
             entries={requirements}
             years={shown}
-            onOpenCourse={setOpenCourse}
+            onOpenCourse={(index) => {
+              const found = requirements.find((r) => r.index === index)
+              if (found) {
+                setOpenCourse({
+                  entry: found.entry,
+                  requirement: found.index,
+                  from: "remaining courses",
+                })
+              }
+            }}
           />
         )) ||
         (reviewPanel && (

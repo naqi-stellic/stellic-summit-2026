@@ -1,3 +1,4 @@
+import { cn } from "cn"
 import { useState } from "react"
 
 import { Icon } from "@/components/icon"
@@ -5,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ELECTIVE_COURSES, ALL_ELECTIVES } from "@/data/catalog"
+import { ELECTIVE_COURSES, ALL_ELECTIVES, type CatalogEntry } from "@/data/catalog"
 import {
   CREDIT_GROUP_LABEL,
   DEGREE,
@@ -30,9 +31,24 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 /* A course as the search lists it: the handle it would be dragged by, its code
    and its name. The name wraps rather than truncating — the frame's rows grow
    to two lines and several of them do. */
-function CourseRow({ code, name }: { code: string; name: string }) {
+function CourseRow({
+  code,
+  name,
+  onOpen,
+}: {
+  code: string
+  name: string
+  /** Opens the course on its own — none of these are in the plan yet. */
+  onOpen?: () => void
+}) {
   return (
-    <div className="flex w-full cursor-grab items-center gap-2 rounded-md border border-gray-40 bg-card p-[7px]">
+    <div
+      onClick={onOpen}
+      className={cn(
+        "flex w-full cursor-grab items-center gap-2 rounded-md border border-gray-40 bg-card p-[7px]",
+        onOpen && "cursor-pointer transition-colors hover:bg-gray-0"
+      )}
+    >
       <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-100" />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-body-md text-gray-80">{code}</span>
@@ -46,6 +62,7 @@ export function PlaceholderPanel({
   course,
   term,
   initialView = "detail",
+  onOpenCourse,
   onClose,
 }: {
   course: PlannedCourse
@@ -53,6 +70,8 @@ export function PlaceholderPanel({
   term: Term
   /** Opened from the card's search button, it starts on the courses. */
   initialView?: "detail" | "search"
+  /** Opens one of the courses that could fill the seat, on its own. */
+  onOpenCourse?: (entry: CatalogEntry) => void
   onClose: () => void
 }) {
   const [searching, setSearching] = useState(initialView === "search")
@@ -120,7 +139,12 @@ export function PlaceholderPanel({
           </div>
 
           {eligible.map((entry) => (
-            <CourseRow key={entry.code} code={entry.code} name={entry.name} />
+            <CourseRow
+              key={entry.code}
+              code={entry.code}
+              name={entry.name}
+              onOpen={onOpenCourse && (() => onOpenCourse(entry))}
+            />
           ))}
         </div>
       </aside>

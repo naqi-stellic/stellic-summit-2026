@@ -279,6 +279,7 @@ export function CoursePanel({
   entry,
   terms,
   planned,
+  backLabel,
   onAdd,
   onRemove,
   onBack,
@@ -290,6 +291,8 @@ export function CoursePanel({
   /** Opened from the plan rather than from the list: the course as it sits in
    *  a term, with the choices made about it and the class it is in. */
   planned?: { course: PlannedCourse; term: Term }
+  /** What the way back is to, where it is not a term. */
+  backLabel?: string
   onAdd: (termId: string) => void
   onRemove?: () => void
   onBack: () => void
@@ -313,7 +316,7 @@ export function CoursePanel({
         >
           <Icon name="chevron-left" size={14} className="shrink-0" />
           <span className="min-w-0 truncate text-left">
-            {planned ? `Back to ${planned.term.name}` : "Back to remaining courses"}
+            Back to {planned ? planned.term.name : (backLabel ?? "remaining courses")}
           </span>
         </button>
         <button

@@ -253,9 +253,13 @@ turns the panel into the course search — the courses that could fill this seat
 a finance one for a finance seat — and "Back to …" returns. The seat's own
 search button goes straight there.
 
+Clicking one of those courses opens it on its own — the same panel a course
+from the remaining list opens, in its unplanned state, since none of them is
+anywhere in the plan yet. The way back says the seat's name and lands on the
+list it was picked from rather than on the seat's own details.
+
 The search is a list, not a search: nothing filters it, and the count beside
-its heading is the design's. Choosing a course from it is not wired either —
-a seat is filled by generating the term, or by dropping a course on it.
+its heading is the design's.
 
 ## Add remaining courses
 
