@@ -14,14 +14,15 @@ export default defineConfig({
     watch: { usePolling: true, interval: 300 },
   },
   build: {
-    /* A page each: the way in, and the two prototypes it opens. They share
-       every component and all the data; what differs is which one a link
-       opens. */
+    /* A page each: the way in, and the prototypes it opens. They share the
+       shell, the tokens and the icon set; Team Plan's two share their data and
+       their components as well, where Team Progress starts its own. */
     rollupOptions: {
       input: {
         index: path.resolve(import.meta.dirname, 'index.html'),
         generator: path.resolve(import.meta.dirname, 'generator.html'),
         planner: path.resolve(import.meta.dirname, 'planner.html'),
+        'advanced-what-if': path.resolve(import.meta.dirname, 'advanced-what-if.html'),
       },
     },
   },

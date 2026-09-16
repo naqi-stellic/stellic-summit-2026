@@ -51,6 +51,11 @@
   --stellic-alert-50: #d30303;
   --stellic-alert-100: #bd0303;
 
+  /* Figma's Dividers Gray. Only the audit tree's trail lines use it: they run
+     behind the rows rather than between them, so gray/40 reads as a border
+     that isn't there. */
+  --stellic-divider: #e4e7ec;
+
   /* Sidebar masthead ground. Not a Figma variable — sampled from the frame. */
   --stellic-parchment: #f5f4ed;
 
@@ -87,6 +92,10 @@
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   /* Figma's shadow/sm: what a card lifted off the page carries. */
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px 0 rgb(0 0 0 / 0.1);
+  /* Figma's "Small Shadow": what the progress screen's cards sit on. Lower
+     and tighter than shadow/sm — a card on a page of cards, not one lifted
+     over a plan. */
+  --shadow-card: 0 2px 2px 0 rgb(21 27 38 / 0.09);
   --shadow-secondary: 0 6px 16px 0 rgb(0 0 0 / 0.12);
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
 }
@@ -124,6 +133,7 @@
   --color-gray-80: var(--stellic-gray-80);
   --color-gray-100: var(--stellic-gray-100);
   --color-stellic-blue: var(--stellic-blue);
+  --color-divider: var(--stellic-divider);
   --color-parchment: var(--stellic-parchment);
   --color-primary-0: var(--stellic-primary-0);
   --color-primary-5: var(--stellic-primary-5);
@@ -151,6 +161,7 @@
 
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
+  --shadow-card: var(--shadow-card);
   --shadow-secondary: var(--shadow-secondary);
   --shadow-2xl: var(--shadow-2xl);
 

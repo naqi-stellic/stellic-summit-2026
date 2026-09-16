@@ -1,0 +1,153 @@
+# Advanced What-If
+
+Team Progress' prototype. Opens at `/advanced-what-if.html`. Page in
+`src/pages/advanced-what-if.tsx`, audit model and sample in `src/data/audit.ts`,
+the tree in `src/components/stellic/audit-tree.tsx` and the cards above it in
+`src/components/stellic/student-profile.tsx`.
+
+Figma: [`2274:20653`](https://www.figma.com/design/prhu0x6AaQF2AVtLBFoDq3/Audit-Profile-Planner?node-id=2274-20653)
+(Student - Free Elective).
+
+## What this screen is
+
+Screen one, and nothing on it is hypothetical yet: it is a student's progress
+against the degree they are actually on. It comes first because a what-if is
+only legible against it — every question the prototype goes on to ask is "what
+would this tree look like instead", and there has to be a *this* to answer
+against.
+
+So the audit is built to be re-run, not just drawn. The rows are a tree of
+`AuditEntry`, the marks are one function of a state, and every figure above the
+tree is counted off the tree. Swapping the programs at the top should be a
+change to `AUDIT`, not a second screen.
+
+## The same student as Team Plan
+
+Scott Abott, on the 120-credit Business Administration B.S. with a Finance
+concentration — the Team Plan prototypes' student and degree, read from the
+other end. Team Plan asks "which term does this go in"; the audit asks "does
+the degree accept it".
+
+`DEGREE` and `STUDENT` are imported from `src/data/plan.ts` rather than copied,
+so the program name, the credit total, the requirement count and the milestones
+cannot drift between the two products. Every course in the tree is one the plan
+holds or still owes, and the forty requirements split exactly as the planner
+has them:
+
+| | |
+| --- | --- |
+| 10 taken | the finished 2026-2027 year |
+| 5 under way | Fall 2027 |
+| 1 registered | FIN 340, whose class is chosen |
+| 1 planned | the Finance elective seat in Spring 2028 |
+| 23 outstanding | `REMAINING_REQUIREMENTS` in `src/data/catalog.ts` |
+
+The four dual-enrolment courses the student came in with are the **unmatched
+courses**: real credit the degree asked for none of, which is what that section
+is for and why the planner shows the same four above its first year.
+
+Names are the ones a registrar would print — "Business Core", "Finance
+Advanced", "Complete your declared concentration" — with no catalogue codes
+trailing the requirement names.
+
+## Numbers
+
+`auditStanding()` walks the tree, counts rows by mark, and every tally on the
+page comes from it: the red counts on the degree row, the Courses bar and its
+legend, the two bars on the degree and program rows, and both halves of the
+Official / Planned toggle. The bar cannot say anything the audit does not.
+
+Two rules make that count come out right. Additional checks — Residency and 120
+Total Credits — are `restated: true` and stepped over, because they re-list
+courses counted elsewhere and walking into them would count those twice. And
+registered and planned sit with the remainder rather than with what is earned,
+because on a bar about what the degree still wants, a seat you have booked is
+still a seat you owe.
+
+Milestones are `DEGREE.milestonesDone` of `DEGREE.milestones` — 3 of 13.
+
+## The tree
+
+Every row is the same three parts — the trail that says where it sits, the mark
+that says how it stands, and the row.
+
+**The trail** is one 40px cell per level above the row, with a 1px line down
+each cell's middle (`--stellic-divider`, `#e4e7ec`). The line overruns its row
+by the 8px gap between rows, so it reads as one line running behind the tree
+rather than a dash beside each row. The elbow into a row is a bordered box with
+`rounded-bl-lg` rather than two lines meeting, which is what gives the frame's
+rounded corner and keeps both strokes on the same pixel grid; it stops 4px short
+of the cell, which is the gap the row leaves in front of itself. A last child's
+line arrives and stops, so a branch visibly ends.
+
+Which lines continue is the one thing the renderer has to know that the data
+does not say, so `EntryRows` carries it down as `stem`.
+
+**The mark** is a 24px square: a ground and a glyph, and that is the whole
+vocabulary. Taken is a green check, in progress a green clock, registered an
+orange calendar, planned an amber outlined check, remaining an empty red box,
+and optional a grey box struck through — a rule rather than a box to fill. A
+program's milestone mark carries a flag as well, which is why the box is
+`min-w-6` and not `size-6`.
+
+**The row** differs only in its ground: a requirement sits on grey, a course on
+white with a border, and the degree and its program on nothing at all, because
+they head the tree rather than hang off it. An elective seat leaves the code
+column empty — the requirement is settled and which course answers it is not.
+
+## Icons
+
+The audit screen draws its own 16px outlines rather than scaling Material's 24px
+grid down, and in several places they are *different glyphs*, not smaller ones:
+the campus mark is a pin, not a folded map; the level tag is an outlined tag,
+not a filled one; the mortarboard is drawn in strokes; the toggles carry a
+filled disc where a heading carries an outlined `info`; and "last computed"
+carries a stopwatch. Those are traced from the frame's own exports into
+`src/components/icon.tsx` under a `Stellic 16px set` heading, the way the rest of
+the icon set was. Everything in the tree is an outline — a solid flag or a solid
+clock reads as a different state at 16px.
+
+## What is drawn and not wired
+
+Everything on the page is the frame's, and almost none of it acts yet — there is
+one screen, so there is nowhere for anything to go:
+
+- the five tabs switch, but only Progress has a design behind it; the other four
+  say so rather than pretending;
+- Official / Planned switches and lights up, and both read the same tree, since
+  there is no second audit to compute yet;
+- the scope select, the recompute button, the unmatched filter, Request to
+  Review Plan and Actions are all drawn and inert;
+- so is every chevron in the tree — nothing collapses.
+
+## Shared chrome
+
+Two seams were added to the shell rather than a second copy of it:
+
+- `AppShell`'s `section="progress"` stands the sidebar on Track Progress and
+  closes Schedule down to one row. The nav is otherwise the plan prototypes'
+  nav, in the same order — `src/components/layout/sidebar.tsx` builds both from
+  one list and only opens Schedule onto its terms where a term is the thing you
+  came to work on;
+- `assistant={false}` takes the floating assistant off, because this frame does
+  not draw one. It is the shell's button, not a prototype's, so the prototype
+  has to say it does not want it.
+
+`--shadow-card` and `--stellic-divider` were added to `src/index.css`: Figma's
+Small Shadow, which is lower and tighter than the `shadow/sm` the plan surfaces
+use, and the Dividers Gray the trail lines run in.
+
+## Responsive
+
+`main` is the `@container`. The content column is the frame's own 1518px,
+centred, so at 1920 it sits 81px clear of the nav on both sides exactly as the
+frame does. Under that the cards wrap: the three-card network row breaks to one
+per line, the Milestones bar drops under Courses, and the audit tree scrolls
+sideways inside its card rather than crushing the rows, because a tree whose
+indentation collapses is no longer a tree.
+
+## Departure from the frame
+
+The bars are shares of real counts rather than Figma's pixel widths — the same
+trade the plan generator makes, and for the same reason: a bar that cannot move
+is a picture of a bar. Everything else structural lands where the frame puts it.

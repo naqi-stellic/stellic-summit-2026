@@ -16,20 +16,45 @@ type NavItem = {
   badge?: string
 }
 
-const NAV: NavItem[] = [
-  { label: "Home", glyph: "s-home" },
-  { label: "Track Progress", glyph: "s-check", strong: true },
-  { label: "Schedule", glyph: "calendar-today", trailing: "expand-more" },
+/* Which product the page belongs to. The nav is the same nav either way — what
+ * differs is the row you are standing on, and whether Schedule is opened onto
+ * its terms, which it is only where a term is what you came to work on. */
+export type NavSection = "plan" | "progress"
+
+const SCHEDULE: NavItem = {
+  label: "Schedule",
+  glyph: "calendar-today",
+  trailing: "expand-more",
+}
+
+const TERMS: NavItem[] = [
   { label: "Fall 2027", spacerRing: true, badge: "In Progress" },
   { label: "Spring 2028", spacerRing: true },
   { label: "Fall 2028", spacerRing: true },
   { label: "Spring 2029", spacerRing: true },
-  { label: "Plan Your Path", glyph: "s-navigation", strong: true, active: true },
+]
+
+const EXPLORE: NavItem[] = [
   { label: "Explore", strong: true, trailing: "s-arrow-down-fill" },
   { label: "Courses", strong: true, sub: true },
   { label: "Pathways", strong: true, sub: true },
   { label: "Programs", strong: true, sub: true },
 ]
+
+function nav(section: NavSection): NavItem[] {
+  const here = (label: string) => label === (section === "plan" ? "Plan Your Path" : "Track Progress")
+
+  return [
+    { label: "Home", glyph: "s-home" },
+    { label: "Track Progress", glyph: "s-check", strong: true, active: here("Track Progress") },
+    SCHEDULE,
+    /* Opened onto its terms on the plan surfaces, where a term is the thing
+       you came to work on; closed everywhere else. */
+    ...(section === "plan" ? TERMS : []),
+    { label: "Plan Your Path", glyph: "s-navigation", strong: true, active: here("Plan Your Path") },
+    ...EXPLORE,
+  ]
+}
 
 const QUICK_LINKS = [
   "Academic Calendar",
@@ -54,7 +79,7 @@ function NavRing({ item }: { item: NavItem }) {
   )
 }
 
-export function Sidebar() {
+export function Sidebar({ section = "plan" }: { section?: NavSection }) {
   return (
     <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-4 bg-gray-100 text-white">
       <div className="flex h-18 shrink-0 items-start border-b border-gray-40 bg-parchment p-5">
@@ -70,7 +95,7 @@ export function Sidebar() {
 
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
         <nav className="flex shrink-0 flex-col items-start border-b border-gray-60 pb-[15px]">
-          {NAV.map((item) => (
+          {nav(section).map((item) => (
             <a
               key={item.label}
               href="#"

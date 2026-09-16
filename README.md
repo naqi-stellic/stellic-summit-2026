@@ -17,12 +17,25 @@ Polling sidesteps the daemon; drop it if `fseventsd` is behaving.
 
 ## Prototypes
 
-`/` is a landing page with a link to each; both open in their own tab.
+`/` is a landing page with a link to each, grouped by the product it belongs to;
+they open in their own tab.
+
+**Team Plan**
 
 | Prototype | Opens at | Figma | Entry | Notes |
 | --- | --- | --- | --- | --- |
 | Plan Generator | `/generator.html` | [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392) | `src/pages/plan-your-path.tsx` | [docs](docs/plan-generator.md) |
 | Planner | `/planner.html` | same frames, minus the generators | `src/pages/planner.tsx` | [docs](docs/planner.md) |
+
+**Team Progress**
+
+| Prototype | Opens at | Figma | Entry | Notes |
+| --- | --- | --- | --- | --- |
+| Advanced What-If | `/advanced-what-if.html` | [`2274:20653`](https://www.figma.com/design/prhu0x6AaQF2AVtLBFoDq3/Audit-Profile-Planner?node-id=2274-20653) | `src/pages/advanced-what-if.tsx` | [docs](docs/advanced-what-if.md) |
+
+The two products share the shell, the tokens and the icon set and nothing else.
+Team Plan's two prototypes also share their data and their components; Team
+Progress starts its own, on its own student.
 
 ### Adding one
 
@@ -43,6 +56,12 @@ The second one landed as a thin page over the first rather than a copy of it:
 starting plan and switch its generators off. Where the two are meant to differ,
 that file is the seam — it is the one place a change can be made to one
 prototype without reaching the other.
+
+A prototype from another product is not that. Advanced What-If shares the shell
+and nothing below it, so what it needed from the shell it asked for by prop:
+`AppShell` takes `section` (which nav row to stand on) and `assistant` (whether
+the assistant floats at all). Adding a case to a shared component beats
+branching on which page is calling.
 
 ## Stack
 

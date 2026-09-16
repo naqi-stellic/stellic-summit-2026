@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
 import { useMediaQuery } from "@/lib/use-media-query"
-import { Sidebar } from "@/components/layout/sidebar"
+import { Sidebar, type NavSection } from "@/components/layout/sidebar"
 import { Topbar } from "@/components/layout/topbar"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,12 +19,19 @@ export function AppShell({
   title,
   children,
   panel,
+  section = "plan",
+  assistant = true,
   assistLabel = "Generate with Assistant",
 }: {
   title: string
   children: ReactNode
   /** When present, the content area splits into a resizable two-column view. */
   panel?: ReactNode
+  /** Which product the page belongs to — the sidebar stands on that row. */
+  section?: NavSection
+  /** Whether the assistant floats over the page at all. Off where the design
+   *  does not draw it, which is every screen outside Team Plan. */
+  assistant?: boolean
   /** What the pill beside the assistant offers to do next. `null` for a
    *  prototype that does not generate: the assistant keeps its own button. */
   assistLabel?: string | null
@@ -39,7 +46,7 @@ export function AppShell({
         {/* The nav is 240px of a phone's 390 — it goes away, and the planner
             gets the width. */}
         <div className="max-md:hidden">
-          <Sidebar />
+          <Sidebar section={section} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar title={title} />
@@ -80,6 +87,7 @@ export function AppShell({
         </div>
       </div>
 
+      {assistant && (
       <div className="fixed right-10 bottom-10 flex max-w-[calc(100vw-3rem)] items-center gap-[10px] max-md:right-4 max-md:bottom-4">
         {panel && assistLabel && (
           /* A pill in the design, not the usual 4px button radius. On a phone
@@ -97,6 +105,7 @@ export function AppShell({
           <Icon name="auto-awesome" size={20} />
         </button>
       </div>
+      )}
     </>
   )
 }
