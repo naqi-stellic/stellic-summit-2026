@@ -74,11 +74,15 @@ that says how it stands, and the row.
 **The trail** is one 40px cell per level above the row, with a 1px line down
 each cell's middle (`--stellic-divider`, `#e4e7ec`). The line overruns its row
 by the 8px gap between rows, so it reads as one line running behind the tree
-rather than a dash beside each row. The elbow into a row is a bordered box with
-`rounded-bl-lg` rather than two lines meeting, which is what gives the frame's
-rounded corner and keeps both strokes on the same pixel grid; it stops 4px short
-of the cell, which is the gap the row leaves in front of itself. A last child's
-line arrives and stops, so a branch visibly ends.
+rather than a dash beside each row.
+
+A branch that carries on meets its row square — it is a T, and the line goes
+past. A branch that ends turns into its row on an 8px radius and stops there,
+drawn as a bordered box with `rounded-bl-lg` rather than two lines meeting, so
+both strokes land on the same pixel grid. That corner is the only one in the
+tree, and it is the whole of how you see, glancing down the left edge, where a
+group finishes. Both stop 4px short of the cell, which is the gap the row
+leaves in front of itself.
 
 Which lines continue is the one thing the renderer has to know that the data
 does not say, so `EntryRows` carries it down as `stem`.

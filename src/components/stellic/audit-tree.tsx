@@ -83,34 +83,35 @@ function AuditBar({
    Where a row sits in the tree, one 40px cell per level above it. The line
    runs down the middle of its cell and overruns the row by the gap between
    rows, so it reads as one line behind the tree rather than a dash per row.
-   The last cell turns right into the row, stopping 4px short — which is the
-   gap the row itself leaves. */
+
+   A branch that carries on meets its row square — it is a T, and the line
+   goes past. A branch that ends turns into its row on an 8px radius and stops
+   there, which is the only corner in the tree and the whole of how you see,
+   at a glance down the left edge, where a group finishes. Both stop 4px short
+   of the cell, which is the gap the row leaves in front of itself. */
 
 function Trail({ cells }: { cells: { line: boolean; elbow?: boolean; last?: boolean }[] }) {
   if (cells.length === 0) return null
 
   return (
     <span className="flex shrink-0 gap-0.5 self-stretch" aria-hidden="true">
-      {cells.map((cell, i) => (
-        <span key={i} className="relative w-10 shrink-0">
-          {/* The elbow is a bordered box, not two lines meeting: that is what
-              gives the frame's rounded corner, and it keeps the two strokes on
-              the same pixel grid. It reaches 4px short of the cell's right
-              edge, which is the gap the row leaves in front of itself. */}
-          {cell.elbow && (
-            <span className="absolute -top-2 bottom-1/2 right-1 left-5 rounded-bl-lg border-b border-l border-divider" />
-          )}
-          {/* The line above, and — unless the branch ends here — below. It
-              overruns the row by the gap between rows, so the tree reads as
-              one line running behind it rather than a dash beside each row. */}
-          {cell.line && !cell.elbow && (
-            <span className="absolute -top-2 -bottom-2 left-5 w-px bg-divider" />
-          )}
-          {cell.elbow && !cell.last && (
-            <span className="absolute top-1/2 -bottom-2 left-5 w-px bg-divider" />
-          )}
-        </span>
-      ))}
+      {cells.map((cell, i) => {
+        const ends = cell.elbow && cell.last
+
+        return (
+          <span key={i} className="relative w-10 shrink-0">
+            {cell.line && !ends && (
+              <span className="absolute -top-2 -bottom-2 left-5 w-px bg-divider" />
+            )}
+            {cell.elbow &&
+              (ends ? (
+                <span className="absolute -top-2 bottom-1/2 right-1 left-5 rounded-bl-lg border-b border-l border-divider" />
+              ) : (
+                <span className="absolute top-1/2 right-1 left-5 h-px bg-divider" />
+              ))}
+          </span>
+        )
+      })}
     </span>
   )
 }
