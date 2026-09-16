@@ -44,8 +44,12 @@ export type Constraint = {
   notes?: ConstraintNote[]
   limit?: { used: number; cap: number }
   progress?: { met: number; total: number }
-  /** Courses this rule keeps out, and therefore the reason they are told. */
+  /** Courses this rule keeps out. */
   blocks?: string[]
+  /** What a blocked course is told, where the rule's own wording is not the
+   *  reason. A course already counting elsewhere has not failed a constraint —
+   *  it has been spent. */
+  blockReason?: string
 }
 
 export type ConstraintStatus = "rule" | "ok" | "unmet"
@@ -70,24 +74,29 @@ const CLAIMED = COUNTING_NOW
  *  programme's rulebook under each of them would make them all read alike. */
 const PROGRAM_RULES: Constraint[] = [
   {
+    id: "total-units",
+    text: `At least ${DEGREE.credits} units in total`,
+    progress: { met: 51, total: DEGREE.credits },
+  },
+  {
     id: "course-set",
-    text: "Count courses only from the given course set",
+    text: `Take at least ${DEGREE.credits} credits from a given course set`,
     notes: [{ text: "Level: Undergraduate" }],
   },
   {
+    id: "min-units",
+    text: "Minimum of 1 unit for each course counted",
+  },
+  {
     id: "double-count",
-    text: "Courses may double count without any limit with other programs unless specified otherwise",
+    text: "Double counting allowed up to unlimited courses with other programs",
   },
   {
-    id: "upper-division",
-    text: "At least 40 credits at the 300 level or above",
-    limit: { used: 6, cap: 40 },
-  },
-  {
-    id: "pass-no-pass",
-    text: "At most 12 credits with the following grading option: Pass/No Pass",
+    id: "pass-grades",
+    text: "At most 12 units with defined grades",
     limit: { used: 0, cap: 12 },
     notes: [
+      { text: "Grades: P" },
       { text: "The following courses will not impact this limit:" },
       {
         codes: [
@@ -106,197 +115,167 @@ const PROGRAM_RULES: Constraint[] = [
     ],
   },
   {
-    id: "transfer-grade",
-    text: "At most 9 credits with transfer grades of C- grade or lower",
+    id: "low-grades",
+    text: "At most 9 units with defined grades",
     limit: { used: 0, cap: 9 },
+    notes: [{ text: "Grades: C-, D+, D, D-, F" }, { text: "Transfer coursework only" }],
   },
   {
     id: "military",
-    text: "Take at most 15 credits that match the following:",
+    text: "Take at most 15 credits from the following attributes:",
     limit: { used: 3, cap: 15 },
     notes: [
-      {
-        text: "Course with one of these attributes: AERO or equivalent; MLSC or equivalent; NAVS or equivalent",
-      },
+      { text: "AERO or equivalent; MLSC or equivalent; NAVS or equivalent" },
       { text: "Course with an enrollment tag Military Transfer Credit" },
     ],
   },
   {
     id: "developmental",
-    text: "Following courses will not count:",
+    text: "Do not count courses from a given set",
     notes: [
       { codes: ["MATH 110", "ENGL 100"] },
       {
-        text: "Course with one of these attributes: DVAL or equivalent; Developmental Mathematics; Developmental Composition; ESL Composition; Study Skills; Hold for Graduate Credit; NDAP or equivalent",
+        text: "Courses with attributes: DVAL or equivalent; Developmental Mathematics; Developmental Composition; ESL Composition; Study Skills",
         truncated: true,
       },
     ],
     blocks: ["MATH 110", "ENGL 100"],
   },
-  {
-    id: "subrequirement-overlap",
-    text: "Courses may double count without any limit within the following subrequirements with no restrictions",
-  },
 ]
 
 /** A requirement's own rules — what this requirement, and no other, asks for.
- *  The ones that name courses name real ones off this student's record, which
- *  is what lets a mapping cite them by name rather than in the abstract. */
+ *  Worded the way the audit editor words them, because a constraint a student
+ *  is shown and a constraint a registrar typed should be the same sentence. */
 const OWN_RULES: Record<string, Constraint[]> = {
   "general-education": [
     {
-      id: "gen-ed-spread",
-      text: "At most 6 credits from any one subject",
+      id: "gen-ed-subject",
+      text: "Take at most 6 credits from a given course set",
       limit: { used: 6, cap: 6 },
       notes: [
-        { text: "Two of the eight must be taken outside the College of Business" },
-        { text: "A subject is the code before the number: ENGL, HIST, PSYC" },
+        { text: "Course set: any one subject code" },
+        { text: "Two of the eight must fall outside subject codes ACCT, BUS, ECON, FIN, MIS, MGMT, MKTG" },
       ],
     },
     {
-      id: "gen-ed-letter",
-      text: "Courses must be taken for a letter grade",
+      id: "gen-ed-grade",
+      text: "Pass with minimum grade C",
+    },
+    {
+      id: "gen-ed-pass",
+      text: "Non-letter grade passed courses can satisfy this requirement",
       notes: [
-        { text: "Pass/No Pass is not accepted against general education" },
-        { text: "The following courses are exempt from this rule:" },
-        {
-          codes: ["ARTP 101", "FILM 150", "MUSC 120", "MUSC 165", "PHIL 120", "UNIV 101"],
-        },
+        { text: "For the following courses only:" },
+        { codes: ["ARTP 101", "FILM 150", "MUSC 120", "MUSC 165", "PHIL 120", "UNIV 101"] },
       ],
     },
     {
-      id: "gen-ed-breadth",
-      text: "Take at least 3 credits from each of the following:",
-      progress: { met: 4, total: 5 },
+      id: "gen-ed-attributes",
+      text: "Take 2 courses from the following attributes:",
+      progress: { met: 1, total: 2 },
       notes: [
-        { text: "Written Communication; Oral Communication; Humanities" },
-        { text: "Social Sciences; Natural Sciences" },
-        { text: "A single course may answer only one of them" },
-      ],
-    },
-    {
-      id: "gen-ed-ace",
-      text: "Take at most 6 credits that match the following:",
-      limit: { used: 3, cap: 6 },
-      notes: [
-        { text: "Course with one of these attributes: ACE 1 or equivalent; ACE 2 or equivalent" },
+        { text: "ACE 1 or equivalent; ACE 2 or equivalent" },
         { text: "Course with an enrollment tag Honors Section" },
       ],
     },
     {
-      id: "gen-ed-developmental",
-      text: "Following courses will not count:",
+      id: "gen-ed-exclude",
+      text: "Do not count courses from a given set",
       notes: [
         { codes: ["MATH 110", "ENGL 100"] },
-        {
-          text: "Course with one of these attributes: DVAL or equivalent; Developmental Mathematics; Developmental Composition; ESL Composition; Study Skills",
-          truncated: true,
-        },
+        { text: "Courses with codes between MATH 000 and MATH 109 do not count" },
       ],
       blocks: ["MATH 110", "ENGL 100"],
     },
     {
       id: "gen-ed-overlap",
-      text: "Courses may double count within the following subrequirements with no restrictions",
-      notes: [
-        { text: "Humanities, Social Sciences and Natural Sciences share a 3-credit overlap" },
-      ],
+      text: "Up to 1 course may double count with other requirements",
     },
   ],
   "business-core": [
+    { id: "core-grade", text: "Pass with minimum grade C" },
+    { id: "core-units", text: "Minimum of 3 units for each course counted" },
     {
-      id: "core-grade",
-      text: "Earn a C or better in every course",
-      notes: [{ text: "A course below C must be repeated before it counts" }],
+      id: "core-transfer",
+      text: "Take at most 12 credits from a given course set",
+      limit: { used: 0, cap: 12 },
+      notes: [{ text: "Course set: transfer coursework" }],
     },
     {
-      id: "core-substitution",
-      text: "College Algebra does not substitute for Business Calculus",
+      id: "core-exclude",
+      text: "Do not count courses from a given set",
       notes: [{ codes: ["MATH 110"] }],
       blocks: ["MATH 110"],
-    },
-    {
-      id: "core-residency",
-      text: "At most 12 credits of the core may be transferred in",
-      limit: { used: 0, cap: 12 },
     },
   ],
   "declared-concentration": [
     {
       id: "one-concentration",
-      text: "Only one concentration may be declared",
-      notes: [{ text: `Declared: ${DEGREE.concentration}` }],
+      text: "The requirement is waived for students with any of these tags:",
+      notes: [{ text: "Concentration Exempt; Second Degree Seeking" }],
     },
   ],
   "finance-declared": [
     {
-      id: "finance-gpa",
-      text: "Earn a 2.5 GPA across the concentration",
-      notes: [{ text: "Measured on the concentration's own courses only" }],
+      id: "finance-tag",
+      text: "Student must have 1 attributes/tags",
+      notes: [{ text: `Tag: ${DEGREE.concentration} concentration declared` }],
     },
+    { id: "finance-grade", text: "Pass with minimum grade C" },
   ],
   "finance-core": [
+    { id: "finance-core-grade", text: "Pass with minimum grade C" },
     {
-      id: "finance-prereq",
-      text: "Corporate Finance is a prerequisite for every other course here",
-      notes: [{ codes: ["FIN 301"] }],
-    },
-    {
-      id: "finance-internship",
-      text: "At most 3 credits from an internship or independent study",
-      limit: { used: 0, cap: 3 },
+      id: "finance-core-timing",
+      text: "Same semester or after 60 credits are earned",
+      notes: [{ text: "Courses taken before the sixtieth credit will not count" }],
     },
   ],
   "finance-advanced": [
     {
-      id: "advanced-level",
-      text: "Every course must be at the 400 level",
+      id: "advanced-range",
+      text: "Courses with codes between FIN 100 and FIN 399 do not count",
     },
   ],
   "finance-electives": [
-    {
-      id: "elective-department",
-      text: "Electives must carry the FIN subject code",
-      notes: [{ text: "A course from another subject needs a written substitution" }],
-    },
+    { id: "elective-preapproved", text: "Other pre-approved courses may also count" },
   ],
   "open-electives": [
     {
       id: "elective-unclaimed",
-      text: "Any undergraduate course not already counting toward another requirement",
-      /* Which is most of the transcript, and the reason this requirement can
-         look empty while the student has a hundred credits. */
+      /* The one constraint that reads the rest of the audit: an elective is by
+         definition whatever nothing else has spent. */
+      text: "Take at least 9 credits excluding the given course set",
+      notes: [{ text: "Course set: courses counting toward another requirement" }],
       blocks: [...CLAIMED],
+      blockReason: "Already counting toward another requirement",
     },
   ],
   capstone: [
     {
-      id: "capstone-last",
-      text: "Taken in the final year",
-      notes: [{ text: "May not be started before 90 credits are earned" }],
+      id: "capstone-timing",
+      text: "Same semester or after 90 credits are earned",
     },
+    { id: "capstone-manual", text: "May only be satisfied manually by an institution" },
   ],
   residency: [
     {
-      id: "residency-check",
-      text: "An additional check: courses counted here are not consumed",
-      notes: [{ text: "The same course still counts toward the requirement that claimed it" }],
+      id: "residency-scope",
+      text: "Only courses from the following sub-requirements can count toward the units total",
+      notes: [{ text: "An additional check: it consumes nothing, and always double counts" }],
     },
     {
-      id: "residency-campus",
-      text: "Credits must be earned on the main campus",
-      notes: [{ text: "Transfer and dual-enrolment credit is not eligible" }],
+      id: "residency-exclude",
+      text: "Do not count courses from a given set",
+      notes: [{ text: "Course set: transfer and dual-enrolment coursework" }],
       blocks: ["MATH 110", "ENGL 100", "HIST 101", "SPAN 101"],
     },
   ],
   "total-credits": [
+    { id: "total-min", text: "Minimum of 1 unit for each course counted" },
     {
-      id: "total-check",
-      text: "An additional check: courses counted here are not consumed",
-    },
-    {
-      id: "total-developmental",
-      text: "Developmental coursework does not count toward the total",
+      id: "total-exclude",
+      text: "Do not count courses from a given set",
       notes: [{ codes: ["MATH 110", "ENGL 100"] }],
       blocks: ["MATH 110", "ENGL 100"],
     },
@@ -343,7 +322,7 @@ function fulfilment(group: AuditGroup): Constraint {
   if (tag.includes("fulfill any")) {
     return {
       id: `${group.id}-fulfil`,
-      text: "Fulfill any one of the following requirements",
+      text: "Fulfill any 1 of the following sub-requirements",
       progress: { met: children.filter(isComplete).length, total: 1 },
     }
   }
@@ -352,16 +331,22 @@ function fulfilment(group: AuditGroup): Constraint {
   if (credits) {
     return {
       id: `${group.id}-fulfil`,
-      text: `At least ${credits[1]} credits from the following`,
+      text: `Take at least ${credits[1]} credits from a given course set`,
       progress: { met: counting * CREDITS_PER_COURSE, total: Number(credits[1]) },
+    }
+  }
+
+  if (holdsGroups) {
+    return {
+      id: `${group.id}-fulfil`,
+      text: "Fulfill all of the following sub-requirements",
+      progress: { met: children.filter(isComplete).length, total: children.length },
     }
   }
 
   return {
     id: `${group.id}-fulfil`,
-    text: holdsGroups
-      ? "Fulfill all of the following requirements"
-      : "Fulfill all of the following courses",
+    text: `Take at least ${children.length} courses from a given course set`,
     progress: { met: children.filter(isComplete).length, total: children.length },
   }
 }
@@ -398,7 +383,12 @@ export function courseMappings(group: AuditGroup): CourseMapping[] {
   const blocked = new Map<string, string>()
   constraints.forEach((constraint) =>
     constraint.blocks?.forEach((code) => {
-      if (!blocked.has(code)) blocked.set(code, constraint.text)
+      if (!blocked.has(code)) {
+        blocked.set(
+          code,
+          constraint.blockReason ?? `Does not satisfy "${constraint.text}"`
+        )
+      }
     })
   )
 

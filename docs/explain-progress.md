@@ -24,12 +24,38 @@ is what the rule says and not a measurement of anyone.
 
 A rule in a real catalogue is rarely one sentence, and flattening it to one is
 how an explanation stops explaining. A `Constraint` carries **notes**, and a
-note can carry its own course chips — so "at most 12 credits Pass/No Pass,
-except for these ten courses" is said in that order, with the exception nested
-under the rule it is an exception to, and a list that runs longer than anyone
-reads standing up trails off into "+ N more" or "… Show more". General
-Education is the worked example: six rules, four of them with sub-clauses, two
-of them naming courses.
+note can carry its own course chips — so "at most 12 units with defined grades,
+and here are the ten courses exempt from it" is said in that order, with the
+exception nested under the rule it is an exception to, and a list that runs
+longer than anyone reads standing up trails off into "+ N more" or "…&nbsp;Show
+more".
+
+**The wording is Stellic's own.** Every constraint here is one of the types the
+audit editor actually offers — `Take at least [x] credits from a given course
+set`, `Take at most [x] credits from a given course set`, `Pass with minimum
+grade [x]`, `At most [x] units with defined grades`, `Non-letter grade passed
+courses can satisfy this requirement`, `Take [x] courses from the following
+attributes`, `Do not count courses from a given set`, `Courses with codes
+between [xx-xxx] and [xx-xxx] do not count`, `Same semester or after [y]
+credits are earned`, `Up to [x] courses may double count with other
+requirements`, `Student must have [x] attributes/tags`, `The requirement is
+waived for students with any of these tags`, `May only be satisfied manually by
+an institution`, `Only courses from the following sub-requirements can count
+toward the units total`. A constraint a student is shown and a constraint a
+registrar typed should be the same sentence.
+
+That is also what picks the derived first line: `Fulfill all of the following
+sub-requirements` where a requirement holds requirements, `Fulfill any 1 of the
+following sub-requirements` where it holds a choice, and `Take at least [x]
+courses/credits from a given course set` where it holds courses.
+
+Open Electives gets the one constraint that reads the rest of the audit —
+`Take at least 9 credits excluding the given course set`, where the set is
+everything already counting. An elective is by definition whatever nothing else
+has spent.
+
+General Education is the worked example: six rules, four with sub-clauses, two
+naming courses, two of them short.
 
 **explain** opens the panel beside the tree, which is that same wording
 measured against this student. It sits on the row, and again in the card's
@@ -80,9 +106,12 @@ than listed.
 Course mappings read the whole record against one requirement:
 
 - **Counting** — the requirement is using it.
-- **Not counting** — a rule is keeping it out, and the row says which. Here:
-  MATH 110 and ENGL 100 against *"Developmental coursework does not count
-  toward the degree"*.
+- **Not counting** — a rule is keeping it out, and the row says which, in the
+  form the audit uses: *Does not satisfy "Do not count courses from a given
+  set"*. Where the rule's own wording is not the reason, the constraint says
+  what is: a course blocked from Open Electives is told *"Already counting
+  toward another requirement"*, because it has not failed anything — it has
+  been spent.
 - **Not considered** — everything else, which is most of it. Worded as an
   absence rather than a refusal: the requirement has no opinion about a course
   it was never offered.
