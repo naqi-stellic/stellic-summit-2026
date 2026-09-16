@@ -236,6 +236,22 @@ a tree never claims a course was passed that the plan says is still to come,
 and a group where one child is enough counts as one thing rather than as a
 shortfall for the options the student did not take.
 
+The panel is a stack of folded sections rather than one long column
+([`1277:28303`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1277-28303)),
+each headed by the glyph that names it: Planning details, Sections,
+Description, Course details, Requisites, and then the two that speak about the
+plan rather than about the course — Where it fits in your plan
+([`1336:25474`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1336-25474))
+and Activity history
+([`1336:24862`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1336-24862)),
+which start folded and appear only for a course the plan already holds. Where
+it fits reads off the plan itself: what the course counts towards, grouped
+under the thing it counts for, and anything put after it that asks for it,
+which is why a subject's own courses gate each other — FIN 415 in Fall 2028
+names FIN 340 in Spring 2028, and nothing before a course can depend on it.
+Activity history is the same course seen the other way round: when it landed
+where it is, and what it was moved from.
+
 A course already in the plan opens on the same panel, from its row on the
 canvas or in a term view
 ([`1:13691`](https://www.figma.com/design/h39YRs9jNEWO4JLmKrh5sh/Course-Sidebar-2.0?node-id=1-13691)).

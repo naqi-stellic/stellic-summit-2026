@@ -198,6 +198,23 @@ function summarise(name: string, children: PrereqNode[], open: boolean): PrereqO
   }
 }
 
+/* The courses a subject builds on within itself. A finance elective asks for
+ * finance rather than for whatever the general pool happened to offer, which
+ * is also what makes a course in the plan hold up the ones after it. */
+const SUBJECT_GATE: Record<string, string[]> = {
+  FIN: ["FIN 301", "FIN 340"],
+  ACCT: ["ACCT 201", "ACCT 202"],
+  ECON: ["ECON 201", "ECON 202"],
+  DATA: ["STAT 210", "MIS 250"],
+  STAT: ["MATH 140", "STAT 210"],
+  MIS: ["MIS 120", "MIS 250"],
+  OPS: ["STAT 210", "OPS 320"],
+  BUS: ["BUS 101", "ECON 201"],
+  MKTG: ["MKTG 201", "BUS 101"],
+  MGMT: ["BUS 101", "MGMT 210"],
+  BLAW: ["BUS 101"],
+}
+
 /** The number in a course's code, which is how far into the subject it is and
  *  therefore how much it asks for. */
 function level(code: string): number {
@@ -217,7 +234,12 @@ function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequ
   }
   const gate = pick(["BUS 101", "MATH 140", "ACCT 201", "ECON 201"])
   const second = pick(["ACCT 202", "ECON 202", "STAT 210", "MKTG 201"])
-  const later = pick(["FIN 301", "MIS 250", "OPS 320", "BUS 390"])
+  /* Only what comes below it in its own subject: a course cannot be asked for
+     by something the student takes before it. */
+  const own = (SUBJECT_GATE[entry.code.split(" ")[0]] ?? []).filter(
+    (code) => level(code) < depth
+  )
+  const later = own.length ? own[seed % own.length] : pick(["FIN 301", "MIS 250", "OPS 320", "BUS 390"])
 
   if (depth < 200) return { options: [] }
 
@@ -324,4 +346,47 @@ export function courseDetail(entry: CatalogEntry): CourseDetail {
     ],
     repeatable: seed % 2 === 0 ? "Course may be repeated" : "Course may be taken once",
   }
+}
+
+/* ------------------------------------------------- what the plan makes of it */
+
+/** Every course a prerequisite tree names, which is how the plan finds out
+ *  what a course is holding up. */
+export function prerequisiteCodes(code: string): string[] {
+  const tree = prerequisites({ code, name: "", reason: "" }, seedOf(code))
+  const out: string[] = []
+  const walk = (nodes: PrereqNode[]) =>
+    nodes.forEach((node) => {
+      if (node.code) out.push(node.code)
+      if (node.children) walk(node.children)
+    })
+  tree.options.forEach((option) => walk(option.children))
+  return [...new Set(out)]
+}
+
+export type Activity = {
+  kind: "add" | "remove"
+  term: string
+  when: string
+  who: string
+}
+
+/* What has happened to this course in the plan. A course that has sat where it
+ * was first put has one event; one that was moved has the three that says so,
+ * newest first. */
+export function activityFor(code: string, term: string, moved?: string): Activity[] {
+  const seed = seedOf(code)
+  const student = "Scott Abott"
+  /* An advisor moves a course out of a term now and then; the student puts it
+     back. Which of them it was is the seed's business. */
+  const remover = seed % 3 === 0 ? "Mark Stehlik" : student
+
+  if (!moved || seed % 3 === 0) {
+    return [{ kind: "add", term, when: "2 months ago", who: student }]
+  }
+  return [
+    { kind: "add", term, when: "3 weeks ago", who: student },
+    { kind: "remove", term: moved, when: "1 month ago", who: remover },
+    { kind: "add", term: moved, when: "2 months ago", who: student },
+  ]
 }

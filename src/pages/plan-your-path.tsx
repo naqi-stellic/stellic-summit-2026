@@ -366,6 +366,9 @@ export function PlanYourPath({
   const plannedOpen = openPlanned ? findCourse(shown, openPlanned) : null
   /* Where a course opened like that could be put: every term that takes one. */
   const plannableTerms = shown.flatMap((year) => year.terms.filter((term) => !term.locked))
+  /* The whole plan, which is what a course panel reads to say where a course
+     fits: the year tabs narrow what is on the canvas, not what is true. */
+  const allTerms = years.flatMap((year) => year.terms)
   /* The seat whose panel is open, if it is still in the plan. */
   const seat = openSeat ? findCourse(shown, openSeat.id) : null
   /* Terms a request is still out on. Every card that draws one of them marks
@@ -754,6 +757,7 @@ export function PlanYourPath({
               reason: "Business core",
             }}
             terms={plannableTerms}
+            plan={allTerms}
             planned={{ course: plannedOpen.course, term: plannedOpen.term }}
             onAdd={() => setOpenPlanned(null)}
             onRemove={() => {
@@ -769,6 +773,7 @@ export function PlanYourPath({
             key={course.entry.code}
             entry={course.entry}
             terms={plannableTerms}
+            plan={allTerms}
             backLabel={course.from}
             onAdd={(termId) => {
               handleAddCourse(termId, course.entry, course.requirement)

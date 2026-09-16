@@ -1,7 +1,7 @@
 import { cn } from "cn"
 import { useState } from "react"
 
-import { Icon } from "@/components/icon"
+import { Icon, type IconName } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import type { CatalogEntry } from "@/data/catalog"
 import {
+  activityFor,
   courseDetail,
+  prerequisiteCodes,
   type PrereqNode,
   type PrereqOption,
   type PrereqState,
@@ -213,6 +215,48 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
+/* One of the sidebar's own sections: a glyph naming it, and everything under
+ * it, which folds away. The two that speak about the plan rather than about
+ * the course start folded — they are there to be asked for. */
+function Fold({
+  icon,
+  title,
+  count,
+  start = "open",
+  children,
+}: {
+  icon: IconName
+  title: string
+  count?: number
+  start?: "open" | "closed"
+  children: React.ReactNode
+}) {
+  const [open, setOpen] = useState(start === "open")
+
+  return (
+    <div className="flex w-full flex-col gap-4">
+      <button
+        type="button"
+        onClick={() => setOpen((was) => !was)}
+        aria-expanded={open}
+        className="flex w-fit cursor-pointer items-center gap-2 text-left"
+      >
+        <Icon name={icon} size={16} className="shrink-0 text-gray-100" />
+        <span className="text-caption-lg font-semibold text-gray-100">
+          {title}
+          {count != null && ` (${count})`}
+        </span>
+        <Icon
+          name={open ? "expand-more" : "chevron-right"}
+          size={16}
+          className="shrink-0 text-gray-100"
+        />
+      </button>
+      {open && children}
+    </div>
+  )
+}
+
 function Chips({ items }: { items: string[] }) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -265,6 +309,31 @@ function Picker({
   )
 }
 
+/** One place the course sits in the plan: what it counts towards, or what it
+ *  is holding up. */
+function FitCard({ label, items, note }: { label: string; items: string[]; note?: string }) {
+  return (
+    <div className="flex w-full items-center gap-3 rounded-md border border-gray-40 bg-card p-4">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="text-body-md text-gray-80">{label}</span>
+        {items.length > 1 ? (
+          <ul className="list-disc pl-5">
+            {items.map((item) => (
+              <li key={item} className="text-body-md font-semibold text-gray-100">
+                {item}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="text-body-md font-semibold text-gray-100">{items[0]}</span>
+        )}
+        {note && <span className="text-body-md text-gray-80">{note}</span>}
+      </div>
+      <Icon name="chevron-right" size={14} className="shrink-0 text-gray-100" />
+    </div>
+  )
+}
+
 /** One of the plan's own choices about a course, with the way to change it. */
 function Property({ label, value }: { label: string; value: string }) {
   return (
@@ -287,6 +356,7 @@ export function CoursePanel({
   entry,
   terms,
   planned,
+  plan,
   backLabel,
   onAdd,
   onRemove,
@@ -299,6 +369,9 @@ export function CoursePanel({
   /** Opened from the plan rather than from the list: the course as it sits in
    *  a term, with the choices made about it and the class it is in. */
   planned?: { course: PlannedCourse; term: Term }
+  /** Every term in the plan, which is where "where it fits" is read from: a
+   *  course is a prerequisite for whatever the plan has put after it. */
+  plan?: Term[]
   /** What the way back is to, where it is not a term. */
   backLabel?: string
   onAdd: (termId: string) => void
@@ -313,6 +386,31 @@ export function CoursePanel({
   const sole = detail.prerequisites.options.length === 1 ? detail.prerequisites.options[0] : null
   const soleRows: Row[] = []
   sole?.children.forEach((child) => flattenSole(child, soleRows))
+  /* Where it fits: what it counts for, grouped under the thing it counts
+     towards, and whatever the plan has put after it that asks for it. */
+  const counting = detail.countsFor.reduce<Record<string, string[]>>((groups, row) => {
+    groups[row.under] = [...(groups[row.under] ?? []), row.name]
+    return groups
+  }, {})
+  /* Only the terms after the one holding it: a course holds up what comes
+     after it, never what the student is already taking. */
+  const held = plan?.findIndex((t) => t.id === planned?.term.id) ?? -1
+  const unlocks = (plan ?? [])
+    .filter((_, i) => held < 0 || i > held)
+    .flatMap((t) => t.courses.map((course) => ({ course, term: t })))
+    .filter(
+      ({ course }) =>
+        !course.placeholder &&
+        course.code !== entry.code &&
+        prerequisiteCodes(course.code).includes(entry.code)
+    )
+  /* A course it was moved from, where the plan has another term to have moved
+     it from — which is what makes a history worth keeping. */
+  const moved = planned
+    ? (plan ?? terms).find((t) => t.id !== planned.term.id && !t.locked)?.name
+    : undefined
+  const activity = planned ? activityFor(entry.code, planned.term.name, moved) : []
+
   const [campus, setCampus] = useState(detail.campus)
   const [termId, setTermId] = useState(terms[0]?.id ?? "")
   const [more, setMore] = useState(false)
@@ -416,7 +514,7 @@ export function CoursePanel({
 
         <div className="flex w-full flex-col gap-6 p-6">
           {planned ? (
-            <>
+            <Fold icon="settings" title="Planning details">
               {/* What the plan chose about it, each changeable on its own. */}
               <div className="grid w-full grid-cols-2 gap-4 @sm:grid-cols-3">
                 <Property label="Campus" value={planned.course.campus ?? "Main"} />
@@ -426,7 +524,7 @@ export function CoursePanel({
                 <Property label="Units" value={String(planned.course.credits)} />
                 <Property label="Grading Option" value={planned.course.gradeOption ?? "Graded"} />
               </div>
-            </>
+            </Fold>
           ) : (
             /* Where and when it would be taken, and the way to put it there. */
             <div className="flex w-full flex-wrap items-end gap-4">
@@ -453,7 +551,7 @@ export function CoursePanel({
             </div>
           )}
 
-          <Section title={`Sections (${detail.sections.length})`}>
+          <Fold icon="calendar-month" title="Sections" count={detail.sections.length}>
             <div className="flex w-full flex-col gap-2">
               {detail.sections.map((section) => {
                 /* The one the student is in is marked rather than offered. */
@@ -502,18 +600,10 @@ export function CoursePanel({
                 {detail.hidden === 1 ? "" : "s"}
               </p>
             </div>
-          </Section>
+          </Fold>
 
-          <div className="flex w-full flex-col gap-8">
-            <Section title={`Attributes (${detail.attributes.length})`}>
-              <Chips items={detail.attributes} />
-            </Section>
-
-            <Section title={`Topics (${detail.topics.length})`}>
-              <Chips items={detail.topics} />
-            </Section>
-
-            <Section title="Description">
+          <Fold icon="info" title="Description">
+            <div className="flex w-full flex-col gap-2">
               <p className="text-body-md text-gray-80">
                 {more ? detail.description : `${detail.description.slice(0, 180)}…`}
               </p>
@@ -524,6 +614,19 @@ export function CoursePanel({
               >
                 {more ? "Show less" : "Show more"}
               </button>
+            </div>
+          </Fold>
+
+          {/* Everything the catalogue says about it, which is one section
+              rather than seven. */}
+          <Fold icon="description" title="Course details">
+          <div className="flex w-full flex-col gap-8">
+            <Section title={`Attributes (${detail.attributes.length})`}>
+              <Chips items={detail.attributes} />
+            </Section>
+
+            <Section title={`Topics (${detail.topics.length})`}>
+              <Chips items={detail.topics} />
             </Section>
 
             <Section title="Required Sections">
@@ -560,9 +663,36 @@ export function CoursePanel({
               </div>
             </Section>
 
-            {/* What has to be true before it can be taken, as a tree: the
-                options, and inside each the courses and conditions it asks
-                for, with what the audit makes of them. */}
+            <Section title="Course Equivalents">
+              <Chips items={detail.equivalents} />
+            </Section>
+
+            {/* Where a course is not in the plan there is no "where it fits"
+                section to put this in, so it stays with the catalogue. */}
+            {!planned && (
+              <Section title="Can count for">
+                <ul className="list-disc pl-5 text-body-md text-gray-100">
+                  {detail.countsFor.map((row) => (
+                    <li key={row.name}>
+                      {row.name}
+                      <br />
+                      <span className="text-gray-80">{row.under}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+            )}
+
+            <Section title="Repeatable">
+              <p className="text-body-md text-gray-80">{detail.repeatable}</p>
+            </Section>
+          </div>
+          </Fold>
+
+          {/* What has to be true before it can be taken, as a tree: the
+              options, and inside each the courses and conditions it asks
+              for, with what the audit makes of them. */}
+          <Fold icon="link" title="Requisites">
             <div className="flex w-full flex-col gap-3">
               <div className="flex w-full flex-col gap-0.5">
                 <div className="flex w-full items-center justify-between gap-3">
@@ -593,27 +723,55 @@ export function CoursePanel({
                 </div>
               )}
             </div>
+          </Fold>
 
-            <Section title="Course Equivalents">
-              <Chips items={detail.equivalents} />
-            </Section>
-
-            <Section title="Can count for">
-              <ul className="list-disc pl-5 text-body-md text-gray-100">
-                {detail.countsFor.map((row) => (
-                  <li key={row.name}>
-                    {row.name}
-                    <br />
-                    <span className="text-gray-80">{row.under}</span>
-                  </li>
+          {planned && (
+            /* What the plan is holding this course for: the requirements it
+               answers, and whatever has been put after it that asks for it. */
+            <Fold icon="help-outline" title="Where it fits in your plan" start="closed">
+              <div className="flex w-full flex-col gap-2">
+                {Object.entries(counting).map(([under, names]) => (
+                  <FitCard key={under} label={`Counting for ${under}`} items={names} />
                 ))}
-              </ul>
-            </Section>
+                {unlocks.map(({ course, term: after }) => (
+                  <FitCard
+                    key={course.id}
+                    label="Is a pre-requisite for"
+                    items={[`${course.code}: ${course.name}`]}
+                    note={`In ${after.name}`}
+                  />
+                ))}
+              </div>
+            </Fold>
+          )}
 
-            <Section title="Repeatable">
-              <p className="text-body-md text-gray-80">{detail.repeatable}</p>
-            </Section>
-          </div>
+          {planned && (
+            /* Every time the course moved, and who moved it. */
+            <Fold icon="history" title="Activity history" count={activity.length} start="closed">
+              <div className="flex w-full flex-col gap-4">
+                {activity.map((event, i) => (
+                  <div key={i} className="flex w-full items-start gap-2">
+                    <Icon
+                      name={event.kind === "add" ? "add" : "close"}
+                      size={16}
+                      className={cn(
+                        "mt-0.5 shrink-0",
+                        event.kind === "add" ? "text-success-100" : "text-alert-100"
+                      )}
+                    />
+                    <span className="flex min-w-0 flex-col">
+                      <span className="text-body-md text-gray-100">
+                        {event.kind === "add" ? "Added to" : "Removed from"} {event.term}
+                      </span>
+                      <span className="text-body-md text-gray-80">
+                        {event.when} by {event.who}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Fold>
+          )}
         </div>
       </div>
 
