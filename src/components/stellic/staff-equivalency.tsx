@@ -182,7 +182,7 @@ function ImpactDialog({
             onClick={() => toast("Downloads the affected usernames. (Exists in the real app)")}
             className="flex cursor-pointer items-center gap-2 text-body-md text-foreground underline [text-underline-position:from-font]"
           >
-            <Icon name="file-upload" size={14} className="rotate-180" />
+            <Icon name="download" size={14} />
             Download affected student usernames
           </button>
         </div>
@@ -206,8 +206,12 @@ function ImpactDialog({
           </RadioGroup>
         </div>
 
-        <DialogFooter className="sm:justify-start">
-          <Button onClick={() => onOpenChange(false)}>Cancel</Button>
+        {/* One decision, two ways to answer it, neither of them weighted by
+            being the wider button. */}
+        <DialogFooter className="gap-2 sm:justify-start">
+          <Button className="flex-1" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button variant="primary" className="flex-1" onClick={() => onCreate(status)}>
             Create rule
           </Button>

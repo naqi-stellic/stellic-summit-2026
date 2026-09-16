@@ -161,6 +161,10 @@ const ICONS = {
     viewBox: "0 0 24 24",
     parts: [{ d: "M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z" }],
   },
+  download: {
+    viewBox: "0 0 24 24",
+    parts: [{ d: "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" }],
+  },
   "thumb-down": {
     viewBox: "0 0 24 24",
     parts: [
