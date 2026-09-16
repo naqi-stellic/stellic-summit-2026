@@ -26,9 +26,11 @@ function CreditRow({ item }: { item: IncomingCredit }) {
           <p className="text-body-md text-gray-80">{item.code}</p>
           <p className="text-body-md font-semibold text-foreground">{item.name}</p>
         </div>
-        {/* Where a course card says which class you are in, this says the one
-            thing worth knowing about credit that has already been earned. */}
-        <p className="text-body-md text-gray-80">{item.detail}</p>
+        {/* Where a course card says which class you are in, this says where
+            the credit came from and what it was. */}
+        <p className="text-body-md text-gray-80">
+          {[item.source, item.detail].filter(Boolean).join(" · ")}
+        </p>
         {/* The credits are a detail like any other, so they are shown when Plan
             details is showing them and not otherwise. */}
         <CourseTags
@@ -45,10 +47,7 @@ function GroupCard({ group }: { group: IncomingGroup }) {
   return (
     <Card className="@container/term w-full min-w-0 gap-0 rounded-md border-gray-40 p-[23px] shadow-none">
       <div className="flex w-full flex-col gap-2">
-        <div className="flex w-full flex-col gap-1">
-          <h4 className="truncate text-caption-lg font-semibold text-gray-100">{group.kind}</h4>
-          <p className="text-body-md text-gray-80">{group.source}</p>
-        </div>
+        <h4 className="truncate text-caption-lg font-semibold text-gray-100">{group.kind}</h4>
 
         <p className="flex items-center gap-2 pt-4 text-body-md font-semibold text-gray-80">
           <AuditIcon state="completed" />
@@ -112,20 +111,6 @@ export function IncomingCredits({
             <h3 className="min-w-0">{heading}</h3>
             <p className="text-label-md text-gray-100">{summary}</p>
           </div>
-        </div>
-
-        {/* What it all comes to, and where to go to see it counted. */}
-        <div className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-4">
-          <p className="min-w-0 text-body-md text-gray-80">
-            {credits} credits from {groups.length} source{groups.length === 1 ? "" : "s"}
-          </p>
-          <a
-            href="#"
-            className="flex shrink-0 items-center gap-1 text-body-md text-primary-50 underline [text-underline-position:from-font]"
-          >
-            View in Progress
-            <Icon name="chevron-right" size={16} />
-          </a>
         </div>
 
         <div className="grid w-full grid-cols-1 gap-4 @3xl:grid-cols-2 @6xl:grid-cols-3">

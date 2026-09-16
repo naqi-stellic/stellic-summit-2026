@@ -53,13 +53,13 @@ Above the first year sits Incoming Credits
 ([`1393:60657`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-60657)
 for the shape it started as): what the student arrived with, folded away like
 the year below it. Three cards in a row — Transfer Credits, Exam Credits,
-Pre-Year 1 — each naming where the credit came from, what it earned, and its
-courses as rows. It is not a year and it holds no terms: none of this was taken
+Pre-Year 1 — each saying what it earned, with its courses as rows that name
+where they came from: the college they transferred from, the board that set the
+exam, or the term they were taken in. It is not a year and it holds no terms: none of this was taken
 on a timetable this plan knows about, so `src/data/incoming.ts` keeps it as
 what it is rather than as two invented semesters.
 
-The total is said twice — beside the heading and again above the cards, where
-"View in Progress" leads to the audit. Each row's credits are a tag like any
+The total is said beside the heading. Each row's credits are a tag like any
 other detail, so they answer to Plan details and are not there until it asks
 for them; what stays on the row is the one fact the kind is worth knowing by. Those credits are extra rather than
 requirements, so the degree's forty and its hundred and twenty are untouched
