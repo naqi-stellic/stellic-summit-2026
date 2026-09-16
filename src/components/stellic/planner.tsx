@@ -259,16 +259,21 @@ export function AuditRow({
   return (
     <div className="flex w-full flex-col">
       <div
+        onClick={overlay ? undefined : () => onOpenSeat?.("detail")}
         className={cn(
           "flex w-full items-center rounded-t-md border bg-card p-2",
           style && !joining ? style.card : "border-gray-40",
+          /* The seat is a thing of its own, so its name opens it. */
+          onOpenSeat && !overlay && "cursor-pointer hover:bg-gray-5",
           draft && "transition-colors duration-500",
           entering && "animate-rise",
           leaving && "animate-vanish overflow-hidden",
           ghosted && "opacity-40"
         )}
       >
-        <p className="min-w-0 flex-1 truncate text-body-md font-semibold text-gray-80">{filled}</p>
+        <p className="min-w-0 flex-1 truncate text-body-md font-semibold text-gray-80">
+          {filled.name}
+        </p>
       </div>
       {row}
     </div>

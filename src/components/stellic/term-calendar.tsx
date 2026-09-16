@@ -61,11 +61,14 @@ function CourseCard({
   term,
   selectable,
   onOpen,
+  onOpenSeat,
 }: {
   course: PlannedCourse
   term: Term
   selectable: boolean
   onOpen?: () => void
+  /** Opens the seat this course was put into, from the band that names it. */
+  onOpenSeat?: () => void
 }) {
   const needsReview = courseStatus(course, term) === "needs review"
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
@@ -82,12 +85,14 @@ function CourseCard({
     >
       {seat && (
         <p
+          onClick={onOpenSeat}
           className={cn(
             "w-full truncate border-b px-3 py-2 text-body-md font-semibold text-gray-80",
-            mark ? mark.card : "border-gray-40"
+            mark ? mark.card : "border-gray-40",
+            onOpenSeat && "cursor-pointer hover:bg-gray-5"
           )}
         >
-          {seat}
+          {seat.name}
         </p>
       )}
       <div className="flex w-full items-stretch pr-3">
@@ -152,14 +157,16 @@ function CourseCard({
   )
 }
 
-function HeldCard({ course }: { course: PlannedCourse }) {
+function HeldCard({ course, onOpen }: { course: PlannedCourse; onOpen?: () => void }) {
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
 
   return (
     <div
+      onClick={onOpen}
       className={cn(
         "flex w-full items-center gap-2 rounded-md border border-dashed p-[7px]",
-        mark ? mark.card : "border-gray-40 bg-gray-0"
+        mark ? mark.card : "border-gray-40 bg-gray-0",
+        onOpen && "cursor-pointer hover:bg-gray-5"
       )}
     >
       <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-80" />
@@ -187,11 +194,13 @@ function Sidebar({
   addable,
   onAddCourse,
   onOpenCourse,
+  onOpenSeat,
 }: {
   term: Term
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
   onOpenCourse?: (courseId: string) => void
+  onOpenSeat?: (courseId: string) => void
 }) {
   const credits = termCredits(term)
   const selectable = term.alert != null
@@ -234,7 +243,11 @@ function Sidebar({
 
         {term.courses.map((course) =>
           course.placeholder ? (
-            <HeldCard key={course.id} course={course} />
+            <HeldCard
+              key={course.id}
+              course={course}
+              onOpen={onOpenSeat && (() => onOpenSeat(course.id))}
+            />
           ) : (
             <CourseCard
               key={course.id}
@@ -242,6 +255,7 @@ function Sidebar({
               term={term}
               selectable={selectable}
               onOpen={onOpenCourse && (() => onOpenCourse(course.id))}
+              onOpenSeat={onOpenSeat && (() => onOpenSeat(course.id))}
             />
           )
         )}
@@ -495,6 +509,7 @@ export function TermCalendar({
   addable,
   onAddCourse,
   onOpenCourse,
+  onOpenSeat,
 }: {
   term: Term
   compare?: boolean
@@ -503,6 +518,8 @@ export function TermCalendar({
   onAddCourse?: (entry: CatalogEntry) => void
   /** Opens one of the term's courses on its own. */
   onOpenCourse?: (courseId: string) => void
+  /** Opens a seat: one still held, or the one a course was put into. */
+  onOpenSeat?: (courseId: string) => void
 }) {
   /* The same droppable the planner's card registers, under the same id. */
   const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
@@ -525,6 +542,7 @@ export function TermCalendar({
           addable={addable}
           onAddCourse={onAddCourse}
           onOpenCourse={onOpenCourse}
+          onOpenSeat={onOpenSeat}
         />
         <span
           aria-hidden="true"

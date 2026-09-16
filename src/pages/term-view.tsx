@@ -72,6 +72,8 @@ function ActionsAlert({
   onAddCourse?: (entry: CatalogEntry) => void
   /** Opens one of the term's courses on its own, beside the term. */
   onOpenCourse?: (courseId: string) => void
+  /** Opens a seat in the term, held or filled. */
+  onOpenSeat?: (courseId: string) => void
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -102,6 +104,7 @@ export function TermView({
   addable,
   onAddCourse,
   onOpenCourse,
+  onOpenSeat,
   compare = true,
 }: {
   term: Term
@@ -128,6 +131,8 @@ export function TermView({
   onAddCourse?: (entry: CatalogEntry) => void
   /** Opens one of the term's courses on its own, beside the term. */
   onOpenCourse?: (courseId: string) => void
+  /** Opens a seat in the term, held or filled. */
+  onOpenSeat?: (courseId: string) => void
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -229,6 +234,7 @@ export function TermView({
           addable={addable}
           onAddCourse={onAddCourse}
           onOpenCourse={onOpenCourse}
+          onOpenSeat={onOpenSeat}
         />
       ) : (
         <TermList
@@ -236,6 +242,7 @@ export function TermView({
           addable={addable}
           onAddCourse={onAddCourse}
           onOpenCourse={onOpenCourse}
+          onOpenSeat={onOpenSeat}
         />
       )}
     </main>

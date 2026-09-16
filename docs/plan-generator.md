@@ -245,6 +245,14 @@ course from a seat's search and adding it to that seat's own term fills it;
 choosing a different term adds it there instead and leaves the seat where it
 is.
 
+The name is the seat, so it opens the seat
+([`1393:32366`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-32366)):
+the same panel a held seat opens, with a Selected course block at the foot
+naming what is standing in it and a bin that gives the seat back. The course
+keeps the seat's own code and name while it stands there, which is what lets
+`emptySeat` put it back exactly as it was — and why the seat is kept as a code
+and a name rather than only the name.
+
 ## A course on its own
 
 Clicking a course in the remaining list opens it beside the plan, built from

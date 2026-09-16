@@ -92,12 +92,15 @@ function CourseRow({
   term,
   selectable,
   onOpen,
+  onOpenSeat,
 }: {
   course: PlannedCourse
   term: Term
   selectable: boolean
   /** Opens the course on its own. */
   onOpen?: () => void
+  /** Opens the seat: the one it is held in, or the one it was put into. */
+  onOpenSeat?: () => void
 }) {
   const status = courseStatus(course, term)
   const held = course.placeholder
@@ -112,6 +115,23 @@ function CourseRow({
        of each. An unmarked one keeps the rule between rows that the table is
        ruled by. */
     <div className={cn(mark ? cn("border", mark.card) : "border-t border-gray-40")}>
+      {/* A course put into a seat goes on saying which requirement it is
+          answering, in a band above it the way the canvas draws one. */}
+      {!held && course.seat && (
+        <div
+          className={cn(
+            "flex w-full items-stretch",
+            mark ? mark.card : "bg-card",
+            onOpenSeat && "cursor-pointer hover:bg-gray-5"
+          )}
+          onClick={onOpenSeat}
+        >
+          <Accent course={course} />
+          <p className="min-w-0 flex-1 truncate px-6 py-2 text-body-md text-gray-80">
+            {course.seat.name}
+          </p>
+        </div>
+      )}
       <div
         className={cn(
           "flex w-full items-stretch",
@@ -141,13 +161,6 @@ function CourseRow({
           )}
 
           <div className="flex w-[223px] shrink-0 flex-col gap-1 px-2 py-3">
-            {/* A course put into a seat goes on saying which requirement it is
-                answering, the way it does on the canvas. */}
-            {!held && course.seat && (
-              <span className="truncate text-label-md font-semibold text-gray-80">
-                {course.seat}
-              </span>
-            )}
             <span className="text-label-md text-gray-80">
               {held ? "Placeholder" : course.code}
             </span>
@@ -218,6 +231,7 @@ export function TermList({
   addable,
   onAddCourse,
   onOpenCourse,
+  onOpenSeat,
 }: {
   term: Term
   /** What the plus can offer, and what a requirement dropped here becomes. */
@@ -225,6 +239,8 @@ export function TermList({
   onAddCourse?: (entry: CatalogEntry) => void
   /** Opens one of the term's courses on its own. */
   onOpenCourse?: (courseId: string) => void
+  /** Opens a seat — held, or filled and opened from its band. */
+  onOpenSeat?: (courseId: string) => void
 }) {
   const credits = termCredits(term)
   const selectable = term.alert != null
@@ -286,7 +302,13 @@ export function TermList({
                 course={course}
                 term={term}
                 selectable={selectable}
-                onOpen={onOpenCourse && (() => onOpenCourse(course.id))}
+                /* A seat has no course to open: it opens as what it is. */
+                onOpen={
+                  course.placeholder
+                    ? onOpenSeat && (() => onOpenSeat(course.id))
+                    : onOpenCourse && (() => onOpenCourse(course.id))
+                }
+                onOpenSeat={onOpenSeat && (() => onOpenSeat(course.id))}
               />
             ))}
           </div>

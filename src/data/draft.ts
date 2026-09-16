@@ -519,7 +519,7 @@ export function generateTermDraft(
                 name: pick.name,
                 placeholder: undefined,
                 /* What it is answering, which outlives the draft note. */
-                seat: c.seat ?? seat,
+                seat: c.seat ?? { code: c.code, name: c.name },
                 classNo: String(2500 + (seq += 1) * 13),
                 campus: "Main",
                 modality: "In Person",
@@ -766,12 +766,47 @@ export function fillSeat(years: Year[], courseId: string, entry: CatalogEntry): 
             code: entry.code,
             name: entry.name,
             placeholder: undefined,
-            seat: c.seat ?? c.name,
+            seat: c.seat ?? { code: c.code, name: c.name },
             classNo: String(2500 + (seq += 1) * 13),
             campus: "Main",
             modality: "In Person",
             gradeOption: "Graded",
             lastActivity: `Added by you, ${GENERATED_ON}`,
+          }
+    ),
+  }))
+}
+
+/** Gives a seat back: the course goes and the requirement it was answering
+ *  stands in its place again, where it was. */
+export function emptySeat(years: Year[], courseId: string): Year[] {
+  const found = findCourse(years, courseId)
+  if (!found || found.term.locked || !found.course.seat) return years
+  const { code, name } = found.course.seat
+
+  return mapTerm(years, found.term.id, (term) => ({
+    ...term,
+    courses: term.courses.map((c) =>
+      c.id !== courseId
+        ? c
+        : {
+            ...c,
+            code,
+            name,
+            placeholder: true,
+            seat: undefined,
+            /* None of the class's own facts survive it. */
+            section: undefined,
+            settled: undefined,
+            classNo: undefined,
+            campus: undefined,
+            modality: undefined,
+            gradeOption: undefined,
+            meetings: undefined,
+            instructor: undefined,
+            building: undefined,
+            room: undefined,
+            topic: undefined,
           }
     ),
   }))

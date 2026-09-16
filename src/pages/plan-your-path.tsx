@@ -63,6 +63,7 @@ import {
   acceptDraft,
   generateTermDraft,
   addCourse,
+  emptySeat,
   fillSeat,
   addableCourses,
   draftLength,
@@ -543,6 +544,12 @@ export function PlanYourPath({
     else setYears((current) => removeCourse(current, courseId))
   }
 
+  /* And the other way: the course goes and the seat stands again. */
+  function handleEmptySeat(courseId: string) {
+    if (draft) editDraft((current) => emptySeat(current, courseId))
+    else setYears((current) => emptySeat(current, courseId))
+  }
+
   /* A seat becoming the course chosen for it, which is a change to the seat
      rather than something new arriving. */
   function handleFillSeat(courseId: string, entry: CatalogEntry) {
@@ -758,6 +765,10 @@ export function PlanYourPath({
               setOpenSeat({ id: seat!.course.id, view: "search" })
               setOpenCourse({ entry, from: seat!.course.name })
             }}
+            onEmpty={() => {
+              handleEmptySeat(seat!.course.id)
+              setOpenSeat({ id: seat!.course.id, view: "detail" })
+            }}
             onClose={() => setOpenSeat(null)}
           />
         )) ||
@@ -882,6 +893,7 @@ export function PlanYourPath({
             addable={addable}
             onAddCourse={(entry) => handleAddCourse(openTerm.id, entry)}
             onOpenCourse={openPlannedPanel}
+            onOpenSeat={(courseId) => openSeatPanel(courseId, "detail")}
             compare={compare}
           />
         ) : (
