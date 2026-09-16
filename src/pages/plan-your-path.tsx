@@ -63,6 +63,7 @@ import {
   acceptDraft,
   generateTermDraft,
   addCourse,
+  fillSeat,
   addableCourses,
   draftLength,
   draftTally,
@@ -542,6 +543,13 @@ export function PlanYourPath({
     else setYears((current) => removeCourse(current, courseId))
   }
 
+  /* A seat becoming the course chosen for it, which is a change to the seat
+     rather than something new arriving. */
+  function handleFillSeat(courseId: string, entry: CatalogEntry) {
+    if (draft) editDraft((current) => fillSeat(current, courseId, entry))
+    else setYears((current) => fillSeat(current, courseId, entry))
+  }
+
   function handleAddCourse(termId: string, entry: CatalogEntry, requirement?: number) {
     if (draft) editDraft((current) => addCourse(current, termId, entry, true, requirement))
     else setYears((current) => addCourse(current, termId, entry, false, requirement))
@@ -785,8 +793,13 @@ export function PlanYourPath({
             plan={allTerms}
             backLabel={course.from}
             onAdd={(termId) => {
-              handleAddCourse(termId, course.entry, course.requirement)
+              /* Opened from a seat and put back in that seat's own term, this
+                 fills the seat rather than landing beside it — which is what
+                 the student asked for by searching from it. */
+              if (seat && seat.term.id === termId) handleFillSeat(seat.course.id, course.entry)
+              else handleAddCourse(termId, course.entry, course.requirement)
               setOpenCourse(null)
+              setOpenSeat(null)
             }}
             onBack={() => setOpenCourse(null)}
             onClose={() => {

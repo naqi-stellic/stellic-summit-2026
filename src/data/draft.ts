@@ -518,6 +518,8 @@ export function generateTermDraft(
                 code: pick.code,
                 name: pick.name,
                 placeholder: undefined,
+                /* What it is answering, which outlives the draft note. */
+                seat: c.seat ?? seat,
                 classNo: String(2500 + (seq += 1) * 13),
                 campus: "Main",
                 modality: "In Person",
@@ -747,6 +749,34 @@ export function removeInDraft(years: Year[], courseId: string): Year[] {
 
 /** Adds a course to a term. `marked` is false on the plan proper, where an
  *  addition is just a course rather than a proposal. */
+/** Puts a course into a seat already in the plan. The seat becomes the course
+ *  where it stands — nothing arrives and nothing leaves — and goes on saying
+ *  which requirement it was held for. */
+export function fillSeat(years: Year[], courseId: string, entry: CatalogEntry): Year[] {
+  const found = findCourse(years, courseId)
+  if (!found || found.term.locked || !found.course.placeholder) return years
+
+  return mapTerm(years, found.term.id, (term) => ({
+    ...term,
+    courses: term.courses.map((c) =>
+      c.id !== courseId
+        ? c
+        : {
+            ...c,
+            code: entry.code,
+            name: entry.name,
+            placeholder: undefined,
+            seat: c.seat ?? c.name,
+            classNo: String(2500 + (seq += 1) * 13),
+            campus: "Main",
+            modality: "In Person",
+            gradeOption: "Graded",
+            lastActivity: `Added by you, ${GENERATED_ON}`,
+          }
+    ),
+  }))
+}
+
 export function addCourse(
   years: Year[],
   termId: string,

@@ -141,6 +141,13 @@ function CourseRow({
           )}
 
           <div className="flex w-[223px] shrink-0 flex-col gap-1 px-2 py-3">
+            {/* A course put into a seat goes on saying which requirement it is
+                answering, the way it does on the canvas. */}
+            {!held && course.seat && (
+              <span className="truncate text-label-md font-semibold text-gray-80">
+                {course.seat}
+              </span>
+            )}
             <span className="text-label-md text-gray-80">
               {held ? "Placeholder" : course.code}
             </span>

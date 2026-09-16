@@ -19,6 +19,10 @@ export type PlannedCourse = {
   notes?: number
   /** A requirement with no course chosen for it yet. */
   placeholder?: boolean
+  /** The seat this course was put into, by the name that seat held. A filled
+   *  seat is still answering that requirement, so the plan goes on saying
+   *  which one above the course that answers it. */
+  seat?: string
   /** The student picked this class themselves. A generated schedule fills in
    *  around it rather than moving it; one a run proposed has no such claim. */
   settled?: boolean

@@ -106,8 +106,11 @@ export function AuditRow({
    * mount again — a neighbour re-rendering after a drop — stays put rather
    * than flashing back in. */
   const entering = draft != null && (streaming || draft.order === 0)
+  /* A seat that has been filled: the course stands where the seat did, under
+     the name of the requirement it is answering. */
+  const filled = !held ? course.seat : undefined
 
-  return (
+  const row = (
     <div
       data-draft-mark={draft?.mark}
       style={
@@ -119,7 +122,8 @@ export function AuditRow({
           : undefined
       }
       className={cn(
-        "group relative flex w-full items-center gap-2 rounded-md border bg-card",
+        "group relative flex w-full items-center gap-2 border bg-card",
+        filled ? "rounded-b-md border-t-0" : "rounded-md",
         locked ? "px-[15px] py-[7px]" : "p-[7px]",
         style && !joining ? style.card : held ? "border-gray-40 bg-gray-0" : "border-gray-40",
         /* A held seat is drawn as an outline waiting to be filled, and stays
@@ -244,6 +248,29 @@ export function AuditRow({
           {course.notes}
         </Badge>
       )}
+    </div>
+  )
+
+  if (!filled) return row
+
+  /* The requirement the seat was held for, above the course that answers it.
+     The two share the line between them, so the strip carries no bottom edge
+     and the row below it no top one. */
+  return (
+    <div className="flex w-full flex-col">
+      <div
+        className={cn(
+          "flex w-full items-center rounded-t-md border bg-card p-2",
+          style && !joining ? style.card : "border-gray-40",
+          draft && "transition-colors duration-500",
+          entering && "animate-rise",
+          leaving && "animate-vanish overflow-hidden",
+          ghosted && "opacity-40"
+        )}
+      >
+        <p className="min-w-0 flex-1 truncate text-body-md font-semibold text-gray-80">{filled}</p>
+      </div>
+      {row}
     </div>
   )
 }

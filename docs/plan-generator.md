@@ -227,6 +227,23 @@ labels (`2026-2027`) rather than "Year 1", since that is what every other
 surface here calls them; and the Changes and Graduation Clearance tabs are drawn
 but empty, there being no design for either.
 
+A seat that gets filled keeps saying what it was held for
+([`1017:200563`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-200563)
+before,
+[`1393:30627`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-30627)
+after): the requirement's name stays as a quiet strip and the course that
+answers it stands under it, sharing the line between them. It reads the same
+whichever way the seat was filled — searched from the seat by hand, or filled
+by a generated term — because both write the same `seat` on the course, and
+the term view carries it as a line above the code.
+
+Filling is a change to the seat rather than something new arriving: `fillSeat`
+turns the seat into the course where it stands, so nothing is added and nothing
+removed, and the requirement it was answering is still answered. Picking a
+course from a seat's search and adding it to that seat's own term fills it;
+choosing a different term adds it there instead and leaves the seat where it
+is.
+
 ## A course on its own
 
 Clicking a course in the remaining list opens it beside the plan, built from
