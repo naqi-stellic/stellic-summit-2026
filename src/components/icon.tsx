@@ -480,12 +480,14 @@ const ICONS = {
 
   /* Staff Home. The two severities are different shapes as well as different
      colours — an octagon stops you, a triangle warns you — so the list stays
-     readable to anyone who cannot tell the red from the amber. */
+     readable to anyone who cannot tell the red from the amber. Outlined, like
+     the triangle and the bulb beside it: a filled glyph among two hollow ones
+     reads as a third state rather than as the top of a scale. */
   report: {
     viewBox: "0 0 24 24",
     parts: [
       {
-        d: "M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM12 17.3c-.72 0-1.3-.58-1.3-1.3s.58-1.3 1.3-1.3 1.3.58 1.3 1.3-.58 1.3-1.3 1.3zm1-4.3h-2V7h2v6z",
+        d: "M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM19 14.9 14.9 19H9.1L5 14.9V9.1L9.1 5h5.8L19 9.1v5.8zM11 15h2v2h-2zm0-8h2v6h-2z",
       },
     ],
   },

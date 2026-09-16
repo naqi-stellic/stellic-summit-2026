@@ -135,7 +135,24 @@ is no expansion affordance where there is nothing to expand.
 
 The two severities are different **shapes** as well as different colours — an
 octagon stops you, a triangle warns you — so the list still sorts itself for a
-reader who cannot tell the red from the amber.
+reader who cannot tell the red from the amber. All three glyphs are outlined:
+a filled one among two hollow ones reads as a third state rather than as the
+top of a scale.
+
+### Transfers
+
+Figma: [`16:13521`](https://www.figma.com/design/gcskEkzwNusd12TOommFW0/Staff-Home?node-id=16-13521).
+
+The Transfers tab is the one place on the page where nothing belongs to a
+program. A row is an incoming course that staff keep articulating by hand, so it
+leads with that course and the institution it comes from, and the body leads
+with the size of the pile a rule would clear — "38 pending articulations".
+
+Its second line is the only thing on Home that Stellic is guessing at: it has
+matched an incoming course to a home one. So it is the only line that carries
+the assistant's mark, and the only one that says **Suggestion** where every
+other finding says **Suggested**. Those findings are a fact with a fix; this is
+a proposal, and the wording keeps them apart.
 
 Sort is Urgency by default, which reads down the severities in turn and then by
 how many students stand behind the program. The tier filter (All / Needs fixing

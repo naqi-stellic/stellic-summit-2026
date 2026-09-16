@@ -40,7 +40,7 @@ import {
  * is that nothing here was sent to anyone: these are findings, and the only
  * thing you can do with one other than fix it is put it away. */
 
-const LAST_UPDATED = "Last updated 2:05am"
+const LAST_UPDATED = "Last updated 2:00am"
 
 const REFRESH_NOTE =
   "Insights update on a schedule. Publishing an audit refreshes its findings right away, and everything else on this page is live."
@@ -279,7 +279,14 @@ function ProgramRow({
 }
 
 /** A catalogue-level finding: the row is the incoming course that wants a rule,
- *  so it leads with that and the institution it comes from. */
+ *  so it leads with that and the institution it comes from, and the body leads
+ *  with the size of the pile the rule would clear.
+ *
+ *  The second line is the only thing on the page Stellic is guessing at — it has
+ *  matched an incoming course to a home one — so it is the only line that
+ *  carries the assistant's mark and the only one that says "Suggestion" rather
+ *  than "Suggested". A finding elsewhere on this page is a fact with a fix;
+ *  this is a proposal. */
 function ArticulationRow({
   row,
   hidden,
@@ -296,16 +303,17 @@ function ArticulationRow({
       <span className="w-[13px] shrink-0" />
       <div className={COL_SUBJECT}>
         <p className="text-body-md font-semibold text-foreground">{row.from}</p>
-        <p className="mt-0.5 text-label-md text-gray-100">{row.institution}</p>
+        <p className="mt-0.5 text-label-md text-gray-80">{row.institution}</p>
       </div>
       <div className={COL_TAGS}>
         <Pill severity="opp" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-label-md text-gray-80">
-          Home course equivalent: <span className="text-gray-100">{row.equivalent}</span>
+        <p className="text-body-md font-semibold text-foreground">{row.impact}</p>
+        <p className="mt-2 flex items-start gap-2 text-label-md text-gray-80">
+          <Icon name="auto-awesome" size={14} className="mt-px shrink-0" />
+          Suggestion: <span className="min-w-0 text-gray-100">{row.suggestion}</span>
         </p>
-        <p className="mt-1 text-label-md font-semibold text-gray-100">{row.impact}</p>
       </div>
       <div className={COL_ACTIONS}>
         <Button size="sm" onClick={onRule}>

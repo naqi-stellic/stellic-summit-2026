@@ -374,8 +374,9 @@ export type Articulation = {
   /** The incoming course, which is what the row is about. */
   from: string
   institution: string
-  /** What it keeps being matched to here. */
-  equivalent: string
+  /** The home course to map it onto — Stellic's suggestion, not a fact. */
+  suggestion: string
+  /** How much work the rule would take off the desk. */
   impact: string
   pending: number
   iso: string
@@ -385,9 +386,9 @@ export type Articulation = {
 export const ARTICULATIONS: Articulation[] = [
   {
     id: "eq1",
-    from: "MATH 1210 Calculus",
+    from: "21-1200: Calculus I",
     institution: "Seneca College",
-    equivalent: "MATH 1200 Calculus I",
+    suggestion: "21-1200: Calculus I",
     impact: "38 pending articulations",
     pending: 38,
     iso: "2026-08-04",
@@ -395,9 +396,9 @@ export const ARTICULATIONS: Articulation[] = [
   },
   {
     id: "eq2",
-    from: "BIOL 1010 Intro Biology",
-    institution: "Humber College",
-    equivalent: "BIOL 1100 Foundations of Biology",
+    from: "21-2445: Biology I",
+    institution: "Seneca College",
+    suggestion: "32-1100: Foundations of Biology",
     impact: "24 pending articulations",
     pending: 24,
     iso: "2026-08-03",
@@ -405,9 +406,9 @@ export const ARTICULATIONS: Articulation[] = [
   },
   {
     id: "eq3",
-    from: "PSYC 101 Intro Psychology",
-    institution: "University College Cork",
-    equivalent: "PSYC 1000 Intro Psychology",
+    from: "PSY-837: Intro to Psychology",
+    institution: "Conestoga College",
+    suggestion: "43-1000: Intro to Psychology",
     impact: "17 pending articulations",
     pending: 17,
     iso: "2026-08-01",
@@ -424,7 +425,7 @@ export type InsightTab = "audit" | "exceptions" | "transfer"
 export const INSIGHT_TAB_LABELS: Record<InsightTab, string> = {
   audit: "Audits",
   exceptions: "Exceptions",
-  transfer: "Transfer",
+  transfer: "Transfers",
 }
 
 /** Whether to show everything, only what is wrong, or only what could be
