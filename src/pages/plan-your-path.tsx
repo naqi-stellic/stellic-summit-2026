@@ -86,7 +86,6 @@ import {
   findTerm,
   moveCourse,
   nextYearNumber,
-  planCampuses,
   planStanding,
   chooseSection,
   registerCourses,
@@ -679,7 +678,6 @@ export function PlanYourPath({
             graduation={expectedGraduation(years)}
             terms={selectableTerms(years)}
             keepTerms={releasableTerms(years)}
-            campus={planCampuses(years)}
             options={optionSummaries}
             selectedOption={optionId}
             placeholders={placeholders}

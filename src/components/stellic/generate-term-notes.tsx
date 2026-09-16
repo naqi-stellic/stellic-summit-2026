@@ -1,5 +1,4 @@
 import { Icon } from "@/components/icon"
-import { InstitutionInstructions } from "@/components/stellic/institution-instructions"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { eligibleCourses, type PlannedCourse } from "@/data/plan"
@@ -78,7 +77,6 @@ export function GenerateTermNotes({
   onNotesChange,
   seatNotes,
   onSeatNoteChange,
-  institution,
 }: {
   /** The held seats in this term, which may be none. */
   seats: PlannedCourse[]
@@ -86,8 +84,6 @@ export function GenerateTermNotes({
   onNotesChange: (next: string) => void
   seatNotes: Record<string, SeatNote>
   onSeatNoteChange: (courseId: string, next: SeatNote) => void
-  /** What the school has already told the run to do. */
-  institution?: string[]
 }) {
   return (
     <>
@@ -126,8 +122,6 @@ export function GenerateTermNotes({
           ))}
         </div>
       )}
-
-      <InstitutionInstructions lines={institution} />
     </>
   )
 }

@@ -92,13 +92,13 @@ Expected graduation is the last term the plan reaches, not a stored date.
 
 ## Two kinds of instructions
 
-The instructions step has the student's box and, under it, the school's:
-`INSTITUTION_INSTRUCTIONS` says what the run always honours — core before
-general, prerequisites, double counting, offerings through the published term,
-the credit ceiling — read-only and locked, with the same rules the summary
-lists under "Also accounting for". Generate Schedule shows its own four, about
-seats, campus, clashes and classes already chosen. Both are derived from
-`PLANNING_RULES` and the scheduler's own rule rather than written twice.
+The student writes theirs in the instructions step. The school's are read back
+in the summary, under "Also accounting for", as two lines rather than a table
+of rows: `INSTITUTION_INSTRUCTIONS` for a plan or a term — core before general,
+prerequisites, double counting, what the catalogue reaches, the credit ceiling
+— and `SCHEDULE_INSTITUTION_INSTRUCTIONS` for a week, about seats, campus,
+clashes and classes already chosen. Both are built from `PLANNING_RULES` and
+the scheduler's own rule rather than written out twice.
 
 ## Generate Plan panel
 

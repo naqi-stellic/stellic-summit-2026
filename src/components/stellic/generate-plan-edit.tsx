@@ -4,6 +4,7 @@ import {
   type SettingStep,
 } from "@/components/stellic/plan-settings"
 import { Button } from "@/components/ui/button"
+import { INSTITUTION_INSTRUCTIONS } from "@/data/plan"
 
 /* The instructions card opened up: everything the draft was built from, each
  * answer linked back to the step that set it, and the two ways out — start the
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button"
 
 export function GeneratePlanEdit({
   choices,
-  rules,
   onCancel,
   onEditStep,
   onStartOver,
@@ -20,7 +20,6 @@ export function GeneratePlanEdit({
   canRegenerate,
 }: {
   choices: SettingRow[]
-  rules: SettingRow[]
   onCancel: () => void
   onEditStep: (step: SettingStep) => void
   onStartOver: () => void
@@ -39,7 +38,7 @@ export function GeneratePlanEdit({
       </div>
 
       <SettingsSection title="Your choices" rows={choices} onEdit={onEditStep} />
-      <SettingsSection title="Also accounting for" rows={rules} onEdit={onEditStep} />
+      <SettingsSection title="Also accounting for" text={INSTITUTION_INSTRUCTIONS} />
 
       <div className="flex w-full items-center gap-2 pt-2">
         <Button className="flex-1" onClick={onStartOver}>

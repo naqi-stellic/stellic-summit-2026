@@ -26,7 +26,7 @@ import { Switch } from "@/components/ui/switch"
 import { RadioCard } from "@/components/stellic/primitives"
 import {
   CREDITS_PER_COURSE,
-  PLANNING_RULES,
+  INSTITUTION_INSTRUCTIONS,
   SCHEDULE_INSTITUTION_INSTRUCTIONS,
   clockTime,
   type PlanStanding,
@@ -196,19 +196,6 @@ export function GenerateTermPanel({
           },
         ]
       : []),
-  ]
-
-  const rules: SettingRow[] = [
-    { label: "Requirement priority", value: PLANNING_RULES.requirementPriority },
-    { label: "Campus", value: term.campus ?? "Main campus" },
-    {
-      label: "Existing credit",
-      value: `${standing.completed.reqs} courses, ${standing.completed.credits} credits`,
-    },
-    { label: "Prerequisites, co-reqs, anti-reqs", value: PLANNING_RULES.prerequisites },
-    { label: "Term offerings", value: `through ${PLANNING_RULES.offeringsThrough}` },
-    { label: "Credit load limits", value: `max ${PLANNING_RULES.maxCreditsPerTerm} per term` },
-    { label: "Double counting rules", value: PLANNING_RULES.doubleCounting },
   ]
 
   return (
@@ -485,7 +472,6 @@ export function GenerateTermPanel({
             onNotesChange={setNotes}
             seatNotes={seatNotes}
             onSeatNoteChange={(id, next) => setSeatNotes((all) => ({ ...all, [id]: next }))}
-            institution={scheduling ? SCHEDULE_INSTITUTION_INSTRUCTIONS : undefined}
           />
         ) : view === 3 ? (
           <GenerateSchedulePrefs term={term} prefs={prefs} onChange={setPrefs} />
@@ -505,7 +491,10 @@ export function GenerateTermPanel({
                 rows={choices}
                 onEdit={(edit) => setView(edit === 3 ? 3 : edit === 2 ? 2 : 1)}
               />
-              <SettingsSection title="Also accounting for" rows={rules} />
+              <SettingsSection
+                title="Also accounting for"
+                text={scheduling ? SCHEDULE_INSTITUTION_INSTRUCTIONS : INSTITUTION_INSTRUCTIONS}
+              />
             </div>
           </>
         ) : (

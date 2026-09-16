@@ -128,23 +128,19 @@ export const PLANNING_RULES = {
   maxCreditsPerTerm: 18,
 }
 
-/** The same rules said the way instructions are said: what the school has told
- *  the generator to do, which the student can read but not change. */
-export const INSTITUTION_INSTRUCTIONS = [
-  "Take core requirements before general ones.",
-  "Respect prerequisites, co-requisites and anti-requisites.",
-  "Count a course toward every requirement it satisfies.",
-  `Only plan classes published through ${PLANNING_RULES.offeringsThrough}.`,
-  `Keep every term at or under ${PLANNING_RULES.maxCreditsPerTerm} credits.`,
-]
+/** The rules said the way instructions are said, short enough to read in a
+ *  line or two: what the school has told the generator, which the student can
+ *  read but not change. */
+export const INSTITUTION_INSTRUCTIONS =
+  "Core requirements before general ones, with prerequisites and double counting applied. " +
+  `Classes published through ${PLANNING_RULES.offeringsThrough}, and at most ` +
+  `${PLANNING_RULES.maxCreditsPerTerm} credits a term.`
 
 /** The same, for a week rather than a degree. */
-export const SCHEDULE_INSTITUTION_INSTRUCTIONS = [
-  "Only offer sections with seats available.",
-  "Keep to the campuses, modalities and sub-terms your programme allows.",
-  "Never timetable two of your classes over each other.",
-  "Leave classes you have already chosen where they are.",
-]
+export const SCHEDULE_INSTITUTION_INSTRUCTIONS =
+  "Only sections with seats, on the campuses and in the modalities your programme allows. " +
+  "No two of your classes at once, and a class you have chosen stays where it is."
+
 
 /** The year already behind the student. It is not part of the editable plan —
  *  nothing in it can be moved, dropped or generated into — so it sits outside

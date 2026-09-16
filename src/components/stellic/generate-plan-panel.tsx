@@ -62,7 +62,6 @@ type View = 1 | 2 | 3 | "summary" | "building" | "options"
 export function GeneratePlanPanel({
   standing,
   graduation,
-  campus,
   terms,
   keepTerms,
   onFraming,
@@ -76,7 +75,6 @@ export function GeneratePlanPanel({
 }: {
   standing: PlanStanding
   graduation: string
-  campus: string
   /** Terms the pacing step can include or exclude, summers included. */
   terms: string[]
   /** Terms whose courses can be kept or released. */
@@ -219,7 +217,6 @@ export function GeneratePlanPanel({
             settings={planSettings({
               standing,
               graduation,
-              campus,
               keepPlanned,
               released: released.length,
               pace,
@@ -250,7 +247,6 @@ export function GeneratePlanPanel({
           <GeneratePlanSummary
             standing={standing}
             graduation={graduation}
-            campus={campus}
             keepPlanned={keepPlanned}
             released={released.length}
             pace={pace}
