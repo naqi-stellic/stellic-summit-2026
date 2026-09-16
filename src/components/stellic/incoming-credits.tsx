@@ -1,3 +1,5 @@
+import { cn } from "cn"
+
 import { Icon } from "@/components/icon"
 import { CourseTags } from "@/components/stellic/course-metadata"
 import { TimelineRail } from "@/components/stellic/planner"
@@ -112,7 +114,14 @@ export function IncomingCredits({
           </div>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-4 @3xl:grid-cols-2 @6xl:grid-cols-3">
+        {/* The same grid a year's terms stand in, so two cards here are as
+            wide as Fall and Spring are. */}
+        <div
+          className={cn(
+            "grid w-full grid-cols-1 gap-4 @3xl:grid-cols-2",
+            groups.length > 2 && "@6xl:grid-cols-3"
+          )}
+        >
           {groups.map((group) => (
             <GroupCard key={group.kind} group={group} />
           ))}

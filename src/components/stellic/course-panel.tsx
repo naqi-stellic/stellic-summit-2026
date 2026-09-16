@@ -14,10 +14,12 @@ import type { CatalogEntry } from "@/data/catalog"
 import {
   activityFor,
   courseDetail,
+  meetingLines,
   prerequisiteCodes,
   type PrereqNode,
   type PrereqOption,
   type PrereqState,
+  type Section as CourseSection,
 } from "@/data/course-detail"
 import {
   CREDIT_GROUP_LABEL,
@@ -412,6 +414,20 @@ export function CoursePanel({
   const activity = planned ? activityFor(entry.code, planned.term.name, moved) : []
   /* The credits are the student's already, which is what the green says. */
   const earned = planned?.term.state === "completed"
+  /* A term that is finished or under way has no choice left in it: the class
+     the student is in is the only one worth showing, read off the plan rather
+     than off the catalogue, because that is where it is true. */
+  const settled = planned != null && planned.term.locked === true
+  const attending: CourseSection | null =
+    settled && planned.course.section
+      ? {
+          code: planned.course.section,
+          when: meetingLines(planned.course.meetings),
+          who: planned.course.instructor ?? "",
+          seats: "",
+        }
+      : null
+  const sections = settled ? (attending ? [attending] : []) : detail.sections
 
   const [campus, setCampus] = useState(detail.campus)
   const [termId, setTermId] = useState(terms[0]?.id ?? "")
@@ -560,9 +576,9 @@ export function CoursePanel({
             </div>
           )}
 
-          <Fold icon="calendar-month" title="Sections" count={detail.sections.length}>
+          <Fold icon="calendar-month" title="Sections" count={sections.length}>
             <div className="flex w-full flex-col gap-2">
-              {detail.sections.map((section) => {
+              {sections.map((section) => {
                 /* The one the student is in is marked rather than offered. */
                 const chosen = planned?.course.section === section.code
                 return (
@@ -597,17 +613,25 @@ export function CoursePanel({
                       ))}
                     </span>
                     <span className="shrink-0 text-body-md text-gray-80">{section.who}</span>
-                    <span className="shrink-0 text-body-md text-success-100">{section.seats}</span>
+                    {/* A class you are already in has no seat count worth
+                        reading: you have one. */}
+                    {section.seats && (
+                      <span className="shrink-0 text-body-md text-success-100">{section.seats}</span>
+                    )}
                   </div>
                 </div>
                 )
               })}
 
-              <p className="flex w-full items-center gap-3 rounded-md border border-gray-40 bg-card p-3 text-body-md text-gray-80">
-                <Icon name="unfold-more" size={16} className="shrink-0 text-gray-100" />
-                Showing sections with seat availability, see {detail.hidden} more available section
-                {detail.hidden === 1 ? "" : "s"}
-              </p>
+              {/* What else has seats is only worth saying where there is still
+                  a class to choose. */}
+              {!settled && (
+                <p className="flex w-full items-center gap-3 rounded-md border border-gray-40 bg-card p-3 text-body-md text-gray-80">
+                  <Icon name="unfold-more" size={16} className="shrink-0 text-gray-100" />
+                  Showing sections with seat availability, see {detail.hidden} more available section
+                  {detail.hidden === 1 ? "" : "s"}
+                </p>
+              )}
             </div>
           </Fold>
 

@@ -76,8 +76,6 @@ import {
   type DraftOption,
 } from "@/data/draft"
 import {
-  COMPLETED,
-  COMPLETED_YEAR,
   addTerm,
   INITIAL_YEARS,
   METADATA_DEFAULT,
@@ -129,14 +127,6 @@ function yearTabs(
 ): YearTab[] {
   return [
     { label: "All Years", icon: "grid-view", selected: !openYear, onSelect: onLeave },
-    {
-      label: COMPLETED.label,
-      ...PHASE_TAB.complete,
-      selected: COMPLETED.label === openYear,
-      /* The year is finished, but its terms can still be read. */
-      terms: COMPLETED_YEAR.terms.map(termTab),
-      onSelectTerm: onOpenTerm,
-    },
     ...years.map((year) => ({
       label: year.label,
       ...PHASE_TAB[year.phase],
@@ -149,7 +139,7 @@ function yearTabs(
 
 /** The year a term belongs to, for the filter above it. */
 function yearOf(years: Year[], termId: string): string | undefined {
-  return [...years, COMPLETED_YEAR].find((year) => year.terms.some((t) => t.id === termId))?.label
+  return years.find((year) => year.terms.some((t) => t.id === termId))?.label
 }
 
 /* Long enough for the last staggered card to finish settling (14 × 35ms of
@@ -276,7 +266,7 @@ export function PlanYourPath({
    * back does not cost the plan its scroll position or its draft. */
   const [openTermId, setOpenTermId] = useState<string | null>(null)
   /* What is finished comes folded away; the rest come open. */
-  const [collapsed, setCollapsed] = useState<string[]>([INCOMING_LABEL, COMPLETED_YEAR.label])
+  const [collapsed, setCollapsed] = useState<string[]>([INCOMING_LABEL])
   /* Which details the cards are showing. Plan details owns this, and every
      card in the plan — canvas or term — answers to the same list. */
   const [metadata, setMetadata] = useState<MetadataField[]>(METADATA_DEFAULT)
@@ -362,17 +352,19 @@ export function PlanYourPath({
   /* The course opened on its own, from the remaining list or from the courses
      that could fill a seat. */
   const course = openCourse
-  /* Everything on the canvas, which is the plan plus the year that is already
-     behind the student — that one is a constant rather than part of the plan,
-     so anything reading a course off the canvas has to look in both. */
-  const canvas = [COMPLETED_YEAR, ...shown]
   /* Or one already planned, which brings its term with it. */
-  const plannedOpen = openPlanned ? findCourse(canvas, openPlanned) : null
+  const plannedOpen = openPlanned ? findCourse(shown, openPlanned) : null
   /* Where a course opened like that could be put: every term that takes one. */
   const plannableTerms = shown.flatMap((year) => year.terms.filter((term) => !term.locked))
   /* The whole plan, which is what a course panel reads to say where a course
      fits: the year tabs narrow what is on the canvas, not what is true. */
-  const allTerms = canvas.flatMap((year) => year.terms)
+  const allTerms = shown.flatMap((year) => year.terms)
+  /* What the nav lists under Schedule: the terms that have one. A term nobody
+     has scheduled yet has nothing to open, and joins the list the moment its
+     classes come out. */
+  const scheduleTerms = allTerms
+    .filter((term) => term.scheduled)
+    .map((term) => ({ name: term.name, inProgress: term.state === "registered" }))
   /* The seat whose panel is open, if it is still in the plan. */
   const seat = openSeat ? findCourse(shown, openSeat.id) : null
   /* Terms a request is still out on. Every card that draws one of them marks
@@ -556,7 +548,7 @@ export function PlanYourPath({
   }
 
   const openTerm: Term | null = openTermId
-    ? (findTerm(shown, openTermId) ?? findTerm([COMPLETED_YEAR], openTermId))
+    ? findTerm(shown, openTermId)
     : null
 
   /* A term opens inside whatever is on screen: if a draft is up, the frame,
@@ -677,6 +669,15 @@ export function PlanYourPath({
       }}
     >
     <AppShell
+      navTerms={scheduleTerms}
+      /* A term view stands on its own term where the nav lists it, and on Plan
+         Your Path where it does not — a term with no schedule is somewhere you
+         got to through the plan. */
+      navCurrent={
+        openTerm && scheduleTerms.some((term) => term.name === openTerm.name)
+          ? openTerm.name
+          : undefined
+      }
       assistLabel={
         generators ? (draft ? "Make changes to Generated plan" : "Generate with Assistant") : null
       }
@@ -918,7 +919,7 @@ export function PlanYourPath({
               onToggleCollapse={() => toggleCollapsed(INCOMING_LABEL)}
             />
 
-            {canvas.map((year) => (
+            {shown.map((year) => (
               <YearSection
                 key={year.label}
                 year={year}

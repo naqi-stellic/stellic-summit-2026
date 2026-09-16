@@ -30,11 +30,13 @@ const SCHEDULE: NavItem = {
   trailing: "expand-more",
 }
 
-const TERMS: NavItem[] = [
-  { label: "Fall 2027", spacerRing: true, badge: "In Progress" },
-  { label: "Spring 2028", spacerRing: true },
-  { label: "Fall 2028", spacerRing: true },
-  { label: "Spring 2029", spacerRing: true },
+/** A term the schedule reaches: the one under way, and any whose classes are
+ *  out. A term that is only planned has no schedule to open. */
+export type ScheduleTerm = { name: string; inProgress?: boolean }
+
+const TERMS: ScheduleTerm[] = [
+  { name: "Fall 2027", inProgress: true },
+  { name: "Spring 2028" },
 ]
 
 const EXPLORE: NavItem[] = [
@@ -61,7 +63,7 @@ const STAFF: NavItem[] = [
   { label: "Analytics", strong: true },
 ]
 
-function nav(section: NavSection, current?: string): NavItem[] {
+function nav(section: NavSection, current?: string, terms: ScheduleTerm[] = TERMS): NavItem[] {
   if (section === "staff") {
     /* Students is where a staff member spends the day, so it is where they
        stand unless the page says otherwise. */
@@ -76,8 +78,16 @@ function nav(section: NavSection, current?: string): NavItem[] {
     { label: "Track Progress", glyph: "s-check", strong: true, active: here("Track Progress") },
     SCHEDULE,
     /* Opened onto its terms on the plan surfaces, where a term is the thing
-       you came to work on; closed everywhere else. */
-    ...(section === "plan" ? TERMS : []),
+       you came to work on; closed everywhere else. Standing on one of them is
+       what a term view does, and it stands on Plan Your Path otherwise. */
+    ...(section === "plan"
+      ? terms.map((term) => ({
+          label: term.name,
+          spacerRing: true,
+          badge: term.inProgress ? "In Progress" : undefined,
+          active: current === term.name,
+        }))
+      : []),
     { label: "Plan Your Path", glyph: "s-navigation", strong: true, active: here("Plan Your Path") },
     ...EXPLORE,
   ]
@@ -164,11 +174,14 @@ export function SidebarNav({
   section = "plan",
   open = true,
   current,
+  terms,
 }: {
   section?: NavSection
   open?: boolean
   /** Which row to stand on, where it is not the section's own default. */
   current?: string
+  /** The terms under Schedule, where the page knows which have one. */
+  terms?: ScheduleTerm[]
 }) {
   if (!open) return null
 
@@ -176,7 +189,7 @@ export function SidebarNav({
     <aside className="flex h-full w-60 shrink-0 flex-col gap-4 overflow-hidden bg-gray-100 pt-4 text-white">
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
         <nav className="flex shrink-0 flex-col items-start border-b border-gray-60 pb-[15px]">
-          {nav(section, current).map((item) => (
+          {nav(section, current, terms).map((item) => (
             <a
               key={item.label}
               href="#"

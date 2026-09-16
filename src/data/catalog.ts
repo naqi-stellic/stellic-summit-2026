@@ -27,7 +27,14 @@ export type CatalogEntry = {
 }
 
 export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
+  /* The foundations, which the student has not sat yet: the plan starts at
+     their first year and the credits they arrived with answer to other
+     requirements than these. */
+  { code: "BUS 101", name: "Introduction to Business", reason: "Business core" },
+  { code: "MATH 140", name: "Business Calculus", reason: "Business core" },
+  { code: "MIS 120", name: "Business Technology Essentials", reason: "Business core" },
   { code: "MGMT 210", name: "Principles of Management", reason: "Business core" },
+  { code: "MGMT 340", name: "Organizational Behavior", reason: "Business core" },
   { code: "ACCT 310", name: "Intermediate Accounting I", reason: "Business core" },
   { code: "MIS 250", name: "Management Information Systems", reason: "Data Analytics minor" },
   { code: "BLAW 301", name: "Business Law & Ethics", reason: "Business core" },
@@ -52,9 +59,15 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
     reason: "Concentration elective",
     placeholder: true,
   },
+  { code: "DATA 210", name: "Foundations of Data Analytics", reason: "Data Analytics minor" },
+  { code: "PSYC 101", name: "Introduction to Psychology", reason: "General education" },
+  { code: "SOC 101", name: "Introduction to Sociology", reason: "General education" },
+  { code: "BIO 105", name: "Human Biology", reason: "General education" },
+  { code: "ARTS 110", name: "Visual Culture", reason: "General education" },
   { code: "ENGL 210", name: "Advanced Composition", reason: "General education" },
   { code: "PHIL 240", name: "Business Ethics", reason: "General education" },
   { code: "HIST 205", name: "Modern World History", reason: "General education" },
+  { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   /* The minor's own elective, held like any other seat but filled from the

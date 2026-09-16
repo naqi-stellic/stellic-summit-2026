@@ -42,19 +42,22 @@ it appears in the year filter's menu.
 
 Figma is the source for layout, not content — its placeholder data contradicts
 itself — so the sample plan is invented to hold together. The story: a student
-who started Fall 2026 on a 120-credit, 40-requirement Business Administration
+starting a 120-credit, 40-requirement Business Administration
 B.S. with a Finance concentration and a Data Analytics minor — the pair being
 the point: no pathway is built for every programme, concentration and minor
 there could be. Three of the outstanding requirements answer to the minor
 rather than the major (MIS 250, STAT 320 and a data elective seat), so it is
-real in the plan without changing the forty or the hundred and twenty. They finished 2026-2027 (10 courses, 30
-credits), are partway through Fall 2027, have started planning Spring 2028, and
-the plan runs out to 2029-2030. Courses are 3 credits each.
+real in the plan without changing the forty or the hundred and twenty. They
+arrived with 15 credits, are partway through Fall 2027, have started planning
+Spring 2028, and the plan runs four years to 2030-2031 — which is what it takes
+to place the forty. Nothing is earned yet, so the counts read 0 taken, 7
+planned, 33 outstanding, and a generated plan fills every one of the eight
+terms. Courses are 3 credits each.
 
 Above the first year sits Incoming Credits
 ([`1393:60657`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-60657)
 for the shape it started as): what the student arrived with, folded away like
-the year below it. Three cards in a row — Transfer Credits, Exam Credits, Pre-Year 1 — each
+the year below it. Two cards, as wide as a year's terms — Transfer Credits and Pre-Year 1 — each
 saying what it earned, with its rows carrying what was brought in rather than
 what it stands for here: another college's course and the college that taught
 it, an exam and the score it was passed at. Which of our requirements they
@@ -68,9 +71,10 @@ The total is said beside the heading. Each row's credits are a tag like any
 other detail, so they answer to Plan details and are not there until it asks
 for them; what stays on the row is the one fact the kind is worth knowing by. Those credits are extra rather than
 requirements, so the degree's forty and its hundred and twenty are untouched
-and the generator has the same work to do. Make them count instead by folding
-them into `COMPLETED` and striking the matching entries off
-`REMAINING_REQUIREMENTS`.
+and the generator has the same work to do. Make them count instead by striking
+the matching entries off `REMAINING_REQUIREMENTS`. They are not idle, though:
+they are the only thing the student has earned, so the prerequisite trees are
+read against them.
 
 Spring 2028 holds one course and one seat: FIN 340, whose class has been chosen
 and which is ready to register, and a Finance elective with no course against
@@ -81,19 +85,23 @@ concentration seats is in the plan rather than on the list — the totals are th
 same either way.
 
 Anything visibly derived from that — year filter tabs, the "+ Add Year N"
-label, expected graduation, the registration deadline — comes from the plan
-rather than being written down separately. Adjust `DEGREE`, `COMPLETED` and
-`INITIAL_YEARS` in `src/data/plan.ts` and the rest follows.
+label, expected graduation, the registration deadline, and the terms the nav
+lists under Schedule — comes from the plan rather than being written down
+separately. Schedule holds the terms that have one: the term under way and any
+whose classes are out, which is Fall 2027 and Spring 2028 until a schedule is
+generated for another. Opening one of those terms stands on it in the nav;
+opening a term with no schedule stands on Plan Your Path, because that is how
+you got there. Adjust `DEGREE` and `INITIAL_YEARS` in
+`src/data/plan.ts` and the rest follows.
 
 ## Numbers
 
 Every figure on screen derives from the plan rather than being written down
 twice. Courses carry `credits`; a term's credit heading and its "Sep - Dec ·
 12 credits" line sum their own courses; and the Generate Plan panel's standing
-comes from `planStanding()` — completed from the finished `COMPLETED` year,
-planned from everything currently sitting in the editable plan (registered
-terms included, since those credits are not earned yet), remaining as the
-balance against `DEGREE`. Requirements are one per course, which is what makes
+comes from `planStanding()` — completed from the plan's own finished terms,
+planned from everything else sitting in it (the term under way included, since
+those credits are not earned yet), remaining as the balance against `DEGREE`. Requirements are one per course, which is what makes
 "6 reqs · 18 credits" read consistently.
 
 So the panel tracks edits: drop a 3-credit course and Planned falls from 18 to
@@ -236,7 +244,7 @@ started") or a grade already in and under what the option asks for (red,
 "Can't be met" — MIS 120 was passed at B and cannot be repeated). What each
 option comes to is read off what is inside it rather than written by hand,
 against the record the plan already holds: the ten courses passed in
-2026-2027, the five under way this term, a 3.24 average and thirty credits. So
+the fifteen credits they arrived with and the five courses under way. So
 a tree never claims a course was passed that the plan says is still to come,
 and a group where one child is enough counts as one thing rather than as a
 shortfall for the options the student did not take.
@@ -330,7 +338,7 @@ A requirement leaves the list once it has a term. A course is recognised by its
 name wherever it was placed from; a seat cannot be — every seat reads alike —
 so a placed seat remembers which outstanding requirement it answers, and the
 generator's seats remember it too. That is what keeps the three shares summing
-to forty: after generating the whole plan the panel reads 10 taken, 30 planned,
+to forty: after generating the whole plan the panel reads 0 taken, 40 planned,
 0 to place.
 
 The panel's refresh button is not built: there is nothing behind it to re-read,

@@ -109,8 +109,9 @@ export const DEGREE = {
   credits: 120,
   /** Non-course checkpoints: declare major, internship, capstone proposal… */
   milestones: 13,
-  /** How many of those have been signed off. The rest are still ahead. */
-  milestonesDone: 3,
+  /** How many of those have been signed off: the concentration, declared when
+   *  the student arrived. The rest are still ahead. */
+  milestonesDone: 1,
 }
 
 /** Institution settings the generator always honours. These are facts about
@@ -141,259 +142,6 @@ export const SCHEDULE_INSTITUTION_INSTRUCTIONS =
   "Only sections with seats, on the campuses and in the modalities your programme allows. " +
   "No two of your classes at once, and a class you have chosen stays where it is."
 
-
-/** The year already behind the student. It is not part of the editable plan —
- *  nothing in it can be moved, dropped or generated into — so it sits outside
- *  INITIAL_YEARS and the planner shows it collapsed. Its terms are real enough
- *  to open and read, though: they have classes, class numbers and hours. */
-export const COMPLETED_YEAR: Year = {
-  label: "2026-2027",
-  phase: "complete",
-  terms: [
-    {
-      id: "fall-2026",
-      name: "Fall 2026",
-      window: "Sep - Dec",
-      campus: "Main campus",
-      reviewed: true,
-      locked: true,
-      scheduled: true,
-      state: "completed",
-      courses: [
-        {
-          id: "p1",
-          code: "BUS 101",
-          name: "Introduction to Business",
-          credits: 3,
-          section: "Lec-01",
-          classNo: "1004",
-          campus: "Main",
-          modality: "In Person",
-          gradeOption: "Graded",
-          accent: "purple",
-          meetings: [
-            { day: 1, from: 9, to: 10.25 },
-            { day: 3, from: 9, to: 10.25 },
-          ],
-          instructor: "Dr. R. Okafor",
-          building: "Hale Hall",
-          room: "212",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 12 Aug 2026",
-        },
-        {
-          id: "p2",
-          code: "MATH 140",
-          name: "Business Calculus",
-          credits: 3,
-          section: "Lec-02",
-          classNo: "1017",
-          campus: "Main",
-          modality: "In Person",
-          gradeOption: "Graded",
-          accent: "amber",
-          meetings: [
-            { day: 2, from: 11, to: 12.25 },
-            { day: 4, from: 11, to: 12.25 },
-          ],
-          instructor: "Dr. L. Whitfield",
-          building: "Science Center",
-          room: "104",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 12 Aug 2026",
-        },
-        {
-          id: "p3",
-          code: "ENGL 101",
-          name: "Composition I",
-          credits: 3,
-          section: "Lec-01",
-          classNo: "1042",
-          campus: "Main",
-          modality: "In Person",
-          gradeOption: "Graded",
-          accent: "green",
-          meetings: [
-            { day: 1, from: 13, to: 14.25 },
-            { day: 3, from: 13, to: 14.25 },
-          ],
-          instructor: "Prof. M. Alvarez",
-          building: "Hale Hall",
-          room: "118",
-          attributes: "Writing Intensive",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 12 Aug 2026",
-        },
-        {
-          id: "p4",
-          code: "HIST 110",
-          name: "World Civilizations",
-          credits: 3,
-          section: "Lec-04",
-          classNo: "1063",
-          campus: "Main",
-          modality: "Online",
-          gradeOption: "Graded",
-          accent: "brown",
-          meetings: [{ day: 5, from: 10, to: 12.5 }],
-          instructor: "Dr. S. Nakamura",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 12 Aug 2026",
-        },
-        {
-          id: "p9",
-          code: "PSYC 101",
-          name: "Introduction to Psychology",
-          credits: 3,
-          section: "Lec-03",
-          classNo: "1085",
-          campus: "Main",
-          modality: "In Person",
-          gradeOption: "Graded",
-          accent: "teal",
-          meetings: [
-            { day: 2, from: 13, to: 14.25 },
-            { day: 4, from: 13, to: 14.25 },
-          ],
-          instructor: "Dr. T. Boateng",
-          topic: "Cognition",
-          building: "Science Center",
-          room: "230",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 12 Aug 2026",
-        },
-      ],
-    },
-    {
-      id: "spring-2027",
-      name: "Spring 2027",
-      window: "Jan - May",
-      campus: "Main campus",
-      reviewed: true,
-      locked: true,
-      scheduled: true,
-      state: "completed",
-      courses: [
-        {
-          id: "p5",
-          code: "ACCT 201",
-          name: "Financial Accounting",
-          credits: 3,
-          section: "Lec-01",
-          classNo: "1511",
-          campus: "Main",
-          modality: "In Person",
-          gradeOption: "Graded",
-          accent: "purple",
-          meetings: [
-            { day: 1, from: 10.5, to: 11.75 },
-            { day: 3, from: 10.5, to: 11.75 },
-          ],
-          instructor: "Prof. D. Sullivan",
-          building: "Braddock Hall",
-          room: "301",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 4 Dec 2026",
-        },
-        {
-          id: "p6",
-          code: "ECON 201",
-          name: "Principles of Microeconomics",
-          credits: 3,
-          section: "Lec-01",
-          classNo: "1524",
-          campus: "Main",
-          modality: "In Person",
-          gradeOption: "Graded",
-          accent: "amber",
-          meetings: [
-            { day: 2, from: 9, to: 10.25 },
-            { day: 4, from: 9, to: 10.25 },
-          ],
-          instructor: "Dr. A. Petrov",
-          building: "Braddock Hall",
-          room: "115",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 4 Dec 2026",
-        },
-        {
-          id: "p7",
-          code: "MIS 120",
-          name: "Business Technology Essentials",
-          credits: 3,
-          section: "Lab-02",
-          classNo: "1548",
-          campus: "Main",
-          modality: "Hybrid",
-          gradeOption: "Graded",
-          accent: "green",
-          meetings: [
-            { day: 2, from: 14, to: 15.25 },
-            { day: 4, from: 14, to: 15.25 },
-          ],
-          instructor: "Prof. K. Iyer",
-          building: "Braddock Hall",
-          room: "Lab 2",
-          subTerm: "Second Half",
-          lastActivity: "Added by pathway, 4 Dec 2026",
-        },
-        {
-          id: "p8",
-          code: "ART 105",
-          name: "Visual Culture",
-          credits: 3,
-          section: "Lec-01",
-          classNo: "1570",
-          campus: "Main",
-          modality: "In Person",
-          gradeOption: "Pass/Fail",
-          accent: "brown",
-          meetings: [{ day: 3, from: 15.5, to: 18 }],
-          instructor: "Prof. J. Moreau",
-          topic: "Modern & Contemporary",
-          building: "Kline Arts",
-          room: "008",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 4 Dec 2026",
-        },
-        {
-          id: "p10",
-          code: "COMM 230",
-          name: "Public Speaking",
-          credits: 3,
-          section: "Lec-02",
-          classNo: "1593",
-          campus: "Main",
-          modality: "In Person",
-          gradeOption: "Graded",
-          accent: "rose",
-          meetings: [
-            { day: 1, from: 13, to: 14.25 },
-            { day: 3, from: 13, to: 14.25 },
-          ],
-          instructor: "Prof. E. Castellanos",
-          building: "Hale Hall",
-          room: "140",
-          attributes: "Oral Communication",
-          subTerm: "Full Term",
-          lastActivity: "Added by pathway, 4 Dec 2026",
-        },
-      ],
-    },
-  ],
-}
-
-/** The roll-up the planner shows in place of that year, counted from it so the
- *  two can never disagree. */
-export const COMPLETED = {
-  label: COMPLETED_YEAR.label,
-  courses: COMPLETED_YEAR.terms.reduce((n, t) => n + t.courses.length, 0),
-  credits: COMPLETED_YEAR.terms.reduce(
-    (n, t) => n + t.courses.reduce((c, course) => c + course.credits, 0),
-    0
-  ),
-  milestones: 3,
-}
 
 /** Years the student has not planned into yet: two empty terms, nothing locked. */
 /** The summer a year can take, between its spring and the next fall. A year
@@ -635,12 +383,11 @@ export const INITIAL_YEARS: Year[] = [
       },
     ],
   },
-  /* The degree is a four-year one and the student started in Fall 2026, so the
-   * plan reaches Spring 2030 and stops. A pace that cannot fit inside it has to
-   * add a year of its own, which is the point: the extra year is the cost of
-   * the lighter load, and it should be visible rather than pre-drawn. */
+  /* Four years of plan, the year under way and three ahead of it. A pace that
+   * cannot fit inside them has to add a year of its own. */
   emptyYear(2028),
   emptyYear(2029),
+  emptyYear(2030),
 ]
 
 /* ---------------------------------------------------------------- moves */
@@ -741,32 +488,42 @@ export const CREDIT_GROUP_LABEL = {
  *  editable plan counts as planned — registered terms included, since those
  *  credits are not earned yet. */
 export function planStanding(years: Year[]) {
+  let doneReqs = 0
+  let doneCredits = 0
   let plannedReqs = 0
   let plannedCredits = 0
   let lockedCourses = 0
   for (const year of years) {
     for (const term of year.terms) {
+      /* Only a finished term has earned anything. A term under way is still
+         planned: those credits are not the student's yet. */
+      const done = term.state === "completed"
       for (const course of term.courses) {
-        plannedReqs += 1
-        plannedCredits += course.credits
+        if (done) {
+          doneReqs += 1
+          doneCredits += course.credits
+        } else {
+          plannedReqs += 1
+          plannedCredits += course.credits
+        }
         if (term.locked) lockedCourses += 1
       }
     }
   }
 
   return {
-    completed: { reqs: COMPLETED.courses, credits: COMPLETED.credits },
+    completed: { reqs: doneReqs, credits: doneCredits },
     planned: { reqs: plannedReqs, credits: plannedCredits },
     remaining: {
-      reqs: Math.max(0, DEGREE.requirements - COMPLETED.courses - plannedReqs),
-      credits: Math.max(0, DEGREE.credits - COMPLETED.credits - plannedCredits),
+      reqs: Math.max(0, DEGREE.requirements - doneReqs - plannedReqs),
+      credits: Math.max(0, DEGREE.credits - doneCredits - plannedCredits),
     },
     total: { reqs: DEGREE.requirements, credits: DEGREE.credits },
     /** Courses the generator has to plan around rather than move. */
     lockedCourses,
     milestones: {
-      completed: COMPLETED.milestones,
-      remaining: Math.max(0, DEGREE.milestones - COMPLETED.milestones),
+      completed: DEGREE.milestonesDone,
+      remaining: Math.max(0, DEGREE.milestones - DEGREE.milestonesDone),
       total: DEGREE.milestones,
     },
   }
@@ -780,7 +537,8 @@ export function expectedGraduation(years: Year[]): string {
   return lastYear?.terms.at(-1)?.name ?? "—"
 }
 
-/** Academic year number of the next year to add — the completed year counts. */
+/** Academic year number of the next year to add. The year behind the student
+ *  counts: the plan starts at their second. */
 export function nextYearNumber(years: Year[]): number {
   return 1 + years.length + 1
 }

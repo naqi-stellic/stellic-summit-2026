@@ -2,7 +2,12 @@ import { useState, type ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
 import { useMediaQuery } from "@/lib/use-media-query"
-import { SidebarMasthead, SidebarNav, type NavSection } from "@/components/layout/sidebar"
+import {
+  SidebarMasthead,
+  SidebarNav,
+  type NavSection,
+  type ScheduleTerm,
+} from "@/components/layout/sidebar"
 import { Topbar } from "@/components/layout/topbar"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,6 +36,7 @@ export function AppShell({
   panel,
   section = "plan",
   navCurrent,
+  navTerms,
   account,
   assistant = true,
   assistLabel = "Generate with Assistant",
@@ -44,6 +50,8 @@ export function AppShell({
   section?: NavSection
   /** Which nav row to stand on, where it is not the section's own default. */
   navCurrent?: string
+  /** The terms the nav lists under Schedule, where the page knows them. */
+  navTerms?: ScheduleTerm[]
   /** Replaces the account circle in the top bar. */
   account?: ReactNode
   /** Whether the assistant floats over the page at all. Off where the design
@@ -78,7 +86,7 @@ export function AppShell({
 
         <div className="flex min-h-0 flex-1">
           <div className="max-md:hidden">
-            <SidebarNav section={section} open={nav} current={navCurrent} />
+            <SidebarNav section={section} open={nav} current={navCurrent} terms={navTerms} />
           </div>
 
           {/* The panel group is always mounted so `children` keeps its place in

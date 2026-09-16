@@ -36,11 +36,11 @@ has them:
 
 | | |
 | --- | --- |
-| 10 taken | the finished 2026-2027 year |
+| 0 taken | the plan's own finished terms — there are none yet |
 | 5 under way | Fall 2027 |
 | 1 registered | FIN 340, whose class is chosen |
 | 1 planned | the Finance elective seat in Spring 2028 |
-| 23 outstanding | `REMAINING_REQUIREMENTS` in `src/data/catalog.ts` |
+| 33 outstanding | `REMAINING_REQUIREMENTS` in `src/data/catalog.ts` |
 
 The four dual-enrolment courses the student came in with are the **unmatched
 courses**: real credit the degree asked for none of, which is what that section

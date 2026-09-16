@@ -3,7 +3,7 @@ import { cn } from "cn"
 
 import { Icon } from "@/components/icon"
 import type { CatalogEntry } from "@/data/catalog"
-import { COMPLETED, DEGREE, type Year } from "@/data/plan"
+import { DEGREE, planStanding, type Year } from "@/data/plan"
 
 /* Everything the degree still wants, with nowhere to be yet. The plan is not
  * finished until this list is empty, so each row is picked up from here and
@@ -122,7 +122,7 @@ export function RequirementsPanel({
   /* Taken, planned, and still to place. They are three counts of the same
      forty, so each is read from where it actually lives rather than inferred
      from the other two. */
-  const done = COMPLETED.courses
+  const done = planStanding(years).completed.reqs
 
   /* Grouped the way the degree asks for them — core before concentration
      before general — which is the order they are listed in. */

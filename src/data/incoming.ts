@@ -23,9 +23,14 @@ export type IncomingGroup = {
 
 /* What was brought in, as it was brought in: the courses another college
  * taught and the exams a board set, not the courses of ours they stand for.
- * Which of ours they answer to is the audit's business, not the planner's. */
+ * Which of ours they answer to is the audit's business, not the planner's.
+ * Two kinds only — what came from elsewhere, and what was taken here before
+ * the first year began. */
 export const INCOMING_CREDITS: IncomingGroup[] = [
   {
+    /* Everything brought in from elsewhere, whoever it came from: a college
+       that taught it or a board that examined it. Where it came from is the
+       line under the name, which is what tells the two apart. */
     kind: "Transfer Credits",
     items: [
       {
@@ -42,11 +47,6 @@ export const INCOMING_CREDITS: IncomingGroup[] = [
         detail: "Mesa Community College",
         credits: 3,
       },
-    ],
-  },
-  {
-    kind: "Exam Credits",
-    items: [
       {
         id: "x1",
         code: "College Board",

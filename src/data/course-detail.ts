@@ -1,5 +1,5 @@
 import type { CatalogEntry } from "@/data/catalog"
-import { CREDITS_PER_COURSE } from "@/data/plan"
+import { CREDITS_PER_COURSE, type Meeting } from "@/data/plan"
 
 /* What a course looks like when it is opened on its own: the catalogue entry
  * for it, the classes on offer, and everything the audit knows about where it
@@ -98,19 +98,13 @@ function seedOf(code: string): number {
 }
 
 /* What the student has, which is what the audit reads a prerequisite against.
- * Taken from the plan itself rather than invented here, so a tree never claims
- * a course was passed that the plan says is still to come. */
+ * They are at the start of the degree, so the only credits already theirs are
+ * the ones they arrived with — the transfer work and the course taken here
+ * before the first year. */
 const EARNED: Record<string, string> = {
-  "BUS 101": "Taken Fall 2026, A",
-  "MATH 140": "Taken Fall 2026, B+",
-  "ENGL 101": "Taken Fall 2026, A−",
-  "HIST 110": "Taken Fall 2026, B",
-  "PSYC 101": "Taken Fall 2026, A−",
-  "ACCT 201": "Taken Spring 2027, B+",
-  "ECON 201": "Taken Spring 2027, A−",
-  "MIS 120": "Taken Spring 2027, B",
-  "ART 105": "Taken Spring 2027, A",
-  "COMM 230": "Taken Spring 2027, B+",
+  "ENG 101": "Transfer credit, Mesa Community College",
+  "MAT 151": "Transfer credit, Mesa Community College",
+  "SPAN 101": "Taken before Year 1",
 }
 
 const IN_PROGRESS = ["FIN 301", "ACCT 202", "ECON 202", "STAT 210", "MKTG 201"]
@@ -137,34 +131,35 @@ function courseNode(code: string, note?: string): PrereqNode {
 }
 
 /* Conditions that are not courses. The student's own standing decides how each
- * one reads: a 3.24 average, thirty credits earned, sophomore, and the finance
- * concentration declared. */
+ * one reads: fifteen credits in hand, the first year under way, and the
+ * finance concentration declared when they arrived. */
 const CONDITIONS: Record<string, PrereqNode> = {
-  gpa: {
-    label: "Cumulative GPA 2.50",
-    state: "earned",
-    meta: "3.24",
-  },
   credits: {
-    label: "30 total credits",
+    label: "12 total credits",
     state: "earned",
-    meta: "30 completed",
+    meta: "15 completed",
   },
   standing: {
-    label: "Sophomore standing",
+    label: "Good academic standing",
     state: "earned",
-    meta: "Sophomore",
+    meta: "No holds",
+  },
+  sophomore: {
+    label: "Sophomore standing",
+    state: "progress",
+    meta: "On track, Sophomore by Fall 2028",
+    tone: "good",
   },
   junior: {
     label: "Junior standing",
     state: "progress",
-    meta: "On track, Junior by Fall 2028",
+    meta: "On track, Junior by Fall 2029",
     tone: "good",
   },
   declared: {
     label: "Declare the Finance concentration",
     state: "earned",
-    meta: "Declared Sep 2026",
+    meta: "Declared Sep 2027",
   },
   second: {
     label: "Declare a second major",
@@ -215,9 +210,8 @@ function summarise(children: PrereqNode[]): Body {
 /* The routes that are closed: a grade already in and under what the option
  * asks, on a course that cannot be repeated. */
 const CLOSED = [
-  { code: "MIS 120", grade: "B", term: "Spring 2027", minimum: "A−" },
-  { code: "HIST 110", grade: "B", term: "Fall 2026", minimum: "A" },
-  { code: "MIS 120", grade: "B", term: "Spring 2027", minimum: "A" },
+  { code: "ENG 101", minimum: "B" },
+  { code: "MAT 151", minimum: "B+" },
 ]
 
 function closed(seed: number): Body {
@@ -226,13 +220,13 @@ function closed(seed: number): Body {
     state: "blocked",
     meta: "Can't be met",
     tone: "bad",
-    summary: `${shut.code} was passed at ${shut.grade}, under the ${shut.minimum} this option asks for`,
+    summary: `${shut.code} transferred without a grade, so the ${shut.minimum} minimum this option asks for cannot be met`,
     children: [
       {
         code: shut.code,
         note: `minimum grade ${shut.minimum}`,
         state: "blocked",
-        meta: `Taken ${shut.term}, ${shut.grade}`,
+        meta: "Transfer credit, no grade",
         tone: "bad",
       },
       CONDITIONS.standing,
@@ -256,14 +250,14 @@ function level(code: string): number {
  * is also what makes a course in the plan hold up the ones after it. */
 const SUBJECT_GATE: Record<string, string[]> = {
   FIN: ["FIN 301", "FIN 340"],
-  ACCT: ["ACCT 201", "ACCT 202"],
-  ECON: ["ECON 201", "ECON 202"],
-  DATA: ["STAT 210", "MIS 250"],
-  STAT: ["MATH 140", "STAT 210"],
+  ACCT: ["ACCT 202"],
+  ECON: ["ECON 202"],
+  DATA: ["DATA 210", "STAT 210"],
+  STAT: ["MAT 151", "STAT 210"],
   MIS: ["MIS 120", "MIS 250"],
   OPS: ["STAT 210", "OPS 320"],
-  BUS: ["BUS 101", "ECON 201"],
-  MKTG: ["MKTG 201", "BUS 101"],
+  BUS: ["BUS 101", "BUS 390"],
+  MKTG: ["MKTG 201"],
   MGMT: ["BUS 101", "MGMT 210"],
   BLAW: ["BUS 101"],
 }
@@ -280,7 +274,7 @@ function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequ
     const rest = from.filter((code) => code !== entry.code)
     return rest[seed % rest.length]
   }
-  const gate = pick(["BUS 101", "MATH 140", "ACCT 201", "ECON 201"])
+  const gate = pick(["MAT 151", "ENG 101"])
   const second = pick(["ACCT 202", "ECON 202", "STAT 210", "MKTG 201"])
   /* Only what comes below it in its own subject: a course cannot be asked for
      by something the student takes before it. */
@@ -297,7 +291,7 @@ function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequ
 
   /* The way the student is on: built from what they have and what they are
      taking, so it is the one that reads well. */
-  const taking = summarise([courseNode(gate), courseNode(second), CONDITIONS.gpa])
+  const taking = summarise([courseNode(gate), courseNode(second), CONDITIONS.credits])
   /* The way nobody has started. */
   const cold = summarise([courseNode(untouched), CONDITIONS.second])
 
@@ -316,8 +310,8 @@ function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequ
       open: true,
       children: [courseNode(second), courseNode(later)],
     },
-    courseNode(gate, "minimum grade B"),
-    CONDITIONS.gpa,
+    courseNode(gate),
+    CONDITIONS.credits,
     CONDITIONS.junior,
   ])
   const shut = closed(seed)
@@ -412,4 +406,29 @@ export function activityFor(code: string, term: string, moved?: string): Activit
     { kind: "remove", term: moved, when: "1 month ago", who: remover },
     { kind: "add", term: moved, when: "2 months ago", who: student },
   ]
+}
+
+
+const DAY_LETTER = ["", "M", "T", "W", "R", "F", "S"]
+
+function clock(hour: number): string {
+  const whole = Math.floor(hour)
+  const minutes = Math.round((hour - whole) * 60)
+  const suffix = whole >= 12 ? "pm" : "am"
+  const shown = whole % 12 === 0 ? 12 : whole % 12
+  return `${shown}:${String(minutes).padStart(2, "0")}${suffix}`
+}
+
+/** A class's hours the way a section lists them: the days that keep the same
+ *  time together on one line, and any that keep another on the next. */
+export function meetingLines(meetings: Meeting[] = []): string[] {
+  const groups: { days: number[]; from: number; to: number }[] = []
+  for (const meeting of meetings) {
+    const same = groups.find((g) => g.from === meeting.from && g.to === meeting.to)
+    if (same) same.days.push(meeting.day)
+    else groups.push({ days: [meeting.day], from: meeting.from, to: meeting.to })
+  }
+  return groups.map(
+    (g) => `${g.days.map((d) => DAY_LETTER[d] ?? "").join("")} ${clock(g.from)} - ${clock(g.to)}`
+  )
 }
