@@ -60,10 +60,10 @@ follow from that, and all three are load-bearing:
   in place, under the transcripts they are being added to. A second way of
   asking the same question would have been a second thing to keep in step.
 
-Reading runs for **10 seconds**, not the 60 the copy promises
+Reading runs for **8 seconds**, not the 60 the copy promises
 (`PROCESSING_MS`). A real pass would use them; a prototype that did would only
-ever be watched once. Ten is long enough to answer all three questions before
-it finishes, which is the whole point of the screen.
+ever be watched once. Eight is long enough to show that the questions are
+answerable while it runs, which is the whole point of the screen.
 
 ## The results page
 

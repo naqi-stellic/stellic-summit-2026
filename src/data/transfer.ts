@@ -235,7 +235,7 @@ export const DISCOVER = [
 
 /** How long the read takes. The copy promises up to 60 seconds and a real OCR
  *  pass would use them; a prototype that did would only ever be watched once,
- *  so the bar runs in ten and the sentence stays honest about the real thing.
- *  The point being demonstrated is that the questions are answerable while it
- *  runs, and ten seconds is long enough to answer all three. */
-export const PROCESSING_MS = 10000
+ *  so the bar runs in eight and the sentence stays honest about the real
+ *  thing. The point being demonstrated is that the questions are answerable
+ *  while it runs, and eight seconds is long enough to show that. */
+export const PROCESSING_MS = 8000
