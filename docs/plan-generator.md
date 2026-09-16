@@ -45,6 +45,15 @@ B.S. with a Finance concentration. They finished 2026-2027 (10 courses, 30
 credits), are partway through Fall 2027, have started planning Spring 2028, and
 the plan runs out to 2029-2030. Courses are 3 credits each.
 
+Above the first year sits Pre-Enrollment
+([`1393:60657`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-60657)):
+two terms of dual enrolment taken before the degree began, four courses in all,
+folded away like the year below it. Those credits are extra rather than
+requirements — `COMPLETED` is still the 2026-2027 year alone — so the forty and
+the hundred and twenty are untouched and the generator has the same work to do.
+Make them count instead by folding them into `COMPLETED` and striking four
+entries off `REMAINING_REQUIREMENTS`.
+
 Spring 2028 holds one course and one seat: FIN 340, whose class has been chosen
 and which is ready to register, and a Finance elective with no course against
 it. So the term reads "1 action required" — the seat — and one of its two

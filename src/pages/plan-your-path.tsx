@@ -76,6 +76,7 @@ import {
 import {
   COMPLETED,
   COMPLETED_YEAR,
+  PRE_ENROLLMENT,
   addTerm,
   INITIAL_YEARS,
   METADATA_DEFAULT,
@@ -147,7 +148,9 @@ function yearTabs(
 
 /** The year a term belongs to, for the filter above it. */
 function yearOf(years: Year[], termId: string): string | undefined {
-  return [...years, COMPLETED_YEAR].find((year) => year.terms.some((t) => t.id === termId))?.label
+  return [...years, COMPLETED_YEAR, PRE_ENROLLMENT].find((year) =>
+    year.terms.some((t) => t.id === termId)
+  )?.label
 }
 
 /* Long enough for the last staggered card to finish settling (14 × 35ms of
@@ -273,8 +276,11 @@ export function PlanYourPath({
   /* A term opened on its own. The planner stays mounted behind it, so coming
    * back does not cost the plan its scroll position or its draft. */
   const [openTermId, setOpenTermId] = useState<string | null>(null)
-  /* The finished year comes folded away; the rest come open. */
-  const [collapsed, setCollapsed] = useState<string[]>([COMPLETED_YEAR.label])
+  /* What is finished comes folded away; the rest come open. */
+  const [collapsed, setCollapsed] = useState<string[]>([
+    PRE_ENROLLMENT.label,
+    COMPLETED_YEAR.label,
+  ])
   /* Which details the cards are showing. Plan details owns this, and every
      card in the plan — canvas or term — answers to the same list. */
   const [metadata, setMetadata] = useState<MetadataField[]>(METADATA_DEFAULT)
@@ -529,7 +535,7 @@ export function PlanYourPath({
   }
 
   const openTerm: Term | null = openTermId
-    ? (findTerm(shown, openTermId) ?? findTerm([COMPLETED_YEAR], openTermId))
+    ? (findTerm(shown, openTermId) ?? findTerm([COMPLETED_YEAR, PRE_ENROLLMENT], openTermId))
     : null
 
   /* A term opens inside whatever is on screen: if a draft is up, the frame,
@@ -802,7 +808,7 @@ export function PlanYourPath({
           {/* Keyed on the option so switching one replays the entrances rather
               than swapping the cards in place. */}
           <div key={draft ? `draft-${streamId}` : "plan"} className="contents">
-            {[COMPLETED_YEAR, ...shown].map((year) => (
+            {[PRE_ENROLLMENT, COMPLETED_YEAR, ...shown].map((year) => (
               <YearSection
                 key={year.label}
                 year={year}
