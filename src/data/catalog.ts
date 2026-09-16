@@ -27,12 +27,14 @@ export type CatalogEntry = {
 }
 
 export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
-  /* The foundations, which the student has not sat yet: the plan starts at
-     their first year and the credits they arrived with answer to other
-     requirements than these. */
-  { code: "BUS 101", name: "Introduction to Business", reason: "Business core" },
-  { code: "MATH 140", name: "Business Calculus", reason: "Business core" },
-  { code: "MIS 120", name: "Business Technology Essentials", reason: "Business core" },
+  /* The core the first year leads to: the courses in the plan now are the
+     foundations, and these are what they are foundations for. */
+  { code: "ECON 201", name: "Principles of Microeconomics", reason: "Business core" },
+  { code: "ECON 202", name: "Principles of Macroeconomics", reason: "Business core" },
+  { code: "ACCT 202", name: "Managerial Accounting", reason: "Business core" },
+  { code: "STAT 210", name: "Business Statistics", reason: "Business core" },
+  { code: "MKTG 201", name: "Principles of Marketing", reason: "Business core" },
+  { code: "FIN 301", name: "Corporate Finance", reason: "Business core" },
   { code: "MGMT 210", name: "Principles of Management", reason: "Business core" },
   { code: "MGMT 340", name: "Organizational Behavior", reason: "Business core" },
   { code: "ACCT 310", name: "Intermediate Accounting I", reason: "Business core" },
@@ -41,18 +43,15 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "OPS 320", name: "Operations & Supply Chain Management", reason: "Business core" },
   { code: "BUS 390", name: "Business Communication", reason: "Business core" },
   { code: "ECON 310", name: "Money & Banking", reason: "Finance concentration" },
-  { code: "FIN 350", name: "Financial Institutions & Markets", reason: "Finance concentration" },
+  { code: "FIN 340", name: "Investments & Portfolio Management", reason: "Finance concentration" },
   { code: "FIN 420", name: "Derivatives & Risk Management", reason: "Finance concentration" },
   { code: "FIN 430", name: "International Finance", reason: "Finance concentration" },
   { code: "FIN 445", name: "Real Estate Finance", reason: "Finance concentration" },
   { code: "FIN 460", name: "Mergers & Acquisitions", reason: "Finance concentration" },
   { code: "FIN 470", name: "Fixed Income Analysis", reason: "Finance concentration" },
-  /* Planned once, in Spring 2028 — the seat held there now stands in its
-     place, so the course itself is outstanding again. */
   { code: "FIN 415", name: "Financial Modeling & Valuation", reason: "Finance concentration" },
   { code: "STAT 320", name: "Econometrics for Business", reason: "Data Analytics minor" },
-  /* One of the two concentration seats; the other is already held in Spring
-     2028, so it is not outstanding. */
+  /* The concentration's own seat, which nothing in the plan holds yet. */
   {
     code: "FIN ELEC",
     name: "Finance elective",
@@ -60,14 +59,11 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
     placeholder: true,
   },
   { code: "DATA 210", name: "Foundations of Data Analytics", reason: "Data Analytics minor" },
-  { code: "PSYC 101", name: "Introduction to Psychology", reason: "General education" },
   { code: "SOC 101", name: "Introduction to Sociology", reason: "General education" },
   { code: "BIO 105", name: "Human Biology", reason: "General education" },
   { code: "ARTS 110", name: "Visual Culture", reason: "General education" },
-  { code: "ENGL 210", name: "Advanced Composition", reason: "General education" },
   { code: "PHIL 240", name: "Business Ethics", reason: "General education" },
   { code: "HIST 205", name: "Modern World History", reason: "General education" },
-  { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   /* The minor's own elective, held like any other seat but filled from the

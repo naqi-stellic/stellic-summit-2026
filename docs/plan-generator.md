@@ -48,8 +48,8 @@ the point: no pathway is built for every programme, concentration and minor
 there could be. Three of the outstanding requirements answer to the minor
 rather than the major (MIS 250, STAT 320 and a data elective seat), so it is
 real in the plan without changing the forty or the hundred and twenty. They
-arrived with 15 credits, are partway through Fall 2027, have started planning
-Spring 2028, and the plan runs four years to 2030-2031 — which is what it takes
+arrived with 15 credits, are partway through Fall 2026, have started planning
+Spring 2027, and the plan runs four years to 2029-2030 — which is what it takes
 to place the forty. Nothing is earned yet, so the counts read 0 taken, 7
 planned, 33 outstanding, and a generated plan fills every one of the eight
 terms. Courses are 3 credits each.
@@ -76,19 +76,23 @@ the matching entries off `REMAINING_REQUIREMENTS`. They are not idle, though:
 they are the only thing the student has earned, so the prerequisite trees are
 read against them.
 
-Spring 2028 holds one course and one seat: FIN 340, whose class has been chosen
-and which is ready to register, and a Finance elective with no course against
-it. So the term reads "1 action required" — the seat — and one of its two
-things can go through registration while the other cannot.
-FIN 415 is on the outstanding list rather than in the plan, and one of the two
-concentration seats is in the plan rather than on the list — the totals are the
-same either way.
+Year one is a first year: Fall 2026 holds Introduction to Business, Business
+Calculus, Business Technology Essentials, Introduction to Psychology and
+Advanced Composition — the transfer credit for Composition I is what lets the
+last of those be a 200-level course. The business core those lead to (micro,
+macro, accounting, statistics, marketing, corporate finance) is on the
+outstanding list rather than in the plan.
+
+Spring 2027 holds one course and one seat: ACCT 201, whose class has been
+chosen and which is ready to register, and a general elective with no course
+against it. So the term reads "1 action required" — the seat — and one of its
+two things can go through registration while the other cannot.
 
 Anything visibly derived from that — year filter tabs, the "+ Add Year N"
 label, expected graduation, the registration deadline, and the terms the nav
 lists under Schedule — comes from the plan rather than being written down
 separately. Schedule holds the terms that have one: the term under way and any
-whose classes are out, which is Fall 2027 and Spring 2028 until a schedule is
+whose classes are out, which is Fall 2026 and Spring 2027 until a schedule is
 generated for another. Opening one of those terms stands on it in the nav;
 opening a term with no schedule stands on Plan Your Path, because that is how
 you got there. Adjust `DEGREE` and `INITIAL_YEARS` in
@@ -144,8 +148,8 @@ and collects picks as removable tags (`TermMultiSelect`, built on shadcn
 
 The terms on offer come from `selectableTerms()`: every term in the plan that is
 not already under way, **plus the summers**, which the planner canvas never shows
-but a student can still choose to study through. So the list runs Spring 2028,
-Summer 2028, Fall 2028 … Summer 2031 — eleven terms, where the canvas shows
+but a student can still choose to study through. So the list runs Spring 2027,
+Summer 2027, Fall 2027 … Summer 2030 — eleven terms, where the canvas shows
 eight.
 
 **Step 3** is a free-text box for anything the generator should know.
@@ -184,7 +188,7 @@ closes rather than going back.
 Only terms still ahead and holding something are on offer. A term under way or
 already taken cannot be reviewed — whatever an advisor would say about it, it
 has happened — and neither can an empty one, since there is nothing in it to
-have an opinion about. On the plan as it opens that is Spring 2028 alone; after
+have an opinion about. On the plan as it opens that is Spring 2027 alone; after
 a plan is generated it is every term.
 
 Submitting does three things: the plan takes a pending banner, every term in the
@@ -208,11 +212,11 @@ review request" and the Changes tab's count are the plan measured against
 itself rather than a number kept by hand.
 
 `src/data/review.ts` holds the request types, the advisor, and one request that
-has already been round — which is why Fall 2027 carries a reviewed mark, and
+has already been round — which is why Fall 2026 carries a reviewed mark, and
 what the panel's history row is.
 
 Departures from the frame: the term groups are headed with the plan's own year
-labels (`2027-2028`) rather than "Year 1", since that is what every other
+labels (`2026-2027`) rather than "Year 1", since that is what every other
 surface here calls them; and the Changes and Graduation Clearance tabs are drawn
 but empty, there being no design for either.
 
@@ -260,8 +264,9 @@ and Activity history
 which start folded and appear only for a course the plan already holds. Where
 it fits reads off the plan itself: what the course counts towards, grouped
 under the thing it counts for, and anything put after it that asks for it,
-which is why a subject's own courses gate each other — FIN 415 in Fall 2028
-names FIN 340 in Spring 2028, and nothing before a course can depend on it.
+which is why a subject's own courses gate each other — ACCT 310 names ACCT 201,
+which the plan holds in Spring 2027, and nothing before a course can depend on
+it.
 Activity history is the same course seen the other way round: when it landed
 where it is, and what it was moved from.
 
@@ -347,7 +352,7 @@ the list being derived from the plan on screen.
 ## What a generated schedule moves
 
 A class the student chose stays where it is: `PlannedCourse.settled` marks one
-picked by hand — Spring 2028's FIN 340, and anything settled through "Search
+picked by hand — Spring 2027's ACCT 201, and anything settled through "Search
 sections" — and a run fills the term's unscheduled courses around it rather than
 moving it. Its hour is struck off the option's order so nothing lands on top.
 

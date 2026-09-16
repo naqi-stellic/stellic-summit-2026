@@ -58,7 +58,7 @@ export function planOptions(coursesPerTerm: number): DraftOption[] {
         "Financial Modeling so the prerequisite is met, and the capstone lands in your final term.",
       coursesPerTerm: steady,
       summers: false,
-      move: { courseId: "c6", toTermId: "fall-2028", reason: "FIN 340 is its prerequisite" },
+      move: { courseId: "c6", toTermId: "fall-2027", reason: "the term is full at five" },
     },
     {
       id: "sooner",
@@ -68,7 +68,7 @@ export function planOptions(coursesPerTerm: number): DraftOption[] {
         "clears the degree sooner.",
       coursesPerTerm: sooner,
       summers: true,
-      move: { courseId: "c6", toTermId: "summer-2028", reason: "FIN 340 is its prerequisite" },
+      move: { courseId: "c6", toTermId: "summer-2027", reason: "the term is full at six" },
     },
     {
       id: "lighter",
@@ -190,7 +190,7 @@ function spreadAccents(term: Term): Term {
 
 /** When the generator ran. Fixed rather than "now" so the plan reads the same
  *  every time it is shown, like every other date in the data. */
-const GENERATED_ON = "15 Sep 2027"
+const GENERATED_ON = "15 Sep 2026"
 
 function draftCourse(entry: QueueEntry, order: number, note?: string): PlannedCourse {
   return {

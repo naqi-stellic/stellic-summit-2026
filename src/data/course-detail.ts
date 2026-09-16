@@ -107,19 +107,19 @@ const EARNED: Record<string, string> = {
   "SPAN 101": "Taken before Year 1",
 }
 
-const IN_PROGRESS = ["FIN 301", "ACCT 202", "ECON 202", "STAT 210", "MKTG 201"]
+const IN_PROGRESS = ["BUS 101", "MATH 140", "MIS 120", "PSYC 101", "ENGL 210"]
 
 /* Already in the plan for a term still to come. It is not earned and it is not
  * under way, but it is not missing either — the plan says when it happens. */
 const PLANNED: Record<string, string> = {
-  "FIN 340": "Planned Spring 2028",
+  "ACCT 201": "Planned Spring 2027",
 }
 
 /* Courses the student has not touched, which is what the routes they are not
  * on are built from. Only one option can be the one that counts, so the others
  * have to read as untouched or out of reach rather than as a second thing
  * quietly going well. */
-const UNTOUCHED = ["MGMT 210", "BLAW 301", "ENGL 210", "PHIL 240", "HIST 205"]
+const UNTOUCHED = ["MGMT 210", "BLAW 301", "SOC 101", "PHIL 240", "HIST 205"]
 
 /** A course as the audit finds it: passed, under way, planned, or still to
  *  come. */
@@ -147,19 +147,19 @@ const CONDITIONS: Record<string, PrereqNode> = {
   sophomore: {
     label: "Sophomore standing",
     state: "progress",
-    meta: "On track, Sophomore by Fall 2028",
+    meta: "On track, Sophomore by Fall 2027",
     tone: "good",
   },
   junior: {
     label: "Junior standing",
     state: "progress",
-    meta: "On track, Junior by Fall 2029",
+    meta: "On track, Junior by Fall 2028",
     tone: "good",
   },
   declared: {
     label: "Declare the Finance concentration",
     state: "earned",
-    meta: "Declared Sep 2027",
+    meta: "Declared Sep 2026",
   },
   second: {
     label: "Declare a second major",
@@ -250,16 +250,17 @@ function level(code: string): number {
  * is also what makes a course in the plan hold up the ones after it. */
 const SUBJECT_GATE: Record<string, string[]> = {
   FIN: ["FIN 301", "FIN 340"],
-  ACCT: ["ACCT 202"],
-  ECON: ["ECON 202"],
+  ACCT: ["ACCT 201", "ACCT 202"],
+  ECON: ["ECON 201", "ECON 202"],
   DATA: ["DATA 210", "STAT 210"],
-  STAT: ["MAT 151", "STAT 210"],
+  STAT: ["MATH 140", "STAT 210"],
   MIS: ["MIS 120", "MIS 250"],
   OPS: ["STAT 210", "OPS 320"],
   BUS: ["BUS 101", "BUS 390"],
   MKTG: ["MKTG 201"],
   MGMT: ["BUS 101", "MGMT 210"],
   BLAW: ["BUS 101"],
+  ENGL: ["ENGL 210"],
 }
 
 /* How much a course asks for depends on how deep it is: a first-year course
@@ -275,11 +276,11 @@ function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequ
     return rest[seed % rest.length]
   }
   const gate = pick(["MAT 151", "ENG 101"])
-  const second = pick(["ACCT 202", "ECON 202", "STAT 210", "MKTG 201"])
+  const second = pick(["MATH 140", "MIS 120", "BUS 101", "ENGL 210"])
   /* Only what comes below it in its own subject: a course cannot be asked for
      by something the student takes before it. */
   const own = (SUBJECT_GATE[entry.code.split(" ")[0]] ?? []).filter((code) => level(code) < depth)
-  const later = own.length ? own[seed % own.length] : pick(["FIN 301", "MIS 250", "OPS 320", "BUS 390"])
+  const later = own.length ? own[seed % own.length] : pick(["ECON 201", "MIS 250", "STAT 210", "BUS 390"])
   const untouched = pick(UNTOUCHED)
 
   if (depth < 200) return { options: [] }

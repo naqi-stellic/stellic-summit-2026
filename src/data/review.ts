@@ -50,21 +50,21 @@ export type Review = {
   at: Record<string, string>
 }
 
-/* Where the demo stands: Fall 2027 is under way and Spring 2028 registration
+/* Where the demo stands: Fall 2026 is under way and Spring 2027 registration
  * closes in the new year, so "now" is the end of the Fall term. */
-export const NOW = new Date(2027, 11, 1, 13, 21)
+export const NOW = new Date(2026, 11, 1, 13, 21)
 
-/* One request has already been round: it is why Fall 2027 carries a reviewed
+/* One request has already been round: it is why Fall 2026 carries a reviewed
  * mark. It sits in the panel's history, under whatever is asked for today. */
 export const INITIAL_REVIEWS: Review[] = [
   {
-    id: "review-2027-fall",
+    id: "review-2026-fall",
     plan: "Primary Plan",
     type: REVIEW_TYPES[1],
-    terms: ["fall-2027"],
-    termNames: ["Fall 2027"],
+    terms: ["fall-2026"],
+    termNames: ["Fall 2026"],
     notes: "",
-    requestedAt: new Date(2027, 7, 20, 13, 21),
+    requestedAt: new Date(2026, 7, 20, 13, 21),
     status: "complete",
     at: {},
   },
@@ -85,13 +85,13 @@ export function reviewableYears(years: Year[]): { label: string; terms: Term[] }
     .filter((year) => year.terms.length > 0)
 }
 
-/** "1 Dec 2027, 1:21pm" — the short form, used on the request's own row. */
+/** "1 Dec 2026, 1:21pm" — the short form, used on the request's own row. */
 export function shortWhen(date: Date): string {
   const day = date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
   return `${day}, ${clock(date)}`
 }
 
-/** "1 December 2027, 1:21pm" — the long form, inside the request. */
+/** "1 December 2026, 1:21pm" — the long form, inside the request. */
 export function longWhen(date: Date): string {
   const day = date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
   return `${day}, ${clock(date)}`

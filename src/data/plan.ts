@@ -123,7 +123,7 @@ export const PLANNING_RULES = {
   doubleCounting: "Applied",
   /** How far the published catalogue reaches. A plan can run past it — later
    *  terms are projected from the usual pattern rather than confirmed. */
-  offeringsThrough: "Spring 2029",
+  offeringsThrough: "Spring 2028",
   /** Hard ceiling per term — six courses — and what the custom pacing stepper
    *  clamps to. A full-time term is five. */
   maxCreditsPerTerm: 18,
@@ -203,12 +203,12 @@ export function emptyYear(start: number): Year {
 
 export const INITIAL_YEARS: Year[] = [
   {
-    label: "2027-2028",
+    label: "2026-2027",
     phase: "active",
     terms: [
       {
-        id: "fall-2027",
-        name: "Fall 2027",
+        id: "fall-2026",
+        name: "Fall 2026",
         window: "Sep - Dec",
         campus: "Main campus",
         reviewed: true,
@@ -219,8 +219,8 @@ export const INITIAL_YEARS: Year[] = [
         courses: [
           {
             id: "c1",
-            code: "FIN 301",
-            name: "Corporate Finance",
+            code: "BUS 101",
+            name: "Introduction to Business",
             credits: 3,
             section: "Lec-01",
             classNo: "2041",
@@ -236,12 +236,12 @@ export const INITIAL_YEARS: Year[] = [
             building: "Braddock Hall",
             room: "220",
             subTerm: "Full Term",
-            lastActivity: "Added by pathway, 3 Apr 2027",
+            lastActivity: "Added by pathway, 3 Apr 2026",
           },
           {
             id: "c2",
-            code: "ACCT 202",
-            name: "Managerial Accounting",
+            code: "MATH 140",
+            name: "Business Calculus",
             credits: 3,
             section: "Lec-01",
             classNo: "2088",
@@ -257,12 +257,12 @@ export const INITIAL_YEARS: Year[] = [
             building: "Braddock Hall",
             room: "301",
             subTerm: "Full Term",
-            lastActivity: "Added by pathway, 3 Apr 2027",
+            lastActivity: "Added by pathway, 3 Apr 2026",
           },
           {
             id: "c3",
-            code: "ECON 202",
-            name: "Principles of Macroeconomics",
+            code: "PSYC 101",
+            name: "Introduction to Psychology",
             credits: 3,
             section: "Lec-01",
             classNo: "2113",
@@ -278,12 +278,12 @@ export const INITIAL_YEARS: Year[] = [
             building: "Braddock Hall",
             room: "115",
             subTerm: "Full Term",
-            lastActivity: "Added by pathway, 3 Apr 2027",
+            lastActivity: "Added by pathway, 3 Apr 2026",
           },
           {
             id: "c4",
-            code: "STAT 210",
-            name: "Business Statistics",
+            code: "MIS 120",
+            name: "Business Technology Essentials",
             credits: 3,
             section: "Lec-01",
             classNo: "2156",
@@ -297,16 +297,16 @@ export const INITIAL_YEARS: Year[] = [
               { day: 4, from: 14.5, to: 15.75 },
             ],
             instructor: "Dr. L. Whitfield",
-            topic: "Applied Regression",
+            topic: "Spreadsheet Analytics",
             building: "Science Center",
             room: "Lab 1",
             subTerm: "Full Term",
-            lastActivity: "Added by mjs, 11 Apr 2027",
+            lastActivity: "Added by mjs, 11 Apr 2026",
           },
           {
             id: "c7",
-            code: "MKTG 201",
-            name: "Principles of Marketing",
+            code: "ENGL 210",
+            name: "Advanced Composition",
             credits: 3,
             section: "Lec-02",
             classNo: "2190",
@@ -321,21 +321,21 @@ export const INITIAL_YEARS: Year[] = [
             instructor: "Prof. N. Adeyemi",
             building: "Braddock Hall",
             room: "118",
-            attributes: "Service Learning",
+            attributes: "Writing Intensive",
             subTerm: "Full Term",
-            lastActivity: "Added by pathway, 3 Apr 2027",
+            lastActivity: "Added by pathway, 3 Apr 2026",
           },
         ],
       },
       {
-        id: "spring-2028",
-        name: "Spring 2028",
+        id: "spring-2027",
+        name: "Spring 2027",
         window: "Jan - May",
         campus: "Main campus",
         reviewed: false,
         /* Registration for Spring opens during the Fall term and closes at the
            start of Spring — the frame's "Jan 18, 2026" predates the term. */
-        alert: { kind: "registration", closes: "Mon Jan 17, 2028 • 11:59pm EST" },
+        alert: { kind: "registration", closes: "Mon Jan 18, 2027 • 11:59pm EST" },
         /* Registration is open for this term, so its classes have times. */
         scheduled: true,
         state: "planned",
@@ -345,12 +345,12 @@ export const INITIAL_YEARS: Year[] = [
                been chosen — so it is ready to register. What the term is still
                waiting on is the seat below it, which has no course. */
             id: "c5",
-            code: "FIN 340",
-            name: "Investments & Portfolio Management",
+            code: "ACCT 201",
+            name: "Financial Accounting",
             credits: 3,
             /* Taught around a theme, which is a thing to have a preference
                about when the schedule is being generated. */
-            topic: "Equity Analysis",
+            topic: "Financial Reporting",
             section: "Lec-02",
             settled: true,
             classNo: "2417",
@@ -366,18 +366,18 @@ export const INITIAL_YEARS: Year[] = [
             building: "Braddock Hall",
             room: "118",
             subTerm: "Full Term",
-            lastActivity: "Added by sabott, 2 Sep 2027",
+            lastActivity: "Added by sabott, 2 Sep 2026",
           },
           {
             /* A requirement with no course against it yet. A seat has no class
                number, campus or modality — there is no course to have them. */
             id: "c6",
-            code: "FIN ELEC",
-            name: "Finance elective",
+            code: "GEN ELEC",
+            name: "General elective",
             credits: 3,
             placeholder: true,
             accent: "amber",
-            lastActivity: "Added by sabott, 2 Sep 2027",
+            lastActivity: "Added by sabott, 2 Sep 2026",
           },
         ],
       },
@@ -385,9 +385,9 @@ export const INITIAL_YEARS: Year[] = [
   },
   /* Four years of plan, the year under way and three ahead of it. A pace that
    * cannot fit inside them has to add a year of its own. */
+  emptyYear(2027),
   emptyYear(2028),
   emptyYear(2029),
-  emptyYear(2030),
 ]
 
 /* ---------------------------------------------------------------- moves */

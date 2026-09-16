@@ -37,9 +37,9 @@ has them:
 | | |
 | --- | --- |
 | 0 taken | the plan's own finished terms — there are none yet |
-| 5 under way | Fall 2027 |
-| 1 registered | FIN 340, whose class is chosen |
-| 1 planned | the Finance elective seat in Spring 2028 |
+| 5 under way | Fall 2026 |
+| 1 registered | ACCT 201, whose class is chosen |
+| 1 planned | the general elective seat in Spring 2027 |
 | 33 outstanding | `REMAINING_REQUIREMENTS` in `src/data/catalog.ts` |
 
 The four dual-enrolment courses the student came in with are the **unmatched

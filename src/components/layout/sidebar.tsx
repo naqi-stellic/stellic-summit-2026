@@ -35,8 +35,8 @@ const SCHEDULE: NavItem = {
 export type ScheduleTerm = { name: string; inProgress?: boolean }
 
 const TERMS: ScheduleTerm[] = [
-  { name: "Fall 2027", inProgress: true },
-  { name: "Spring 2028" },
+  { name: "Fall 2026", inProgress: true },
+  { name: "Spring 2027" },
 ]
 
 const EXPLORE: NavItem[] = [
