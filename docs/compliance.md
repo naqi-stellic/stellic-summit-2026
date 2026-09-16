@@ -79,7 +79,7 @@ be several hundred rows of things that have not happened yet.
 
 ## What is drawn and not wired
 
-Only Compliance leads anywhere; the five others are drawn but greyed and do
-not press. Official / Planned toggles and both read the same ruleset. The profile's three actions are
+Only Compliance leads anywhere; the five others read as normal and simply do
+not take a press. Official / Planned toggles and both read the same ruleset. The profile's three actions are
 inert. There is no scope select or recompute button — `AuditControls` now takes
 `scopes` as optional, because a ruleset is read whole or not at all.

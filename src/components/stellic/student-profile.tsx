@@ -312,34 +312,53 @@ export function AuditControls({
           const on = tab.id === active
           const open = live.includes(tab.id)
 
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              disabled={!open}
-              onClick={() => onSelectTab?.(tab.id)}
-              aria-current={on ? "page" : undefined}
-              className={cn(
-                "flex h-[38px] flex-col items-center justify-between",
-                open ? "cursor-pointer" : "cursor-default",
-                tab.count === undefined ? "w-[150px]" : "px-4"
-              )}
-            >
+          const inside = (
+            <>
               <span
                 className={cn(
                   "flex flex-1 items-center gap-3.5 text-caption-lg font-semibold",
-                  on ? "text-primary-50" : open ? "text-gray-100" : "text-gray-60"
+                  on ? "text-primary-50" : "text-gray-100"
                 )}
               >
                 {tab.label}
                 {tab.count !== undefined && <Badge variant="danger">{tab.count}</Badge>}
               </span>
-              {/* The indicator sits in the strip's own 1px rule, so an inactive
-                  tab reserves it rather than shifting when it lights up. */}
+              {/* The indicator sits in the strip's own 1px rule, so a tab that
+                  is not the one you are on reserves it rather than shifting
+                  when it lights up. */}
               <span
                 className={cn("h-0.5 w-full", on ? "bg-primary-50" : "bg-transparent")}
                 aria-hidden="true"
               />
+            </>
+          )
+
+          const shape = cn(
+            "flex h-[38px] flex-col items-center justify-between",
+            tab.count === undefined ? "w-[150px]" : "px-4"
+          )
+
+          /* A tab with nothing behind it is still a tab — it reads the same as
+             the rest, because it is part of the record either way. It simply
+             does not take a press, so it is not a button at all rather than a
+             button drawn to look unavailable. */
+          if (!open) {
+            return (
+              <span key={tab.id} className={shape}>
+                {inside}
+              </span>
+            )
+          }
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onSelectTab?.(tab.id)}
+              aria-current={on ? "page" : undefined}
+              className={cn(shape, "cursor-pointer")}
+            >
+              {inside}
             </button>
           )
         })}
