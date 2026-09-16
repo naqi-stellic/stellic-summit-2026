@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
 import { useMediaQuery } from "@/lib/use-media-query"
-import { Sidebar, type NavSection } from "@/components/layout/sidebar"
+import { SidebarMasthead, SidebarNav, type NavSection } from "@/components/layout/sidebar"
 import { Topbar } from "@/components/layout/topbar"
 import { Button } from "@/components/ui/button"
 import {
@@ -56,19 +56,29 @@ export function AppShell({
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden">
-        {/* The nav is 240px of a phone's 390 — it goes away, and the planner
-            gets the width. */}
-        <div className="max-md:hidden">
-          <Sidebar section={section} open={nav} onToggle={() => setNav(!nav)} />
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex h-screen flex-col overflow-hidden">
+        {/* Two rows, not two columns: the nav's masthead stands beside the top
+            bar and its links beside the page, so collapsing the nav takes the
+            links away and the page runs to the left edge — it does not leave a
+            60px rail down the whole screen for the page to sit behind. */}
+        <div className="flex shrink-0">
+          {/* The nav is 240px of a phone's 390 — it goes away, and the planner
+              gets the width. */}
+          <div className="max-md:hidden">
+            <SidebarMasthead open={nav} onToggle={() => setNav(!nav)} />
+          </div>
           <Topbar title={title ?? SECTION_TITLE[section]} />
+        </div>
+
+        <div className="flex min-h-0 flex-1">
+          <div className="max-md:hidden">
+            <SidebarNav section={section} open={nav} />
+          </div>
 
           {/* The panel group is always mounted so `children` keeps its place in
               the tree; swapping the wrapper would remount the whole planner and
               throw away its scroll position and drag state. */}
-          <div className="flex min-h-0 flex-1 bg-background">
+          <div className="flex min-h-0 min-w-0 flex-1 bg-background">
             <ResizablePanelGroup
               orientation={wide ? "horizontal" : "vertical"}
               className="min-w-0 flex-1"

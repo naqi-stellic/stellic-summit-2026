@@ -97,15 +97,15 @@ function NavRing({ item }: { item: NavItem }) {
   )
 }
 
-export function Sidebar({
-  section = "plan",
-  open = true,
-  onToggle,
-}: {
-  section?: NavSection
-  open?: boolean
-  onToggle?: () => void
-}) {
+/* The nav is two pieces in two rows, not one column: its masthead stands beside
+ * the top bar, and its links stand beside the page. Collapsed, the masthead
+ * stays — it is the way back — and the links go, which is what lets the page
+ * start where the nav used to. Written as two components rather than one aside
+ * so that collapsing changes the nav's width and nothing about where the page
+ * sits in the tree: the planner keeps its scroll, its drag and its draft. */
+
+/** The 72px-tall head of the nav, level with the top bar. */
+export function SidebarMasthead({ open = true, onToggle }: { open?: boolean; onToggle?: () => void }) {
   /* Collapsed, the nav is only its own masthead: a 60px square of parchment
      holding the way back. The column below it goes entirely rather than
      becoming a rail of glyphs — a rail would have to abbreviate ten labels
@@ -113,43 +113,49 @@ export function Sidebar({
      not to read a harder version of it. */
   if (!open) {
     return (
-      <aside className="sticky top-0 flex h-screen w-[60px] shrink-0 flex-col bg-background">
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={false}
-          aria-label="Expand navigation"
-          className="flex h-18 w-full shrink-0 cursor-pointer items-center justify-center border-r border-b border-gray-40 bg-parchment text-gray-100"
-        >
-          {/* The same glyph the expanded masthead carries, turned about: its
-              chevron points out of the nav rather than into it. */}
-          <Icon name="s-menu-collapse" size={20} className="h-5 w-8 -scale-x-100" />
-        </button>
-      </aside>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={false}
+        aria-label="Expand navigation"
+        className="flex h-18 w-[60px] shrink-0 cursor-pointer items-center justify-center border-r border-b border-gray-40 bg-parchment text-gray-100"
+      >
+        {/* The same glyph the expanded masthead carries, turned about: its
+            chevron points out of the nav rather than into it. */}
+        <Icon name="s-menu-collapse" size={20} className="h-5 w-8 -scale-x-100" />
+      </button>
     )
   }
 
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-4 bg-gray-100 text-white">
-      <div className="flex h-18 shrink-0 items-start border-b border-gray-40 bg-parchment p-5">
-        <div className="flex min-w-0 flex-1 items-center justify-between">
-          <img
-            src="/brand/stellic-wordmark.svg"
-            alt="Stellic"
-            className="h-8 w-[139.156px] shrink-0"
-          />
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-expanded={true}
-            aria-label="Collapse navigation"
-            className="shrink-0 cursor-pointer text-gray-100"
-          >
-            <Icon name="s-menu-collapse" size={20} className="h-5 w-7" />
-          </button>
-        </div>
+    <div className="flex h-18 w-60 shrink-0 items-start border-b border-gray-40 bg-parchment p-5">
+      <div className="flex min-w-0 flex-1 items-center justify-between">
+        <img
+          src="/brand/stellic-wordmark.svg"
+          alt="Stellic"
+          className="h-8 w-[139.156px] shrink-0"
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={true}
+          aria-label="Collapse navigation"
+          className="shrink-0 cursor-pointer text-gray-100"
+        >
+          <Icon name="s-menu-collapse" size={20} className="h-5 w-7" />
+        </button>
       </div>
+    </div>
+  )
+}
 
+/** Everything under the masthead. Collapsed, there is nothing: no width, no
+ *  rail, and the page beside it takes the room. */
+export function SidebarNav({ section = "plan", open = true }: { section?: NavSection; open?: boolean }) {
+  if (!open) return null
+
+  return (
+    <aside className="flex h-full w-60 shrink-0 flex-col gap-4 overflow-hidden bg-gray-100 pt-4 text-white">
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
         <nav className="flex shrink-0 flex-col items-start border-b border-gray-60 pb-[15px]">
           {nav(section).map((item) => (

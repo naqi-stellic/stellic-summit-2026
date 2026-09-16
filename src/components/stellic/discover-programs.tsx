@@ -18,9 +18,10 @@ export function DiscoverPrograms({ onOpen }: { onOpen?: () => void }) {
       /* White, on the same hairline every card on the page carries. It had been
          a blue banner, which made it the loudest thing in the audit — it is an
          offer at the foot of a long read, not an announcement. The blue is down
-         to the disc behind the glyph, which is enough to say it is a way out.
+         to the disc behind the glyph, and to the hover, which takes the disc's
+         own primary-0 rather than the grey an inert card takes.
          px-[19px] py-[15px]: the design's 20 and 16, less the border. */
-      className="flex w-full items-center gap-5 rounded-md border border-gray-40 bg-card px-[19px] py-[15px] text-left transition-colors hover:border-primary-50 hover:bg-gray-0"
+      className="flex w-full items-center gap-5 rounded-md border border-gray-40 bg-card px-[19px] py-[15px] text-left transition-colors hover:border-primary-50 hover:bg-primary-0"
     >
       <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-0 text-primary-50">
         <Icon name="s-search" size={16} />

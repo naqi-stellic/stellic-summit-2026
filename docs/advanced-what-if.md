@@ -142,7 +142,8 @@ It is white, on the same hairline every other card on the page carries, with
 the glyph in a `primary-0` disc. It started blue, which made it the loudest
 thing in a long audit — it is an offer at the foot of a read rather than an
 announcement — so the blue is down to the disc, which is enough to say it leads
-somewhere.
+somewhere. Hovered, it takes the same `primary-0` as the disc rather than the
+grey every inert card takes, so the hover says which blue it belongs to.
 
 It is a `button`, not an `Alert`: `role="alert"` would have a screen reader
 announce it on arrival, and nothing here has happened.

@@ -3,7 +3,7 @@ import { Icon } from "@/components/icon"
 export function Topbar({ title }: { title: string }) {
   /* The shell never scrolls, so this stays put structurally — no sticky. */
   return (
-    <header className="flex h-18 shrink-0 items-center justify-between gap-4 border-b border-gray-40 bg-card px-6 max-md:px-4">
+    <header className="flex h-18 min-w-0 flex-1 items-center justify-between gap-4 border-b border-gray-40 bg-card px-6 max-md:px-4">
       {/* Pinned to a 24px top inset rather than optically centred, as designed. */}
       <h1 className="min-w-0 self-stretch truncate pt-6 text-caption-lg font-semibold text-gray-100">
         {title}

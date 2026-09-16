@@ -271,7 +271,15 @@ rows stack once the panel is dragged under 320px. The registration banner wraps
 its closing date to a second line rather than truncating, growing from 92px to
 120px when it does.
 
-The sidebar stays a fixed 240px at every width; collapsing it is not wired up yet.
+The sidebar is a fixed 240px at every width, and the button in its masthead
+folds it away. Collapsed, only the masthead is left — a 60px square of
+parchment level with the top bar — and the planner runs to the left edge on
+the same 24px gutter it keeps on the right. That is why `AppShell` is two
+rows rather than two columns: the nav's masthead stands beside the top bar
+and its links beside the page, so taking the links away gives the page the
+width instead of leaving a rail for it to sit behind. The planner's place in
+the tree does not change either way, so collapsing the nav mid-draft keeps
+the draft, the scroll and any drag in progress.
 
 ## Fidelity
 
