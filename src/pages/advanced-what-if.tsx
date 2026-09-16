@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { AppShell } from "@/components/layout/app-shell"
 import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
+import { DiscoverPanel } from "@/components/stellic/discover-panel"
 import { DiscoverPrograms } from "@/components/stellic/discover-programs"
 import {
   AuditControls,
@@ -29,9 +30,18 @@ import {
 export function AdvancedWhatIf() {
   const [tab, setTab] = useState("progress")
   const [view, setView] = useState("planned")
+  /* The what-if opens beside the audit rather than over it: the question is
+     "what would this tree look like instead", so the tree has to stay in
+     sight while it is being asked. */
+  const [discovering, setDiscovering] = useState(false)
 
   return (
-    <AppShell title="Student Progress" section="progress" assistant={false}>
+    <AppShell
+      title="Student Progress"
+      section="progress"
+      assistant={false}
+      panel={discovering ? <DiscoverPanel onClose={() => setDiscovering(false)} /> : undefined}
+    >
       {/* The pane scrolls, not the shell. `@container` so the cards reflow
           against the width they actually have rather than the window's. */}
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 py-8">
@@ -69,7 +79,7 @@ export function AdvancedWhatIf() {
                   stands on the card's own padding, as the tree and the
                   unmatched list do — one edge down each side, whatever is
                   against it. */}
-              <DiscoverPrograms />
+              <DiscoverPrograms onOpen={() => setDiscovering(true)} />
             </section>
           ) : (
             <section className="rounded-md bg-card p-6 text-body-md text-gray-80 shadow-card">

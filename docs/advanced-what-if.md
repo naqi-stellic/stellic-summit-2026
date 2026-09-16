@@ -149,6 +149,34 @@ one is offering, and a dark edge round an offer reads as a warning.
 It is a `button`, not an `Alert`: `role="alert"` would have a screen reader
 announce it on arrival, and nothing here has happened.
 
+## The Discover Programs panel
+
+Figma: [`3972:24242`](https://www.figma.com/design/prhu0x6AaQF2AVtLBFoDq3/Audit-Profile-Planner?node-id=3972-24242)
+(step 1).
+
+The banner opens it beside the audit through `AppShell`'s `panel` prop, not
+over it: the question is "what would this tree look like instead", so the tree
+has to stay in sight while it is being asked. The audit's card scrolls
+sideways inside the narrowed pane rather than crushing its rows.
+
+Its chrome is the Generate Plan wizard's, deliberately. A student who has used
+one has used the other, and a second kind of side panel would be a second thing
+to learn for no reason — same header, same step counter, same progress bars,
+same pair of full-width buttons at the foot. What differs is the question.
+
+Step 1 asks what the student is here to do: add a major, change one, or just
+look. The answer is what decides what step 2 asks, which is why it is asked
+first, and Continue stays disabled until it has one.
+
+The frame is a sketch rather than a drawn screen — it counts four steps where
+there are two, and has nothing behind the second — so the content is the
+sketch's and the shape is the wizard's. Step 2 says there is no design behind
+it yet rather than inventing one, and keeps the way back.
+
+The options stack their sentence under their label rather than beside it, which
+is why they are not `RadioCard`: that card puts the two on one row, which works
+only while the line is four or five words.
+
 ## What is drawn and not wired
 
 Everything on the page is the frame's, and almost none of it acts yet — there is
