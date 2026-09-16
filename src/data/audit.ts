@@ -63,6 +63,10 @@ export type AuditGroup = {
   /** An additional check rather than a requirement: it re-lists courses that
    *  are counted elsewhere, so the tallies step over it. */
   restated?: boolean
+  /** Folded away when the page opens. A group of seats has nothing to read —
+   *  every row says the same thing — so it states how many it wants and keeps
+   *  them behind the chevron until someone asks. */
+  collapsed?: boolean
   /** The four shares the degree and the program rows read at a glance. Filled
    *  in from `auditStanding()` rather than written down. */
   bar?: { taken: number; inProgress: number; claimed: number; total: number }
@@ -250,6 +254,7 @@ const TREE: AuditGroup = {
                   name: "Finance Electives",
                   mark: "planned",
                   tags: ["at least 6 credits"],
+                  collapsed: true,
                   children: [
                     /* A seat, not a course: the requirement is settled and
                        which course answers it is not, so the code column is
@@ -287,6 +292,7 @@ const TREE: AuditGroup = {
           name: "Open Electives",
           mark: "remaining",
           tags: ["at least 9 credits"],
+          collapsed: true,
           children: [
             course("", "General elective", "remaining"),
             course("", "General elective", "remaining"),

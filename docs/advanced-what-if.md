@@ -121,8 +121,17 @@ one screen, so there is nowhere for anything to go:
 - Official / Planned switches and lights up, and both read the same tree, since
   there is no second audit to compute yet;
 - the scope select, the recompute button, the unmatched filter, Request to
-  Review Plan and Actions are all drawn and inert;
-- so is every chevron in the tree — nothing collapses.
+  Review Plan and Actions are all drawn and inert.
+
+A requirement's chevron does work: it folds the group. `collapsed: true` in the
+data says which groups the page opens folded — the two elective groups, because
+a list of seats has nothing to read, every row of it saying the same thing, so
+the requirement states how many credits it wants and keeps them behind the
+chevron. After that the fold belongs to whoever is reading, not to the data, so
+`AuditTree` holds it in state rather than writing it back.
+
+Folding hides rows; it does not remove them. `auditStanding()` walks the data,
+so the tallies above the tree are the same whether a group is open or shut.
 
 ## Shared chrome
 

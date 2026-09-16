@@ -1,5 +1,5 @@
 import { cn } from "cn"
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
@@ -177,7 +177,15 @@ function CourseRow({ course, bare }: { course: AuditCourse; bare?: boolean }) {
   )
 }
 
-function GroupRow({ group }: { group: AuditGroup }) {
+function GroupRow({
+  group,
+  open = true,
+  onToggle,
+}: {
+  group: AuditGroup
+  open?: boolean
+  onToggle?: () => void
+}) {
   if (group.level === "degree") {
     return (
       <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md py-2">
@@ -234,7 +242,25 @@ function GroupRow({ group }: { group: AuditGroup }) {
     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-md border border-gray-40 bg-gray-5 p-[7px]">
       {group.mark && <AuditMarkIcon mark={group.mark} />}
       <p className="text-body-md font-semibold">{group.name}</p>
-      <Icon name="chevron-right" size={14} className="shrink-0" />
+      {/* The chevron is the fold. A requirement with nothing under it has
+          nothing to fold, so it keeps the mark and not the control. */}
+      {group.children.length > 0 ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          aria-label={`${open ? "Collapse" : "Expand"} ${group.name}`}
+          className="shrink-0 cursor-pointer"
+        >
+          <Icon
+            name="chevron-right"
+            size={14}
+            className={cn("transition-transform", open && "rotate-90")}
+          />
+        </button>
+      ) : (
+        <Icon name="chevron-right" size={14} className="shrink-0" />
+      )}
       <Tags tags={group.tags} />
     </div>
   )
@@ -250,21 +276,30 @@ function EntryRows({
   entry,
   stem,
   last,
+  folded,
+  onToggle,
 }: {
   entry: AuditEntry
   /** One per level above this row: does that level's line continue past it? */
   stem: boolean[]
   last: boolean
+  folded: Set<string>
+  onToggle: (id: string) => void
 }) {
   const trail = [...stem.map((line) => ({ line })), { line: true, elbow: true, last }]
+  const open = entry.kind === "group" && !folded.has(entry.id)
 
   const row = (
     <TreeElement trail={trail} indent={12}>
-      {entry.kind === "course" ? <CourseRow course={entry} /> : <GroupRow group={entry} />}
+      {entry.kind === "course" ? (
+        <CourseRow course={entry} />
+      ) : (
+        <GroupRow group={entry} open={open} onToggle={() => onToggle(entry.id)} />
+      )}
     </TreeElement>
   )
 
-  if (entry.kind === "course" || entry.children.length === 0) return row
+  if (entry.kind === "course" || entry.children.length === 0 || !open) return row
 
   return (
     <>
@@ -275,13 +310,39 @@ function EntryRows({
           entry={child}
           stem={[...stem, !last]}
           last={i === entry.children.length - 1}
+          folded={folded}
+          onToggle={onToggle}
         />
       ))}
     </>
   )
 }
 
+/** Every group the tree opens folded. Read once, since after that the fold is
+ *  the reader's rather than the data's. */
+function initialFold(audit: AuditGroup): Set<string> {
+  const folded = new Set<string>()
+
+  const walk = (entry: AuditEntry) => {
+    if (entry.kind === "course") return
+    if (entry.collapsed) folded.add(entry.id)
+    entry.children.forEach(walk)
+  }
+  walk(audit)
+
+  return folded
+}
+
 export function AuditTree({ audit }: { audit: AuditGroup }) {
+  const [folded, setFolded] = useState(() => initialFold(audit))
+
+  const toggle = (id: string) =>
+    setFolded((current) => {
+      const next = new Set(current)
+      if (!next.delete(id)) next.add(id)
+      return next
+    })
+
   return (
     <div className="flex flex-col gap-2">
       {/* The degree heads the tree rather than hanging off it, so it is the one
@@ -295,6 +356,8 @@ export function AuditTree({ audit }: { audit: AuditGroup }) {
           entry={child}
           stem={[]}
           last={i === audit.children.length - 1}
+          folded={folded}
+          onToggle={toggle}
         />
       ))}
     </div>
