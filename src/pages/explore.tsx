@@ -153,19 +153,24 @@ export function Explore() {
   if (step === "results") {
     return (
       <ExploreShell>
-        <main className="@container min-w-0 flex-1 px-6 py-12">
-          <div className="mx-auto flex w-full max-w-[1349px] flex-col items-start gap-4 @7xl:flex-row">
+        <main className="@container min-h-0 min-w-0 flex-1 overflow-hidden">
+          {/* Wide enough for two columns and only the answer scrolls: the rail
+              is short, it never earns a scrollbar of its own, and what it holds
+              — what you gave us, and Start application — should not leave the
+              screen to read the rest. Stacked, the page scrolls as a page. */}
+          <div className="mx-auto flex h-full w-full max-w-[1349px] flex-col gap-4 overflow-y-auto px-6 py-12 @7xl:flex-row @7xl:overflow-hidden">
+            {/* The rail leads on a narrow screen and sits beside the answer on
+                a wide one: on a phone the thing worth pressing should not be
+                three cards down. */}
             <VisitorRail
+              className="shrink-0 @7xl:order-last @7xl:self-start"
               transcripts={entries}
               answers={answers}
               interests={interests}
               onEditTranscripts={() => setStep("questions")}
               onEditProfile={() => setStep("questions")}
             />
-            {/* The rail leads on a narrow screen and sits beside the answer on
-                a wide one: on a phone the thing worth pressing should not be
-                three cards down. */}
-            <div className="flex w-full min-w-0 flex-col gap-4 @7xl:order-first">
+            <div className="flex w-full min-w-0 flex-col gap-4 @7xl:min-h-0 @7xl:overflow-y-auto">
               <VerdictCard />
               <ProgramsCard />
               <DiscoverCard />
@@ -178,7 +183,7 @@ export function Explore() {
 
   return (
     <ExploreShell>
-      <main className="@container min-w-0 flex-1 px-6 py-12">
+      <main className="@container min-h-0 min-w-0 flex-1 overflow-y-auto px-6 py-12">
         <div className="mx-auto w-full max-w-[973px]">
           <ExploreCard>
             <ExploreCardBody>

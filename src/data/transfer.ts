@@ -96,42 +96,44 @@ export type TransferCourse = {
 
 export const TRANSFER_COURSES: TransferCourse[] = [
   {
-    code: "PS50148",
-    name: "Multivariate statistics for use in health context",
+    code: "BUS 101",
+    name: "Introduction to Business",
     term: "Fall 2022",
     credits: 6,
     grade: "B",
     verdict: "confirmed",
-    equivalent: { code: "19-930", name: "Statistics I", credits: 6, grade: "B" },
+    equivalent: { code: "BUS 120", name: "Foundations of Business", credits: 6, grade: "B" },
   },
   {
-    code: "PS50112",
-    name: "Advanced statistics for use in health context",
+    code: "ACC 201",
+    name: "Principles of Accounting",
     term: "Fall 2022",
     credits: 4,
     grade: "D",
     verdict: "confirmed",
-    equivalent: { code: "19-931", name: "Statistics II", credits: 4, grade: "D" },
+    equivalent: { code: "ACC 210", name: "Financial Accounting", credits: 4, grade: "D" },
   },
   {
-    code: "PS50030",
-    name: "Biopsychosocial mechanisms in health",
-    term: "Fall 2022",
+    code: "MKT 210",
+    name: "Principles of Marketing",
+    term: "Spring 2023",
     credits: 4,
     grade: "B",
     verdict: "confirmed",
-    equivalent: { code: "19-215", name: "Health Psychology", credits: 4, grade: "B" },
+    equivalent: { code: "MKT 230", name: "Marketing Fundamentals", credits: 4, grade: "B" },
   },
-  /* An unusual bundled unit, which is exactly why nobody can articulate it
-     automatically: it is the only row here waiting on a human. */
+  /* No equivalent has been agreed, so it is nobody's call but a human's. That
+     is the whole of what "pending review" means here. */
   {
-    code: "PS00000",
-    name: "EXTRA UNIT Academic integrity training",
-    term: "Fall 2022",
+    code: "MGT 305",
+    name: "Organizational Behavior",
+    term: "Spring 2023",
     credits: 8,
     grade: "C",
     verdict: "pending",
   },
+  /* The elective that does not count: nothing wrong with it, nothing here
+     that it answers to. */
   {
     code: "HIST 110",
     name: "World History I",
@@ -199,10 +201,10 @@ export const INTERESTS = [
  *  it is a guess, and the badges are the only place the three questions and
  *  the credit count are visibly doing any work. */
 export const PROGRAMS = [
-  { name: "BS Computer Science", reasons: ["Transfers the most credits", "Similar field of study"] },
+  { name: "BS Business Analytics", reasons: ["Transfers the most credits", "Similar field of study"] },
+  { name: "BS Information Systems", reasons: ["Matches interests", "Most of your credits count"] },
   { name: "BS Data Science", reasons: ["Matches interests", "Similar field of study"] },
-  { name: "BS Business Analytics", reasons: ["Matches interests", "Most of your credits count"] },
-  { name: "BS Information Systems", reasons: ["Matches interests", "Similar field of study"] },
+  { name: "BS Computer Science", reasons: ["Matches interests", "Similar field of study"] },
 ]
 
 /** Institution content, not design: the admin panel in the same Figma file

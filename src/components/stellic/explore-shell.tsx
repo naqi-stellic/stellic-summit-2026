@@ -27,7 +27,9 @@ export function ExploreShell({
   title?: string
 }) {
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
+    /* The shell owns the viewport, as `AppShell` does: it never scrolls, so
+       the bar stays put and whatever is under it scrolls on its own. */
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
       <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-gray-40 bg-card px-6">
         <div className="flex min-w-0 flex-1 items-center gap-4">
           <img

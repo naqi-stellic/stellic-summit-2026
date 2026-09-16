@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { cn } from "cn"
 
 import { Icon } from "@/components/icon"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -230,12 +231,14 @@ export function DiscoverCard() {
  * from five facts — and the fastest way to a better estimate is to correct one
  * of them. `Start application` is the only filled button on the screen. */
 export function VisitorRail({
+  className,
   transcripts,
   answers,
   interests,
   onEditTranscripts,
   onEditProfile,
 }: {
+  className?: string
   transcripts: Transcript[]
   answers: Answers
   interests: string[]
@@ -251,7 +254,7 @@ export function VisitorRail({
   ]
 
   return (
-    <ExploreCard className="w-full @7xl:w-[360px]">
+    <ExploreCard className={cn("w-full @7xl:w-[360px]", className)}>
       <div className="flex flex-col gap-6 px-[31px] py-[23px]">
         <div className="flex items-center gap-3">
           <Avatar size="lg">

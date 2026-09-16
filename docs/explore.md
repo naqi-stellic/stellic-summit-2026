@@ -73,6 +73,12 @@ useless without somewhere to spend it; the university's own content last,
 because it is the only thing on the page that is not about this person. The
 rail holds what they gave us, and the one thing we want them to do with it.
 
+The shell owns the viewport the way `AppShell` does, so the bar never leaves
+and, once there is room for two columns, neither does the rail: it is short
+enough never to earn a scrollbar of its own, and `Start application` should not
+have to be scrolled back to. Only the answer beside it moves. Stacked, the page
+scrolls as a page.
+
 **The verdict is said twice** — once as a sentence, once as a three-segment
 bar. The bar is not decoration: it is the only place the three totals are in
 proportion to each other, which is the difference between "8 pending" and "8
@@ -112,6 +118,12 @@ Small, deliberate, and each one for a reason:
 - **The tiles have a hover state.** They are drawn at 80% and nothing else is
   drawn, so hover takes them to full rather than introducing a colour the
   design does not have.
+- **The courses are business rather than health sciences.** The credit totals
+  are the file's own — 14 confirmed, 8 pending, 3 with no credit out of 25 —
+  so the headline sentence reads exactly as designed, but the transcript
+  underneath it is three confirmed courses, one pending and one refused rather
+  than the file's two, two and one. The program badges moved with it: a
+  business transcript is not what makes Computer Science the biggest transfer.
 - **Two Discover photographs are cropped.** They carried the real
   institution's marks, which the rename to Stellic University contradicts. The
   crop keeps the photograph and drops the lettering.
