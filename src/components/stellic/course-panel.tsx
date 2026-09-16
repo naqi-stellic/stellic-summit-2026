@@ -87,7 +87,7 @@ function Trail({ prefix, connector }: { prefix: boolean[]; connector: "tee" | "e
   )
 }
 
-type Row = { node: PrereqNode; prefix: boolean[]; last: boolean }
+type Row = { node: PrereqNode; prefix: boolean[]; last: boolean; root?: boolean }
 
 /** The tree, flattened to rows that each know which lines to draw. */
 function flatten(node: PrereqNode, prefix: boolean[], last: boolean, out: Row[]) {
@@ -96,13 +96,21 @@ function flatten(node: PrereqNode, prefix: boolean[], last: boolean, out: Row[])
   kids.forEach((kid, i) => flatten(kid, [...prefix, !last], i === kids.length - 1, out))
 }
 
+/* A course that asks for one thing only has no option to open, so its
+ * requirements are the top of the tree rather than hanging off one. */
+function flattenSole(node: PrereqNode, out: Row[]) {
+  out.push({ node, prefix: [], last: true, root: true })
+  const kids = node.open === false ? [] : (node.children ?? [])
+  kids.forEach((kid, i) => flatten(kid, [], i === kids.length - 1, out))
+}
+
 function PrereqRow({ row }: { row: Row }) {
   const { node } = row
   const group = node.children != null
 
   return (
     <div className="flex items-stretch">
-      <Trail prefix={row.prefix} connector={row.last ? "elbow" : "tee"} />
+      {!row.root && <Trail prefix={row.prefix} connector={row.last ? "elbow" : "tee"} />}
       <div className="flex min-h-[30px] min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-[5px]">
         {!group && <Mark state={node.state} />}
         {node.code ? (
@@ -299,6 +307,12 @@ export function CoursePanel({
   onClose: () => void
 }) {
   const detail = courseDetail(entry)
+
+  /* One option is not a choice, so it is drawn as the requirements themselves
+     rather than as something to pick. */
+  const sole = detail.prerequisites.options.length === 1 ? detail.prerequisites.options[0] : null
+  const soleRows: Row[] = []
+  sole?.children.forEach((child) => flattenSole(child, soleRows))
   const [campus, setCampus] = useState(detail.campus)
   const [termId, setTermId] = useState(terms[0]?.id ?? "")
   const [more, setMore] = useState(false)
@@ -557,13 +571,27 @@ export function CoursePanel({
                     Evaluated for {term?.name ?? "this plan"}
                   </span>
                 </div>
-                <p className="text-body-md text-gray-100">{detail.prerequisites.directive}</p>
+                {/* Said only where there is a choice to make. One way in needs
+                    no directive, and none at all needs no tree. */}
+                {detail.prerequisites.directive && (
+                  <p className="text-body-md text-gray-100">{detail.prerequisites.directive}</p>
+                )}
               </div>
-              <div className="flex w-full flex-col">
-                {detail.prerequisites.options.map((option) => (
-                  <Option key={option.name} option={option} />
-                ))}
-              </div>
+              {sole ? (
+                <div className="flex w-full flex-col">
+                  {soleRows.map((row, i) => (
+                    <PrereqRow key={i} row={row} />
+                  ))}
+                </div>
+              ) : detail.prerequisites.options.length === 0 ? (
+                <p className="text-body-md text-gray-80">This course has no prerequisites.</p>
+              ) : (
+                <div className="flex w-full flex-col">
+                  {detail.prerequisites.options.map((option) => (
+                    <Option key={option.name} option={option} />
+                  ))}
+                </div>
+              )}
             </div>
 
             <Section title="Course Equivalents">

@@ -223,6 +223,19 @@ reads the same every time it is opened. The plan has no data about a course
 nobody has taken, and inventing it per render would make the panel lie
 differently each time.
 
+How much a course asks for follows the number in its code, because that is what
+the number means. A hundred-level course has no prerequisites and says so. A
+two-hundred one has a single way in, which is not a choice, so it is drawn as
+the requirements themselves — no Option head above them and no directive over
+it. Three hundred gives two ways in and four hundred gives three, one of them
+out of reach, and those are the ones headed "Complete any one of N options".
+What each option comes to is read off what is inside it rather than written by
+hand, against the record the plan already holds: the ten courses passed in
+2026-2027, the five under way this term, a 3.24 average and thirty credits. So
+a tree never claims a course was passed that the plan says is still to come,
+and a group where one child is enough counts as one thing rather than as a
+shortfall for the options the student did not take.
+
 A course already in the plan opens on the same panel, from its row on the
 canvas or in a term view
 ([`1:13691`](https://www.figma.com/design/h39YRs9jNEWO4JLmKrh5sh/Course-Sidebar-2.0?node-id=1-13691)).

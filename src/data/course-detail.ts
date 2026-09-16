@@ -31,6 +31,8 @@ export type PrereqNode = {
   tone?: "good" | "bad"
   /** A group of its own, which is what makes this a tree. */
   children?: PrereqNode[]
+  /** One of the children is enough, rather than all of them. */
+  any?: boolean
   open?: boolean
 }
 
@@ -63,7 +65,8 @@ export type CourseDetail = {
   description: string
   requiredSections: { kind: string; available: number }[]
   instructors: { name: string; semesters: number }[]
-  prerequisites: { directive: string; options: PrereqOption[] }
+  /** No options at all where a course asks for nothing. */
+  prerequisites: { directive?: string; options: PrereqOption[] }
   equivalents: string[]
   countsFor: { name: string; under: string }[]
   repeatable: string
@@ -94,64 +97,189 @@ function seedOf(code: string): number {
   return [...code].reduce((n, c) => n + c.charCodeAt(0), 0)
 }
 
-function prerequisites(seed: number): CourseDetail["prerequisites"] {
-  const first = ["FIN 301", "ACCT 202", "ECON 202"][seed % 3]
-  const second = ["STAT 210", "MATH 140", "BUS 101"][seed % 3]
+/* What the student has, which is what the audit reads a prerequisite against.
+ * Taken from the plan itself rather than invented here, so a tree never claims
+ * a course was passed that the plan says is still to come. */
+const EARNED: Record<string, string> = {
+  "BUS 101": "Taken Fall 2026, A",
+  "MATH 140": "Taken Fall 2026, B+",
+  "ENGL 101": "Taken Fall 2026, A−",
+  "HIST 110": "Taken Fall 2026, B",
+  "PSYC 101": "Taken Fall 2026, A−",
+  "ACCT 201": "Taken Spring 2027, B+",
+  "ECON 201": "Taken Spring 2027, A−",
+  "MIS 120": "Taken Spring 2027, B",
+  "ART 105": "Taken Spring 2027, A",
+  "COMM 230": "Taken Spring 2027, B+",
+}
 
+const IN_PROGRESS = ["FIN 301", "ACCT 202", "ECON 202", "STAT 210", "MKTG 201"]
+
+/** A course as the audit finds it: passed, under way, or still to come. */
+function courseNode(code: string, note?: string): PrereqNode {
+  if (EARNED[code]) return { code, note, state: "earned", meta: EARNED[code] }
+  if (IN_PROGRESS.includes(code)) return { code, note, state: "progress", meta: "In progress" }
+  return { code, note, state: "remaining" }
+}
+
+/* Conditions that are not courses. The student's own standing decides how each
+ * one reads: a 3.24 average, thirty credits earned, sophomore, and the finance
+ * concentration declared. */
+const CONDITIONS: Record<string, PrereqNode> = {
+  gpa: {
+    label: "Cumulative GPA 2.50",
+    state: "earned",
+    meta: "3.24",
+  },
+  credits: {
+    label: "30 total credits",
+    state: "earned",
+    meta: "30 completed",
+  },
+  standing: {
+    label: "Sophomore standing",
+    state: "earned",
+    meta: "Sophomore",
+  },
+  junior: {
+    label: "Junior standing",
+    state: "progress",
+    meta: "On track, Junior by Fall 2028",
+    tone: "good",
+  },
+  declared: {
+    label: "Declare the Finance concentration",
+    state: "earned",
+    meta: "Declared Sep 2026",
+  },
+  second: {
+    label: "Declare a second major",
+    state: "neutral",
+    meta: "Not declared",
+  },
+}
+
+/** What an option comes to, read off what is inside it. */
+function summarise(name: string, children: PrereqNode[], open: boolean): PrereqOption {
+  /* A group where one child is enough counts as one thing, and is met by the
+     best of what is inside it — otherwise a choice would read as a shortfall
+     merely for having options the student did not take. */
+  const rank = (state?: PrereqState) =>
+    state === "earned" ? 2 : state === "progress" ? 1 : 0
+  const flat = (nodes: PrereqNode[]): PrereqNode[] =>
+    nodes.flatMap((node) => {
+      if (!node.children) return [node]
+      const inside = flat(node.children)
+      if (!node.any) return inside
+      const best = inside.reduce((a, b) => (rank(b.state) > rank(a.state) ? b : a))
+      return [best]
+    })
+  const leaves = flat(children)
+  const earned = leaves.filter((n) => n.state === "earned").length
+  const going = leaves.filter((n) => n.state === "progress").length
+  const missing = leaves.length - earned - going
+
+  if (missing === 0 && going === 0) {
+    return { name, state: "earned", meta: "Earned", tone: "good", open, children }
+  }
+  if (earned === 0 && going === 0) {
+    return { name, state: "neutral", meta: "Nothing started", open, children }
+  }
+  if (missing === 0) {
+    return { name, state: "progress", meta: "On track", tone: "good", open, children }
+  }
+  return {
+    name,
+    state: "remaining",
+    meta: `${missing} not earned`,
+    tone: "bad",
+    open,
+    children,
+  }
+}
+
+/** The number in a course's code, which is how far into the subject it is and
+ *  therefore how much it asks for. */
+function level(code: string): number {
+  return Number(code.replace(/\D+/g, "")) || 100
+}
+
+/* How much a course asks for depends on how deep it is: a first-year course
+ * asks for nothing, a second-year one for a course or two, and only the later
+ * ones offer more than one way in. */
+function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequisites"] {
+  const depth = level(entry.code)
+  /* Never ask a course for itself: the deeper lists hold courses that are
+     themselves in the catalogue. */
+  const pick = (from: string[]) => {
+    const rest = from.filter((code) => code !== entry.code)
+    return rest[seed % rest.length]
+  }
+  const gate = pick(["BUS 101", "MATH 140", "ACCT 201", "ECON 201"])
+  const second = pick(["ACCT 202", "ECON 202", "STAT 210", "MKTG 201"])
+  const later = pick(["FIN 301", "MIS 250", "OPS 320", "BUS 390"])
+
+  if (depth < 200) return { options: [] }
+
+  if (depth < 300) {
+    /* One way in, so the option itself is not worth naming. */
+    return {
+      options: [
+        summarise("Option 1", [courseNode(gate), CONDITIONS.credits], true),
+      ],
+    }
+  }
+
+  if (depth < 400) {
+    return {
+      directive: "Complete any one of 2 options",
+      options: [
+        summarise("Option 1", [courseNode(gate), courseNode(second), CONDITIONS.gpa], true),
+        summarise("Option 2", [courseNode(later), CONDITIONS.declared], false),
+      ],
+    }
+  }
+
+  /* A final-year course: three ways in, one of them out of reach. */
   return {
     directive: "Complete any one of 3 options",
     options: [
-      {
-        name: "Option 1",
-        state: "progress",
-        meta: "On track",
-        tone: "good",
-        open: true,
-        children: [
+      summarise(
+        "Option 1",
+        [
           {
             label: "Take any one of",
+            any: true,
             open: true,
-            children: [
-              { code: first, state: "earned", meta: "Taken Fall 2026, A−" },
-              { code: second, state: "remaining" },
-              {
-                label: "All of",
-                open: true,
-                children: [
-                  { code: "MATH 140", state: "earned", meta: "Taken Fall 2026, B+" },
-                  { code: "STAT 210", state: "progress", meta: "In progress" },
-                ],
-              },
-            ],
+            children: [courseNode(second), courseNode(later)],
           },
-          { code: "BUS 101", note: "minimum grade B", state: "earned", meta: "Taken Fall 2026, A" },
-          { label: "Cumulative GPA 2.50", state: "progress", meta: "On track, 3.24", tone: "good" },
-          { label: "30 total credits", state: "earned", meta: "30 completed" },
+          courseNode(gate, "minimum grade B"),
+          CONDITIONS.gpa,
+          CONDITIONS.junior,
         ],
-      },
+        true
+      ),
       {
         name: "Option 2",
         state: "blocked",
         meta: "Can't be met",
         tone: "bad",
         open: false,
-        summary: `${second} below the B minimum, and the concentration is not declared`,
+        /* Out of reach rather than merely unmet: the grade is already in and
+           the course cannot be repeated. */
+        summary: "MIS 120 was passed at B, under the A− this option asks for",
         children: [
-          { label: "Declare the Marketing concentration", state: "remaining", meta: "Not declared" },
-          { code: second, note: "minimum grade B", state: "remaining", meta: "Not earned, C+" },
+          {
+            code: "MIS 120",
+            note: "minimum grade A−",
+            state: "blocked",
+            meta: "Taken Spring 2027, B",
+            tone: "bad",
+          },
+          CONDITIONS.standing,
         ],
       },
-      {
-        name: "Option 3",
-        state: "neutral",
-        meta: "Nothing started",
-        open: false,
-        summary: "Not declared, no course planned",
-        children: [
-          { label: "Declare a second major", state: "remaining", meta: "Not declared" },
-          { code: "BUS 390", state: "remaining" },
-        ],
-      },
+      summarise("Option 3", [CONDITIONS.second, courseNode(later), CONDITIONS.credits], false),
     ],
   }
 }
@@ -187,7 +315,7 @@ export function courseDetail(entry: CatalogEntry): CourseDetail {
       { name: INSTRUCTORS[seed % INSTRUCTORS.length], semesters: 3 + (seed % 6) },
       { name: INSTRUCTORS[(seed + 3) % INSTRUCTORS.length], semesters: 1 + (seed % 4) },
     ],
-    prerequisites: prerequisites(seed),
+    prerequisites: prerequisites(entry, seed),
     equivalents: [`${entry.code.split(" ")[0]}-${300 + (seed % 90)}`, `GEN-${100 + (seed % 80)}`],
     countsFor: [
       { name: entry.reason, under: "BSc in Business Administration" },
