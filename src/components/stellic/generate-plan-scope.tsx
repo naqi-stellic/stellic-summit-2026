@@ -58,11 +58,13 @@ export function GeneratePlanScope({
   const courses = standing.total.reqs
   const milestones = standing.milestones
 
-  const planning = [
-    { label: "Programs", value: DEGREE.program },
-    { label: "Concentration", value: DEGREE.concentration },
-    { label: "Minor", value: DEGREE.minor },
-    { label: "Expected Graduation", value: graduation },
+  /* What the plan is for, which is more than one thing: the degree and the
+     minor are both programmes with requirements to place, so they are both
+     under Programs, each on its own line. */
+  const planning: { label: string; values: string[] }[] = [
+    { label: "Programs", values: [DEGREE.program, `Minor in ${DEGREE.minor}`] },
+    { label: "Concentration", values: [DEGREE.concentration] },
+    { label: "Expected Graduation", values: [graduation] },
   ]
 
   return (
@@ -120,23 +122,27 @@ export function GeneratePlanScope({
         <div className="flex items-center pb-2">
           <h4 className="text-body-md font-semibold text-gray-100">What we&rsquo;re planning</h4>
         </div>
-        {planning.map((row) => (
-          <div
-            key={row.label}
-            className="flex w-full flex-col gap-x-2 @xs:flex-row @xs:items-start"
-          >
-            <span className="text-body-md text-gray-80 @xs:w-[150px] @xs:shrink-0">
-              {row.label}
-            </span>
-            <span className="min-w-0 flex-1 text-body-md text-gray-100">{row.value}</span>
-            <button
-              type="button"
-              className="shrink-0 cursor-pointer text-body-md text-gray-80 underline [text-underline-position:from-font]"
+        {planning.map((row) =>
+          row.values.map((value, i) => (
+            <div
+              key={value}
+              className="flex w-full flex-col gap-x-2 @xs:flex-row @xs:items-start"
             >
-              edit
-            </button>
-          </div>
-        ))}
+              {/* The label names the group, so a second programme sits under
+                  the first rather than repeating it. */}
+              <span className="text-body-md text-gray-80 @xs:w-[150px] @xs:shrink-0">
+                {i === 0 ? row.label : ""}
+              </span>
+              <span className="min-w-0 flex-1 text-body-md text-gray-100">{value}</span>
+              <button
+                type="button"
+                className="shrink-0 cursor-pointer text-body-md text-gray-80 underline [text-underline-position:from-font]"
+              >
+                edit
+              </button>
+            </div>
+          ))
+        )}
       </div>
     </>
   )

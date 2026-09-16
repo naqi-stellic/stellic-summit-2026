@@ -13,7 +13,9 @@ export type SettingStep = 1 | 2 | 3
 
 export type SettingRow = {
   label: string
-  value: string
+  /** A list where the label covers more than one thing — the programmes a
+   *  plan is for, say — which stack under the one label. */
+  value: string | string[]
   step?: SettingStep
 }
 
@@ -36,9 +38,10 @@ export function planSettings({
   notes: string
 }): { choices: SettingRow[]; rules: SettingRow[] } {
   const choices: SettingRow[] = [
-    { label: "Program", value: DEGREE.program },
+    /* Every programme the plan is for, the minor included: it is a programme
+       with requirements of its own, not a footnote to the major. */
+    { label: "Programs", value: [DEGREE.program, `Minor in ${DEGREE.minor}`] },
     { label: "Concentration", value: DEGREE.concentration },
-    { label: "Minor", value: DEGREE.minor },
     { label: "Expected Graduation", value: graduation },
     {
       label: "Keeping",
@@ -96,7 +99,11 @@ export function SettingsSection({
           className={cn("flex w-full items-start gap-2 text-body-md", i === 0 && "pt-2")}
         >
           <p className="w-[148px] shrink-0 text-gray-80">{row.label}</p>
-          <p className="min-w-0 flex-1 text-gray-100">{row.value}</p>
+          <div className="flex min-w-0 flex-1 flex-col gap-1 text-gray-100">
+            {(Array.isArray(row.value) ? row.value : [row.value]).map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
           {/* Offered only where it leads somewhere: the step that set it. */}
           {onEdit && row.step && (
             <button

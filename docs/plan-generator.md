@@ -136,7 +136,14 @@ v4, so they are the design's own numbers: the panel opens at 520px, clamps
 between 340 and 760, and the planner keeps 520px.
 
 **Step 1** shows Courses and Milestones progress, the plan summary, and a
-keep-or-choose radio. Every figure comes from `planStanding()` — the tallies,
+keep-or-choose radio. "What we're planning"
+([`367:181084`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=367-181084),
+[`252:30410`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=252-30410))
+lists every programme the plan is for under one Programs label, one line each
+with its own edit, which is where the minor belongs: it has requirements to
+place like any other programme, and three of the outstanding ones are its. The
+concentration is a row of its own beneath them, as is the graduation the plan
+reaches. The review screen reads the same rows back from `planSettings()`. Every figure comes from `planStanding()` — the tallies,
 the bar shares, and the "Keep my N courses" copy — so Figma's own numbers there
 are placeholders that were deliberately not copied.
 
