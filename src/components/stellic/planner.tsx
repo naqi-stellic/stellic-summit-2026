@@ -194,22 +194,24 @@ export function AuditRow({
         )}
       </div>
 
-      {/* What can be done to this row, at the end of it: a seat is filled by
-          finding a class for it, anything can be written about, and anything
-          can be taken out. Only the search button is there at rest — the other
-          two take no room until the cursor is on the row — so a seat ends in
-          its search button until it is hovered, and then the three sit side by
-          side. */}
+      {/* What can be done to this row, at the end of it: anything can be taken
+          out or written about, and a seat is filled by finding a class for it.
+          Remove and the note take no room until the cursor is on the row, and
+          they come before the search — so a seat's search button ends the row
+          whether it is hovered or not, and never moves out from under the
+          pointer reaching for it. */}
       {!overlay && (held || onRemove) && (
         <span className="flex shrink-0 items-center gap-1">
-          {held && (
+          {onRemove && (
             <Button
               size="icon"
-              aria-label={`Search classes for ${course.name}`}
+              aria-label={`Remove ${course.name}`}
+              /* Keep the drag sensor out of it, or the press starts a drag. */
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => onOpenSeat?.("search")}
+              onClick={onRemove}
+              className="hidden group-hover:inline-flex"
             >
-              <Icon name="s-search" size={16} />
+              <Icon name="close" size={16} />
             </Button>
           )}
           {onRemove && (
@@ -222,16 +224,14 @@ export function AuditRow({
               <Icon name="sticky-note-2" size={16} />
             </Button>
           )}
-          {onRemove && (
+          {held && (
             <Button
               size="icon"
-              aria-label={`Remove ${course.name}`}
-              /* Keep the drag sensor out of it, or the press starts a drag. */
+              aria-label={`Search classes for ${course.name}`}
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={onRemove}
-              className="hidden group-hover:inline-flex"
+              onClick={() => onOpenSeat?.("search")}
             >
-              <Icon name="close" size={16} />
+              <Icon name="s-search" size={16} />
             </Button>
           )}
         </span>

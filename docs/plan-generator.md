@@ -14,8 +14,10 @@ Planned courses can be picked up and dropped into any other planned term
 (`@dnd-kit`). Registered terms are locked — `Term.locked` — so their courses
 have no handle and can't be moved, and nothing can be dropped into them.
 Hovering a movable course reveals what can be done to it, at the end of the
-row: a note and a remove button, with a search button before them on a held
-seat. Only the search button is there when the row is not hovered.
+row: remove and a note, with a seat's search button after them. Only the search
+button is there when the row is not hovered, and because the other two appear
+to its left it does not move when they do — the pointer reaching for it finds
+it where it was.
 
 Collision detection is `pointerWithin` rather than `closestCorners` on purpose:
 `closestCorners` always resolves to *some* droppable, so releasing over a locked
