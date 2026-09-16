@@ -1,7 +1,7 @@
 import { cn } from "cn"
 
 import { describePace, type PaceState } from "@/components/stellic/generate-plan-pace"
-import { DEGREE, type PlanStanding } from "@/data/plan"
+import { DEGREE, INSTITUTION_INSTRUCTIONS, PLANNING_RULES, type PlanStanding } from "@/data/plan"
 
 /* Everything a plan is generated from, in one place: the answers the student
  * gave and the institution settings that apply regardless. The review screen
@@ -20,6 +20,7 @@ export type SettingRow = {
 export function planSettings({
   standing,
   graduation,
+  campus,
   keepPlanned,
   released,
   pace,
@@ -27,12 +28,13 @@ export function planSettings({
 }: {
   standing: PlanStanding
   graduation: string
+  campus: string
   keepPlanned: string
   /** How many planned courses the student left open for the generator. */
   released: number
   pace: PaceState
   notes: string
-}): { choices: SettingRow[] } {
+}): { choices: SettingRow[]; rules: SettingRow[] } {
   const choices: SettingRow[] = [
     { label: "Program", value: DEGREE.program },
     { label: "Concentration", value: DEGREE.concentration },
@@ -55,26 +57,39 @@ export function planSettings({
     choices.push({ label: "Anything else", value: notes.trim(), step: 3 })
   }
 
-  return { choices }
+  const rules: SettingRow[] = [
+    { label: "Requirement priority", value: PLANNING_RULES.requirementPriority },
+    { label: "Campus", value: campus },
+    {
+      label: "Existing credit",
+      value: `${standing.completed.reqs} courses, ${standing.completed.credits} credits`,
+    },
+    { label: "Prerequisites, co-reqs, anti-reqs", value: PLANNING_RULES.prerequisites },
+    {
+      label: "Term offerings",
+      value: `confirmed through ${PLANNING_RULES.offeringsThrough}, projected after`,
+    },
+    { label: "Credit load limits", value: `max ${PLANNING_RULES.maxCreditsPerTerm} per term` },
+    { label: "Double counting rules", value: PLANNING_RULES.doubleCounting },
+    { label: "Institution instructions", value: INSTITUTION_INSTRUCTIONS },
+  ]
+
+  return { choices, rules }
 }
 
 export function SettingsSection({
   title,
-  rows = [],
-  text,
+  rows,
   onEdit,
 }: {
   title: string
-  rows?: SettingRow[]
-  /** In place of rows: what the section amounts to, said in a line or two. */
-  text?: string
+  rows: SettingRow[]
   /** Given, every row that belongs to a step offers a way back to it. */
   onEdit?: (step: SettingStep) => void
 }) {
   return (
     <div className="flex w-full flex-col gap-2 overflow-clip">
       <p className="text-overline font-medium tracking-[0.5px] text-gray-100 uppercase">{title}</p>
-      {text && <p className="pt-2 text-body-md text-gray-100">{text}</p>}
       {rows.map((row, i) => (
         <div
           key={row.label}

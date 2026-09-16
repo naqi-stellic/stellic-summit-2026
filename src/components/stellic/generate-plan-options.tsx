@@ -48,7 +48,7 @@ export function GeneratePlanOptions({
   /** One line reading back what the draft was built from. */
   instructions: string
   /** The same line spelled out, for when the card is opened up. */
-  settings: { choices: SettingRow[] }
+  settings: { choices: SettingRow[]; rules: SettingRow[] }
   editing: boolean
   options: PlanOptionSummary[]
   selected: string
@@ -66,6 +66,7 @@ export function GeneratePlanOptions({
         {editing ? (
           <GeneratePlanEdit
             choices={settings.choices}
+            rules={settings.rules}
             onCancel={onCancelEdit}
             onEditStep={onEditStep}
             onStartOver={onStartOver}

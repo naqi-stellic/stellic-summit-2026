@@ -4,7 +4,7 @@ import {
   planSettings,
   type SettingStep,
 } from "@/components/stellic/plan-settings"
-import { INSTITUTION_INSTRUCTIONS, type PlanStanding } from "@/data/plan"
+import type { PlanStanding } from "@/data/plan"
 
 /* The review screen. Every row under "Your choices" reads back an answer the
  * student actually gave in steps 1-3; the rows beneath it are institution
@@ -14,6 +14,7 @@ import { INSTITUTION_INSTRUCTIONS, type PlanStanding } from "@/data/plan"
 export function GeneratePlanSummary({
   standing,
   graduation,
+  campus,
   keepPlanned,
   released,
   pace,
@@ -22,15 +23,17 @@ export function GeneratePlanSummary({
 }: {
   standing: PlanStanding
   graduation: string
+  campus: string
   keepPlanned: string
   released: number
   pace: PaceState
   notes: string
   onEdit: (step: SettingStep) => void
 }) {
-  const { choices } = planSettings({
+  const { choices, rules } = planSettings({
     standing,
     graduation,
+    campus,
     keepPlanned,
     released,
     pace,
@@ -50,7 +53,7 @@ export function GeneratePlanSummary({
 
       <div className="flex w-full flex-col gap-2 rounded-md border border-gray-40 bg-gray-0 p-[15px]">
         <SettingsSection title="Your choices" rows={choices} onEdit={onEdit} />
-        <SettingsSection title="Also accounting for" text={INSTITUTION_INSTRUCTIONS} />
+        <SettingsSection title="Also accounting for" rows={rules} onEdit={onEdit} />
       </div>
     </>
   )

@@ -27,6 +27,7 @@ import { RadioCard } from "@/components/stellic/primitives"
 import {
   CREDITS_PER_COURSE,
   INSTITUTION_INSTRUCTIONS,
+  PLANNING_RULES,
   SCHEDULE_INSTITUTION_INSTRUCTIONS,
   clockTime,
   type PlanStanding,
@@ -196,6 +197,23 @@ export function GenerateTermPanel({
           },
         ]
       : []),
+  ]
+
+  const rules: SettingRow[] = [
+    { label: "Requirement priority", value: PLANNING_RULES.requirementPriority },
+    { label: "Campus", value: term.campus ?? "Main campus" },
+    {
+      label: "Existing credit",
+      value: `${standing.completed.reqs} courses, ${standing.completed.credits} credits`,
+    },
+    { label: "Prerequisites, co-reqs, anti-reqs", value: PLANNING_RULES.prerequisites },
+    { label: "Term offerings", value: `through ${PLANNING_RULES.offeringsThrough}` },
+    { label: "Credit load limits", value: `max ${PLANNING_RULES.maxCreditsPerTerm} per term` },
+    { label: "Double counting rules", value: PLANNING_RULES.doubleCounting },
+    {
+      label: "Institution instructions",
+      value: scheduling ? SCHEDULE_INSTITUTION_INSTRUCTIONS : INSTITUTION_INSTRUCTIONS,
+    },
   ]
 
   return (
@@ -491,10 +509,7 @@ export function GenerateTermPanel({
                 rows={choices}
                 onEdit={(edit) => setView(edit === 3 ? 3 : edit === 2 ? 2 : 1)}
               />
-              <SettingsSection
-                title="Also accounting for"
-                text={scheduling ? SCHEDULE_INSTITUTION_INSTRUCTIONS : INSTITUTION_INSTRUCTIONS}
-              />
+              <SettingsSection title="Also accounting for" rows={rules} />
             </div>
           </>
         ) : (
