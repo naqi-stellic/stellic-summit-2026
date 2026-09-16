@@ -6,6 +6,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { AuditCourse, AuditEntry, AuditGroup, AuditMark } from "@/data/audit"
 
+/** What a row offers beyond reading: the way to ask why it says what it says.
+ *  Absent on the prototypes that do not explain anything. */
+export type Explain = {
+  onExplain: (group: AuditGroup) => void
+  /** Whether the row's own rules can be opened underneath it. */
+  constraints?: (group: AuditGroup) => React.ReactNode
+}
+
 /* The degree audit, drawn as a tree. Every row is the same three parts: the
  * trail that says where it sits, the mark that says how it stands, and the row
  * itself. What differs between a requirement and a course is the ground under
@@ -29,17 +37,21 @@ const MARK: Record<AuditMark, { ground: string; icon?: IconName; glyph?: number 
   optional: { ground: "border border-gray-80" },
 }
 
-export function AuditMarkIcon({ mark }: { mark: AuditMark }) {
+export function AuditMarkIcon({ mark, size = 24 }: { mark: AuditMark; size?: 16 | 24 }) {
   const { ground, icon, glyph } = MARK[mark]
+  /* The mapping list runs at 16, where a 14px tick inside a 16px box leaves no
+     box. Everything scales off the box rather than being a second set. */
+  const scale = size / 24
 
   return (
     <span
+      style={{ width: size, height: size }}
       className={cn(
-        "flex size-6 shrink-0 items-center justify-center rounded-md p-0.5",
+        "flex shrink-0 items-center justify-center rounded-md p-0.5",
         ground
       )}
     >
-      {icon && glyph && <Icon name={icon} size={glyph} />}
+      {icon && glyph && <Icon name={icon} size={Math.round(glyph * scale)} />}
       {mark === "optional" && <span className="h-px w-2.5 rounded-full bg-gray-80" />}
     </span>
   )
@@ -125,7 +137,7 @@ export function TreeElement({
   children: ReactNode
 }) {
   return (
-    <div className="flex items-stretch gap-1 bg-card">
+    <div className="group flex items-stretch gap-1 bg-card">
       <Trail cells={trail} />
       {children}
     </div>
@@ -181,14 +193,55 @@ export function CourseRow({ course, bare }: { course: AuditCourse; bare?: boolea
   )
 }
 
+/** The two things a row offers when the prototype explains itself: its own
+ *  rules, opened underneath it, and the panel that reads them out. Hidden
+ *  until the row is pointed at — they hold their space, so nothing moves. */
+function RowTools({
+  group,
+  rulesOpen,
+  onToggleRules,
+  onExplain,
+}: {
+  group: AuditGroup
+  rulesOpen: boolean
+  onToggleRules?: () => void
+  onExplain?: (group: AuditGroup) => void
+}) {
+  if (!onExplain) return null
+
+  return (
+    <>
+      {onToggleRules && (
+        <button
+          type="button"
+          onClick={onToggleRules}
+          aria-expanded={rulesOpen}
+          className="cursor-pointer rounded-md border border-gray-40 bg-card px-[7px] py-px text-label-md text-foreground transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 max-md:opacity-100 md:opacity-0"
+        >
+          rules
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={() => onExplain(group)}
+        className="cursor-pointer rounded-md border border-gray-40 bg-card px-[7px] py-px text-label-md text-foreground transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 max-md:opacity-100 md:opacity-0"
+      >
+        explain
+      </button>
+    </>
+  )
+}
+
 function GroupRow({
   group,
   open = true,
   onToggle,
+  tools,
 }: {
   group: AuditGroup
   open?: boolean
   onToggle?: () => void
+  tools?: React.ReactNode
 }) {
   /* The degree heads the tree rather than hanging off it, so it is drawn on
      nothing: no ground, no border, and the counts in place of a mark. What it
@@ -212,6 +265,7 @@ function GroupRow({
               <Icon name="expand-more" size={10} className="shrink-0" />
               <Icon name="more-horiz" size={14} className="shrink-0" />
               <Tags tags={group.tags} small />
+              {tools}
             </div>
             {group.subtitle && (
               <p className="truncate text-body-md text-gray-80">{group.subtitle}</p>
@@ -254,6 +308,7 @@ function GroupRow({
         <Icon name="chevron-right" size={14} className="shrink-0" />
       )}
       <Tags tags={group.tags} />
+      {tools}
     </div>
   )
 }
@@ -270,6 +325,7 @@ function EntryRows({
   last,
   folded,
   onToggle,
+  explain,
 }: {
   entry: AuditEntry
   /** One per level above this row: does that level's line continue past it? */
@@ -277,25 +333,57 @@ function EntryRows({
   last: boolean
   folded: Set<string>
   onToggle: (id: string) => void
+  explain?: Explain
 }) {
   const trail = [...stem.map((line) => ({ line })), { line: true, elbow: true, last }]
   const open = entry.kind === "group" && !folded.has(entry.id)
+  const rulesId = `${entry.id}-rules`
+  const rulesOpen = !folded.has(rulesId)
 
   const row = (
     <TreeElement trail={trail}>
       {entry.kind === "course" ? (
         <CourseRow course={entry} />
       ) : (
-        <GroupRow group={entry} open={open} onToggle={() => onToggle(entry.id)} />
+        <GroupRow
+          group={entry}
+          open={open}
+          onToggle={() => onToggle(entry.id)}
+          tools={
+            <RowTools
+              group={entry}
+              rulesOpen={rulesOpen}
+              onToggleRules={explain?.constraints ? () => onToggle(rulesId) : undefined}
+              onExplain={explain?.onExplain}
+            />
+          }
+        />
       )}
     </TreeElement>
   )
 
-  if (entry.kind === "course" || entry.children.length === 0 || !open) return row
+  /* The rules open as a row of their own, indented one level past the row they
+     belong to — they are about it, not beside it. */
+  const rules =
+    entry.kind === "group" && explain?.constraints && rulesOpen ? (
+      <TreeElement trail={[...stem.map((line) => ({ line })), { line: !last }, { line: false }]}>
+        {explain.constraints(entry)}
+      </TreeElement>
+    ) : null
+
+  if (entry.kind === "course" || entry.children.length === 0 || !open) {
+    return (
+      <>
+        {row}
+        {rules}
+      </>
+    )
+  }
 
   return (
     <>
       {row}
+      {rules}
       {entry.children.map((child, i) => (
         <EntryRows
           key={child.id}
@@ -304,6 +392,7 @@ function EntryRows({
           last={i === entry.children.length - 1}
           folded={folded}
           onToggle={onToggle}
+          explain={explain}
         />
       ))}
     </>
@@ -318,14 +407,18 @@ function initialFold(audit: AuditGroup): Set<string> {
   const walk = (entry: AuditEntry) => {
     if (entry.kind === "course") return
     if (entry.collapsed) folded.add(entry.id)
+    /* A row's rules are shut until someone asks, which is the opposite default
+       from the row itself. */
+    folded.add(`${entry.id}-rules`)
     entry.children.forEach(walk)
   }
   walk(audit)
+  folded.add(`${audit.id}-rules`)
 
   return folded
 }
 
-export function AuditTree({ audit }: { audit: AuditGroup }) {
+export function AuditTree({ audit, explain }: { audit: AuditGroup; explain?: Explain }) {
   const [folded, setFolded] = useState(() => initialFold(audit))
 
   const toggle = (id: string) =>
@@ -340,7 +433,10 @@ export function AuditTree({ audit }: { audit: AuditGroup }) {
       {/* The degree heads the tree rather than hanging off it, so it is the one
           row with no trail beside it. */}
       <TreeElement trail={[]}>
-        <GroupRow group={audit} />
+        <GroupRow
+          group={audit}
+          tools={<RowTools group={audit} rulesOpen={false} onExplain={explain?.onExplain} />}
+        />
       </TreeElement>
       {audit.children.map((child, i) => (
         <EntryRows
@@ -350,6 +446,7 @@ export function AuditTree({ audit }: { audit: AuditGroup }) {
           last={i === audit.children.length - 1}
           folded={folded}
           onToggle={toggle}
+          explain={explain}
         />
       ))}
     </div>

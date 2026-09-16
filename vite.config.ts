@@ -24,6 +24,7 @@ export default defineConfig({
         planner: path.resolve(import.meta.dirname, 'planner.html'),
         'advanced-what-if': path.resolve(import.meta.dirname, 'advanced-what-if.html'),
         compliance: path.resolve(import.meta.dirname, 'compliance.html'),
+        explain: path.resolve(import.meta.dirname, 'explain.html'),
       },
     },
   },

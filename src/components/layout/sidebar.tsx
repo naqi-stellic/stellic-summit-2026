@@ -42,9 +42,10 @@ const EXPLORE: NavItem[] = [
 ]
 
 /* The staff side of the product is a different nav altogether: it is a list of
-   everything there is, not a path through one student's degree. */
+   everything there is, not a path through one student's degree — so no rings
+   either. A ring marks where you are on a path, and this is not one. */
 const STAFF: NavItem[] = [
-  { label: "Students", glyph: "s-check", strong: true, active: true },
+  { label: "Students", strong: true, active: true },
   { label: "Programs", strong: true },
   { label: "Courses", strong: true },
   { label: "Pathways", strong: true },
