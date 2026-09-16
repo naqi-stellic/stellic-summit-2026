@@ -54,8 +54,8 @@ trailing the requirement names.
 
 `auditStanding()` walks the tree, counts rows by mark, and every tally on the
 page comes from it: the red counts on the degree row, the Courses bar and its
-legend, the two bars on the degree and program rows, and both halves of the
-Official / Planned toggle. The bar cannot say anything the audit does not.
+legend, the bar on the degree row, and both halves of the Official / Planned
+toggle. The bar cannot say anything the audit does not.
 
 Two rules make that count come out right. Additional checks — Residency and 120
 Total Credits — are `restated: true` and stepped over, because they re-list
@@ -90,14 +90,21 @@ does not say, so `EntryRows` carries it down as `stem`.
 **The mark** is a 24px square: a ground and a glyph, and that is the whole
 vocabulary. Taken is a green check, in progress a green clock, registered an
 orange calendar, planned an amber outlined check, remaining an empty red box,
-and optional a grey box struck through — a rule rather than a box to fill. A
-program's milestone mark carries a flag as well, which is why the box is
-`min-w-6` and not `size-6`.
+and optional a grey box struck through — a rule rather than a box to fill.
 
 **The row** differs only in its ground: a requirement sits on grey, a course on
-white with a border, and the degree and its program on nothing at all, because
-they head the tree rather than hang off it. An elective seat leaves the code
-column empty — the requirement is settled and which course answers it is not.
+white with a border, and the degree on nothing at all, because it heads the tree
+rather than hangs off it. An elective seat leaves the code column empty — the
+requirement is settled and which course answers it is not.
+
+There are two levels, not three. A row naming the concentration used to sit
+between the degree and its requirements, and it said nothing the rows under it
+do not: the concentration is already there in *Complete your declared
+concentration → Finance*, with its core, its advanced list and its electives.
+So the degree heads the tree directly and took the two things that row was
+carrying for it — which catalogue version it is being read against, and the
+PGPA. `AuditGroup.level` is `degree | requirement`, and everything under the
+degree is a requirement.
 
 ## Icons
 

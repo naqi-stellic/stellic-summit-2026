@@ -42,21 +42,19 @@ export type AuditCourse = {
 }
 
 /** A requirement: a named thing the degree asks for, holding courses or
- *  further requirements. The degree and the program under it are the same
- *  shape — what changes is how the row is drawn, which is `level`. */
+ *  further requirements. The degree is the same shape — what changes is how
+ *  the row is drawn, which is `level`. */
 export type AuditGroup = {
   kind: "group"
   id: string
   name: string
-  /** `degree` and `program` head the tree; every other requirement is a
-   *  `requirement` and carries a ground. */
-  level: "degree" | "program" | "requirement"
+  /** The degree heads the tree and carries no ground; everything under it is
+   *  a `requirement` and sits on one. */
+  level: "degree" | "requirement"
   mark?: AuditMark
   /** The red counts on the degree row: requirements outstanding, then
    *  milestones. A flag marks the second. */
   counts?: { requirements: number; milestones: number }
-  /** The program row's second mark: its milestone, already signed off. */
-  milestoneMark?: AuditMark
   subtitle?: string
   /** The grey tags after the name: "fulfill all", "at least 12 credits". */
   tags?: string[]
@@ -67,8 +65,8 @@ export type AuditGroup = {
    *  every row says the same thing — so it states how many it wants and keeps
    *  them behind the chevron until someone asks. */
   collapsed?: boolean
-  /** The four shares the degree and the program rows read at a glance. Filled
-   *  in from `auditStanding()` rather than written down. */
+  /** The four shares the degree row reads at a glance. Filled in from
+   *  `auditStanding()` rather than written down. */
   bar?: { taken: number; inProgress: number; claimed: number; total: number }
   pgpa?: string
   children: AuditEntry[]
@@ -139,208 +137,197 @@ const TREE: AuditGroup = {
   id: "bsba",
   level: "degree",
   name: DEGREE.program,
+  subtitle: "Applied Version: Fall 2026 to present · Catalog Term: Fall 2026",
   tags: [`fulfill all | at least ${DEGREE.credits} credits`],
+  pgpa: "PGPA 3.38",
   children: [
     {
       kind: "group",
-      id: "finance",
-      level: "program",
-      name: `${DEGREE.concentration} Concentration`,
-      mark: "remaining",
-      milestoneMark: "taken",
-      subtitle: "Applied Version: Fall 2026 to present · Catalog Term: Fall 2026",
+      id: "general-education",
+      level: "requirement",
+      name: "General Education",
+      mark: "in-progress",
       tags: ["fulfill all"],
-      pgpa: "PGPA 3.38",
+      children: [
+        course("ENGL 101", "Composition I", "taken", "Taken in Fall '26", "A-"),
+        course("HIST 110", "World Civilizations", "taken", "Taken in Fall '26", "B+"),
+        course("PSYC 101", "Introduction to Psychology", "taken", "Taken in Fall '26", "A"),
+        course("ART 105", "Visual Culture", "taken", "Taken in Spring '27", "B"),
+        course("COMM 230", "Public Speaking", "taken", "Taken in Spring '27", "A-"),
+        course("ENGL 210", "Advanced Composition", "remaining"),
+        course("PHIL 240", "Business Ethics", "remaining"),
+        course("HIST 205", "Modern World History", "remaining"),
+      ],
+    },
+    {
+      kind: "group",
+      id: "business-core",
+      level: "requirement",
+      name: "Business Core",
+      mark: "in-progress",
+      tags: ["fulfill all"],
+      children: [
+        course("BUS 101", "Introduction to Business", "taken", "Taken in Fall '26", "A"),
+        course("MATH 140", "Business Calculus", "taken", "Taken in Fall '26", "B"),
+        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
+        course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '27", "B+"),
+        course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '27", "A"),
+        course("ACCT 202", "Managerial Accounting", "in-progress", "In progress · Fall '27"),
+        course("ECON 202", "Principles of Macroeconomics", "in-progress", "In progress · Fall '27"),
+        course("STAT 210", "Business Statistics", "in-progress", "In progress · Fall '27"),
+        course("MKTG 201", "Principles of Marketing", "in-progress", "In progress · Fall '27"),
+        course("MGMT 210", "Principles of Management", "remaining"),
+        course("ACCT 310", "Intermediate Accounting I", "remaining"),
+        course("MIS 250", "Management Information Systems", "remaining"),
+        course("BLAW 301", "Business Law & Ethics", "remaining"),
+        course("OPS 320", "Operations & Supply Chain Management", "remaining"),
+        course("BUS 390", "Business Communication", "remaining"),
+      ],
+    },
+    {
+      kind: "group",
+      id: "declared-concentration",
+      level: "requirement",
+      name: "Complete your declared concentration",
+      mark: "in-progress",
+      tags: ["fulfill any"],
       children: [
         {
           kind: "group",
-          id: "general-education",
+          id: "finance-declared",
           level: "requirement",
-          name: "General Education",
+          name: "Finance",
           mark: "in-progress",
-          tags: ["fulfill all"],
-          children: [
-            course("ENGL 101", "Composition I", "taken", "Taken in Fall '26", "A-"),
-            course("HIST 110", "World Civilizations", "taken", "Taken in Fall '26", "B+"),
-            course("PSYC 101", "Introduction to Psychology", "taken", "Taken in Fall '26", "A"),
-            course("ART 105", "Visual Culture", "taken", "Taken in Spring '27", "B"),
-            course("COMM 230", "Public Speaking", "taken", "Taken in Spring '27", "A-"),
-            course("ENGL 210", "Advanced Composition", "remaining"),
-            course("PHIL 240", "Business Ethics", "remaining"),
-            course("HIST 205", "Modern World History", "remaining"),
-          ],
-        },
-        {
-          kind: "group",
-          id: "business-core",
-          level: "requirement",
-          name: "Business Core",
-          mark: "in-progress",
-          tags: ["fulfill all"],
-          children: [
-            course("BUS 101", "Introduction to Business", "taken", "Taken in Fall '26", "A"),
-            course("MATH 140", "Business Calculus", "taken", "Taken in Fall '26", "B"),
-            course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
-            course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '27", "B+"),
-            course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '27", "A"),
-            course("ACCT 202", "Managerial Accounting", "in-progress", "In progress · Fall '27"),
-            course("ECON 202", "Principles of Macroeconomics", "in-progress", "In progress · Fall '27"),
-            course("STAT 210", "Business Statistics", "in-progress", "In progress · Fall '27"),
-            course("MKTG 201", "Principles of Marketing", "in-progress", "In progress · Fall '27"),
-            course("MGMT 210", "Principles of Management", "remaining"),
-            course("ACCT 310", "Intermediate Accounting I", "remaining"),
-            course("MIS 250", "Management Information Systems", "remaining"),
-            course("BLAW 301", "Business Law & Ethics", "remaining"),
-            course("OPS 320", "Operations & Supply Chain Management", "remaining"),
-            course("BUS 390", "Business Communication", "remaining"),
-          ],
-        },
-        {
-          kind: "group",
-          id: "declared-concentration",
-          level: "requirement",
-          name: "Complete your declared concentration",
-          mark: "in-progress",
-          tags: ["fulfill any"],
+          tags: ["declared · fulfill all"],
           children: [
             {
               kind: "group",
-              id: "finance-declared",
+              id: "finance-core",
               level: "requirement",
-              name: "Finance",
+              name: "Finance Core",
               mark: "in-progress",
-              tags: ["declared · fulfill all"],
+              tags: ["fulfill all"],
               children: [
-                {
-                  kind: "group",
-                  id: "finance-core",
-                  level: "requirement",
-                  name: "Finance Core",
-                  mark: "in-progress",
-                  tags: ["fulfill all"],
-                  children: [
-                    course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
-                    course(
-                      "FIN 340",
-                      "Investments & Portfolio Management",
-                      "registered",
-                      "Registered · Spring '28"
-                    ),
-                    course("ECON 310", "Money & Banking", "remaining"),
-                    course("FIN 350", "Financial Institutions & Markets", "remaining"),
-                    course("FIN 415", "Financial Modeling & Valuation", "remaining"),
-                    course("STAT 320", "Econometrics for Business", "remaining"),
-                  ],
-                },
-                {
-                  kind: "group",
-                  id: "finance-advanced",
-                  level: "requirement",
-                  name: "Finance Advanced",
-                  mark: "remaining",
-                  tags: ["at least 15 credits"],
-                  children: [
-                    course("FIN 420", "Derivatives & Risk Management", "remaining"),
-                    course("FIN 430", "International Finance", "remaining"),
-                    course("FIN 445", "Real Estate Finance", "remaining"),
-                    course("FIN 460", "Mergers & Acquisitions", "remaining"),
-                    course("FIN 470", "Fixed Income Analysis", "remaining"),
-                  ],
-                },
-                {
-                  kind: "group",
-                  id: "finance-electives",
-                  level: "requirement",
-                  name: "Finance Electives",
-                  mark: "planned",
-                  tags: ["at least 6 credits"],
-                  collapsed: true,
-                  children: [
-                    /* A seat, not a course: the requirement is settled and
-                       which course answers it is not, so the code column is
-                       empty until one is chosen. */
-                    course("", "Finance elective", "planned", "Planned · Spring '28"),
-                    course("", "Finance elective", "remaining"),
-                  ],
-                },
+                course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
+                course(
+                  "FIN 340",
+                  "Investments & Portfolio Management",
+                  "registered",
+                  "Registered · Spring '28"
+                ),
+                course("ECON 310", "Money & Banking", "remaining"),
+                course("FIN 350", "Financial Institutions & Markets", "remaining"),
+                course("FIN 415", "Financial Modeling & Valuation", "remaining"),
+                course("STAT 320", "Econometrics for Business", "remaining"),
               ],
             },
             {
               kind: "group",
-              id: "marketing",
+              id: "finance-advanced",
               level: "requirement",
-              name: "Marketing",
-              mark: "optional",
-              tags: ["not needed"],
-              children: [],
+              name: "Finance Advanced",
+              mark: "remaining",
+              tags: ["at least 15 credits"],
+              children: [
+                course("FIN 420", "Derivatives & Risk Management", "remaining"),
+                course("FIN 430", "International Finance", "remaining"),
+                course("FIN 445", "Real Estate Finance", "remaining"),
+                course("FIN 460", "Mergers & Acquisitions", "remaining"),
+                course("FIN 470", "Fixed Income Analysis", "remaining"),
+              ],
             },
             {
               kind: "group",
-              id: "operations",
+              id: "finance-electives",
               level: "requirement",
-              name: "Operations Management",
-              mark: "optional",
-              tags: ["not needed"],
-              children: [],
+              name: "Finance Electives",
+              mark: "planned",
+              tags: ["at least 6 credits"],
+              collapsed: true,
+              children: [
+                /* A seat, not a course: the requirement is settled and
+                   which course answers it is not, so the code column is
+                   empty until one is chosen. */
+                course("", "Finance elective", "planned", "Planned · Spring '28"),
+                course("", "Finance elective", "remaining"),
+              ],
             },
           ],
         },
         {
           kind: "group",
-          id: "open-electives",
+          id: "marketing",
           level: "requirement",
-          name: "Open Electives",
-          mark: "remaining",
-          tags: ["at least 9 credits"],
-          collapsed: true,
-          children: [
-            course("", "General elective", "remaining"),
-            course("", "General elective", "remaining"),
-            course("", "General elective", "remaining"),
-          ],
+          name: "Marketing",
+          mark: "optional",
+          tags: ["not needed"],
+          children: [],
         },
         {
           kind: "group",
-          id: "capstone",
+          id: "operations",
           level: "requirement",
-          name: "Capstone",
-          mark: "remaining",
-          tags: ["fulfill all · taken last"],
-          children: [course("BUS 495", "Strategic Management", "remaining")],
+          name: "Operations Management",
+          mark: "optional",
+          tags: ["not needed"],
+          children: [],
         },
-        {
-          kind: "group",
-          id: "residency",
-          level: "requirement",
-          name: "Complete 30 of the last 36 credits on the main campus",
-          mark: "in-progress",
-          restated: true,
-          tags: ["at least 30 credits", "Additional Check"],
-          children: [
-            course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
-            course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '27", "B+"),
-            course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '27", "A"),
-            course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
-          ],
-        },
-        {
-          kind: "group",
-          id: "total-credits",
-          level: "requirement",
-          name: `${DEGREE.credits} Total Credits`,
-          mark: "in-progress",
-          restated: true,
-          tags: [`at least ${DEGREE.credits} credits`, "Additional Check"],
-          children: [
-            course("BUS 101", "Introduction to Business", "taken", "Taken in Fall '26", "A"),
-            course("MATH 140", "Business Calculus", "taken", "Taken in Fall '26", "B"),
-            course("ENGL 101", "Composition I", "taken", "Taken in Fall '26", "A-"),
-            course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
-            course("COMM 230", "Public Speaking", "taken", "Taken in Spring '27", "A-"),
-            course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
-            course("FIN 340", "Investments & Portfolio Management", "registered", "Registered · Spring '28"),
-          ],
-        },
+      ],
+    },
+    {
+      kind: "group",
+      id: "open-electives",
+      level: "requirement",
+      name: "Open Electives",
+      mark: "remaining",
+      tags: ["at least 9 credits"],
+      collapsed: true,
+      children: [
+        course("", "General elective", "remaining"),
+        course("", "General elective", "remaining"),
+        course("", "General elective", "remaining"),
+      ],
+    },
+    {
+      kind: "group",
+      id: "capstone",
+      level: "requirement",
+      name: "Capstone",
+      mark: "remaining",
+      tags: ["fulfill all · taken last"],
+      children: [course("BUS 495", "Strategic Management", "remaining")],
+    },
+    {
+      kind: "group",
+      id: "residency",
+      level: "requirement",
+      name: "Complete 30 of the last 36 credits on the main campus",
+      mark: "in-progress",
+      restated: true,
+      tags: ["at least 30 credits", "Additional Check"],
+      children: [
+        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
+        course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '27", "B+"),
+        course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '27", "A"),
+        course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
+      ],
+    },
+    {
+      kind: "group",
+      id: "total-credits",
+      level: "requirement",
+      name: `${DEGREE.credits} Total Credits`,
+      mark: "in-progress",
+      restated: true,
+      tags: [`at least ${DEGREE.credits} credits`, "Additional Check"],
+      children: [
+        course("BUS 101", "Introduction to Business", "taken", "Taken in Fall '26", "A"),
+        course("MATH 140", "Business Calculus", "taken", "Taken in Fall '26", "B"),
+        course("ENGL 101", "Composition I", "taken", "Taken in Fall '26", "A-"),
+        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
+        course("COMM 230", "Public Speaking", "taken", "Taken in Spring '27", "A-"),
+        course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
+        course("FIN 340", "Investments & Portfolio Management", "registered", "Registered · Spring '28"),
       ],
     },
   ],
@@ -380,26 +367,18 @@ export function auditStanding(audit: AuditGroup) {
 
 const STANDING = auditStanding(TREE)
 
-const BAR = {
-  taken: STANDING.taken,
-  inProgress: STANDING.inProgress,
-  claimed: STANDING.claimed,
-  total: DEGREE.requirements,
-}
-
-/* The degree and the program both carry a bar, and with one program on the
-   plan they carry the same one — which is the truth here rather than a gap
-   worth inventing. */
 export const AUDIT: AuditGroup = {
   ...TREE,
-  bar: BAR,
+  bar: {
+    taken: STANDING.taken,
+    inProgress: STANDING.inProgress,
+    claimed: STANDING.claimed,
+    total: DEGREE.requirements,
+  },
   counts: {
     requirements: STANDING.remaining,
     milestones: DEGREE.milestones - DEGREE.milestonesDone,
   },
-  children: TREE.children.map((child) =>
-    child.kind === "group" ? { ...child, bar: BAR } : child
-  ),
 }
 
 export const OFFICIAL_PROGRESS = {

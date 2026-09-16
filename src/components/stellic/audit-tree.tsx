@@ -29,17 +29,16 @@ const MARK: Record<AuditMark, { ground: string; icon?: IconName; glyph?: number 
   optional: { ground: "border border-gray-80" },
 }
 
-export function AuditMarkIcon({ mark, milestone }: { mark: AuditMark; milestone?: boolean }) {
+export function AuditMarkIcon({ mark }: { mark: AuditMark }) {
   const { ground, icon, glyph } = MARK[mark]
 
   return (
     <span
       className={cn(
-        "flex h-6 min-w-6 shrink-0 items-center justify-center gap-0.5 rounded-md p-0.5",
+        "flex size-6 shrink-0 items-center justify-center rounded-md p-0.5",
         ground
       )}
     >
-      {milestone && <Icon name="outlined-flag" size={16} />}
       {icon && glyph && <Icon name={icon} size={glyph} />}
       {mark === "optional" && <span className="h-px w-2.5 rounded-full bg-gray-80" />}
     </span>
@@ -186,37 +185,23 @@ function GroupRow({
   open?: boolean
   onToggle?: () => void
 }) {
+  /* The degree heads the tree rather than hanging off it, so it is drawn on
+     nothing: no ground, no border, and the counts in place of a mark. What it
+     is for — which catalogue it is being read against, and what it has earned
+     so far — sits under the name and beside the bar. */
   if (group.level === "degree") {
     return (
       <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md py-2">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           {group.counts && (
             <>
               <CountMark count={group.counts.requirements} />
               <CountMark count={group.counts.milestones} milestone />
             </>
           )}
-          <p className="text-caption-lg font-semibold">{group.name}</p>
-          <Icon name="expand-more" size={10} className="shrink-0" />
-          <Icon name="more-horiz" size={14} className="shrink-0" />
-          <Tags tags={group.tags} small />
-        </div>
-        {group.bar && <AuditBar bar={group.bar} />}
-      </div>
-    )
-  }
-
-  if (group.level === "program") {
-    return (
-      <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md pl-2">
-        {/* The marks stand beside the whole block, so the line under the name
-            starts where the name does rather than under them. */}
-        <div className="flex min-w-0 items-center gap-2">
-          {group.mark && <AuditMarkIcon mark={group.mark} />}
-          {group.milestoneMark && <AuditMarkIcon mark={group.milestoneMark} milestone />}
           <div className="flex min-w-0 flex-col justify-center gap-[3px]">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <p className="text-body-md font-semibold">{group.name}</p>
+              <p className="text-caption-lg font-semibold">{group.name}</p>
               <Icon name="expand-more" size={10} className="shrink-0" />
               <Icon name="more-horiz" size={14} className="shrink-0" />
               <Tags tags={group.tags} small />
