@@ -14,8 +14,9 @@ plan off the plan header, Generate Term off a term's, and the assistant's
 — it is the shell's, not the generator's.
 
 Generate Schedule stays, because the scheduler is already a product: it appears
-on a term reading its published week and nowhere else — not on the canvas, not
-on a term without a schedule — and it opens nothing. Scenery, deliberately.
+on any term whose week is published, in either view, and nowhere else — not on
+the canvas, and not on a term whose calendar is still disabled. It opens
+nothing. Scenery, deliberately.
 
 Everything else it has, including the requirements panel behind the sidebar
 button, dragging out of it, and the incoming credits above the first year, is

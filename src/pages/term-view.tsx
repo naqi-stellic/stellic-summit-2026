@@ -155,10 +155,11 @@ export function TermView({
           },
         ]
       : /* A prototype without the generators still has the scheduler, which is
-           already a product — but only where a schedule could be generated, so
-           it appears on a term reading its week and nowhere else. It opens
+           already a product — but only where there is a schedule to generate
+           against, so it is there for a term whose week is out, in either view,
+           and absent from one whose calendar is still disabled. It opens
            nothing here. */
-        mode === "calendar" && term.scheduled
+        term.scheduled
         ? [{ label: "Generate Schedule", icon: "design-services" as const }]
         : []),
     {
