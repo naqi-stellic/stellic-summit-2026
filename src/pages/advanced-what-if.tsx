@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { AppShell } from "@/components/layout/app-shell"
 import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
+import { DiscoverPrograms } from "@/components/stellic/discover-programs"
 import {
   AuditControls,
   NetworkRow,
@@ -61,6 +62,13 @@ export function AdvancedWhatIf() {
                 blurb={UNMATCHED.blurb}
                 courses={UNMATCHED.courses}
               />
+              {/* The foot of the audit, and the way into the what-if. Stood
+                  off the card's edge by as much as the degree row is, so it
+                  reads as the last thing in the tree rather than a strip
+                  glued to the card. */}
+              <div className="pl-5">
+                <DiscoverPrograms />
+              </div>
             </section>
           ) : (
             <section className="rounded-md bg-card p-6 text-body-md text-gray-80 shadow-card">

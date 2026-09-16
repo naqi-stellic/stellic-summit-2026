@@ -118,6 +118,28 @@ carries a stopwatch. Those are traced from the frame's own exports into
 the icon set was. Everything in the tree is an outline — a solid flag or a solid
 clock reads as a different state at 16px.
 
+## Discover other programs
+
+Figma: [`3972:24241`](https://www.figma.com/design/prhu0x6AaQF2AVtLBFoDq3/Audit-Profile-Planner?node-id=3972-24241).
+
+The banner at the foot of the audit, under the courses the degree had no use
+for, which is where the question occurs to you: this degree is accounted for,
+so what would another one make of the same transcript. It is the way into the
+what-if, and the first piece of that feature to land —
+`src/components/stellic/discover-programs.tsx`, which is where the rest of it
+will grow.
+
+That frame is a JPEG pasted onto the canvas rather than a drawn component, so
+there is nothing to read tokens off. It is rebuilt from the design system
+instead, and the two numbers worth knowing were measured off the image: the
+banner is 82px tall on 32/20 padding, and its rule is `primary-5` rather than
+the info `Alert`'s `primary-100` — sampling the reference puts it around
+`#cce3fc`, and in any case a plan's banner is telling you something where this
+one is offering, and a dark edge round an offer reads as a warning.
+
+It is a `button`, not an `Alert`: `role="alert"` would have a screen reader
+announce it on arrival, and nothing here has happened.
+
 ## What is drawn and not wired
 
 Everything on the page is the frame's, and almost none of it acts yet — there is
@@ -128,7 +150,8 @@ one screen, so there is nowhere for anything to go:
 - Official / Planned switches and lights up, and both read the same tree, since
   there is no second audit to compute yet;
 - the scope select, the recompute button, the unmatched filter, Request to
-  Review Plan and Actions are all drawn and inert.
+  Review Plan and Actions are all drawn and inert;
+- Discover other programs takes an `onOpen` and has not been given one yet.
 
 A requirement's chevron does work: it folds the group. `collapsed: true` in the
 data says which groups the page opens folded — the two elective groups, because
