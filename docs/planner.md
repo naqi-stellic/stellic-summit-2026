@@ -14,7 +14,8 @@ the assistant's "Generate with Assistant" pill off the panel. The assistant's
 own button stays — it is the shell's, not the generator's.
 
 Everything else it has, including the requirements panel behind the sidebar
-button and dragging out of it, is the plan generator's.
+button, dragging out of it, and the incoming credits above the first year, is
+the plan generator's.
 
 The plan itself is the same `INITIAL_YEARS` the plan generator opens on, so the
 two prototypes start from the same place and can be read against each other.

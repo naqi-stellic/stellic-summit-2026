@@ -49,14 +49,21 @@ real in the plan without changing the forty or the hundred and twenty. They fini
 credits), are partway through Fall 2027, have started planning Spring 2028, and
 the plan runs out to 2029-2030. Courses are 3 credits each.
 
-Above the first year sits Pre-Enrollment
-([`1393:60657`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-60657)):
-two terms of dual enrolment taken before the degree began, four courses in all,
-folded away like the year below it. Those credits are extra rather than
-requirements — `COMPLETED` is still the 2026-2027 year alone — so the forty and
-the hundred and twenty are untouched and the generator has the same work to do.
-Make them count instead by folding them into `COMPLETED` and striking four
-entries off `REMAINING_REQUIREMENTS`.
+Above the first year sits Incoming Credits
+([`1393:60657`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-60657)
+for the shape it started as): what the student arrived with, folded away like
+the year below it. Three cards in a row — Transfer Credits, Exam Credits,
+Pre-Year 1 — each naming where the credit came from, what it earned, and its
+courses as rows. It is not a year and it holds no terms: none of this was taken
+on a timetable this plan knows about, so `src/data/incoming.ts` keeps it as
+what it is rather than as two invented semesters.
+
+The total is said twice — beside the heading and again above the cards, where
+"View in Progress" leads to the audit. Those credits are extra rather than
+requirements, so the degree's forty and its hundred and twenty are untouched
+and the generator has the same work to do. Make them count instead by folding
+them into `COMPLETED` and striking the matching entries off
+`REMAINING_REQUIREMENTS`.
 
 Spring 2028 holds one course and one seat: FIN 340, whose class has been chosen
 and which is ready to register, and a Finance elective with no course against

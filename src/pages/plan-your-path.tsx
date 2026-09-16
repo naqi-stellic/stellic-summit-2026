@@ -19,6 +19,7 @@ import { AppShell } from "@/components/layout/app-shell"
 import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { MetadataProvider } from "@/components/stellic/course-metadata"
 import { GenerateTermPanel } from "@/components/stellic/generate-term-panel"
+import { IncomingCredits, INCOMING_LABEL } from "@/components/stellic/incoming-credits"
 import { PlaceholderPanel } from "@/components/stellic/placeholder-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
 import {
@@ -76,7 +77,6 @@ import {
 import {
   COMPLETED,
   COMPLETED_YEAR,
-  PRE_ENROLLMENT,
   addTerm,
   INITIAL_YEARS,
   METADATA_DEFAULT,
@@ -148,9 +148,7 @@ function yearTabs(
 
 /** The year a term belongs to, for the filter above it. */
 function yearOf(years: Year[], termId: string): string | undefined {
-  return [...years, COMPLETED_YEAR, PRE_ENROLLMENT].find((year) =>
-    year.terms.some((t) => t.id === termId)
-  )?.label
+  return [...years, COMPLETED_YEAR].find((year) => year.terms.some((t) => t.id === termId))?.label
 }
 
 /* Long enough for the last staggered card to finish settling (14 × 35ms of
@@ -277,10 +275,7 @@ export function PlanYourPath({
    * back does not cost the plan its scroll position or its draft. */
   const [openTermId, setOpenTermId] = useState<string | null>(null)
   /* What is finished comes folded away; the rest come open. */
-  const [collapsed, setCollapsed] = useState<string[]>([
-    PRE_ENROLLMENT.label,
-    COMPLETED_YEAR.label,
-  ])
+  const [collapsed, setCollapsed] = useState<string[]>([INCOMING_LABEL, COMPLETED_YEAR.label])
   /* Which details the cards are showing. Plan details owns this, and every
      card in the plan — canvas or term — answers to the same list. */
   const [metadata, setMetadata] = useState<MetadataField[]>(METADATA_DEFAULT)
@@ -535,7 +530,7 @@ export function PlanYourPath({
   }
 
   const openTerm: Term | null = openTermId
-    ? (findTerm(shown, openTermId) ?? findTerm([COMPLETED_YEAR, PRE_ENROLLMENT], openTermId))
+    ? (findTerm(shown, openTermId) ?? findTerm([COMPLETED_YEAR], openTermId))
     : null
 
   /* A term opens inside whatever is on screen: if a draft is up, the frame,
@@ -607,6 +602,12 @@ export function PlanYourPath({
 
   function cancelReview(id: string) {
     setReviews((current) => current.filter((review) => review.id !== id))
+  }
+
+  function toggleCollapsed(label: string) {
+    setCollapsed((current) =>
+      current.includes(label) ? current.filter((l) => l !== label) : [...current, label]
+    )
   }
 
   function toggleMetadata(id: string) {
@@ -807,18 +808,17 @@ export function PlanYourPath({
           {/* Keyed on the option so switching one replays the entrances rather
               than swapping the cards in place. */}
           <div key={draft ? `draft-${streamId}` : "plan"} className="contents">
-            {[PRE_ENROLLMENT, COMPLETED_YEAR, ...shown].map((year) => (
+            <IncomingCredits
+              collapsed={collapsed.includes(INCOMING_LABEL)}
+              onToggleCollapse={() => toggleCollapsed(INCOMING_LABEL)}
+            />
+
+            {[COMPLETED_YEAR, ...shown].map((year) => (
               <YearSection
                 key={year.label}
                 year={year}
                 collapsed={collapsed.includes(year.label)}
-                onToggleCollapse={() =>
-                  setCollapsed((current) =>
-                    current.includes(year.label)
-                      ? current.filter((label) => label !== year.label)
-                      : [...current, year.label]
-                  )
-                }
+                onToggleCollapse={() => toggleCollapsed(year.label)}
                 settling={accepting}
                 revealed={revealed}
                 drop={drop}
