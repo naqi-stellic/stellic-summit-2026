@@ -17,7 +17,7 @@ const SECTIONS = [
   {
     name: "Team Plan",
     prototypes: [
-      { href: "/planner.html", name: "Planner" },
+      { href: "/planner.html", name: "New Planner" },
       { href: "/generator.html", name: "Plan Generator" },
     ],
   },
