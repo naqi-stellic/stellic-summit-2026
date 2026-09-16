@@ -17,7 +17,12 @@ import {
   type PrereqOption,
   type PrereqState,
 } from "@/data/course-detail"
-import type { Term } from "@/data/plan"
+import {
+  CREDIT_GROUP_LABEL,
+  creditGroup,
+  type PlannedCourse,
+  type Term,
+} from "@/data/plan"
 
 /* A course opened on its own, before it is anywhere in the plan: what it is,
  * which classes are on offer, and everything the audit knows about where it
@@ -65,13 +70,15 @@ function Trail({ prefix, connector }: { prefix: boolean[]; connector: "tee" | "e
         </span>
       ))}
       <span className="relative w-[18px] shrink-0">
-        <span
-          className={cn(
-            "absolute left-2 w-px bg-gray-40",
-            connector === "tee" ? "top-0 bottom-0" : "top-0 h-[15px]"
-          )}
-        />
-        <span className="absolute top-[15px] left-2 h-px w-[10px] bg-gray-40" />
+        {connector === "tee" ? (
+          <>
+            <span className="absolute inset-y-0 left-2 w-px bg-gray-40" />
+            <span className="absolute top-[15px] left-2 h-px w-[10px] bg-gray-40" />
+          </>
+        ) : (
+          /* The last child turns the corner rather than cutting it square. */
+          <span className="absolute top-0 left-2 h-[15px] w-[10px] rounded-bl-[4px] border-b border-l border-gray-40" />
+        )}
       </span>
     </span>
   )
@@ -101,9 +108,7 @@ function PrereqRow({ row }: { row: Row }) {
             {node.note && <span className="text-label-md text-gray-80">{node.note}</span>}
           </>
         ) : (
-          <span className={cn("min-w-0 text-body-md text-gray-100", group && "pl-[26px]")}>
-            {node.label}
-          </span>
+          <span className="min-w-0 text-body-md text-gray-100">{node.label}</span>
         )}
         {node.meta && (
           <span
@@ -173,7 +178,10 @@ function Option({ option }: { option: PrereqOption }) {
       )}
 
       {open && (
-        <div className="flex flex-col pt-0.5">
+        /* 7px puts the first stem under the centre of the option's mark: 6px of
+           the head's padding plus half of its 18px square, less the 8px the
+           stem already sits in from the cell's edge. */
+        <div className="flex flex-col pt-0.5 pl-[7px]">
           {rows.map((row, i) => (
             <PrereqRow key={i} row={row} />
           ))}
@@ -246,17 +254,41 @@ function Picker({
   )
 }
 
+/** One of the plan's own choices about a course, with the way to change it. */
+function Property({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <span className="text-body-md text-gray-80">{label}</span>
+      <span className="flex min-w-0 items-center gap-2">
+        <span className="min-w-0 truncate text-body-md text-gray-100">{value}</span>
+        <a
+          href="#"
+          className="shrink-0 text-body-md text-gray-80 underline [text-underline-position:from-font]"
+        >
+          edit
+        </a>
+      </span>
+    </div>
+  )
+}
+
 export function CoursePanel({
   entry,
   terms,
+  planned,
   onAdd,
+  onRemove,
   onBack,
   onClose,
 }: {
   entry: CatalogEntry
   /** Where it could be planned: the terms that would take it. */
   terms: Term[]
+  /** Opened from the plan rather than from the list: the course as it sits in
+   *  a term, with the choices made about it and the class it is in. */
+  planned?: { course: PlannedCourse; term: Term }
   onAdd: (termId: string) => void
+  onRemove?: () => void
   onBack: () => void
   onClose: () => void
 }) {
@@ -264,7 +296,7 @@ export function CoursePanel({
   const [campus, setCampus] = useState(detail.campus)
   const [termId, setTermId] = useState(terms[0]?.id ?? "")
   const [more, setMore] = useState(false)
-  const term = terms.find((t) => t.id === termId)
+  const term = planned?.term ?? terms.find((t) => t.id === termId)
 
   return (
     <aside className="flex h-full w-full flex-col gap-4 overflow-x-clip overflow-y-auto bg-background p-6 pb-28">
@@ -275,7 +307,9 @@ export function CoursePanel({
           className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-body-md text-gray-80"
         >
           <Icon name="chevron-left" size={14} className="shrink-0" />
-          <span className="min-w-0 truncate text-left">Back to remaining courses</span>
+          <span className="min-w-0 truncate text-left">
+            {planned ? `Back to ${planned.term.name}` : "Back to remaining courses"}
+          </span>
         </button>
         <button
           type="button"
@@ -316,38 +350,86 @@ export function CoursePanel({
         </div>
 
         <div className="flex w-full flex-col gap-6 p-6">
-          {/* Where and when it would be taken, and the way to put it there. */}
-          <div className="flex w-full flex-wrap items-end gap-4">
-            <Picker label="Campus" value={campus} options={["Main", "Downtown"]} onChange={setCampus} />
-            <Picker
-              label="Term"
-              value={term?.name ?? "No term"}
-              options={terms.map((t) => t.name)}
-              onChange={(name) => setTermId(terms.find((t) => t.name === name)?.id ?? termId)}
-            />
-            <Button
-              variant="primary"
-              disabled={!term}
-              onClick={() => term && onAdd(term.id)}
-              className="shrink-0"
-            >
-              Add to Plan
-            </Button>
-          </div>
+          {planned ? (
+            <>
+              {/* The term it is in, and what can be done to it there. */}
+              <div className="flex w-full flex-wrap items-center gap-2">
+                <span className="text-caption-lg font-semibold text-gray-100">
+                  {planned.term.name}
+                </span>
+                <Badge variant="warning">{CREDIT_GROUP_LABEL[creditGroup(planned.term)]}</Badge>
+                <span className="ml-auto flex shrink-0 items-center gap-2">
+                  <Button size="sm">
+                    <Icon name="sticky-note-2" size={16} />
+                    Comment
+                  </Button>
+                  <Button size="sm" onClick={onRemove}>
+                    <Icon name="close" size={16} />
+                    Remove
+                  </Button>
+                </span>
+              </div>
+
+              {/* What the plan chose about it, each changeable on its own. */}
+              <div className="grid w-full grid-cols-2 gap-4 @sm:grid-cols-3">
+                <Property label="Campus" value={planned.course.campus ?? "Main"} />
+                <Property label="Topic" value={planned.course.topic ?? "General"} />
+                <Property label="Sub-term" value={planned.course.subTerm ?? "Full Term"} />
+                <Property label="Level" value="Undergraduate" />
+                <Property label="Units" value={String(planned.course.credits)} />
+                <Property label="Grading Option" value={planned.course.gradeOption ?? "Graded"} />
+              </div>
+            </>
+          ) : (
+            /* Where and when it would be taken, and the way to put it there. */
+            <div className="flex w-full flex-wrap items-end gap-4">
+              <Picker
+                label="Campus"
+                value={campus}
+                options={["Main", "Downtown"]}
+                onChange={setCampus}
+              />
+              <Picker
+                label="Term"
+                value={term?.name ?? "No term"}
+                options={terms.map((t) => t.name)}
+                onChange={(name) => setTermId(terms.find((t) => t.name === name)?.id ?? termId)}
+              />
+              <Button
+                variant="primary"
+                disabled={!term}
+                onClick={() => term && onAdd(term.id)}
+                className="shrink-0"
+              >
+                Add to Plan
+              </Button>
+            </div>
+          )}
 
           <Section title={`Sections (${detail.sections.length})`}>
             <div className="flex w-full flex-col gap-2">
-              {detail.sections.map((section) => (
+              {detail.sections.map((section) => {
+                /* The one the student is in is marked rather than offered. */
+                const chosen = planned?.course.section === section.code
+                return (
                 <div
                   key={section.code}
-                  className="flex w-full items-stretch rounded-md border border-gray-40 bg-card"
+                  className={cn(
+                    "flex w-full items-stretch rounded-md border bg-card",
+                    chosen ? "border-primary-50 bg-primary-0/40" : "border-gray-40"
+                  )}
                 >
                   <button
                     type="button"
-                    aria-label={`Add ${section.code} to plan`}
-                    className="flex cursor-pointer items-center border-r border-gray-40 px-3 text-gray-100 hover:bg-gray-5"
+                    aria-label={
+                      chosen ? `${section.code} is your class` : `Add ${section.code} to plan`
+                    }
+                    className={cn(
+                      "flex cursor-pointer items-center border-r px-3 hover:bg-gray-5",
+                      chosen ? "border-primary-50 text-primary-50" : "border-gray-40 text-gray-100"
+                    )}
                   >
-                    <Icon name="add" size={16} />
+                    <Icon name={chosen ? "check" : "add"} size={16} />
                   </button>
                   <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 p-3">
                     <span className="w-[50px] shrink-0 text-body-md font-semibold text-gray-100">
@@ -364,7 +446,8 @@ export function CoursePanel({
                     <span className="shrink-0 text-body-md text-success-100">{section.seats}</span>
                   </div>
                 </div>
-              ))}
+                )
+              })}
 
               <p className="flex w-full items-center gap-3 rounded-md border border-gray-40 bg-card p-3 text-body-md text-gray-80">
                 <Icon name="unfold-more" size={16} className="shrink-0 text-gray-100" />

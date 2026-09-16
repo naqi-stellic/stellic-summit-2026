@@ -60,10 +60,12 @@ function CourseCard({
   course,
   term,
   selectable,
+  onOpen,
 }: {
   course: PlannedCourse
   term: Term
   selectable: boolean
+  onOpen?: () => void
 }) {
   const needsReview = courseStatus(course, term) === "needs review"
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
@@ -79,7 +81,7 @@ function CourseCard({
         aria-hidden="true"
         className={cn("w-1 shrink-0", course.accent ? ACCENT[course.accent] : "bg-gray-40")}
       />
-      <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 p-3">
+      <label onClick={onOpen} className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 p-3">
         {/* A proposed class carries its mark; one you can still choose to
             register carries a tick. A term that is neither — already under way —
             has nothing to offer here. */}
@@ -169,10 +171,12 @@ function Sidebar({
   term,
   addable,
   onAddCourse,
+  onOpenCourse,
 }: {
   term: Term
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  onOpenCourse?: (courseId: string) => void
 }) {
   const credits = termCredits(term)
   const selectable = term.alert != null
@@ -217,7 +221,13 @@ function Sidebar({
           course.placeholder ? (
             <HeldCard key={course.id} course={course} />
           ) : (
-            <CourseCard key={course.id} course={course} term={term} selectable={selectable} />
+            <CourseCard
+              key={course.id}
+              course={course}
+              term={term}
+              selectable={selectable}
+              onOpen={onOpenCourse && (() => onOpenCourse(course.id))}
+            />
           )
         )}
       </div>
@@ -469,12 +479,15 @@ export function TermCalendar({
   compare = true,
   addable,
   onAddCourse,
+  onOpenCourse,
 }: {
   term: Term
   compare?: boolean
   /** What the plus offers, and what a requirement dropped here becomes. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  /** Opens one of the term's courses on its own. */
+  onOpenCourse?: (courseId: string) => void
 }) {
   /* The same droppable the planner's card registers, under the same id. */
   const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
@@ -492,7 +505,12 @@ export function TermCalendar({
     >
       {/* Side by side when there is room for both; stacked when there is not. */}
       <div className="flex w-full flex-col @3xl/term:flex-row">
-        <Sidebar term={term} addable={addable} onAddCourse={onAddCourse} />
+        <Sidebar
+          term={term}
+          addable={addable}
+          onAddCourse={onAddCourse}
+          onOpenCourse={onOpenCourse}
+        />
         <span
           aria-hidden="true"
           className="shrink-0 bg-gray-40 max-@3xl/term:h-px @3xl/term:w-px"

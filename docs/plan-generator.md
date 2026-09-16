@@ -221,10 +221,20 @@ reads the same every time it is opened. The plan has no data about a course
 nobody has taken, and inventing it per render would make the panel lie
 differently each time.
 
+A course already in the plan opens on the same panel, from its row on the
+canvas or in a term view
+([`1:13691`](https://www.figma.com/design/h39YRs9jNEWO4JLmKrh5sh/Course-Sidebar-2.0?node-id=1-13691)).
+What changes is the top of the card: the term holding it with Comment and
+Remove, then the plan's own choices about it — campus, topic, sub-term, level,
+units, grading — each with an edit beside it, and the class the student is in
+ticked and tinted among the sections. Everything below is the same, including
+the prerequisite tree, which is the new design rather than the one in that
+frame.
+
 Add to Plan does what it says — the course lands in the term the picker names
-and leaves the remaining list. The section rows' pluses and the bookmark are
-drawn but not wired, and a nested group inside an option cannot be folded away
-on its own, only the option can.
+and leaves the remaining list — and Remove takes a planned one out. The section
+rows' pluses, the bookmark and the edits are drawn but not wired, and a nested
+group inside an option cannot be folded away on its own, only the option can.
 
 ## A seat on its own
 

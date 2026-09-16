@@ -91,10 +91,13 @@ function CourseRow({
   course,
   term,
   selectable,
+  onOpen,
 }: {
   course: PlannedCourse
   term: Term
   selectable: boolean
+  /** Opens the course on its own. */
+  onOpen?: () => void
 }) {
   const status = courseStatus(course, term)
   const held = course.placeholder
@@ -116,7 +119,13 @@ function CourseRow({
         )}
       >
         <Accent course={course} />
-        <div className="flex min-w-0 flex-1 items-center gap-4 pr-4 pl-6">
+        <div
+          onClick={onOpen}
+          className={cn(
+            "flex min-w-0 flex-1 items-center gap-4 pr-4 pl-6",
+            onOpen && "cursor-pointer"
+          )}
+        >
           <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-80" />
           {/* Registration is what the ticks are for: choosing which of these
               classes to put through. A term not open for it has nothing to
@@ -201,11 +210,14 @@ export function TermList({
   term,
   addable,
   onAddCourse,
+  onOpenCourse,
 }: {
   term: Term
   /** What the plus can offer, and what a requirement dropped here becomes. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  /** Opens one of the term's courses on its own. */
+  onOpenCourse?: (courseId: string) => void
 }) {
   const credits = termCredits(term)
   const selectable = term.alert != null
@@ -262,7 +274,13 @@ export function TermList({
             </div>
 
             {term.courses.map((course) => (
-              <CourseRow key={course.id} course={course} term={term} selectable={selectable} />
+              <CourseRow
+                key={course.id}
+                course={course}
+                term={term}
+                selectable={selectable}
+                onOpen={onOpenCourse && (() => onOpenCourse(course.id))}
+              />
             ))}
           </div>
         </div>

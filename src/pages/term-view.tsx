@@ -70,6 +70,8 @@ function ActionsAlert({
   /** What can be planned into this term, and what to do when one is. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  /** Opens one of the term's courses on its own, beside the term. */
+  onOpenCourse?: (courseId: string) => void
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -99,6 +101,7 @@ export function TermView({
   sidebar,
   addable,
   onAddCourse,
+  onOpenCourse,
   compare = true,
 }: {
   term: Term
@@ -123,6 +126,8 @@ export function TermView({
   /** What can be planned into this term, and what to do when one is. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  /** Opens one of the term's courses on its own, beside the term. */
+  onOpenCourse?: (courseId: string) => void
   /** While a draft is up: show what the term already held alongside what is
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
@@ -223,9 +228,15 @@ export function TermView({
           compare={compare}
           addable={addable}
           onAddCourse={onAddCourse}
+          onOpenCourse={onOpenCourse}
         />
       ) : (
-        <TermList term={term} addable={addable} onAddCourse={onAddCourse} />
+        <TermList
+          term={term}
+          addable={addable}
+          onAddCourse={onAddCourse}
+          onOpenCourse={onOpenCourse}
+        />
       )}
     </main>
   )

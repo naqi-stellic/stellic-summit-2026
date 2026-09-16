@@ -297,6 +297,8 @@ export function PlanYourPath({
   /* A course from the remaining list, opened on its own before it is anywhere
      in the plan. */
   const [openCourse, setOpenCourse] = useState<number | null>(null)
+  /* A course already in the plan, opened on its own. */
+  const [openPlanned, setOpenPlanned] = useState<string | null>(null)
   /* The held seat opened on its own, and whether it opened on the courses that
      could fill it. */
   const [openSeat, setOpenSeat] = useState<{ id: string; view: "detail" | "search" } | null>(null)
@@ -353,6 +355,8 @@ export function PlanYourPath({
   const standing = planStanding(years)
   /* The course from the remaining list that is open, if it is still on it. */
   const course = requirements.find((r) => r.index === openCourse)
+  /* Or one already planned, which brings its term with it. */
+  const plannedOpen = openPlanned ? findCourse(shown, openPlanned) : null
   /* Where a course opened like that could be put: every term that takes one. */
   const plannableTerms = shown.flatMap((year) => year.terms.filter((term) => !term.locked))
   /* The seat whose panel is open, if it is still in the plan. */
@@ -605,6 +609,16 @@ export function PlanYourPath({
 
   function openSeatPanel(courseId: string, view: "detail" | "search") {
     setOpenSeat({ id: courseId, view })
+    setOpenPlanned(null)
+    setReqsOpen(false)
+    setReviewPanel(false)
+  }
+
+  /* A course already in the plan, opened beside it. */
+  function openPlannedPanel(courseId: string) {
+    setOpenPlanned(courseId)
+    setOpenSeat(null)
+    setOpenCourse(null)
     setReqsOpen(false)
     setReviewPanel(false)
   }
@@ -717,6 +731,25 @@ export function PlanYourPath({
             onClose={() => setOpenSeat(null)}
           />
         )) ||
+        (plannedOpen && (
+          <CoursePanel
+            key={plannedOpen.course.id}
+            entry={{
+              code: plannedOpen.course.code,
+              name: plannedOpen.course.name,
+              reason: "Business core",
+            }}
+            terms={plannableTerms}
+            planned={{ course: plannedOpen.course, term: plannedOpen.term }}
+            onAdd={() => setOpenPlanned(null)}
+            onRemove={() => {
+              handleRemoveCourse(plannedOpen.course.id)
+              setOpenPlanned(null)
+            }}
+            onBack={() => setOpenPlanned(null)}
+            onClose={() => setOpenPlanned(null)}
+          />
+        )) ||
         (course && (
           <CoursePanel
             key={course.entry.code}
@@ -796,6 +829,7 @@ export function PlanYourPath({
             sidebar={{ open: reqsOpen, onToggle: openRequirements }}
             addable={addable}
             onAddCourse={(entry) => handleAddCourse(openTerm.id, entry)}
+            onOpenCourse={openPlannedPanel}
             compare={compare}
           />
         ) : (
@@ -861,6 +895,7 @@ export function PlanYourPath({
                 onAddCourse={handleAddCourse}
                 onOpenTerm={openTermView}
                 onOpenSeat={openSeatPanel}
+                onOpenCourse={openPlannedPanel}
                 openSeatId={openSeat?.id ?? null}
                 onAddTerm={() => addYearTerm(year.label)}
                 onPickSection={pickSection}

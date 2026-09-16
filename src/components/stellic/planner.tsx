@@ -71,6 +71,9 @@ type AuditRowProps = {
   /** Opens a held seat on its own — on what it is holding a place for, or
    *  straight on the courses that could fill it. */
   onOpenSeat?: (view: "detail" | "search") => void
+  /** Opens a course on its own: the catalogue entry for it and what the plan
+   *  has chosen about it. */
+  onOpenCourse?: () => void
   /** This seat's panel is the one open. */
   selected?: boolean
 }
@@ -84,6 +87,7 @@ export function AuditRow({
   streaming,
   onRemove,
   onOpenSeat,
+  onOpenCourse,
   selected,
 }: AuditRowProps) {
   const draft = course.draft
@@ -122,7 +126,7 @@ export function AuditRow({
            that way while a draft is proposing it — the dashes are what say it
            is a seat rather than a course, whatever colour the draft gives it. */
         held && "border-dashed",
-        held && onOpenSeat && !overlay && "cursor-pointer",
+        ((held && onOpenSeat) || (!held && onOpenCourse)) && !overlay && "cursor-pointer",
         /* The seat whose panel is open says so. */
         selected && "border-primary-50 bg-primary-0/40",
         !locked && !draft && "cursor-grab transition-colors hover:bg-gray-5",
@@ -140,7 +144,13 @@ export function AuditRow({
 
       <div
         className="flex min-w-0 flex-1 flex-col justify-center gap-2"
-        onClick={held && onOpenSeat && !overlay ? () => onOpenSeat("detail") : undefined}
+        onClick={
+          overlay
+            ? undefined
+            : held
+              ? onOpenSeat && (() => onOpenSeat("detail"))
+              : onOpenCourse
+        }
       >
         {held ? (
           <p className="flex items-center gap-2 text-body-md font-semibold text-foreground">
@@ -243,6 +253,7 @@ function SortableAuditRow({
   streaming,
   onRemove,
   onOpenSeat,
+  onOpenCourse,
   selected,
 }: {
   course: PlannedCourse
@@ -250,6 +261,7 @@ function SortableAuditRow({
   streaming?: boolean
   onRemove: () => void
   onOpenSeat?: (view: "detail" | "search") => void
+  onOpenCourse?: () => void
   selected?: boolean
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -272,6 +284,7 @@ function SortableAuditRow({
         streaming={streaming}
         onRemove={onRemove}
         onOpenSeat={onOpenSeat}
+        onOpenCourse={onOpenCourse}
         selected={selected}
       />
     </div>
@@ -358,6 +371,7 @@ export function SemesterCard({
   onAddCourse,
   onOpen,
   onOpenSeat,
+  onOpenCourse,
   openSeatId,
   onPickSection,
 }: {
@@ -379,6 +393,8 @@ export function SemesterCard({
   onOpen?: () => void
   /** Opens one of this term's held seats on its own. */
   onOpenSeat?: (courseId: string, view: "detail" | "search") => void
+  /** Opens one of its courses on its own. */
+  onOpenCourse?: (courseId: string) => void
   /** The seat whose panel is open, if it is one of this term's. */
   openSeatId?: string | null
   /** Settles one of this term's courses on a section. */
@@ -419,6 +435,7 @@ export function SemesterCard({
         onOpenSeat={
           onOpenSeat ? (view) => onOpenSeat(course.id, view) : undefined
         }
+        onOpenCourse={onOpenCourse && (() => onOpenCourse(course.id))}
         selected={openSeatId === course.id}
       />
     )
@@ -565,6 +582,7 @@ export function YearSection({
   onAddCourse,
   onOpenTerm,
   onOpenSeat,
+  onOpenCourse,
   openSeatId,
   onPickSection,
 }: {
@@ -580,6 +598,8 @@ export function YearSection({
   onAddTerm?: () => void
   /** Opens a held seat on its own. */
   onOpenSeat?: (courseId: string, view: "detail" | "search") => void
+  /** Opens a course on its own. */
+  onOpenCourse?: (courseId: string) => void
   /** The seat whose panel is open. */
   openSeatId?: string | null
   /** Folded away to its heading and what it comes to. */
@@ -660,6 +680,7 @@ export function YearSection({
               onAddCourse={(entry) => onAddCourse(term.id, entry)}
               onOpen={onOpenTerm && (() => onOpenTerm(term.id))}
               onOpenSeat={onOpenSeat}
+              onOpenCourse={onOpenCourse}
               openSeatId={openSeatId}
               onPickSection={onPickSection}
             />
