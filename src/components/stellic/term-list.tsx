@@ -178,7 +178,10 @@ function CourseRow({
             <StatusPill status={status}>{status}</StatusPill>
           </div>
 
-          <span aria-hidden="true" className="w-px self-stretch bg-gray-40" />
+          {/* Where a rule used to divide the two halves of the row. A band
+              above a filled seat and a line under a course that needs one cut
+              it into pieces, so it keeps the width and drops the line. */}
+          <span aria-hidden="true" className="w-px shrink-0 self-stretch" />
 
           {/* A held seat has nothing on this side of the rule yet: no class has
               been chosen, so there is no class number, campus or grading. */}
@@ -281,7 +284,7 @@ export function TermList({
               {selectable && <span aria-hidden="true" className="ml-4 w-4 shrink-0" />}
               <span className="ml-4 w-[223px] shrink-0 self-center px-2 py-3">Course</span>
               <span className="ml-4 w-[121px] shrink-0 self-center">Status</span>
-              <span aria-hidden="true" className="ml-4 w-px self-stretch bg-gray-40" />
+              <span aria-hidden="true" className="ml-4 w-px shrink-0 self-stretch" />
               <span className="ml-4 w-[98px] shrink-0 self-center">Class No.</span>
               <span className="ml-4 w-[109px] shrink-0 self-center">Campus</span>
               <span className="ml-4 w-[109px] shrink-0 self-center">Modality</span>

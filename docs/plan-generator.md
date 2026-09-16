@@ -245,6 +245,9 @@ course from a seat's search and adding it to that seat's own term fills it;
 choosing a different term adds it there instead and leaves the seat where it
 is.
 
+Registering settles it. The class is the student's from then on, so the seat
+has done its job: the band goes, and with it the way back to a held seat.
+
 The name is the seat, so it opens the seat
 ([`1393:32366`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-32366)):
 the same panel a held seat opens, with a Selected course block at the foot

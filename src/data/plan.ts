@@ -672,7 +672,10 @@ export function registerCourses(years: Year[], termId: string, courseIds: string
         : {
             ...term,
             courses: term.courses.map((c) =>
-              ids.has(c.id) ? { ...c, registered: true } : c
+              /* Registering settles it: the seat it was put into has done its
+                 job and stops being a thing of its own, so the course is a
+                 course from here on. */
+              ids.has(c.id) ? { ...c, registered: true, seat: undefined } : c
             ),
           }
     ),
