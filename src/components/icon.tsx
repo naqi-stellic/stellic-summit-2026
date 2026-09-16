@@ -478,6 +478,54 @@ const ICONS = {
     ],
   },
 
+  /* Staff Home. The two severities are different shapes as well as different
+     colours — an octagon stops you, a triangle warns you — so the list stays
+     readable to anyone who cannot tell the red from the amber. */
+  report: {
+    viewBox: "0 0 24 24",
+    parts: [
+      {
+        d: "M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM12 17.3c-.72 0-1.3-.58-1.3-1.3s.58-1.3 1.3-1.3 1.3.58 1.3 1.3-.58 1.3-1.3 1.3zm1-4.3h-2V7h2v6z",
+      },
+    ],
+  },
+  lightbulb: {
+    viewBox: "0 0 24 24",
+    parts: [
+      {
+        d: "M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z",
+      },
+    ],
+  },
+  "swap-vert": {
+    viewBox: "0 0 24 24",
+    parts: [{ d: "M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3 5 6.99h3V14h2V6.99h3L9 3z" }],
+  },
+  tune: {
+    viewBox: "0 0 24 24",
+    parts: [
+      {
+        d: "M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z",
+      },
+    ],
+  },
+  inbox: {
+    viewBox: "0 0 24 24",
+    parts: [
+      {
+        d: "M19 3H4.99c-1.11 0-1.98.89-1.98 2L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z",
+      },
+    ],
+  },
+  person: {
+    viewBox: "0 0 24 24",
+    parts: [
+      {
+        d: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",
+      },
+    ],
+  },
+
   /* ---- Stellic 16px set ----
      Traced from the audit screen's own exports rather than scaled down from
      Material's 24px grid: at 16px the design draws its own outlines, and the

@@ -27,6 +27,7 @@ const SECTIONS = [
       { href: "/advanced-what-if.html", name: "Advanced What-If" },
       { href: "/compliance.html", name: "Proactive Compliance" },
       { href: "/explain.html", name: "Explain Progress" },
+      { href: "/staff-home.html", name: "Staff Home" },
     ],
   },
   {

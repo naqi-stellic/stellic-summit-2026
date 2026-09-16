@@ -30,6 +30,8 @@ export function AppShell({
   children,
   panel,
   section = "plan",
+  navCurrent,
+  account,
   assistant = true,
   assistLabel = "Generate with Assistant",
 }: {
@@ -40,6 +42,10 @@ export function AppShell({
   panel?: ReactNode
   /** Which product the page belongs to — the sidebar stands on that row. */
   section?: NavSection
+  /** Which nav row to stand on, where it is not the section's own default. */
+  navCurrent?: string
+  /** Replaces the account circle in the top bar. */
+  account?: ReactNode
   /** Whether the assistant floats over the page at all. Off where the design
    *  does not draw it, which is every screen outside Team Plan. */
   assistant?: boolean
@@ -67,12 +73,12 @@ export function AppShell({
           <div className="max-md:hidden">
             <SidebarMasthead open={nav} onToggle={() => setNav(!nav)} />
           </div>
-          <Topbar title={title ?? SECTION_TITLE[section]} />
+          <Topbar title={title ?? SECTION_TITLE[section]} account={account} />
         </div>
 
         <div className="flex min-h-0 flex-1">
           <div className="max-md:hidden">
-            <SidebarNav section={section} open={nav} />
+            <SidebarNav section={section} open={nav} current={navCurrent} />
           </div>
 
           {/* The panel group is always mounted so `children` keeps its place in

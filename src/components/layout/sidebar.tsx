@@ -14,6 +14,9 @@ type NavItem = {
   sub?: boolean
   active?: boolean
   badge?: string
+  /** A small chip after the label. Unlike `badge` this one is meant to be
+   *  read: it says the row is new, not that something is waiting in it. */
+  chip?: string
 }
 
 /* Which product the page belongs to. The nav is the same nav either way — what
@@ -45,7 +48,8 @@ const EXPLORE: NavItem[] = [
    everything there is, not a path through one student's degree — so no rings
    either. A ring marks where you are on a path, and this is not one. */
 const STAFF: NavItem[] = [
-  { label: "Students", strong: true, active: true },
+  { label: "Home", strong: true, chip: "Beta" },
+  { label: "Students", strong: true },
   { label: "Programs", strong: true },
   { label: "Courses", strong: true },
   { label: "Pathways", strong: true },
@@ -57,10 +61,15 @@ const STAFF: NavItem[] = [
   { label: "Analytics", strong: true },
 ]
 
-function nav(section: NavSection): NavItem[] {
-  if (section === "staff") return STAFF
+function nav(section: NavSection, current?: string): NavItem[] {
+  if (section === "staff") {
+    /* Students is where a staff member spends the day, so it is where they
+       stand unless the page says otherwise. */
+    const on = current ?? "Students"
+    return STAFF.map((item) => ({ ...item, active: item.label === on }))
+  }
 
-  const here = (label: string) => label === (section === "plan" ? "Plan Your Path" : "Track Progress")
+  const here = (label: string) => label === (current ?? (section === "plan" ? "Plan Your Path" : "Track Progress"))
 
   return [
     { label: "Home", glyph: "s-home" },
@@ -151,14 +160,23 @@ export function SidebarMasthead({ open = true, onToggle }: { open?: boolean; onT
 
 /** Everything under the masthead. Collapsed, there is nothing: no width, no
  *  rail, and the page beside it takes the room. */
-export function SidebarNav({ section = "plan", open = true }: { section?: NavSection; open?: boolean }) {
+export function SidebarNav({
+  section = "plan",
+  open = true,
+  current,
+}: {
+  section?: NavSection
+  open?: boolean
+  /** Which row to stand on, where it is not the section's own default. */
+  current?: string
+}) {
   if (!open) return null
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col gap-4 overflow-hidden bg-gray-100 pt-4 text-white">
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
         <nav className="flex shrink-0 flex-col items-start border-b border-gray-60 pb-[15px]">
-          {nav(section).map((item) => (
+          {nav(section, current).map((item) => (
             <a
               key={item.label}
               href="#"
@@ -179,6 +197,11 @@ export function SidebarNav({ section = "plan", open = true }: { section?: NavSec
                 >
                   {item.label}
                 </span>
+                {item.chip && (
+                  <span className="rounded-[3px] bg-white/18 px-1.5 text-label-sm font-semibold text-gray-40">
+                    {item.chip}
+                  </span>
+                )}
                 {item.trailing === "expand-more" && <Icon name="expand-more" size={14} />}
               </span>
               {item.trailing === "s-arrow-down-fill" && (

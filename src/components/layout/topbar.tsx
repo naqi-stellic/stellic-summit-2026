@@ -1,6 +1,13 @@
+import type { ReactNode } from "react"
+
 import { Icon } from "@/components/icon"
 
-export function Topbar({ title }: { title: string }) {
+export function Topbar({ title, account }: {
+  title: string
+  /** What sits where the account circle does. Given only where the page has
+   *  something to put there — Staff Home hangs its "View as" menu on it. */
+  account?: ReactNode
+}) {
   /* The shell never scrolls, so this stays put structurally — no sticky. */
   return (
     <header className="flex h-18 min-w-0 flex-1 items-center justify-between gap-4 border-b border-gray-40 bg-card px-6 max-md:px-4">
@@ -29,9 +36,11 @@ export function Topbar({ title }: { title: string }) {
         <button type="button" aria-label="Notifications" className="shrink-0 text-gray-100">
           <Icon name="s-notification" size={24} />
         </button>
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-field text-gray-0">
-          CN
-        </span>
+        {account ?? (
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-field text-gray-0">
+            CN
+          </span>
+        )}
       </div>
     </header>
   )

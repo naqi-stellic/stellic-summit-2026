@@ -34,6 +34,7 @@ they open in their own tab.
 | Advanced What-If | `/advanced-what-if.html` | [`2274:20653`](https://www.figma.com/design/prhu0x6AaQF2AVtLBFoDq3/Audit-Profile-Planner?node-id=2274-20653) | `src/pages/advanced-what-if.tsx` | [docs](docs/advanced-what-if.md) |
 | Proactive Compliance | `/compliance.html` | from a static mock, not a frame | `src/pages/compliance.tsx` | [docs](docs/compliance.md) |
 | Explain Progress | `/explain.html` | from a static mock, not a frame | `src/pages/explain-progress.tsx` | [docs](docs/explain-progress.md) |
+| Staff Home | `/staff-home.html` | from a static mock, not a frame | `src/pages/staff-home.tsx` | [docs](docs/staff-home.md) |
 
 **Team Explore**
 
@@ -42,10 +43,12 @@ they open in their own tab.
 | Prospective Student Lite | `/explore.html` | [`2362:4464`](https://www.figma.com/design/8OuDzmowzaVkdMBm0SbQCr/Prostu-Transfer-Experience?node-id=2362-4464) | `src/pages/explore.tsx` | [docs](docs/explore.md) |
 
 The products share the shell, the tokens and the icon set and nothing else.
-Team Plan's two prototypes share their data and their components; Team
-Progress' three share the student, the profile cards and the audit tree.
+Team Plan's two prototypes share their data and their components; three of Team
+Progress' four share the student, the profile cards and the audit tree.
 Compliance is that page with one more tab on it; Explain Progress is the same
-tab with one more question. Team Explore shares less still — it is the one
+tab with one more question. Staff Home is the exception: it is the other side
+of the desk, so it shares the shell and the design system and brings its own
+data. Team Explore shares less still — it is the one
 surface here that is not somebody signed in to Stellic, so it brings its own
 chrome and takes only the tokens and the icon set.
 
