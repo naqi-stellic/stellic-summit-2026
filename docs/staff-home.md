@@ -77,6 +77,18 @@ Grace has a single tab.
 Both panels are keyed on the persona, so switching who is looking starts them
 afresh: the tab, the search and anything unfolded belonged to the last person.
 
+Where a person lands is a fact about them rather than a default the queue holds,
+so a persona can carry `landsOn`. Jessica's tabs are Appointments and Transfer,
+in that priority order, but Transfer is what she opened Home for — so that is
+where she starts.
+
+## Transfer Insights
+
+`StaffHome` takes one optional prop, `only`, which pins the page to a single
+persona: no switcher, and the account circle goes back to being the plain grey
+circle every other prototype carries. `src/pages/transfer-insights.tsx` is that
+one line. See [docs](transfer-insights.md).
+
 ## Open Items
 
 Tab order is priority order — a person's own record-keeping first, then the
@@ -102,10 +114,10 @@ Rows behave differently on purpose:
 - **Exceptions** splits on whether there is a workflow behind the request. A
   direct one is decided here in one press. One with a workflow opens onto the
   rail instead and offers Open.
-- **Workflows** open onto the rail. **Transfer** holds two kinds of work at
-  once — credit reviews that want a decision, and articulations that want
-  nobody's approval — so the articulations sit under the requests rather than
-  among them.
+- **Workflows** open onto the rail. **Transfer** is credit reviews only. It once
+  carried the articulations as well, which blurred the line the page is built
+  on: an articulation is not waiting on anybody, so it belongs in Insights and
+  nowhere else.
 
 ### The step rail
 

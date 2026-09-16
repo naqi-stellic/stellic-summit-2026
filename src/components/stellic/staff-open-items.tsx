@@ -118,7 +118,9 @@ export function OpenItems({
   onCleared: () => void
 }) {
   const toast = useToast()
-  const [tab, setTab] = useState<TabKey>("audits")
+  /* Null until somebody picks one: where a person lands is a fact about them,
+     not a default this component gets to hold. */
+  const [tab, setTab] = useState<TabKey | null>(null)
   const [query, setQuery] = useState("")
   const [sort, setSort] = useState<Sort>("date")
   const [open, setOpen] = useState<string[]>([])
@@ -161,7 +163,8 @@ export function OpenItems({
      you are is derived from what is left rather than held in state and
      corrected afterwards. */
   const allowed = ALL_TABS.filter((key) => jobs[JOB_OF_TAB[key]] && tabAllowed(key, perms))
-  const here = allowed.includes(tab) ? tab : allowed[0]
+  const lands = persona.landsOn && allowed.includes(persona.landsOn) ? persona.landsOn : allowed[0]
+  const here = tab && allowed.includes(tab) ? tab : lands
 
   const shown: Tab[] = []
   const more: Tab[] = []
@@ -616,12 +619,8 @@ function Workflows({
       />
     )
 
-  /* Transfer holds two kinds of work at once. Articulations need no decision,
-     so they sit under the requests that do rather than among them. */
-  const ordered = [...rows].sort(
-    (a, b) => Number(a.kind === "art") - Number(b.kind === "art")
-  )
-
+  /* Where the row leads if you would rather read than decide. Transfer keeps
+     its own page for that; everything else is answered by the audit. */
   const view = (row: WorkflowRow) =>
     category === "transfer" ? (
       <Button
@@ -634,112 +633,77 @@ function Workflows({
         View in transfers
       </Button>
     ) : (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => elsewhere(`Opens ${row.student}'s audit.`)}
-      >
+      <Button variant="ghost" size="sm" onClick={() => elsewhere(`Opens ${row.student}'s audit.`)}>
         View in audit
       </Button>
     )
 
   return (
     <>
-      {ordered.map((row) =>
-        row.kind === "art" ? (
-          <Row key={row.id}>
-            <RowSubject
-              face={{ initials: row.initials, color: row.color }}
-              title={row.student}
-              sub={row.program}
-            />
-            <RowBody>
-              <Headline>{row.name}</Headline>
-              <Quiet>{row.date}</Quiet>
-            </RowBody>
-            <RowActions>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => elsewhere(`Opens the articulation for ${row.student}.`)}
-              >
-                Edit Articulation
-              </Button>
-              {view(row)}
-            </RowActions>
-          </Row>
-        ) : (
-          <Row
-            key={row.id}
-            label={`${row.student}'s request`}
-            open={open.includes(row.id)}
-            onToggle={() => onToggle(row.id)}
-            detail={
-              <StepRail
-                steps={[
-                  {
-                    state: "done",
-                    label: row.openedAs ?? "Request submitted",
-                    who: `${row.student} (student)`,
-                    when: row.date,
-                    fields: row.fields,
-                  },
-                  ...(row.steps ?? []),
-                ]}
-                actions={
-                  <>
-                    <Button
-                      size="sm"
-                      onClick={() => elsewhere(`Opens a message to ${row.student}.`)}
-                    >
-                      Contact {row.student.split(" ")[0]}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => elsewhere(`Starts the “${yourStep(row.steps)?.label}” step.`)}
-                    >
-                      Start
-                    </Button>
-                  </>
-                }
-                footer={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => elsewhere(`Opens ${row.student}'s profile, Requests tab.`)}
-                  >
-                    Open student profile
-                    <Icon name="open-in-new" size={12} />
+      {rows.map((row) => (
+        <Row
+          key={row.id}
+          label={`${row.student}'s request`}
+          open={open.includes(row.id)}
+          onToggle={() => onToggle(row.id)}
+          detail={
+            <StepRail
+              steps={[
+                {
+                  state: "done",
+                  label: row.openedAs ?? "Request submitted",
+                  who: `${row.student} (student)`,
+                  when: row.date,
+                  fields: row.fields,
+                },
+                ...(row.steps ?? []),
+              ]}
+              actions={
+                <>
+                  <Button size="sm" onClick={() => elsewhere(`Opens a message to ${row.student}.`)}>
+                    Contact {row.student.split(" ")[0]}
                   </Button>
-                }
-              />
-            }
-          >
-            <RowSubject
-              face={{ initials: row.initials, color: row.color }}
-              title={row.student}
-              sub={row.program}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => elsewhere(`Starts the “${yourStep(row.steps)?.label}” step.`)}
+                  >
+                    Start
+                  </Button>
+                </>
+              }
+              footer={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => elsewhere(`Opens ${row.student}'s profile, Requests tab.`)}
+                >
+                  Open student profile
+                  <Icon name="open-in-new" size={12} />
+                </Button>
+              }
             />
-            <RowBody>
-              <Headline>{row.name}</Headline>
-              {row.status && <StatusLine>{row.status}</StatusLine>}
-              <Field label="Step">{openSteps(row.steps).join(", ")}</Field>
-              <Quiet>{row.date}</Quiet>
-            </RowBody>
-            <RowActions>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => elsewhere("Opens this request.")}
-              >
-                Open
-              </Button>
-              {view(row)}
-            </RowActions>
-          </Row>
-        )
-      )}
+          }
+        >
+          <RowSubject
+            face={{ initials: row.initials, color: row.color }}
+            title={row.student}
+            sub={row.program}
+          />
+          <RowBody>
+            <Headline>{row.name}</Headline>
+            {row.status && <StatusLine>{row.status}</StatusLine>}
+            <Field label="Step">{openSteps(row.steps).join(", ")}</Field>
+            <Quiet>{row.date}</Quiet>
+          </RowBody>
+          <RowActions>
+            <Button variant="primary" size="sm" onClick={() => elsewhere("Opens this request.")}>
+              Open
+            </Button>
+            {view(row)}
+          </RowActions>
+        </Row>
+      ))}
     </>
   )
 }

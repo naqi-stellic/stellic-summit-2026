@@ -13,6 +13,33 @@
  * programs she owns are hers to act on — while the Audits *tab* never appears,
  * because there is no publish request she could approve. A job is not a tab. */
 
+/* ============================================================ Tabs */
+
+export type TabKey = "notes" | "appts" | "audits" | "exceptions" | "grad" | "transfer" | "other"
+
+/** Display order, which is priority order rather than the alphabetical order
+ *  Customize Home uses: a person's own record-keeping first, then the requests
+ *  waiting on a decision from them. */
+export const ALL_TABS: TabKey[] = [
+  "notes",
+  "appts",
+  "audits",
+  "exceptions",
+  "grad",
+  "transfer",
+  "other",
+]
+
+export const TAB_LABELS: Record<TabKey, string> = {
+  notes: "Notes",
+  appts: "Appointments",
+  audits: "Audits",
+  exceptions: "Exceptions",
+  grad: "Graduation Clearance",
+  transfer: "Transfer",
+  other: "Other Requests",
+}
+
 export type PersonaKey =
   | "naqi"
   | "priya"
@@ -47,6 +74,9 @@ export type Persona = {
   /** Avatar ground. Not a token — these are people, not states. */
   color: string
   role: string
+  /** The tab this person opens on, where the first one in priority order is
+   *  not the reason they came. Falls back to the first tab they are allowed. */
+  landsOn?: TabKey
   perms: Perms
 }
 
@@ -103,12 +133,16 @@ export const PERSONAS: Persona[] = [
     initials: "J",
     color: "#0e7090",
     role: "Transfer office",
+    /* Transfer is the work she is here for, so it is where she lands — ahead
+       of the appointments that would otherwise take the first slot. */
+    landsOn: "transfer",
     perms: {
       auditPublish: false,
       auditEdit: false,
       makeException: false,
       articulations: true,
       wf: ["transfer"],
+      appts: true,
     },
   },
   {
@@ -157,33 +191,6 @@ export const PERSONAS: Persona[] = [
 ]
 
 export const personaOf = (key: PersonaKey) => PERSONAS.find((p) => p.key === key)!
-
-/* ============================================================ Tabs */
-
-export type TabKey = "notes" | "appts" | "audits" | "exceptions" | "grad" | "transfer" | "other"
-
-/** Display order, which is priority order rather than the alphabetical order
- *  Customize Home uses: a person's own record-keeping first, then the requests
- *  waiting on a decision from them. */
-export const ALL_TABS: TabKey[] = [
-  "notes",
-  "appts",
-  "audits",
-  "exceptions",
-  "grad",
-  "transfer",
-  "other",
-]
-
-export const TAB_LABELS: Record<TabKey, string> = {
-  notes: "Notes",
-  appts: "Appointments",
-  audits: "Audits",
-  exceptions: "Exceptions",
-  grad: "Graduation Clearance",
-  transfer: "Transfer",
-  other: "Other Requests",
-}
 
 /* ============================================================ Jobs */
 

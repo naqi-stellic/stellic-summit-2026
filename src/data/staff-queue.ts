@@ -309,9 +309,6 @@ export const EXCEPTIONS: ExceptionRequest[] = [
 
 export type WorkflowRow = {
   id: string
-  /** An articulation nobody has to approve: it is on the Transfer tab because
-   *  that is whose work it is, not because it is waiting for a decision. */
-  kind?: "art"
   name: string
   student: string
   initials: string
@@ -437,42 +434,6 @@ export const WORKFLOWS: Record<"grad" | "transfer" | "other", { label: string; r
     transfer: {
       label: "Transfer",
       rows: [
-        {
-          id: "a1",
-          kind: "art",
-          name: "Transfer Credit Review",
-          student: "Marisol Vega",
-          initials: "MV",
-          color: "#3e4784",
-          program: "Computer Science (BSc)",
-          date: "Aug 2",
-          iso: "2026-08-02",
-          vis: ["naqi", "jessica"],
-        },
-        {
-          id: "a2",
-          kind: "art",
-          name: "Transfer Credit Review",
-          student: "Aiden Kwok",
-          initials: "AK",
-          color: "#b54708",
-          program: "Biology (BSc)",
-          date: "Aug 1",
-          iso: "2026-08-01",
-          vis: ["naqi", "jessica"],
-        },
-        {
-          id: "a3",
-          kind: "art",
-          name: "Transfer Credit Review",
-          student: "Fatima Noor",
-          initials: "FN",
-          color: "#0b7a6b",
-          program: "Environmental Eng (MS)",
-          date: "Jul 31",
-          iso: "2026-07-31",
-          vis: ["naqi", "jessica"],
-        },
         {
           id: "t1",
           name: "Transfer Credit Review",

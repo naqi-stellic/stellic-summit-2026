@@ -32,7 +32,10 @@ const SECTIONS = [
   },
   {
     name: "Team Explore",
-    prototypes: [{ href: "/explore.html", name: "Prospective Student Lite" }],
+    prototypes: [
+      { href: "/explore.html", name: "Prospective Student Lite" },
+      { href: "/transfer-insights.html", name: "Transfer Insights" },
+    ],
   },
 ]
 

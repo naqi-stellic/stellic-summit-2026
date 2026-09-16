@@ -33,19 +33,21 @@ import { EXCEPTIONS, PUBLISH_REQUESTS, REPORTS, TODAY } from "@/data/staff-queue
  * the audits you can change, and it wants a fix. Both are built out of the same
  * furniture and read in the same three moves, so the page is learned once. */
 
-export function StaffHome() {
+export function StaffHome({ only }: { only?: PersonaKey }) {
   return (
     <TooltipProvider delayDuration={200}>
       <ToastProvider>
-        <Home />
+        <Home only={only} />
       </ToastProvider>
     </TooltipProvider>
   )
 }
 
-function Home() {
+function Home({ only }: { only?: PersonaKey }) {
   const toast = useToast()
-  const [key, setKey] = useState<PersonaKey>("naqi")
+  /* Given, the page is that one person's Home and nobody else's: no switcher,
+     and the account circle goes back to being the account circle. */
+  const [key, setKey] = useState<PersonaKey>(only ?? "naqi")
   /* Held per persona, because it is a per-user setting: switching who is
      looking must not carry the last person's choices over. */
   const [jobs, setJobs] = useState(() =>
@@ -77,7 +79,15 @@ function Home() {
       navCurrent="Home"
       title="Home"
       assistant={false}
-      account={<PersonaMenu persona={persona} onSelect={setKey} />}
+      account={
+        only ? (
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-field text-gray-0">
+            {persona.initials}
+          </span>
+        ) : (
+          <PersonaMenu persona={persona} onSelect={setKey} />
+        )
+      }
     >
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 pt-8 pb-24">
         <div className="mx-auto flex w-full max-w-[1024px] flex-col gap-6">
@@ -88,15 +98,18 @@ function Home() {
             <div>
               <h2 className="text-h400 font-semibold text-gray-100">Welcome, {persona.name}!</h2>
               <p className="mt-1 text-body-md text-gray-80">
-                {key === "naqi" ? (
+                {/* The second line belongs to the switcher, not to the product:
+                    it is there to say why the page just changed shape. Where
+                    there is no switcher, the tally is the real line. */}
+                {!only && key !== "naqi" ? (
+                  <>
+                    {persona.role} · viewing Home with {persona.name}'s permissions
+                  </>
+                ) : (
                   <>
                     Keep it up! You've cleared{" "}
                     <span className="font-semibold text-gray-100">{cleared}</span> items this week
                     🙌
-                  </>
-                ) : (
-                  <>
-                    {persona.role} · viewing Home with {persona.name}'s permissions
                   </>
                 )}
               </p>
