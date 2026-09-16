@@ -115,10 +115,24 @@ const EARNED: Record<string, string> = {
 
 const IN_PROGRESS = ["FIN 301", "ACCT 202", "ECON 202", "STAT 210", "MKTG 201"]
 
-/** A course as the audit finds it: passed, under way, or still to come. */
+/* Already in the plan for a term still to come. It is not earned and it is not
+ * under way, but it is not missing either — the plan says when it happens. */
+const PLANNED: Record<string, string> = {
+  "FIN 340": "Planned Spring 2028",
+}
+
+/* Courses the student has not touched, which is what the routes they are not
+ * on are built from. Only one option can be the one that counts, so the others
+ * have to read as untouched or out of reach rather than as a second thing
+ * quietly going well. */
+const UNTOUCHED = ["MGMT 210", "BLAW 301", "ENGL 210", "PHIL 240", "HIST 205"]
+
+/** A course as the audit finds it: passed, under way, planned, or still to
+ *  come. */
 function courseNode(code: string, note?: string): PrereqNode {
   if (EARNED[code]) return { code, note, state: "earned", meta: EARNED[code] }
   if (IN_PROGRESS.includes(code)) return { code, note, state: "progress", meta: "In progress" }
+  if (PLANNED[code]) return { code, note, state: "planned", meta: PLANNED[code] }
   return { code, note, state: "remaining" }
 }
 
@@ -157,15 +171,22 @@ const CONDITIONS: Record<string, PrereqNode> = {
     state: "neutral",
     meta: "Not declared",
   },
+  honors: {
+    label: "Admission to the Honors College",
+    state: "neutral",
+    meta: "Not admitted",
+  },
 }
 
+type Body = Omit<PrereqOption, "name" | "open">
+
 /** What an option comes to, read off what is inside it. */
-function summarise(name: string, children: PrereqNode[], open: boolean): PrereqOption {
+function summarise(children: PrereqNode[]): Body {
   /* A group where one child is enough counts as one thing, and is met by the
      best of what is inside it — otherwise a choice would read as a shortfall
      merely for having options the student did not take. */
   const rank = (state?: PrereqState) =>
-    state === "earned" ? 2 : state === "progress" ? 1 : 0
+    state === "earned" ? 3 : state === "progress" ? 2 : state === "planned" ? 1 : 0
   const flat = (nodes: PrereqNode[]): PrereqNode[] =>
     nodes.flatMap((node) => {
       if (!node.children) return [node]
@@ -176,26 +197,58 @@ function summarise(name: string, children: PrereqNode[], open: boolean): PrereqO
     })
   const leaves = flat(children)
   const earned = leaves.filter((n) => n.state === "earned").length
-  const going = leaves.filter((n) => n.state === "progress").length
+  const going = leaves.filter((n) => n.state === "progress" || n.state === "planned").length
   const missing = leaves.length - earned - going
 
   if (missing === 0 && going === 0) {
-    return { name, state: "earned", meta: "Earned", tone: "good", open, children }
+    return { state: "earned", meta: "Earned", tone: "good", children }
   }
   if (earned === 0 && going === 0) {
-    return { name, state: "neutral", meta: "Nothing started", open, children }
+    return { state: "neutral", meta: "Nothing started", children }
   }
   if (missing === 0) {
-    return { name, state: "progress", meta: "On track", tone: "good", open, children }
+    return { state: "progress", meta: "On track", tone: "good", children }
   }
+  return { state: "remaining", meta: `${missing} not earned`, tone: "bad", children }
+}
+
+/* The routes that are closed: a grade already in and under what the option
+ * asks, on a course that cannot be repeated. */
+const CLOSED = [
+  { code: "MIS 120", grade: "B", term: "Spring 2027", minimum: "A−" },
+  { code: "HIST 110", grade: "B", term: "Fall 2026", minimum: "A" },
+  { code: "MIS 120", grade: "B", term: "Spring 2027", minimum: "A" },
+]
+
+function closed(seed: number): Body {
+  const shut = CLOSED[seed % CLOSED.length]
   return {
-    name,
-    state: "remaining",
-    meta: `${missing} not earned`,
+    state: "blocked",
+    meta: "Can't be met",
     tone: "bad",
-    open,
-    children,
+    summary: `${shut.code} was passed at ${shut.grade}, under the ${shut.minimum} this option asks for`,
+    children: [
+      {
+        code: shut.code,
+        note: `minimum grade ${shut.minimum}`,
+        state: "blocked",
+        meta: `Taken ${shut.term}, ${shut.grade}`,
+        tone: "bad",
+      },
+      CONDITIONS.standing,
+    ],
   }
+}
+
+/** Numbered and folded in the order they are given, the first one open. */
+function laid(bodies: Body[]): PrereqOption[] {
+  return bodies.map((body, i) => ({ ...body, name: `Option ${i + 1}`, open: i === 0 }))
+}
+
+/** The number in a course's code, which is how far into the subject it is and
+ *  therefore how much it asks for. */
+function level(code: string): number {
+  return Number(code.replace(/\D+/g, "")) || 100
 }
 
 /* The courses a subject builds on within itself. A finance elective asks for
@@ -215,15 +268,10 @@ const SUBJECT_GATE: Record<string, string[]> = {
   BLAW: ["BUS 101"],
 }
 
-/** The number in a course's code, which is how far into the subject it is and
- *  therefore how much it asks for. */
-function level(code: string): number {
-  return Number(code.replace(/\D+/g, "")) || 100
-}
-
 /* How much a course asks for depends on how deep it is: a first-year course
  * asks for nothing, a second-year one for a course or two, and only the later
- * ones offer more than one way in. */
+ * ones offer more than one way in. Where there is a choice, exactly one of the
+ * ways is the one the student is on. */
 function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequisites"] {
   const depth = level(entry.code)
   /* Never ask a course for itself: the deeper lists hold courses that are
@@ -236,73 +284,48 @@ function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequ
   const second = pick(["ACCT 202", "ECON 202", "STAT 210", "MKTG 201"])
   /* Only what comes below it in its own subject: a course cannot be asked for
      by something the student takes before it. */
-  const own = (SUBJECT_GATE[entry.code.split(" ")[0]] ?? []).filter(
-    (code) => level(code) < depth
-  )
+  const own = (SUBJECT_GATE[entry.code.split(" ")[0]] ?? []).filter((code) => level(code) < depth)
   const later = own.length ? own[seed % own.length] : pick(["FIN 301", "MIS 250", "OPS 320", "BUS 390"])
+  const untouched = pick(UNTOUCHED)
 
   if (depth < 200) return { options: [] }
 
   if (depth < 300) {
     /* One way in, so the option itself is not worth naming. */
-    return {
-      options: [
-        summarise("Option 1", [courseNode(gate), CONDITIONS.credits], true),
-      ],
-    }
+    return { options: laid([summarise([courseNode(gate), CONDITIONS.credits])]) }
   }
+
+  /* The way the student is on: built from what they have and what they are
+     taking, so it is the one that reads well. */
+  const taking = summarise([courseNode(gate), courseNode(second), CONDITIONS.gpa])
+  /* The way nobody has started. */
+  const cold = summarise([courseNode(untouched), CONDITIONS.second])
 
   if (depth < 400) {
     return {
       directive: "Complete any one of 2 options",
-      options: [
-        summarise("Option 1", [courseNode(gate), courseNode(second), CONDITIONS.gpa], true),
-        summarise("Option 2", [courseNode(later), CONDITIONS.declared], false),
-      ],
+      options: laid([taking, seed % 2 === 0 ? cold : closed(seed)]),
     }
   }
 
-  /* A final-year course: three ways in, one of them out of reach. */
+  /* A final-year course: three ways in, and only one of them open. */
+  const deep = summarise([
+    {
+      label: "Take any one of",
+      any: true,
+      open: true,
+      children: [courseNode(second), courseNode(later)],
+    },
+    courseNode(gate, "minimum grade B"),
+    CONDITIONS.gpa,
+    CONDITIONS.junior,
+  ])
+  const shut = closed(seed)
+  const none = summarise([courseNode(untouched), CONDITIONS.honors])
+
   return {
     directive: "Complete any one of 3 options",
-    options: [
-      summarise(
-        "Option 1",
-        [
-          {
-            label: "Take any one of",
-            any: true,
-            open: true,
-            children: [courseNode(second), courseNode(later)],
-          },
-          courseNode(gate, "minimum grade B"),
-          CONDITIONS.gpa,
-          CONDITIONS.junior,
-        ],
-        true
-      ),
-      {
-        name: "Option 2",
-        state: "blocked",
-        meta: "Can't be met",
-        tone: "bad",
-        open: false,
-        /* Out of reach rather than merely unmet: the grade is already in and
-           the course cannot be repeated. */
-        summary: "MIS 120 was passed at B, under the A− this option asks for",
-        children: [
-          {
-            code: "MIS 120",
-            note: "minimum grade A−",
-            state: "blocked",
-            meta: "Taken Spring 2027, B",
-            tone: "bad",
-          },
-          CONDITIONS.standing,
-        ],
-      },
-      summarise("Option 3", [CONDITIONS.second, courseNode(later), CONDITIONS.credits], false),
-    ],
+    options: laid(seed % 2 === 0 ? [deep, shut, none] : [deep, none, shut]),
   }
 }
 

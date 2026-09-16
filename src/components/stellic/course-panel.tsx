@@ -410,6 +410,8 @@ export function CoursePanel({
     ? (plan ?? terms).find((t) => t.id !== planned.term.id && !t.locked)?.name
     : undefined
   const activity = planned ? activityFor(entry.code, planned.term.name, moved) : []
+  /* The credits are the student's already, which is what the green says. */
+  const earned = planned?.term.state === "completed"
 
   const [campus, setCampus] = useState(detail.campus)
   const [termId, setTermId] = useState(terms[0]?.id ?? "")
@@ -469,7 +471,11 @@ export function CoursePanel({
                 <span className="text-caption-lg font-semibold text-gray-100">
                   {planned.term.name}
                 </span>
-                <Badge variant="warning">{CREDIT_GROUP_LABEL[creditGroup(planned.term)]}</Badge>
+                {/* Green where the credits are already the student's, amber
+                    while they are only promised. */}
+                <Badge variant={earned ? "success" : "warning"}>
+                  {CREDIT_GROUP_LABEL[creditGroup(planned.term)]}
+                </Badge>
               </p>
               <p className="flex flex-wrap items-center gap-4 text-body-md text-gray-80">
                 <span>Topic: {planned.course.topic ?? "General"}</span>
@@ -491,10 +497,13 @@ export function CoursePanel({
                     <Icon name="sticky-note-2" size={16} />
                     Write a note
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={onRemove} className="gap-2 py-1.5 text-body-md">
-                    <Icon name="close" size={16} />
-                    Remove from plan
-                  </DropdownMenuItem>
+                  {/* A course already taken cannot be taken back out. */}
+                  {onRemove && (
+                    <DropdownMenuItem onSelect={onRemove} className="gap-2 py-1.5 text-body-md">
+                      <Icon name="close" size={16} />
+                      Remove from plan
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
               <Icon name="unfold-less" size={16} className="text-gray-100" />

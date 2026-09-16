@@ -130,6 +130,7 @@ export function AuditRow({
         /* The seat whose panel is open says so. */
         selected && "border-primary-50 bg-primary-0/40",
         !locked && !draft && "cursor-grab transition-colors hover:bg-gray-5",
+        locked && onOpenCourse && "transition-colors hover:bg-gray-5",
         /* Same reason as the draft bar: a marked card carries the transition
            all along, so losing its tint is something it can animate. */
         draft && "transition-colors duration-500",
@@ -418,12 +419,17 @@ export function SemesterCard({
   const rows: ReactNode[] = term.courses.map((course) => {
     const struck = course.draft?.mark === "moved" || course.draft?.mark === "removed"
     return term.locked || struck ? (
+      /* A term that is done or under way is not editable, but the courses in
+         it are still courses: they open on their own like any other. */
       <AuditRow
         key={course.id}
         course={course}
         locked={term.locked}
         settling={settling}
         streaming={streaming}
+        onOpenCourse={
+          term.locked && !struck && onOpenCourse ? () => onOpenCourse(course.id) : undefined
+        }
       />
     ) : (
       <SortableAuditRow

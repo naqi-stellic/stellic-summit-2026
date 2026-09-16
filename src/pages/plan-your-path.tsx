@@ -362,13 +362,17 @@ export function PlanYourPath({
   /* The course opened on its own, from the remaining list or from the courses
      that could fill a seat. */
   const course = openCourse
+  /* Everything on the canvas, which is the plan plus the year that is already
+     behind the student — that one is a constant rather than part of the plan,
+     so anything reading a course off the canvas has to look in both. */
+  const canvas = [COMPLETED_YEAR, ...shown]
   /* Or one already planned, which brings its term with it. */
-  const plannedOpen = openPlanned ? findCourse(shown, openPlanned) : null
+  const plannedOpen = openPlanned ? findCourse(canvas, openPlanned) : null
   /* Where a course opened like that could be put: every term that takes one. */
   const plannableTerms = shown.flatMap((year) => year.terms.filter((term) => !term.locked))
   /* The whole plan, which is what a course panel reads to say where a course
      fits: the year tabs narrow what is on the canvas, not what is true. */
-  const allTerms = years.flatMap((year) => year.terms)
+  const allTerms = canvas.flatMap((year) => year.terms)
   /* The seat whose panel is open, if it is still in the plan. */
   const seat = openSeat ? findCourse(shown, openSeat.id) : null
   /* Terms a request is still out on. Every card that draws one of them marks
@@ -760,10 +764,14 @@ export function PlanYourPath({
             plan={allTerms}
             planned={{ course: plannedOpen.course, term: plannedOpen.term }}
             onAdd={() => setOpenPlanned(null)}
-            onRemove={() => {
-              handleRemoveCourse(plannedOpen.course.id)
-              setOpenPlanned(null)
-            }}
+            onRemove={
+              plannedOpen.term.locked
+                ? undefined
+                : () => {
+                    handleRemoveCourse(plannedOpen.course.id)
+                    setOpenPlanned(null)
+                  }
+            }
             onBack={() => setOpenPlanned(null)}
             onClose={() => setOpenPlanned(null)}
           />
@@ -910,7 +918,7 @@ export function PlanYourPath({
               onToggleCollapse={() => toggleCollapsed(INCOMING_LABEL)}
             />
 
-            {[COMPLETED_YEAR, ...shown].map((year) => (
+            {canvas.map((year) => (
               <YearSection
                 key={year.label}
                 year={year}

@@ -229,8 +229,13 @@ two-hundred one has a single way in, which is not a choice, so it is drawn as
 the requirements themselves — no Option head above them and no directive over
 it. Three hundred gives two ways in and four hundred gives three, one of them
 out of reach, and those are the ones headed "Complete any one of N options".
-What each option comes to is read off what is inside it rather than written by
-hand, against the record the plan already holds: the ten courses passed in
+Only one of the ways can be the one the student takes, so only one of them
+reads as green: the first is built from what they have and what they are
+taking, and the others from a course nobody has started (grey, "Nothing
+started") or a grade already in and under what the option asks for (red,
+"Can't be met" — MIS 120 was passed at B and cannot be repeated). What each
+option comes to is read off what is inside it rather than written by hand,
+against the record the plan already holds: the ten courses passed in
 2026-2027, the five under way this term, a 3.24 average and thirty credits. So
 a tree never claims a course was passed that the plan says is still to come,
 and a group where one child is enough counts as one thing rather than as a
@@ -251,6 +256,13 @@ which is why a subject's own courses gate each other — FIN 415 in Fall 2028
 names FIN 340 in Spring 2028, and nothing before a course can depend on it.
 Activity history is the same course seen the other way round: when it landed
 where it is, and what it was moved from.
+
+Courses in a term that is finished or under way open the same way — they are
+not editable, but they are still courses, so the row opens the panel and the
+Actions menu drops Remove. The term tag beside the name is green and says Taken
+where the credits are already the student's, amber where they are only
+promised. The only rows on the canvas that do not open are the incoming
+credits, which are not courses of this plan.
 
 A course already in the plan opens on the same panel, from its row on the
 canvas or in a term view
