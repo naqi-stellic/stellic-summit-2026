@@ -280,6 +280,119 @@
   .animate-dissolve {
     animation: none;
   }
+
+  /* The border stays, in its ordinary colour, and the words stay legible. */
+  .ai-glow::before,
+  .ai-glow::after,
+  .ai-shimmer {
+    animation: none;
+  }
+
+  .ai-glow[data-working="true"] {
+    border-color: var(--stellic-gray-40);
+  }
+
+  .ai-shimmer {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--stellic-gray-60);
+  }
+}
+
+/* ==========================================================================
+   The assistant thinking out loud.
+
+   A conic gradient turning just outside the card's edge while an answer is
+   being written, and gone the moment it is finished — so "Stellic is working
+   on this" is a property of the surface rather than another spinner to read.
+   The card's own border fades out underneath it and back in afterwards.
+   ========================================================================== */
+
+@property --ai-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes ai-spin {
+  to {
+    --ai-angle: 360deg;
+  }
+}
+
+/* Light sweeping across the words, which says the same thing the border does
+   at the scale of a single line. */
+@keyframes ai-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+/* No `position` of its own: the element it goes on is already positioned —
+   the dialog is `fixed` — and setting `relative` here would take that away.
+   Anything else using this class has to be positioned already too. */
+.ai-glow {
+  isolation: isolate;
+  transition: border-color 0.9s ease;
+}
+
+.ai-glow::before,
+.ai-glow::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 5px;
+  background: conic-gradient(
+    from var(--ai-angle),
+    #f43f5e,
+    #fb923c,
+    #facc15,
+    #4ade80,
+    #38bdf8,
+    #818cf8,
+    #e879f9,
+    #f43f5e
+  );
+  z-index: -1;
+  animation: ai-spin 2.6s linear infinite;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+/* The same ring again, blurred, so the colour reaches past the edge. */
+.ai-glow::after {
+  inset: -2px;
+  filter: blur(6px);
+}
+
+.ai-glow[data-working="true"] {
+  border-color: transparent;
+}
+
+.ai-glow[data-working="true"]::before {
+  opacity: 1;
+}
+
+.ai-glow[data-working="true"]::after {
+  opacity: 0.25;
+}
+
+.ai-shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--stellic-gray-60) 35%,
+    #c9d0dc 50%,
+    var(--stellic-gray-60) 65%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: ai-shimmer 2.2s linear infinite;
 }
 
 @layer base {

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Face, Panel, Section } from "@/components/stellic/staff-chrome"
 import { Customize } from "@/components/stellic/staff-customize"
+import { CreateEquivalency } from "@/components/stellic/staff-equivalency"
 import { Insights } from "@/components/stellic/staff-insights"
 import { OpenItems } from "@/components/stellic/staff-open-items"
 import { ToastProvider, useToast } from "@/components/stellic/staff-toast"
@@ -18,6 +19,7 @@ import {
   type TabKey,
 } from "@/data/staff-home"
 import { EXCEPTIONS, PUBLISH_REQUESTS, REPORTS, TODAY } from "@/data/staff-queue"
+import type { Articulation } from "@/data/staff-insights"
 
 /* Staff Home.
  *
@@ -65,14 +67,21 @@ function Home({ who, inert, without }: StaffHomeProps) {
   const [exceptions, setExceptions] = useState(EXCEPTIONS)
   const [cleared, setCleared] = useState(45)
   const [customizing, setCustomizing] = useState(false)
+  /* The equivalency form takes the whole page when it is open: it is where the
+     Transfers insight was pointing, not a panel beside it. */
+  const [writing, setWriting] = useState<Articulation | null>(null)
+  /* Articulations a rule has been written for. Gone rather than hidden — the
+     work is done, not put off. */
+  const [resolved, setResolved] = useState(() => new Set<string>())
 
   const elsewhere = (what: string) => toast(`${what} (Exists in the real app)`)
 
   return (
     <AppShell
       section="staff"
-      navCurrent="Home"
-      title="Home"
+      /* The form belongs to Transfer, so the nav says so while it is open. */
+      navCurrent={writing ? "Transfer" : "Home"}
+      title={writing ? "Transfer" : "Home"}
       assistant={false}
       account={
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-field text-gray-0">
@@ -80,6 +89,21 @@ function Home({ who, inert, without }: StaffHomeProps) {
         </span>
       }
     >
+      {writing ? (
+        <CreateEquivalency
+          row={writing}
+          onCancel={() => setWriting(null)}
+          onCreate={(count, status) => {
+            setResolved((all) => new Set([...all, writing.id]))
+            setWriting(null)
+            setCleared((n) => n + 1)
+            toast(
+              `Rule created. ${count} articulations queued as ${status === "completed" ? "Completed" : status === "new" ? "New" : "Pending"}.`,
+              { ok: true }
+            )
+          }}
+        />
+      ) : (
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 pt-8 pb-24">
         <div className="mx-auto flex w-full max-w-[1024px] flex-col gap-6">
           {/* Who you are and how the week is going. The tally is the page's
@@ -216,6 +240,8 @@ function Home({ who, inert, without }: StaffHomeProps) {
             persona={persona}
             jobs={jobs}
             hidden={hidden}
+            resolved={resolved}
+            onCreateRule={setWriting}
             onHide={(ids) => setHidden((all) => new Set([...all, ...ids]))}
             onRestore={(ids) =>
               setHidden((all) => {
@@ -228,6 +254,7 @@ function Home({ who, inert, without }: StaffHomeProps) {
           />
         </div>
       </main>
+      )}
 
       <Customize
         open={customizing}

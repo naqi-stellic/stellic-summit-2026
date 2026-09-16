@@ -359,53 +359,154 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
 
 /* ============================================================ Articulations */
 
+/** A course, written the way both columns of the equivalency form want it. */
+export type Course = { code: string; name: string }
+
+/** A home course Stellic proposes the incoming one should map onto, and the
+ *  evidence it is proposing it from. Nothing here is decided — every one of
+ *  them is offered with an Add and a Hide. */
+export type Suggestion = Course & { because: string }
+
+/* ---------------------------------------------------------------- lookup
+   What the assistant finds when asked about an incoming course.
+
+   Nobody here has Seneca's catalogue. Somebody normally opens a tab, searches
+   a college's site and reads a paragraph, which is the slow half of writing an
+   equivalency — so the assistant goes and reads it, and shows its sources so
+   the reading can be checked rather than trusted. */
+
+export type CatalogMatch = {
+  /** As the catalogue writes it: code and title together. */
+  title: string
+  school: string
+  summary: string
+  /** Where it was read. Shown because a description nobody can check is worth
+   *  less than no description. */
+  sources: string[]
+}
+
+/** What the assistant says it is doing while it does it. Five of them, one a
+ *  second, because the work takes about that long and a progress bar that
+ *  cannot say what it is waiting for says nothing. */
+export const lookupSteps = (institution: string, code: string) => [
+  "Finding catalog details…",
+  `Locating ${institution}'s course catalog…`,
+  `Searching the catalog for ${code}…`,
+  "Matching the course code and title…",
+  "Reading the course description…",
+]
+
 /** A catalogue-level finding that belongs to no program: an incoming course
  *  staff have articulated by hand often enough that it should be a rule. */
 export type Articulation = {
   id: string
   /** The incoming course, which is what the row is about. */
-  from: string
+  from: Course
   institution: string
-  /** The home course to map it onto — Stellic's suggestion, not a fact. */
-  suggestion: string
+  /** The one home course Stellic proposes it maps onto. The insight row names
+   *  it and the equivalency form opens holding it — one suggestion, said once,
+   *  in both places. */
+  suggestion: Suggestion
   /** How much work the rule would take off the desk. */
   impact: string
   pending: number
   iso: string
   vis: PersonaKey[]
+  /** What the assistant turns up when asked about the incoming course. One
+   *  course in the source column, one course read out of the catalogue. */
+  details: CatalogMatch
 }
 
 export const ARTICULATIONS: Articulation[] = [
   {
     id: "eq1",
-    from: "21-1200: Calculus I",
+    from: { code: "21-1200", name: "Calculus I" },
     institution: "Seneca College",
-    suggestion: "21-1200: Calculus I",
+    suggestion: {
+      code: "31-1200",
+      name: "Calculus I",
+      because:
+        "Matched to 31-1200 on 36 of the last 38 transfers from Seneca College, every one of them approved.",
+    },
     impact: "38 pending articulations",
     pending: 38,
     iso: "2026-08-04",
     vis: ["jessica"],
+    details: {
+      title: "21-1200: Calculus I",
+      school: "Seneca College",
+      summary:
+        "Limits, continuity, and the derivative, developed from first principles and applied to rates of change, curve sketching and optimisation. The term closes on the definite integral and the fundamental theorem. Six credit hours across lecture and tutorial, with a…",
+      sources: ["catalog.senecacollege.ca", "math.senecacollege.ca"],
+    },
   },
   {
     id: "eq2",
-    from: "21-2445: Biology I",
+    from: { code: "21-2445", name: "Biology I" },
     institution: "Seneca College",
-    suggestion: "32-1100: Foundations of Biology",
+    suggestion: {
+      code: "32-1100",
+      name: "Foundations of Biology",
+      because:
+        "Matched to 32-1100 on 22 of the last 24 transfers from Seneca College. The other two were waived.",
+    },
     impact: "24 pending articulations",
     pending: 24,
     iso: "2026-08-03",
     vis: ["jessica"],
+    details: {
+      title: "21-2445: Biology I",
+      school: "Seneca College",
+      summary:
+        "Cell structure and function, bioenergetics, molecular genetics and the principles of inheritance, taught alongside a weekly laboratory. Students practise microscopy, aseptic technique and experimental design, and keep a lab notebook assessed as part of the…",
+      sources: ["catalog.senecacollege.ca", "science.senecacollege.ca"],
+    },
   },
   {
     id: "eq3",
-    from: "PSY-837: Intro to Psychology",
+    from: { code: "PSY-837", name: "Intro to Psychology" },
     institution: "Conestoga College",
-    suggestion: "43-1000: Intro to Psychology",
+    suggestion: {
+      code: "43-1000",
+      name: "Intro to Psychology",
+      because:
+        "Matched to 43-1000 on all 17 transfers from Conestoga College since the 2024 catalogue.",
+    },
     impact: "17 pending articulations",
     pending: 17,
     iso: "2026-08-01",
     vis: ["jessica"],
+    details: {
+      title: "PSY-837: Intro to Psychology",
+      school: "Conestoga College",
+      summary:
+        "A survey of the discipline: biological bases of behaviour, sensation and perception, learning, memory, development, personality and psychological disorders. Assessment is by two term tests and a short paper on a peer-reviewed study of the student's…",
+      sources: ["conestogac.on.ca/calendar"],
+    },
   },
+]
+
+/* ---------------------------------------------------------------- the rule
+   What a new equivalency is born with. They are the institution's defaults
+   rather than this rule's answers, which is why the form states them and
+   offers to change them rather than asking. */
+
+export const RULE_DEFAULTS: [string, string][] = [
+  ["Effective Dates", "Anytime in the past - Indefinite in the future"],
+  ["Min / max grades", "A- to C"],
+  ["Min / max credit", "3 to 6"],
+  ["Courses must be taken within the last", "Any number of years"],
+]
+
+/** What a rule does to the articulations it creates. Pending is the default
+ *  because a rule going live should not award credit before anyone has looked
+ *  at what it swept up. */
+export type ArticulationStatus = "pending" | "new" | "completed"
+
+export const ARTICULATION_STATUS: { id: ArticulationStatus; label: string; detail: string }[] = [
+  { id: "pending", label: "Pending", detail: "Held for review. No credit awarded, nothing on audit." },
+  { id: "new", label: "New", detail: "Held for review, flagged as created by this rule." },
+  { id: "completed", label: "Completed", detail: "Awards credit to the student." },
 ]
 
 /* ============================================================ Reading it */
@@ -501,6 +602,6 @@ export function matchArticulations(rows: Articulation[], q: InsightQuery) {
   )
 
   if (q.sort === "newest") return [...shown].sort((a, b) => (a.iso < b.iso ? 1 : -1))
-  if (q.sort === "name") return [...shown].sort((a, b) => a.from.localeCompare(b.from))
+  if (q.sort === "name") return [...shown].sort((a, b) => a.from.code.localeCompare(b.from.code))
   return [...shown].sort((a, b) => b.pending - a.pending)
 }

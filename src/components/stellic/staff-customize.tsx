@@ -46,7 +46,7 @@ export function Customize({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px]">
+      <DialogContent className="rounded-md sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle>Customize your home page</DialogTitle>
           <DialogDescription className="text-body-md text-gray-80">
@@ -63,7 +63,7 @@ export function Customize({
               <div
                 key={job.key}
                 className={cn(
-                  "flex items-start gap-3.5 rounded-lg border p-[13px] transition-colors",
+                  "flex items-start gap-3.5 rounded-md border p-[13px] transition-colors",
                   on ? "border-primary-5 bg-primary-0/30" : "border-gray-40"
                 )}
               >

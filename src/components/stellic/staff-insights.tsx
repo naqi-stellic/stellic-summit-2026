@@ -300,7 +300,9 @@ function ArticulationRow({
     <div className="flex items-start gap-3.5 border-b border-divider p-4 transition-colors last:border-b-0 hover:bg-gray-0">
       <span className="w-[13px] shrink-0" />
       <div className={COL_SUBJECT}>
-        <p className="text-body-md font-semibold text-foreground">{row.from}</p>
+        <p className="text-body-md font-semibold text-foreground">
+          {row.from.code}: {row.from.name}
+        </p>
         <p className="mt-0.5 text-label-md text-gray-80">{row.institution}</p>
       </div>
       <div className={COL_TAGS}>
@@ -310,7 +312,10 @@ function ArticulationRow({
         <p className="text-body-md font-semibold text-foreground">{row.impact}</p>
         <p className="mt-2 flex items-start gap-2 text-label-md text-gray-80">
           <Icon name="auto-awesome" size={14} className="mt-px shrink-0" />
-          Suggestion: <span className="min-w-0 text-gray-100">{row.suggestion}</span>
+          Suggestion:{" "}
+          <span className="min-w-0 text-gray-100">
+            {row.suggestion.code}: {row.suggestion.name}
+          </span>
         </p>
       </div>
       <div className={COL_ACTIONS}>
@@ -331,12 +336,19 @@ export function Insights({
   persona,
   jobs,
   hidden,
+  resolved,
   onHide,
   onRestore,
+  onCreateRule,
   onCleared,
 }: {
   persona: Persona
   jobs: Record<string, boolean>
+  /** Articulations a rule has already been written for. They are gone rather
+   *  than hidden: the work is done, not put off. */
+  resolved: Set<string>
+  /** Open the equivalency form on this row. */
+  onCreateRule: (row: Articulation) => void
   /** This person's own hidden set. Dismissal is per-user, so it is held per
    *  persona and never leaves anyone else's list. */
   hidden: Set<string>
@@ -368,7 +380,7 @@ export function Insights({
 
   const programs = canEdit ? INSIGHT_PROGRAMS.filter((p) => p.vis.includes(persona.key)) : []
   const articulations = perms.articulations
-    ? ARTICULATIONS.filter((row) => row.vis.includes(persona.key))
+    ? ARTICULATIONS.filter((row) => row.vis.includes(persona.key) && !resolved.has(row.id))
     : []
 
   const ask = (over: Partial<InsightQuery> = {}): InsightQuery => ({
@@ -440,7 +452,7 @@ export function Insights({
           key={(isHidden ? "h-" : "") + row.id}
           row={row}
           hidden={isHidden}
-          onRule={() => elsewhere(`Launches the create rule sidebar for ${row.from}.`)}
+          onRule={() => onCreateRule(row)}
           onHide={() => hideThese([row.id], "Moved to hidden insights. Other staff still see it.")}
         />
       ))}
@@ -545,7 +557,7 @@ export function Insights({
               aria-expanded={drawer}
               className={cn(
                 "flex w-full cursor-pointer items-center gap-2.5 border-t border-divider bg-gray-0 px-4 py-3 text-left transition-colors hover:bg-gray-5",
-                !drawer && "rounded-b-lg"
+                !drawer && "rounded-b-md"
               )}
             >
               <Icon
@@ -558,7 +570,7 @@ export function Insights({
               </span>
             </button>
             {drawer && (
-              <div className="overflow-hidden rounded-b-lg border-t border-divider bg-gray-0">
+              <div className="overflow-hidden rounded-b-md border-t border-divider bg-gray-0">
                 {list(away, true)}
               </div>
             )}

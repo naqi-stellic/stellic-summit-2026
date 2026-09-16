@@ -62,7 +62,7 @@ export function Section({
  *  is the same hairline — so nothing on the page is lifted above anything. */
 export function Panel({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-lg border border-gray-40 bg-card shadow-xs", className)}>
+    <div className={cn("rounded-md border border-gray-40 bg-card shadow-xs", className)}>
       {children}
     </div>
   )

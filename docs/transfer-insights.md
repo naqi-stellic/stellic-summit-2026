@@ -58,6 +58,80 @@ the assistant's mark, and the only one that says **Suggestion** where every
 other finding says **Suggested**. Those findings are a fact with a fix; this is
 a proposal, and the wording keeps them apart.
 
+## Create new equivalency
+
+Figma: [`77:16095`](https://www.figma.com/design/gcskEkzwNusd12TOommFW0/Staff-Home?node-id=77-16095).
+`src/components/stellic/staff-equivalency.tsx`.
+
+Where **Create rule** goes. The insight says a course keeps being articulated by
+hand; this is the rule that stops it. It takes the whole page rather than a
+panel — it is the destination the insight was pointing at, not a footnote to it
+— and the nav stands on Transfer while it is open.
+
+The form arrives already holding an argument. The incoming course is on the
+left, taken from the row. The right-hand column is Stellic's proposals, each a
+dashed card with an **Add**, a **Hide**, and the evidence behind the badge:
+*"Matched to 31-1200 on 36 of the last 38 transfers from Seneca College, every
+one of them approved."* A suggestion that cannot say why it is suggesting is
+just an instruction, so every one of them carries its reason.
+
+Adding a suggestion turns it into an ordinary course on the rule: solid border,
+a remove ×, the same shape as the incoming course opposite. That is the only
+state change on the page, and it is the whole difference between a suggestion
+and a default — nothing is on the rule until somebody puts it there.
+
+The row Jessica pressed decides everything the form shows: the institution, the
+incoming course, which suggestion leads, and how many students the rule would
+catch. Nothing is invented between the two screens.
+
+### Course details
+
+The other half of writing an equivalency is knowing what the incoming course
+actually was, and nobody in a registrar's office has Seneca's catalogue. The
+slow part of the job is opening a tab, finding a college's site and reading a
+paragraph — so **View course details** sends the assistant to read it.
+
+`src/components/stellic/staff-course-details.tsx`. It opens **where the button
+was**, in the column the course is in, rather than over the page: what it says
+is about that course and is read against it, and a dialog would cover the very
+thing it describes. Closing it puts the button back.
+
+Two things keep it honest rather than magical. While it works it says what it is
+doing, naming the institution and the code — *"Searching the catalog for
+21-1200…"* — rather than turning a spinner at you; five steps, one a second, so
+the wait is five seconds and never longer. And when it answers it says where it
+read, as source chips under the description, so the answer can be checked
+instead of trusted. The line at the foot — *details may contain errors, verify
+with the source links* — is the same point, and the thumbs beside it are how a
+wrong one gets reported. Only a thumbs down is asked to explain itself; a thumbs
+up is already the whole message.
+
+The card fills rather than appears: every word is queued and revealed in order,
+so it grows downward at a steady rate and reads as something being written for
+you. A conic gradient turns just outside its edge while that is happening and is
+gone the moment it stops, so "Stellic is working on this" is a property of the
+surface rather than another thing to read. Both stop under
+`prefers-reduced-motion`.
+
+One course in the source column, one course read out of the catalogue. The card
+describes what is in front of it and nothing else.
+
+### The impact dialog
+
+Save does not save. It opens **Create equivalency rule**, which states the
+equivalency in one line and then the thing a form cannot: *38 students will have
+articulations created by this rule*, with their usernames a click away. A rule
+is not one decision about one student, it is one decision about everybody it
+catches, so the count comes before the button.
+
+**Set articulation status** decides what the rule does to them — Pending, New or
+Completed. Pending is the default, because a rule going live should not award
+credit before anyone has looked at what it swept up.
+
+Creating the rule resolves the insight: the row leaves the Transfers tab for
+good rather than going to hidden, because the work is done rather than put off,
+and the cleared-items tally moves.
+
 ## Jessica
 
 Defined in `src/data/staff-home.ts` beside Marcus, who is the other one:
