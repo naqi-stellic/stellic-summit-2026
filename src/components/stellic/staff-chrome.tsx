@@ -84,30 +84,35 @@ export function TabBar({
   more = [],
   active,
   onSelect,
+  live,
 }: {
   tabs: Tab[]
   more?: Tab[]
   active: string
   onSelect: (id: string) => void
+  /** The tabs that lead somewhere. The rest are drawn exactly as they would be
+   *  otherwise — they are part of the record and leaving them out would
+   *  misrepresent it — but they do not pretend to open, because there is
+   *  nothing behind them to open onto. Omitted, every tab leads somewhere. */
+  live?: string[]
 }) {
   return (
     <div className="flex flex-wrap items-center gap-x-1 border-b border-gray-40 px-4">
       {tabs.map((tab) => {
         const on = tab.id === active
+        const opens = !live || live.includes(tab.id)
 
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => onSelect(tab.id)}
-            aria-current={on ? "page" : undefined}
-            className={cn(
-              "-mb-px flex cursor-pointer items-center gap-[7px] border-b-2 px-3.5 pt-[15px] pb-[13px] text-caption-lg font-semibold whitespace-nowrap transition-colors",
-              on
-                ? "border-primary-50 text-primary-50"
-                : "border-transparent text-gray-80 hover:text-gray-100"
-            )}
-          >
+        const shape = cn(
+          "-mb-px flex items-center gap-[7px] border-b-2 px-3.5 pt-[15px] pb-[13px] text-caption-lg font-semibold whitespace-nowrap transition-colors",
+          on ? "border-primary-50 text-primary-50" : "border-transparent text-gray-80",
+          /* Not greyed and not disabled — an inert tab is an ordinary tab that
+             happens to have nothing behind it. Only the pointer and the hover
+             go, because those are the two things that promise otherwise. */
+          opens && "cursor-pointer hover:text-gray-100"
+        )
+
+        const inside = (
+          <>
             {tab.label}
             {!!tab.count && (
               <span
@@ -119,7 +124,23 @@ export function TabBar({
                 {tab.count}
               </span>
             )}
+          </>
+        )
+
+        return opens ? (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onSelect(tab.id)}
+            aria-current={on ? "page" : undefined}
+            className={shape}
+          >
+            {inside}
           </button>
+        ) : (
+          <span key={tab.id} className={shape}>
+            {inside}
+          </span>
         )
       })}
 

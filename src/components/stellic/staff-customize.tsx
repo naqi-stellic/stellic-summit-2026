@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
-import { jobsFor, type Persona } from "@/data/staff-home"
+import { jobsFor, type JobKey, type Persona } from "@/data/staff-home"
 
 /* Customize your home page.
  *
@@ -31,15 +31,18 @@ export function Customize({
   onOpenChange,
   persona,
   jobs,
+  without,
   onToggle,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   persona: Persona
   jobs: Record<string, boolean>
+  /** Jobs this prototype does not carry, so it does not offer them either. */
+  without?: JobKey[]
   onToggle: (key: string, on: boolean) => void
 }) {
-  const available = jobsFor(persona.perms)
+  const available = jobsFor(persona.perms, without)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

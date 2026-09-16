@@ -6,9 +6,22 @@ Staff Home with the transfer officer standing in it rather than the registrar.
 
 ## What differs
 
-One thing, passed to `StaffHome`: `who="jessica"` where Staff Home passes
-`who="marcus"`. There is no second difference — the permission model does the
-rest, and a change to either prototype lands in both.
+Three props on `StaffHome`, and the permission model does everything else — a
+change to either prototype lands in both.
+
+`who="jessica"` where Staff Home passes `who="marcus"`. That alone decides both
+panels: her tabs, her insights, her rows.
+
+`inert={["appts"]}`. Her appointments are real and the count is hers, so the tab
+is drawn — but this prototype is about transfer credit and nothing has been
+built behind it. It is not greyed and not disabled, because it is not either of
+those things: it is an ordinary unselected tab that happens to have nothing
+behind it, so only the pointer and the hover go.
+
+`without={["reports"]}`. Pinned reports are a registrar's habit rather than a
+transfer officer's, and they are the one block on Home with nothing to act on.
+Off the page, and off the Customize list with it — a switch for something the
+page will not draw is a promise it cannot keep.
 
 ## Why it is worth having twice
 

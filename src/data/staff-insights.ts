@@ -37,7 +37,6 @@ export type InsightItem = {
 export type InsightProgram = {
   id: string
   program: string
-  code: string
   version: string
   students: number
   published: string
@@ -60,8 +59,7 @@ const withIds = (programs: RawProgram[]): InsightProgram[] =>
 export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
   {
     id: "me",
-    program: "BEng in Mechanical Engineering",
-    code: "BENG-ME",
+    program: "Mechanical Engineering, B.Eng.",
     version: "EY2024",
     students: 210,
     published: "Sep 2024",
@@ -156,8 +154,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
   },
   {
     id: "biol",
-    program: "BS in Biology",
-    code: "BS-BIOL",
+    program: "Biology, B.S.",
     version: "EY2025",
     students: 142,
     published: "Jan 12",
@@ -213,8 +210,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
   },
   {
     id: "polsci",
-    program: "BA in Political Science",
-    code: "BA-POLSCI",
+    program: "Political Science, B.A.",
     version: "EY2025",
     students: 96,
     published: "Mar 3",
@@ -239,8 +235,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
   },
   {
     id: "cs",
-    program: "BS in Computer Science",
-    code: "BS-CS",
+    program: "Computer Science, B.S.",
     version: "EY2026",
     students: 388,
     published: "Jul 28",
@@ -289,8 +284,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
   },
   {
     id: "enve",
-    program: "MS in Environmental Engineering",
-    code: "MS-ENVE",
+    program: "Environmental Engineering, M.S.",
     version: "EY2026",
     students: 41,
     published: "Jun 19",
@@ -315,8 +309,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
   },
   {
     id: "bfa",
-    program: "BFA in Graphic Design",
-    code: "BFA-GD",
+    program: "Graphic Design, B.F.A.",
     version: "EY2026",
     students: 58,
     published: "Jul 2",
@@ -344,8 +337,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
   },
   {
     id: "bba",
-    program: "BBA in Business Administration",
-    code: "BBA-BUS",
+    program: "Business Administration, B.B.A.",
     version: "EY2026",
     students: 176,
     published: "May 8",

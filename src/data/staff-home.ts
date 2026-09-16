@@ -222,12 +222,17 @@ export function jobAllowed(job: Job, perms: Perms): boolean {
   return job.tab ? tabAllowed(job.tab, perms) : false
 }
 
-export const jobsFor = (perms: Perms) => JOBS.filter((job) => jobAllowed(job, perms))
+/** What Customize Home has to offer. `without` is a prototype saying it does
+ *  not carry a job at all — not that this person cannot have it — so the job
+ *  is not listed either, because a switch for something the page will not draw
+ *  is a promise it cannot keep. */
+export const jobsFor = (perms: Perms, without: JobKey[] = []) =>
+  JOBS.filter((job) => jobAllowed(job, perms) && !without.includes(job.key))
 
 /** Every allowed job starts on. What a role should arrive with is an admin
  *  setting in the real product; here it is simply everything they may have. */
-export function defaultJobs(perms: Perms): Record<string, boolean> {
+export function defaultJobs(perms: Perms, without: JobKey[] = []): Record<string, boolean> {
   const on: Record<string, boolean> = {}
-  jobsFor(perms).forEach((job) => (on[job.key] = true))
+  jobsFor(perms, without).forEach((job) => (on[job.key] = true))
   return on
 }

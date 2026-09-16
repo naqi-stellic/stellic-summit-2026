@@ -132,6 +132,10 @@ severity, a source, the requirement it is about, and — always — a **suggeste
 fix**, because a finding without one is a complaint. Opportunities also carry
 who they reach.
 
+A program is named the way somebody says it out loud — "Mechanical Engineering,
+B.Eng." — and not `[BENG-ME]`. The code is how Stellic finds the audit, not how
+a person recognises it, so it is nowhere on the page.
+
 Findings bundle under their program rather than arriving as a flat list: a
 program with ten problems is one decision, not ten. The row shape follows the
 count. One finding renders flat with the message inline; several render as a

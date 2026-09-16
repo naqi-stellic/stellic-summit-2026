@@ -164,9 +164,7 @@ function ProgramRow({
 
   const subject = (
     <div className={COL_SUBJECT}>
-      <p className="text-body-md font-semibold text-foreground">
-        {program.program} <span className="font-normal text-gray-80">[{program.code}]</span>
-      </p>
+      <p className="text-body-md font-semibold text-foreground">{program.program}</p>
       <p className="mt-0.5 text-label-md text-gray-80">
         Version: <span className="font-semibold text-gray-100">{program.version}</span>
       </p>
@@ -412,7 +410,7 @@ export function Insights({
   const elsewhere = (what: string) => toast(`${what} (Exists in the real app)`)
 
   const editor = (program: InsightProgram) =>
-    elsewhere(`Opens the audit editor: ${program.code} ${program.version}.`)
+    elsewhere(`Opens the audit editor: ${program.program}, ${program.version}.`)
 
   const liveTotal = total(live)
   const awayTotal = total(away)
@@ -432,7 +430,7 @@ export function Insights({
             const ids = program.shown.map((item) => item.id)
             hideThese(
               ids,
-              `${ids.length} insight${ids.length > 1 ? "s" : ""} on ${program.code} moved to hidden. Other staff still see them.`
+              `${ids.length} insight${ids.length > 1 ? "s" : ""} on ${program.program} moved to hidden. Other staff still see them.`
             )
           }}
         />

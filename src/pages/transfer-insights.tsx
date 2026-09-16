@@ -1,6 +1,6 @@
 import { StaffHome } from "@/pages/staff-home"
 
-import type { PersonaKey } from "@/data/staff-home"
+import type { JobKey, PersonaKey, TabKey } from "@/data/staff-home"
 
 /* Transfer Insights.
  *
@@ -14,6 +14,16 @@ import type { PersonaKey } from "@/data/staff-home"
 
 const WHO: PersonaKey = "jessica"
 
+/* Her appointments are real and the count is hers, so the tab is drawn — but
+   this prototype is about transfer credit, and nothing has been built behind
+   it. It reads as any other unselected tab and does nothing when pressed. */
+const INERT: TabKey[] = ["appts"]
+
+/* Pinned reports are a registrar's habit, not a transfer officer's, and they
+   are the one block on Home with nothing to act on. Off the page here, and off
+   the Customize list with it. */
+const WITHOUT: JobKey[] = ["reports"]
+
 export function TransferInsights() {
-  return <StaffHome who={WHO} />
+  return <StaffHome who={WHO} inert={INERT} without={WITHOUT} />
 }

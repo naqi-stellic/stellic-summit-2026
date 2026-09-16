@@ -103,6 +103,7 @@ function arrange<T extends { iso: string; student?: string; program?: string }>(
 export function OpenItems({
   persona,
   jobs,
+  inert,
   publishes,
   exceptions,
   onResolve,
@@ -110,6 +111,8 @@ export function OpenItems({
 }: {
   persona: Persona
   jobs: Record<string, boolean>
+  /** Tabs this prototype draws but does not open. Named and nothing more. */
+  inert?: TabKey[]
   publishes: PublishRequest[]
   exceptions: ExceptionRequest[]
   /** Take a row off the queue once it has finished animating out. */
@@ -161,8 +164,11 @@ export function OpenItems({
      you are is derived from what is left rather than held in state and
      corrected afterwards. */
   const allowed = ALL_TABS.filter((key) => jobs[JOB_OF_TAB[key]] && tabAllowed(key, perms))
-  const lands = persona.landsOn && allowed.includes(persona.landsOn) ? persona.landsOn : allowed[0]
-  const here = tab && allowed.includes(tab) ? tab : lands
+  /* An inert tab is drawn but never stood on, so it is out of the running for
+     where the page opens as well as for where a press can take you. */
+  const opens = allowed.filter((key) => !inert?.includes(key))
+  const lands = persona.landsOn && opens.includes(persona.landsOn) ? persona.landsOn : opens[0]
+  const here = tab && opens.includes(tab) ? tab : lands
 
   const shown: Tab[] = []
   const more: Tab[] = []
@@ -222,6 +228,7 @@ export function OpenItems({
           tabs={shown}
           more={more}
           active={here}
+          live={inert ? opens : undefined}
           onSelect={(id) => choose(id as TabKey)}
         />
 
@@ -272,7 +279,7 @@ export function OpenItems({
                   window.setTimeout(() => {
                     setPublishing((all) => all.filter((id) => id !== row.id))
                     clear("publish", row.id)
-                    toast(`${row.code} ${row.version} published.`, { ok: true })
+                    toast(`${row.program}, ${row.version} published.`, { ok: true })
                   }, 2300)
                   return
                 }
@@ -283,7 +290,7 @@ export function OpenItems({
                 clear("publish", row.id)
                 toast(`Back to draft. We let ${row.requestedBy} know.`)
               }}
-              onOpen={(row) => elsewhere(`Opens the audit editor: ${row.code} ${row.version}.`)}
+              onOpen={(row) => elsewhere(`Opens the audit editor: ${row.program}, ${row.version}.`)}
             />
           )}
 
@@ -405,11 +412,7 @@ function Publishes({
       {rows.map((row) => (
         <Row key={row.id} leaving={leaving.includes(row.id)}>
           <RowSubject
-            title={
-              <>
-                {row.program} <span className="font-normal text-gray-80">[{row.code}]</span>
-              </>
-            }
+            title={row.program}
             sub={
               <>
                 Version: <span className="font-semibold">{row.version}</span>
@@ -576,7 +579,7 @@ function Exceptions({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => elsewhere(`Opens ${row.student}'s audit (${row.code}).`)}
+                onClick={() => elsewhere(`Opens ${row.student}'s audit.`)}
               >
                 View in audit
               </Button>

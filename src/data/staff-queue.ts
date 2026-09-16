@@ -49,8 +49,7 @@ export type TodayAppt = {
   /** The people in the room, and how many more than fit. */
   who: { initials: string; color: string }[]
   more?: number
-  /** Under way right now, or how long until it starts. */
-  live?: boolean
+  /** How long until it starts, on the ones close enough to say. */
   starts?: string
 }
 
@@ -59,7 +58,7 @@ export const TODAY: TodayAppt[] = [
     title: "Fawad Miller / Advising",
     when: "11:30am – 12:30pm",
     who: [{ initials: "FM", color: "#b54708" }],
-    live: true,
+    starts: "In 1 hour",
   },
   {
     title: "Group Advising",
@@ -70,7 +69,7 @@ export const TODAY: TodayAppt[] = [
       { initials: "TW", color: "#9f1ab1" },
     ],
     more: 23,
-    starts: "In 10 mins",
+    starts: "In 2 hours",
   },
   {
     title: "Group Advising",
@@ -99,7 +98,6 @@ export const TODAY: TodayAppt[] = [
 export type PublishRequest = {
   id: string
   program: string
-  code: string
   version: string
   requestedBy: string
   date: string
@@ -115,8 +113,7 @@ export type PublishRequest = {
 export const PUBLISH_REQUESTS: PublishRequest[] = [
   {
     id: "ap1",
-    program: "BS in Biology",
-    code: "BS-BIOL",
+    program: "Biology, B.S.",
     version: "EY2026",
     requestedBy: "Farida Mensah",
     date: "Jul 31",
@@ -126,8 +123,7 @@ export const PUBLISH_REQUESTS: PublishRequest[] = [
   },
   {
     id: "ap2",
-    program: "BA in Political Science",
-    code: "BA-POLSCI",
+    program: "Political Science, B.A.",
     version: "EY2026",
     requestedBy: "Tariq Oduya",
     date: "Aug 3",
@@ -155,7 +151,6 @@ export type ExceptionRequest = {
   requestedBy: string
   date: string
   iso: string
-  code: string
   vis: PersonaKey[]
   workflow?: { name: string; fields: [string, string][]; steps: Step[] }
 }
@@ -167,7 +162,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     username: "jmiller",
     initials: "JM",
     color: "#3e4784",
-    program: "Computer Science (BSc)",
+    program: "Computer Science, B.S.",
     kind: "direct",
     title: "Waive this Requirement",
     requirement: "Math Electives",
@@ -176,7 +171,6 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     requestedBy: "Mei-Ling Johansson",
     date: "Aug 3",
     iso: "2026-08-03",
-    code: "BS-CS",
     vis: ["marcus"],
   },
   {
@@ -185,7 +179,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     username: "aosei",
     initials: "AO",
     color: "#026aa2",
-    program: "Political Science (BA)",
+    program: "Political Science, B.A.",
     kind: "direct",
     title: "Substitution",
     requirement: "Regional Studies",
@@ -194,7 +188,6 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     requestedBy: "Mei-Ling Johansson",
     date: "Aug 1",
     iso: "2026-08-01",
-    code: "BA-POLSCI",
     vis: ["marcus"],
   },
   {
@@ -203,7 +196,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     username: "syildiz",
     initials: "SY",
     color: "#087443",
-    program: "Biology (BSc)",
+    program: "Biology, B.S.",
     kind: "wf",
     title: "Manually Pick Courses",
     requirement: "Science Core",
@@ -212,7 +205,6 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     requestedBy: "Selin Yıldız (student)",
     date: "Jul 30",
     iso: "2026-07-30",
-    code: "BS-BIOL",
     vis: ["marcus"],
     workflow: {
       name: "Make an Exception: Science Core",
@@ -257,7 +249,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     username: "twren",
     initials: "TW",
     color: "#9f1ab1",
-    program: "Graphic Design (BFA)",
+    program: "Graphic Design, B.F.A.",
     kind: "direct",
     title: "Waive or Modify Requirement Constraint",
     requirement: "Studio Electives",
@@ -265,7 +257,6 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     requestedBy: "Camille Beaumont",
     date: "Aug 4",
     iso: "2026-08-04",
-    code: "BFA-GD",
     vis: ["marcus"],
   },
 ]
@@ -300,7 +291,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           student: "Farah Al-Amin",
           initials: "FA",
           color: "#b54708",
-          program: "Biology (BSc)",
+          program: "Biology, B.S.",
           date: "Jul 29",
           iso: "2026-07-29",
           vis: ["marcus"],
@@ -336,7 +327,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           student: "Diego Ramos",
           initials: "DR",
           color: "#175cd3",
-          program: "Computer Science (BSc)",
+          program: "Computer Science, B.S.",
           date: "Jul 31",
           iso: "2026-07-31",
           vis: ["marcus"],
@@ -371,7 +362,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           student: "Ingrid Castellanos",
           initials: "IC",
           color: "#0b7a6b",
-          program: "Political Science (BA)",
+          program: "Political Science, B.A.",
           date: "Aug 2",
           iso: "2026-08-02",
           vis: ["marcus"],
@@ -405,7 +396,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           student: "Ryo Nakamura",
           initials: "RN",
           color: "#3e4784",
-          program: "Computer Science (BSc)",
+          program: "Computer Science, B.S.",
           date: "Aug 3",
           iso: "2026-08-03",
           vis: ["jessica"],
@@ -432,7 +423,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           student: "Bríd O'Sullivan",
           initials: "BO",
           color: "#b42318",
-          program: "Biology (BSc)",
+          program: "Biology, B.S.",
           date: "Aug 4",
           iso: "2026-08-04",
           vis: ["jessica"],
@@ -484,7 +475,7 @@ export const NOTES: Note[] = [
     student: "Alexander Mitchell",
     initials: "AM",
     color: "#8891a6",
-    program: "Materials Science and Engineering, MS",
+    program: "Materials Science and Engineering, M.S.",
     text: "Did not attend the last two sessions of MATH 131.",
     tags: [
       { label: "High", tone: "danger" },
@@ -501,7 +492,7 @@ export const NOTES: Note[] = [
     student: "Priya Chandran",
     initials: "PC",
     color: "#175cd3",
-    program: "Computer Science, BSc",
+    program: "Computer Science, B.S.",
     text: "Referred to academic coaching after missing two midterms.",
     tags: [
       { label: "Medium", tone: "warning" },
@@ -518,7 +509,7 @@ export const NOTES: Note[] = [
     student: "Tomas Reyes",
     initials: "TR",
     color: "#b54708",
-    program: "Mechanical Engineering, BEng",
+    program: "Mechanical Engineering, B.Eng.",
     text: "Referred to the financial aid office regarding a tuition hold.",
     tags: [{ label: "Financial" }, { label: "Advisor" }],
   },
@@ -530,7 +521,7 @@ export const NOTES: Note[] = [
     student: "Alexander Mitchell",
     initials: "AM",
     color: "#8891a6",
-    program: "Materials Science and Engineering, MS",
+    program: "Materials Science and Engineering, M.S.",
     text: "Mentioned in Dr. Okafor's note as a strong capstone candidate.",
     tags: [{ label: "Mention" }, { label: "Faculty" }],
   },
@@ -569,7 +560,7 @@ export const APPTS: ApptRow[] = [
     student: "Aaron Scott",
     initials: "AS",
     color: "#8891a6",
-    program: "BA in Political Science",
+    program: "Political Science, B.A.",
     attended: false,
     minutes: false,
   },
@@ -581,7 +572,7 @@ export const APPTS: ApptRow[] = [
     student: "Aaron Lewis",
     initials: "AL",
     color: "#8891a6",
-    program: "BS in Educational Studies",
+    program: "Educational Studies, B.S.",
     attended: true,
     minutes: false,
   },

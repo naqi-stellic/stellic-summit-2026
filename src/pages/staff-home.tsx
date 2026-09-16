@@ -10,7 +10,13 @@ import { Customize } from "@/components/stellic/staff-customize"
 import { Insights } from "@/components/stellic/staff-insights"
 import { OpenItems } from "@/components/stellic/staff-open-items"
 import { ToastProvider, useToast } from "@/components/stellic/staff-toast"
-import { defaultJobs, personaOf, type PersonaKey } from "@/data/staff-home"
+import {
+  defaultJobs,
+  personaOf,
+  type JobKey,
+  type PersonaKey,
+  type TabKey,
+} from "@/data/staff-home"
 import { EXCEPTIONS, PUBLISH_REQUESTS, REPORTS, TODAY } from "@/data/staff-queue"
 
 /* Staff Home.
@@ -27,21 +33,31 @@ import { EXCEPTIONS, PUBLISH_REQUESTS, REPORTS, TODAY } from "@/data/staff-queue
  * the audits you can change, and it wants a fix. Both are built out of the same
  * furniture and read in the same three moves, so the page is learned once. */
 
-export function StaffHome({ who }: { who: PersonaKey }) {
+export function StaffHome({ who, inert, without }: StaffHomeProps) {
   return (
     <TooltipProvider delayDuration={200}>
       <ToastProvider>
-        <Home who={who} />
+        <Home who={who} inert={inert} without={without} />
       </ToastProvider>
     </TooltipProvider>
   )
 }
 
-function Home({ who }: { who: PersonaKey }) {
+type StaffHomeProps = {
+  who: PersonaKey
+  /** Queue tabs this prototype draws but does not open — named, counted, and
+   *  going nowhere, because nothing behind them has been built. */
+  inert?: TabKey[]
+  /** Jobs this prototype leaves out altogether: off the page and off the
+   *  Customize list, rather than switched off and waiting to be found. */
+  without?: JobKey[]
+}
+
+function Home({ who, inert, without }: StaffHomeProps) {
   const toast = useToast()
   const persona = personaOf(who)
 
-  const [jobs, setJobs] = useState(() => defaultJobs(persona.perms))
+  const [jobs, setJobs] = useState(() => defaultJobs(persona.perms, without))
   /* A dismissal is a reading decision rather than a resolution, so it is this
      person's alone — it never leaves anybody else's list. */
   const [hidden, setHidden] = useState(() => new Set<string>())
@@ -170,12 +186,6 @@ function Home({ who }: { who: PersonaKey }) {
                           <span className="ml-1.5 text-label-md text-gray-80">+{appt.more}</span>
                         )}
                       </span>
-                      {appt.live && (
-                        <span className="flex items-center gap-1.5 text-label-md font-medium text-warning-50">
-                          <span className="size-1.5 rounded-full bg-warning-50" />
-                          In Progress
-                        </span>
-                      )}
                       {appt.starts && (
                         <span className="text-label-md text-gray-80">{appt.starts}</span>
                       )}
@@ -191,6 +201,7 @@ function Home({ who }: { who: PersonaKey }) {
           <OpenItems
             persona={persona}
             jobs={jobs}
+            inert={inert}
             publishes={publishes}
             exceptions={exceptions}
             onResolve={(kind, id) =>
@@ -223,6 +234,7 @@ function Home({ who }: { who: PersonaKey }) {
         onOpenChange={setCustomizing}
         persona={persona}
         jobs={jobs}
+        without={without}
         onToggle={(job, on) => setJobs((all) => ({ ...all, [job]: on }))}
       />
     </AppShell>
