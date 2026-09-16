@@ -11,17 +11,22 @@ type Segment = { share: number; className: string }
 /** Leading segments take their share of the width; the last one absorbs the
  *  remainder, so the bar always fills exactly. */
 function ProgressBar({ segments }: { segments: Segment[] }) {
+  /* Only the shares that are actually there. A segment of nothing still drew
+     its own divider, which put a hairline at the head of the bar. */
+  const shown = segments.filter((segment, i) => i === segments.length - 1 || segment.share > 0)
+
   return (
-    <div className="flex h-2 w-full items-start">
-      {segments.map((segment, i) => {
-        const last = i === segments.length - 1
+    /* The pill is the bar's shape rather than its first and last segments', so
+       both ends stay round whichever shares happen to be in it. */
+    <div className="flex h-2 w-full items-start overflow-hidden rounded-full">
+      {shown.map((segment, i) => {
+        const last = i === shown.length - 1
         return (
           <div
             key={i}
             className={cn(
               "h-full",
-              i === 0 && "rounded-l-full",
-              last ? "min-w-0 flex-1 rounded-r-full" : "border-r border-white",
+              last ? "min-w-0 flex-1" : "border-r border-white",
               segment.className
             )}
             style={last ? undefined : { width: `${segment.share * 100}%` }}
