@@ -125,8 +125,12 @@ Small, deliberate, and each one for a reason:
   Discover card and unanswered question group to 80% opacity. That is a resting
   state on a canvas and a greyed-out control in a browser: at 80% a 13px label
   reads as disabled, and the question you have not answered yet is the one you
-  most need to read. Everything is at full strength, hover moves the edge
-  instead, and 60% is kept for the one tile that really is inert.
+  most need to read. Everything is at full strength, and 60% is kept for the
+  one tile that really is inert.
+- **Hover is blue on blue.** No hover state is drawn at all, so every card that
+  can be pressed takes the same one: the edge goes to `primary-50` and the
+  ground to `primary-0`, the pale blue a selected chip already stands on. A
+  grey ground under a blue edge reads as two different signals at once.
 - **The courses are business rather than health sciences.** The credit totals
   are the file's own — 14 confirmed, 8 pending, 3 with no credit out of 25 —
   so the headline sentence reads exactly as designed, but the transcript

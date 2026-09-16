@@ -173,7 +173,7 @@ export function ProgramsCard() {
           {PROGRAMS.map((program) => (
             <div
               key={program.name}
-              className="flex flex-col gap-4 rounded-md border border-gray-40 p-[15px] transition-all hover:border-primary-50"
+              className="flex flex-col gap-4 rounded-md border border-gray-40 p-[15px] transition-all hover:border-primary-50 hover:bg-primary-0"
             >
               <p className="text-body-md font-semibold text-gray-100">{program.name}</p>
               {/* The badges are the recommendation's reasoning, said in the
@@ -204,7 +204,7 @@ export function DiscoverCard() {
             <a
               key={item.title}
               href="#"
-              className="flex flex-col overflow-hidden rounded-md border border-gray-40 transition-all hover:border-primary-50"
+              className="flex flex-col overflow-hidden rounded-md border border-gray-40 transition-all hover:border-primary-50 hover:bg-primary-0"
             >
               <img
                 src={item.image}

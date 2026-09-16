@@ -62,7 +62,9 @@ export function SectionLabel({ className, ...props }: ComponentProps<"p">) {
  *  The file draws these at 80%, and that is where the file and the browser
  *  part company: at 80% the 13px label is greyed rather than quiet, and a tile
  *  you are being asked to choose between should not read as the disabled one.
- *  Full strength, and hover moves the edge instead.
+ *  Full strength, and hover takes the blue it already has: the edge goes to
+ *  primary, and the ground to the pale blue the selected chip stands on. One
+ *  hover means one thing everywhere on the page.
  *
  *  `disabled` is for a branch this prototype does not carry. It stays drawn,
  *  because leaving it out would misreport the design. */
@@ -86,7 +88,7 @@ export function ChoiceCard({
         "flex min-w-0 flex-1 flex-col items-start gap-1 rounded-md border border-gray-40 p-[15px] text-left transition-all",
         disabled
           ? "cursor-not-allowed opacity-60"
-          : "hover:border-primary-50 hover:bg-gray-0",
+          : "hover:border-primary-50 hover:bg-primary-0",
         className
       )}
       {...props}
