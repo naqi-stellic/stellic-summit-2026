@@ -138,13 +138,11 @@ what-if, and the first piece of that feature to land —
 `src/components/stellic/discover-programs.tsx`, which is where the rest of it
 will grow.
 
-That frame is a JPEG pasted onto the canvas rather than a drawn component, so
-there is nothing to read tokens off. It is rebuilt from the design system
-instead, and the two numbers worth knowing were measured off the image: the
-banner is 82px tall on 32/20 padding, and its rule is `primary-5` rather than
-the info `Alert`'s `primary-100` — sampling the reference puts it around
-`#cce3fc`, and in any case a plan's banner is telling you something where this
-one is offering, and a dark edge round an offer reads as a warning.
+It is white, on the same hairline every other card on the page carries, with
+the glyph in a `primary-0` disc. It started blue, which made it the loudest
+thing in a long audit — it is an offer at the foot of a read rather than an
+announcement — so the blue is down to the disc, which is enough to say it leads
+somewhere.
 
 It is a `button`, not an `Alert`: `role="alert"` would have a screen reader
 announce it on arrival, and nothing here has happened.
@@ -186,33 +184,46 @@ here.
 that was actually set, each with the way back to the step that set it. A filter
 nobody touched is not an answer, so it is not a row.
 
-**The check** is three seconds of spinner and no copy. Nothing is computed —
-the standings are already known — but a result that arrives the instant you ask
-for it does not read as having been checked against anything.
+**The check** does not hide the list while it runs. Every program is on screen
+from the first moment with its name, its school and its kind — the catalogue is
+known at once — and only its progress is still arriving, said as *Loading
+progress…* with the dots taking their turn. They report in over five seconds,
+and the list ranks itself as the answers land: a program cannot be ranked
+before it has been audited, so the ones that have come back sort to the top and
+the rest hold their catalogue order until they do. The heading counts them
+throughout, reading *N programs found — loading progress…* and then *N
+programs, sorted by most credits re-used*.
 
-**The results** are one card per program, sorted by what is left to earn,
-because that is the thing anyone actually weighs. Each card is the audit's own
-reading of the program: the same four shares in the same colours, counted the
-same way, so a student who can read the tree can read this without being taught
-anything new.
+Nothing is really computed; the standings were known before the button was
+pressed. But a result that arrives the instant you ask for it does not read as
+having been checked against anything, and a spinner over the whole panel hid a
+list that was ready.
+
+**The results** rank by what the transcript already answers rather than by what
+is left. It is the better question of the two: "how much of this have I done"
+puts a 120-credit major above a minor that is nearly free, which is the right
+way round when the question was what else this record is worth. Each card is
+the audit's own reading of the program — the same four shares in the same
+colours, counted the same way — so a student who can read the tree can read
+this without being taught anything new.
 
 ## What the three intents do
 
-The answer to step 1 decides what is on offer and what pressing the button
-does, which is the point of asking it first.
+The answer to step 1 decides whether the record can be changed at all. What it
+would be changed *to* is the card's business.
 
-**Add an additional major** puts the program's audit on the page under the
+**Add an additional program** puts the program's audit on the page under the
 degree and above the unmatched courses — where it would fall on the record, as
 another thing the transcript is being read against. The degree stays.
 
-**Change your major** puts it in place of the degree, and is offered majors
-only: a minor cannot replace a major. Its button says so rather than saying
-"Add". Because the degree is gone, nothing double counts — there is only one
-program left to count toward — and the overlap shows up instead as how much of
-the new major the student has already done.
+A chosen program offers **Add Program** and, if it is a major, **Switch to**.
+The catalogue is no longer narrowed by the intent, because the card says it
+better: a minor offers Add and no Switch to, not being able to take a major's
+place. Switching puts the program where the degree was, and because the degree
+is gone nothing double counts — the overlap shows up instead as how much of the
+new major the student has already done.
 
-**Just exploring** changes nothing, so its cards carry Program Details and no
-Add button at all.
+**Just exploring** changes nothing, so its cards carry Program Details alone.
 
 ## Double counting
 
