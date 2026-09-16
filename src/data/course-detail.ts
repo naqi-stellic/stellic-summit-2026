@@ -8,7 +8,16 @@ import { CREDITS_PER_COURSE } from "@/data/plan"
  * way every term gets its sections: deterministic from the code, so the same
  * course reads the same every time it is opened. */
 
-export type PrereqState = "earned" | "progress" | "planned" | "remaining" | "blocked"
+export type PrereqState =
+  | "earned"
+  | "progress"
+  | "planned"
+  /** Asked for and not earned: the audit's red outline. */
+  | "remaining"
+  /** Asked for and now out of reach. */
+  | "blocked"
+  /** Nothing has happened here either way — an option nobody has started. */
+  | "neutral"
 
 export type PrereqNode = {
   /** A course by its code, or a condition in words. One or the other. */
@@ -134,7 +143,7 @@ function prerequisites(seed: number): CourseDetail["prerequisites"] {
       },
       {
         name: "Option 3",
-        state: "remaining",
+        state: "neutral",
         meta: "Nothing started",
         open: false,
         summary: "Not declared, no course planned",

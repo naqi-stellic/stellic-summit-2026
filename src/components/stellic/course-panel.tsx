@@ -40,8 +40,11 @@ function Mark({ state }: { state?: PrereqState }) {
     earned: "border-success-100 bg-success-5 text-success-100",
     progress: "border-success-100 bg-success-5 text-success-100",
     planned: "border-warning-50 bg-warning-5 text-warning-50",
+    /* Asked for and not earned, or out of reach: red either way. Nothing
+       started is neither — it is quiet rather than wrong. */
     remaining: "border-alert-50 bg-alert-5 text-alert-50",
     blocked: "border-alert-50 bg-alert-5 text-alert-50",
+    neutral: "border-gray-60 bg-gray-5 text-gray-80",
   }[state ?? "remaining"]
 
   const glyph =
