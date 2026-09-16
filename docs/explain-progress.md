@@ -22,6 +22,15 @@ been naming the same thing twice.
 The card is the catalogue's own wording: no marks and no fractions, because it
 is what the rule says and not a measurement of anyone.
 
+A rule in a real catalogue is rarely one sentence, and flattening it to one is
+how an explanation stops explaining. A `Constraint` carries **notes**, and a
+note can carry its own course chips — so "at most 12 credits Pass/No Pass,
+except for these ten courses" is said in that order, with the exception nested
+under the rule it is an exception to, and a list that runs longer than anyone
+reads standing up trails off into "+ N more" or "… Show more". General
+Education is the worked example: six rules, four of them with sub-clauses, two
+of them naming courses.
+
 **explain** opens the panel beside the tree, which is that same wording
 measured against this student. It sits on the row, and again in the card's
 header — from the card you should not have to go back to the row to ask. In

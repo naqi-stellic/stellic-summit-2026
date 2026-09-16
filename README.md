@@ -17,8 +17,8 @@ Polling sidesteps the daemon; drop it if `fseventsd` is behaving.
 
 ## Prototypes
 
-`/` is a landing page with a link to each, grouped by the product it belongs to
-and with a line saying what it is; they open in their own tab.
+`/` is a landing page with a link to each, grouped by the product it belongs to;
+they open in their own tab.
 
 **Team Plan**
 

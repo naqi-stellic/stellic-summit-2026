@@ -25,13 +25,23 @@ import { CREDITS_PER_COURSE, DEGREE } from "@/data/plan"
  *  - a **limit** can fail by being exceeded, and reads as a fraction;
  *  - everything else is descriptive. There is nothing to satisfy, so it is
  *    stated and marked grey rather than ticked. */
+/** A line under a constraint. A rule in a real catalogue is rarely one
+ *  sentence: it carries the set it applies to, the exceptions to itself, and
+ *  the courses those exceptions name. Each of those is a note, and a note can
+ *  carry its own chips — which is how "at most 12 credits Pass/No Pass, except
+ *  for these twenty-six courses" gets said in the order it is meant. */
+export type ConstraintNote = {
+  text?: string
+  /** Course codes, shown as chips. Long lists trail off into "+ N more". */
+  codes?: string[]
+  /** The catalogue's own list runs longer than anyone reads standing up. */
+  truncated?: boolean
+}
+
 export type Constraint = {
   id: string
   text: string
-  /** Lines beneath it: a course set, an attribute list. */
-  detail?: string[]
-  /** Course codes the rule names, shown as chips. */
-  codes?: string[]
+  notes?: ConstraintNote[]
   limit?: { used: number; cap: number }
   progress?: { met: number; total: number }
   /** Courses this rule keeps out, and therefore the reason they are told. */
@@ -62,33 +72,70 @@ const PROGRAM_RULES: Constraint[] = [
   {
     id: "course-set",
     text: "Count courses only from the given course set",
-    detail: ["Level: Undergraduate"],
+    notes: [{ text: "Level: Undergraduate" }],
   },
   {
     id: "double-count",
     text: "Courses may double count without any limit with other programs unless specified otherwise",
   },
   {
-    id: "developmental",
-    text: "Developmental coursework does not count toward the degree",
-    detail: ["Courses numbered below 101, and their equivalents"],
-    codes: ["MATH 110", "ENGL 100"],
-    blocks: ["MATH 110", "ENGL 100"],
-  },
-  {
     id: "upper-division",
-    text: `At least 40 credits at the 300 level or above`,
+    text: "At least 40 credits at the 300 level or above",
     limit: { used: 6, cap: 40 },
   },
   {
     id: "pass-no-pass",
-    text: "At most 12 credits with the grading option Pass/No Pass",
+    text: "At most 12 credits with the following grading option: Pass/No Pass",
     limit: { used: 0, cap: 12 },
+    notes: [
+      { text: "The following courses will not impact this limit:" },
+      {
+        codes: [
+          "ATHP 101",
+          "BSAD 111",
+          "BSAD 222",
+          "BSAD 333",
+          "COMB 101E",
+          "FITN 140",
+          "MLSC 101",
+          "MLSC 201",
+          "MUSC 120",
+          "UNIV 101",
+        ],
+      },
+    ],
   },
   {
     id: "transfer-grade",
-    text: "At most 9 credits with transfer grades of C- or lower",
+    text: "At most 9 credits with transfer grades of C- grade or lower",
     limit: { used: 0, cap: 9 },
+  },
+  {
+    id: "military",
+    text: "Take at most 15 credits that match the following:",
+    limit: { used: 3, cap: 15 },
+    notes: [
+      {
+        text: "Course with one of these attributes: AERO or equivalent; MLSC or equivalent; NAVS or equivalent",
+      },
+      { text: "Course with an enrollment tag Military Transfer Credit" },
+    ],
+  },
+  {
+    id: "developmental",
+    text: "Following courses will not count:",
+    notes: [
+      { codes: ["MATH 110", "ENGL 100"] },
+      {
+        text: "Course with one of these attributes: DVAL or equivalent; Developmental Mathematics; Developmental Composition; ESL Composition; Study Skills; Hold for Graduate Credit; NDAP or equivalent",
+        truncated: true,
+      },
+    ],
+    blocks: ["MATH 110", "ENGL 100"],
+  },
+  {
+    id: "subrequirement-overlap",
+    text: "Courses may double count without any limit within the following subrequirements with no restrictions",
   },
 ]
 
@@ -100,31 +147,72 @@ const OWN_RULES: Record<string, Constraint[]> = {
     {
       id: "gen-ed-spread",
       text: "At most 6 credits from any one subject",
-      detail: ["Two of the eight must be taken outside the College of Business"],
       limit: { used: 6, cap: 6 },
+      notes: [
+        { text: "Two of the eight must be taken outside the College of Business" },
+        { text: "A subject is the code before the number: ENGL, HIST, PSYC" },
+      ],
     },
     {
       id: "gen-ed-letter",
       text: "Courses must be taken for a letter grade",
-      detail: ["Pass/No Pass is not accepted against general education"],
+      notes: [
+        { text: "Pass/No Pass is not accepted against general education" },
+        { text: "The following courses are exempt from this rule:" },
+        {
+          codes: ["ARTP 101", "FILM 150", "MUSC 120", "MUSC 165", "PHIL 120", "UNIV 101"],
+        },
+      ],
+    },
+    {
+      id: "gen-ed-breadth",
+      text: "Take at least 3 credits from each of the following:",
+      progress: { met: 4, total: 5 },
+      notes: [
+        { text: "Written Communication; Oral Communication; Humanities" },
+        { text: "Social Sciences; Natural Sciences" },
+        { text: "A single course may answer only one of them" },
+      ],
+    },
+    {
+      id: "gen-ed-ace",
+      text: "Take at most 6 credits that match the following:",
+      limit: { used: 3, cap: 6 },
+      notes: [
+        { text: "Course with one of these attributes: ACE 1 or equivalent; ACE 2 or equivalent" },
+        { text: "Course with an enrollment tag Honors Section" },
+      ],
     },
     {
       id: "gen-ed-developmental",
-      text: "Developmental coursework does not count toward the degree",
-      codes: ["MATH 110", "ENGL 100"],
+      text: "Following courses will not count:",
+      notes: [
+        { codes: ["MATH 110", "ENGL 100"] },
+        {
+          text: "Course with one of these attributes: DVAL or equivalent; Developmental Mathematics; Developmental Composition; ESL Composition; Study Skills",
+          truncated: true,
+        },
+      ],
       blocks: ["MATH 110", "ENGL 100"],
+    },
+    {
+      id: "gen-ed-overlap",
+      text: "Courses may double count within the following subrequirements with no restrictions",
+      notes: [
+        { text: "Humanities, Social Sciences and Natural Sciences share a 3-credit overlap" },
+      ],
     },
   ],
   "business-core": [
     {
       id: "core-grade",
       text: "Earn a C or better in every course",
-      detail: ["A course below C must be repeated before it counts"],
+      notes: [{ text: "A course below C must be repeated before it counts" }],
     },
     {
       id: "core-substitution",
       text: "College Algebra does not substitute for Business Calculus",
-      codes: ["MATH 110"],
+      notes: [{ codes: ["MATH 110"] }],
       blocks: ["MATH 110"],
     },
     {
@@ -137,21 +225,21 @@ const OWN_RULES: Record<string, Constraint[]> = {
     {
       id: "one-concentration",
       text: "Only one concentration may be declared",
-      detail: [`Declared: ${DEGREE.concentration}`],
+      notes: [{ text: `Declared: ${DEGREE.concentration}` }],
     },
   ],
   "finance-declared": [
     {
       id: "finance-gpa",
       text: "Earn a 2.5 GPA across the concentration",
-      detail: ["Measured on the concentration's own courses only"],
+      notes: [{ text: "Measured on the concentration's own courses only" }],
     },
   ],
   "finance-core": [
     {
       id: "finance-prereq",
       text: "Corporate Finance is a prerequisite for every other course here",
-      codes: ["FIN 301"],
+      notes: [{ codes: ["FIN 301"] }],
     },
     {
       id: "finance-internship",
@@ -169,7 +257,7 @@ const OWN_RULES: Record<string, Constraint[]> = {
     {
       id: "elective-department",
       text: "Electives must carry the FIN subject code",
-      detail: ["A course from another subject needs a written substitution"],
+      notes: [{ text: "A course from another subject needs a written substitution" }],
     },
   ],
   "open-electives": [
@@ -185,19 +273,19 @@ const OWN_RULES: Record<string, Constraint[]> = {
     {
       id: "capstone-last",
       text: "Taken in the final year",
-      detail: ["May not be started before 90 credits are earned"],
+      notes: [{ text: "May not be started before 90 credits are earned" }],
     },
   ],
   residency: [
     {
       id: "residency-check",
       text: "An additional check: courses counted here are not consumed",
-      detail: ["The same course still counts toward the requirement that claimed it"],
+      notes: [{ text: "The same course still counts toward the requirement that claimed it" }],
     },
     {
       id: "residency-campus",
       text: "Credits must be earned on the main campus",
-      detail: ["Transfer and dual-enrolment credit is not eligible"],
+      notes: [{ text: "Transfer and dual-enrolment credit is not eligible" }],
       blocks: ["MATH 110", "ENGL 100", "HIST 101", "SPAN 101"],
     },
   ],
@@ -209,7 +297,7 @@ const OWN_RULES: Record<string, Constraint[]> = {
     {
       id: "total-developmental",
       text: "Developmental coursework does not count toward the total",
-      codes: ["MATH 110", "ENGL 100"],
+      notes: [{ codes: ["MATH 110", "ENGL 100"] }],
       blocks: ["MATH 110", "ENGL 100"],
     },
   ],

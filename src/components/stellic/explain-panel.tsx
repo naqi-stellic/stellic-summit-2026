@@ -67,16 +67,27 @@ function ConstraintRow({ constraint, last }: { constraint: Constraint; last: boo
           </span>
         )}
       </div>
-      {constraint.detail?.map((line) => (
-        <p key={line} className="pl-6 text-body-md text-foreground">
-          {line}
-        </p>
-      ))}
-      {constraint.codes && (
-        <div className="pl-6">
-          <CodeChips codes={constraint.codes} />
+      {constraint.notes?.map((note, i) => (
+        <div key={i} className="flex flex-col gap-1 pl-6">
+          {note.text && (
+            <p className="text-body-md text-foreground">
+              {note.text}
+              {note.truncated && (
+                <>
+                  {"\u2026 "}
+                  <a
+                    href="#"
+                    className="text-gray-80 underline [text-underline-position:from-font]"
+                  >
+                    Show more
+                  </a>
+                </>
+              )}
+            </p>
+          )}
+          {note.codes && <CodeChips codes={note.codes} />}
         </div>
-      )}
+      ))}
     </div>
   )
 }
@@ -242,17 +253,30 @@ export function ConstraintsCard({
         {constraints.map((constraint) => (
           <li key={constraint.id}>
             {constraint.text}
-            {constraint.detail && (
-              <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-label-md">
-                {constraint.detail.map((line) => (
-                  <li key={line}>{line}</li>
+            {constraint.notes && (
+              <ul className="mt-1 flex list-disc flex-col gap-1 pl-5">
+                {constraint.notes.map((note, i) => (
+                  <li key={i} className={cn(!note.text && "list-none")}>
+                    {note.text}
+                    {note.truncated && (
+                      <>
+                        {"\u2026 "}
+                        <a
+                          href="#"
+                          className="underline [text-underline-position:from-font]"
+                        >
+                          Show more
+                        </a>
+                      </>
+                    )}
+                    {note.codes && (
+                      <div className="mt-1">
+                        <CodeChips codes={note.codes} shown={6} />
+                      </div>
+                    )}
+                  </li>
                 ))}
               </ul>
-            )}
-            {constraint.codes && (
-              <div className="mt-1">
-                <CodeChips codes={constraint.codes} shown={6} />
-              </div>
             )}
           </li>
         ))}

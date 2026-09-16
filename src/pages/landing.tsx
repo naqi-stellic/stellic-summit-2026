@@ -9,52 +9,31 @@ import { Button } from "@/components/ui/button"
  * would read as two versions of one thing; under their own headings they read
  * as what they are — different surfaces that happen to share a shell.
  *
- * Each now carries a line saying what it is. With two prototypes the names
- * were enough, and a card tall enough to hold a sentence sat mostly empty;
- * with five they are not — Explain Progress and Proactive Compliance are the
- * same screen until someone says how they differ. */
+ * The names carry it on their own. A line of explanation under each one is a
+ * paragraph nobody came here to read, and a count beside the heading is a
+ * number you can get by looking. */
 
 const SECTIONS = [
   {
     name: "Team Plan",
     prototypes: [
-      {
-        href: "/planner.html",
-        name: "Planner",
-        blurb: "A degree laid out term by term: the plan, registration, and advisor review.",
-      },
-      {
-        href: "/generator.html",
-        name: "Plan Generator",
-        blurb: "The same planner, with the wizard that builds the plan for you.",
-      },
+      { href: "/planner.html", name: "Planner" },
+      { href: "/generator.html", name: "Plan Generator" },
     ],
   },
   {
     name: "Team Progress",
     prototypes: [
-      {
-        href: "/advanced-what-if.html",
-        name: "Advanced What-If",
-        blurb: "The degree audit, and what another program would make of the same transcript.",
-      },
-      {
-        href: "/compliance.html",
-        name: "Proactive Compliance",
-        blurb: "The same record read against an eligibility clock rather than against a degree.",
-      },
-      {
-        href: "/explain.html",
-        name: "Explain Progress",
-        blurb: "The audit with its working shown: the rules, and why a course does or does not count.",
-      },
+      { href: "/advanced-what-if.html", name: "Advanced What-If" },
+      { href: "/compliance.html", name: "Proactive Compliance" },
+      { href: "/explain.html", name: "Explain Progress" },
     ],
   },
 ]
 
 const REPO = "https://github.com/naqi-stellic/stellic-summit-2026"
 
-function Prototype({ href, name, blurb }: { href: string; name: string; blurb: string }) {
+function Prototype({ href, name }: { href: string; name: string }) {
   return (
     <a
       href={href}
@@ -62,17 +41,14 @@ function Prototype({ href, name, blurb }: { href: string; name: string; blurb: s
       rel="noreferrer"
       /* The whole card is the link, so the chevron is a signpost rather than a
          second thing to hit. It steps right on hover, which is the only motion
-         on the page. p-[23px]: 24, less the border drawn inside it. */
-      className="group flex items-start gap-4 rounded-md border border-gray-40 bg-card p-[23px] shadow-sm transition-colors hover:border-primary-50 hover:bg-gray-0"
+         on the page. p-[19px]: 20, less the border drawn inside it. */
+      className="group flex items-center gap-4 rounded-md border border-gray-40 bg-card p-[19px] shadow-sm transition-colors hover:border-primary-50 hover:bg-gray-0"
     >
-      <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-h300 font-semibold text-gray-100">{name}</span>
-        <span className="text-body-md text-gray-80">{blurb}</span>
-      </span>
+      <span className="min-w-0 flex-1 text-h300 font-semibold text-gray-100">{name}</span>
       <Icon
         name="chevron-right"
         size={20}
-        className="mt-1 shrink-0 text-gray-60 transition-all group-hover:translate-x-0.5 group-hover:text-primary-50"
+        className="shrink-0 text-gray-60 transition-all group-hover:translate-x-0.5 group-hover:text-primary-50"
       />
     </a>
   )
@@ -89,18 +65,14 @@ export function Landing() {
           <h1 className="text-h400 font-semibold text-gray-100">Summit 2026</h1>
         </div>
 
-        {/* One column rather than two. A sentence per card wants the width more
-            than the page wants to be short, and five cards do not tile evenly
-            into two columns anyway. */}
+        {/* One column. Five cards do not tile evenly into two, and a list of
+            five names is short enough not to need to. */}
         <div className="flex w-full max-w-[720px] flex-col gap-10">
           {SECTIONS.map((section) => (
             <section key={section.name} className="flex flex-col gap-3">
-              <div className="flex items-baseline gap-2">
-                <h2 className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
-                  {section.name}
-                </h2>
-                <span className="text-overline text-gray-60">{section.prototypes.length}</span>
-              </div>
+              <h2 className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
+                {section.name}
+              </h2>
               <div className="flex flex-col gap-3">
                 {section.prototypes.map((prototype) => (
                   <Prototype key={prototype.href} {...prototype} />
