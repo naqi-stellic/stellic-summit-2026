@@ -234,8 +234,9 @@ before,
 after): the requirement's name stays as a quiet strip and the course that
 answers it stands under it, sharing the line between them. It reads the same
 whichever way the seat was filled — searched from the seat by hand, or filled
-by a generated term — because both write the same `seat` on the course, and
-the term view carries it as a line above the code.
+by a generated term — because both write the same `seat` on the course. The
+term view carries it too: a line above the code in the list, and a band across
+the head of the card in the calendar, above the accent rather than beside it.
 
 Filling is a change to the seat rather than something new arriving: `fillSeat`
 turns the seat into the course where it stands, so nothing is added and nothing

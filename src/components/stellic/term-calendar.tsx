@@ -69,70 +69,85 @@ function CourseCard({
 }) {
   const needsReview = courseStatus(course, term) === "needs review"
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
+  /* A seat that was filled: the requirement it was held for heads the card,
+     the way it heads the row on the canvas. */
+  const seat = course.placeholder ? undefined : course.seat
 
   return (
     <div
       className={cn(
-        "flex w-full items-stretch overflow-hidden rounded-md border pr-3",
+        "flex w-full flex-col overflow-hidden rounded-md border",
         mark ? mark.card : "border-gray-40 bg-card"
       )}
     >
-      <span
-        aria-hidden="true"
-        className={cn("w-1 shrink-0", course.accent ? ACCENT[course.accent] : "bg-gray-40")}
-      />
-      <label onClick={onOpen} className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 p-3">
-        {/* A proposed class carries its mark; one you can still choose to
-            register carries a tick. A term that is neither — already under way —
-            has nothing to offer here. */}
-        {mark ? (
-          <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
-        ) : course.registered ? null : selectable ? (
-          <Checkbox
-            defaultChecked
-            className="mt-0.5"
-            aria-label={`Register ${course.name}`}
-          />
-        ) : null}
-        <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="flex items-center gap-1.5 text-body-md text-gray-80">
-            {needsReview && (
-              <Icon name="warning" size={14} className="shrink-0 text-warning-100" />
-            )}
-            {course.code}
-          </span>
-          <span
-            className={cn(
-              "text-body-md font-semibold text-gray-100",
-              isStruck(course) && "line-through"
-            )}
-          >
-            {course.name}
-          </span>
-          {course.section && (
-            <span className="flex items-center gap-1 text-body-md text-gray-100">
-              <Icon name="calendar-today" size={14} />
-              {course.section}
-            </span>
+      {seat && (
+        <p
+          className={cn(
+            "w-full truncate border-b px-3 py-2 text-body-md font-semibold text-gray-80",
+            mark ? mark.card : "border-gray-40"
           )}
-          <span className="flex flex-wrap items-start gap-1 pt-2">
-            <Badge variant="secondary">{course.credits} credits</Badge>
-            {course.campus && <Badge variant="secondary">{course.campus}</Badge>}
-            {course.modality && <Badge variant="secondary">{course.modality}</Badge>}
-          </span>
-          {/* Under the badges, where the card has room to say why it is here. */}
-          <DraftNote course={course} className="pt-1" />
-        </span>
-      </label>
-      {/* Nothing of this class can be drawn until a section is chosen, so the
-          way to choose one sits on the card. */}
-      {needsReview && !mark && (
-        <span className="flex items-center py-3">
-          <Button size="icon" aria-label={`Search sections for ${course.name}`}>
-            <Icon name="s-search" size={16} />
-          </Button>
-        </span>
+        >
+          {seat}
+        </p>
       )}
+      <div className="flex w-full items-stretch pr-3">
+        <span
+          aria-hidden="true"
+          className={cn("w-1 shrink-0", course.accent ? ACCENT[course.accent] : "bg-gray-40")}
+        />
+        <label onClick={onOpen} className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 p-3">
+          {/* A proposed class carries its mark; one you can still choose to
+              register carries a tick. A term that is neither — already under way —
+              has nothing to offer here. */}
+          {mark ? (
+            <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
+          ) : course.registered ? null : selectable ? (
+            <Checkbox
+              defaultChecked
+              className="mt-0.5"
+              aria-label={`Register ${course.name}`}
+            />
+          ) : null}
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="flex items-center gap-1.5 text-body-md text-gray-80">
+              {needsReview && (
+                <Icon name="warning" size={14} className="shrink-0 text-warning-100" />
+              )}
+              {course.code}
+            </span>
+            <span
+              className={cn(
+                "text-body-md font-semibold text-gray-100",
+                isStruck(course) && "line-through"
+              )}
+            >
+              {course.name}
+            </span>
+            {course.section && (
+              <span className="flex items-center gap-1 text-body-md text-gray-100">
+                <Icon name="calendar-today" size={14} />
+                {course.section}
+              </span>
+            )}
+            <span className="flex flex-wrap items-start gap-1 pt-2">
+              <Badge variant="secondary">{course.credits} credits</Badge>
+              {course.campus && <Badge variant="secondary">{course.campus}</Badge>}
+              {course.modality && <Badge variant="secondary">{course.modality}</Badge>}
+            </span>
+            {/* Under the badges, where the card has room to say why it is here. */}
+            <DraftNote course={course} className="pt-1" />
+          </span>
+        </label>
+        {/* Nothing of this class can be drawn until a section is chosen, so the
+            way to choose one sits on the card. */}
+        {needsReview && !mark && (
+          <span className="flex items-center py-3">
+            <Button size="icon" aria-label={`Search sections for ${course.name}`}>
+              <Icon name="s-search" size={16} />
+            </Button>
+          </span>
+        )}
+      </div>
     </div>
   )
 }
