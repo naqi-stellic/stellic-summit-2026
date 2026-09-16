@@ -4,14 +4,14 @@
 
 export type IncomingCredit = {
   id: string
+  /** The quiet line above the name. A course's own code where it has one; for
+   *  an exam, whoever set it — there is no course code to give. */
   code: string
   name: string
-  /** Where this one came from, where that is a thing worth naming: the college
-   *  it transferred from, the board that set the exam. */
-  source?: string
-  /** The one fact worth reading after the name: which exam it came from, what
-   *  it satisfies, when it was taken. Whichever is the useful one for a kind. */
-  detail: string
+  /** The line under the name, where there is one to give: the college the
+   *  credit transferred from, the score the exam was passed at. A course taken
+   *  at this campus has neither, and reads like any other course of ours. */
+  detail?: string
   credits: number
 }
 
@@ -21,24 +21,25 @@ export type IncomingGroup = {
   items: IncomingCredit[]
 }
 
+/* What was brought in, as it was brought in: the courses another college
+ * taught and the exams a board set, not the courses of ours they stand for.
+ * Which of ours they answer to is the audit's business, not the planner's. */
 export const INCOMING_CREDITS: IncomingGroup[] = [
   {
     kind: "Transfer Credits",
     items: [
       {
         id: "t1",
-        code: "ENGL 100",
-        name: "Academic Writing Basics",
-        source: "Mesa Community College",
-        detail: "General education",
+        code: "ENG 101",
+        name: "English Composition I",
+        detail: "Mesa Community College",
         credits: 3,
       },
       {
         id: "t2",
-        code: "MATH 110",
+        code: "MAT 151",
         name: "College Algebra",
-        source: "Mesa Community College",
-        detail: "Quantitative reasoning",
+        detail: "Mesa Community College",
         credits: 3,
       },
     ],
@@ -48,30 +49,30 @@ export const INCOMING_CREDITS: IncomingGroup[] = [
     items: [
       {
         id: "x1",
-        code: "MATH 140",
-        name: "Business Calculus",
-        source: "College Board",
-        detail: "AP Calculus BC",
+        code: "College Board",
+        name: "AP Calculus BC",
+        detail: "Score 5",
         credits: 3,
       },
       {
         id: "x2",
-        code: "HIST 101",
-        name: "United States History I",
-        source: "College Board",
-        detail: "AP US History",
+        code: "College Board",
+        name: "AP US History",
+        detail: "Score 4",
         credits: 3,
       },
     ],
   },
   {
+    /* Courses of this campus, taken before the first year began. They read the
+       way every other course of ours reads, minus the class: which sitting of
+       it you attended is not something the plan keeps this far back. */
     kind: "Pre-Year 1",
     items: [
       {
         id: "p1",
         code: "SPAN 101",
         name: "Elementary Spanish I",
-        detail: "Taken Fall 2024",
         credits: 3,
       },
     ],

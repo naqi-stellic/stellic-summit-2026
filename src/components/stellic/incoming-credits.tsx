@@ -27,10 +27,9 @@ function CreditRow({ item }: { item: IncomingCredit }) {
           <p className="text-body-md font-semibold text-foreground">{item.name}</p>
         </div>
         {/* Where a course card says which class you are in, this says where
-            the credit came from and what it was. */}
-        <p className="text-body-md text-gray-80">
-          {[item.source, item.detail].filter(Boolean).join(" · ")}
-        </p>
+            the credit came from — and says nothing at all for a course of ours,
+            which came from here. */}
+        {item.detail && <p className="text-body-md text-gray-80">{item.detail}</p>}
         {/* The credits are a detail like any other, so they are shown when Plan
             details is showing them and not otherwise. */}
         <CourseTags

@@ -52,10 +52,13 @@ the plan runs out to 2029-2030. Courses are 3 credits each.
 Above the first year sits Incoming Credits
 ([`1393:60657`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1393-60657)
 for the shape it started as): what the student arrived with, folded away like
-the year below it. Three cards in a row — Transfer Credits, Exam Credits,
-Pre-Year 1 — each saying what it earned, with its courses as rows that name
-where they came from: the college they transferred from, the board that set the
-exam, or the term they were taken in. It is not a year and it holds no terms: none of this was taken
+the year below it. Three cards in a row — Transfer Credits, Exam Credits, Pre-Year 1 — each
+saying what it earned, with its rows carrying what was brought in rather than
+what it stands for here: another college's course and the college that taught
+it, an exam and the score it was passed at. Which of our requirements they
+answer to is the audit's business. Pre-Year 1 is different in kind — those are
+courses of this campus, taken before the first year — so its rows read like any
+other course of ours, minus the class. It is not a year and it holds no terms: none of this was taken
 on a timetable this plan knows about, so `src/data/incoming.ts` keeps it as
 what it is rather than as two invented semesters.
 
