@@ -7,10 +7,12 @@ import { DiscoverResults } from "@/components/stellic/discover-results"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
+  PROGRAMS,
   activeFilters,
   groupOf,
   matchPrograms,
   type FilterState,
+  type Program,
 } from "@/data/programs"
 
 /* Discover Programs: the what-if, asked beside the audit it is asking about.
@@ -210,13 +212,33 @@ function DiscoverChecking({ onDone }: { onDone: () => void }) {
   )
 }
 
-export function DiscoverPanel({ onClose }: { onClose: () => void }) {
+/** What the chosen intent does to the record, and what the button that does it
+ *  is called. Only a major can replace a major, which is why changing one is
+ *  offered nothing else. */
+const OUTCOME: Record<DiscoverIntent, { label: string; majorsOnly: boolean }> = {
+  add: { label: "Add Program", majorsOnly: false },
+  change: { label: "Change to this Program", majorsOnly: true },
+  explore: { label: "", majorsOnly: false },
+}
+
+export function DiscoverPanel({
+  onApply,
+  onClose,
+}: {
+  /** Put the program on the record: beside the degree, or in place of it. */
+  onApply: (program: Program, mode: "add" | "change") => void
+  onClose: () => void
+}) {
   const [view, setView] = useState<View>(1)
   const [intent, setIntent] = useState<DiscoverIntent | null>(null)
   const [filters, setFilters] = useState<FilterState>({})
   const [chosen, setChosen] = useState<string | null>(null)
 
-  const programs = matchPrograms(filters)
+  const outcome = OUTCOME[intent ?? "explore"]
+  const onOffer = outcome.majorsOnly
+    ? PROGRAMS.filter((program) => program.kind === "Major")
+    : PROGRAMS
+  const programs = matchPrograms(filters, onOffer)
   const isStep = view === 1 || view === 2
 
   function startOver() {
@@ -271,7 +293,12 @@ export function DiscoverPanel({ onClose }: { onClose: () => void }) {
         {view === 1 && <DiscoverIntentStep value={intent} onChange={setIntent} />}
 
         {view === 2 && (
-          <DiscoverFilters filters={filters} onChange={setFilters} matches={programs.length} />
+          <DiscoverFilters
+            filters={filters}
+            onChange={setFilters}
+            onOffer={onOffer}
+            matches={programs.length}
+          />
         )}
 
         {view === "summary" && (
@@ -286,7 +313,17 @@ export function DiscoverPanel({ onClose }: { onClose: () => void }) {
         {view === "checking" && <DiscoverChecking onDone={() => setView("results")} />}
 
         {view === "results" && (
-          <DiscoverResults programs={programs} selected={chosen} onSelect={setChosen} />
+          <DiscoverResults
+            programs={programs}
+            selected={chosen}
+            onSelect={setChosen}
+            canAdd={intent !== "explore"}
+            addLabel={outcome.label}
+            onAdd={(program) => {
+              onApply(program, intent === "change" ? "change" : "add")
+              onClose()
+            }}
+          />
         )}
 
         {/* The check finishes on its own and has nothing to press in the

@@ -19,6 +19,7 @@ import {
   type FilterField,
   type FilterGroup,
   type FilterState,
+  type Program,
 } from "@/data/programs"
 
 /* Step 2: narrowing the catalogue down to the programs worth checking against.
@@ -33,14 +34,16 @@ import {
 function FilterFieldInput({
   field,
   values,
+  onOffer,
   onChange,
 }: {
   field: FilterField
   values: string[]
+  onOffer: Program[]
   onChange: (next: string[]) => void
 }) {
   const [open, setOpen] = useState(false)
-  const available = fieldOptions(field.id).filter((option) => !values.includes(option))
+  const available = fieldOptions(field.id, onOffer).filter((option) => !values.includes(option))
 
   return (
     <div className="flex flex-col gap-2">
@@ -118,10 +121,12 @@ function FilterFieldInput({
 function FilterButton({
   group,
   filters,
+  onOffer,
   onChange,
 }: {
   group: FilterGroup
   filters: FilterState
+  onOffer: Program[]
   onChange: (next: FilterState) => void
 }) {
   const [open, setOpen] = useState(false)
@@ -165,6 +170,7 @@ function FilterButton({
             key={field.id}
             field={field}
             values={filters[field.id] ?? []}
+            onOffer={onOffer}
             onChange={(next) => onChange({ ...filters, [field.id]: next })}
           />
         ))}
@@ -176,10 +182,14 @@ function FilterButton({
 export function DiscoverFilters({
   filters,
   onChange,
+  onOffer,
   matches,
 }: {
   filters: FilterState
   onChange: (next: FilterState) => void
+  /** The programs this run is choosing between — changing a major is offered
+   *  only majors, so the filters must offer only what those hold. */
+  onOffer: Program[]
   /** How many programs the filters leave, which is the only reading of them
    *  that matters before Continue is pressed. */
   matches: number
@@ -200,6 +210,7 @@ export function DiscoverFilters({
               key={group.id}
               group={group}
               filters={filters}
+              onOffer={onOffer}
               onChange={onChange}
             />
           ))}

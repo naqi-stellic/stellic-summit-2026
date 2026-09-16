@@ -11,7 +11,14 @@ import {
   TermStrip,
 } from "@/components/stellic/student-profile"
 import {
+  auditProgram,
+  countedBy,
+  markDoubleCounting,
+  type Program,
+} from "@/data/programs"
+import {
   AUDIT,
+  AUDIT_STUDENT,
   AUDIT_SCOPES,
   AUDIT_TABS,
   AUDIT_VIEWS,
@@ -34,19 +41,48 @@ export function AdvancedWhatIf() {
      "what would this tree look like instead", so the tree has to stay in
      sight while it is being asked. */
   const [discovering, setDiscovering] = useState(false)
+  /* What the what-if did to the record. `add` puts a second program under the
+     degree; `change` puts one in place of it. Nothing is saved anywhere — this
+     is the prototype's whole memory of the run. */
+  const [applied, setApplied] = useState<{ program: Program; mode: "add" | "change" } | null>(null)
+
+  const second = applied?.mode === "add" ? auditProgram(applied.program, true) : null
+  const primary =
+    applied?.mode === "change"
+      ? auditProgram(applied.program, false)
+      : /* Double counting is a fact about a course rather than about one tree,
+           so the degree's own copies say so too. */
+        second
+        ? markDoubleCounting(AUDIT, countedBy(applied!.program))
+        : AUDIT
+
+  /* The profile says what the student is on, so it has to say this as well. */
+  const programs =
+    applied?.mode === "change"
+      ? [`${applied.program.name}`]
+      : applied
+        ? [AUDIT_STUDENT.program, `${applied.program.name} (${applied.program.kind})`]
+        : [AUDIT_STUDENT.program]
 
   return (
     <AppShell
       title="Student Progress"
       section="progress"
       assistant={false}
-      panel={discovering ? <DiscoverPanel onClose={() => setDiscovering(false)} /> : undefined}
+      panel={
+        discovering ? (
+          <DiscoverPanel
+            onApply={(program, mode) => setApplied({ program, mode })}
+            onClose={() => setDiscovering(false)}
+          />
+        ) : undefined
+      }
     >
       {/* The pane scrolls, not the shell. `@container` so the cards reflow
           against the width they actually have rather than the window's. */}
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 py-8">
         <div className="mx-auto flex w-full max-w-[1518px] flex-col gap-4">
-          <ProfileCard />
+          <ProfileCard programs={programs} />
           <NetworkRow />
           <TermStrip />
 
@@ -69,7 +105,11 @@ export function AdvancedWhatIf() {
                      separate things in one card, and at 24 they read as one
                      list that changes its mind twice. */
                   className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
-              <AuditTree audit={AUDIT} />
+              <AuditTree audit={primary} />
+              {/* A second program sits under the degree and above the courses
+                  nothing has claimed, which is where it would fall on the
+                  record: another thing the transcript is being read against. */}
+              {second && <AuditTree audit={second} />}
               <UnmatchedSection
                 count={UNMATCHED.count}
                 blurb={UNMATCHED.blurb}

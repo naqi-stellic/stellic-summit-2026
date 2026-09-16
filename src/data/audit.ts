@@ -39,6 +39,10 @@ export type AuditCourse = {
    *  is only holding a place for. */
   result?: string
   grade?: string
+  /** Counting toward more than one program at once. Set when a second program
+   *  is on the record, never on an additional check — those always double
+   *  count, so the mark would be on every row and mean nothing. */
+  doubleCounts?: boolean
 }
 
 /** A requirement: a named thing the degree asks for, holding courses or
@@ -422,3 +426,54 @@ export const UNMATCHED = {
     course("SPAN 101", "Elementary Spanish I", "taken", "Taken in Spring '25", "A"),
   ],
 }
+
+/* ------------------------------------------------- what the student holds */
+
+/** Every course the student actually has, by code: taken, under way,
+ *  registered or planned. A `remaining` row is a course the degree wants and
+ *  the student has not got, so it is not a record of anything.
+ *
+ *  This is what another program is audited against — it is the transcript,
+ *  and the whole question a what-if asks is what else it would satisfy. */
+export const STUDENT_RECORD: Map<string, AuditCourse> = (() => {
+  const held = new Map<string, AuditCourse>()
+
+  const walk = (entry: AuditEntry) => {
+    if (entry.kind === "course") {
+      /* A seat has no code, and an empty string is not an identity: keyed on
+         one, every seat in the audit would answer for every other. */
+      if (entry.code && entry.mark !== "remaining" && !held.has(entry.code)) {
+        held.set(entry.code, entry)
+      }
+      return
+    }
+    entry.children.forEach(walk)
+  }
+  walk(TREE)
+  /* The unmatched courses are held too. The degree has no use for them, which
+     is exactly why they are worth offering to another one. */
+  UNMATCHED.courses.forEach((course) => held.set(course.code, course))
+
+  return held
+})()
+
+/** The codes that are actually counting toward the degree on screen. A course
+ *  here that also counts toward a second program is double counting; one of
+ *  the unmatched courses is not, because it was counting toward nothing. */
+export const COUNTING_NOW: Set<string> = (() => {
+  const counting = new Set<string>()
+
+  const walk = (entry: AuditEntry) => {
+    if (entry.kind === "course") {
+      if (entry.code && entry.mark !== "remaining") counting.add(entry.code)
+      return
+    }
+    /* An additional check never makes a course double count — it consumes
+       nothing, which is the point of it. */
+    if (entry.restated) return
+    entry.children.forEach(walk)
+  }
+  walk(TREE)
+
+  return counting
+})()

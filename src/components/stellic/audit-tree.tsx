@@ -165,6 +165,14 @@ function CourseRow({ course, bare }: { course: AuditCourse; bare?: boolean }) {
       {/* Credits, then where it was taken, then what it earned — right to left
           is the order they stop being certain in, so they are read that way. */}
       <div className="flex shrink-0 items-center gap-4 text-overline font-medium text-gray-80 uppercase">
+        {/* Counting in two programs at once. It leads the result group because
+            it qualifies everything after it: these credits are being spent
+            twice. */}
+        {course.doubleCounts && (
+          <span title="Counting toward more than one program" className="flex">
+            <Icon name="double-counting" size={24} className="text-gray-100" />
+          </span>
+        )}
         <p className="whitespace-nowrap">{course.credits} Credits</p>
         {course.result && <p className="whitespace-nowrap">{course.result}</p>}
         {course.grade && <p className="min-w-4 text-right">{course.grade}</p>}
@@ -193,7 +201,9 @@ function GroupRow({
           {group.counts && (
             <>
               <CountMark count={group.counts.requirements} />
-              <CountMark count={group.counts.milestones} milestone />
+              {group.counts.milestones > 0 && (
+                <CountMark count={group.counts.milestones} milestone />
+              )}
             </>
           )}
           <div className="flex min-w-0 flex-col justify-center gap-[3px]">

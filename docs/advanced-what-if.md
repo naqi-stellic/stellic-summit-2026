@@ -194,8 +194,63 @@ for it does not read as having been checked against anything.
 because that is the thing anyone actually weighs. Each card is the audit's own
 reading of the program: the same four shares in the same colours, counted the
 same way, so a student who can read the tree can read this without being taught
-anything new. The chosen card carries Add Program and Program Details; neither
-is wired, there being nothing behind them yet.
+anything new.
+
+## What the three intents do
+
+The answer to step 1 decides what is on offer and what pressing the button
+does, which is the point of asking it first.
+
+**Add an additional major** puts the program's audit on the page under the
+degree and above the unmatched courses — where it would fall on the record, as
+another thing the transcript is being read against. The degree stays.
+
+**Change your major** puts it in place of the degree, and is offered majors
+only: a minor cannot replace a major. Its button says so rather than saying
+"Add". Because the degree is gone, nothing double counts — there is only one
+program left to count toward — and the overlap shows up instead as how much of
+the new major the student has already done.
+
+**Just exploring** changes nothing, so its cards carry Program Details and no
+Add button at all.
+
+## Double counting
+
+Per Stellic's own rules: a course counting toward two programs at once carries
+the chain-link mark, and hovering it says where it is counting. Two things do
+*not* get it — a course double counting within one program, and an additional
+check, which consumes nothing and always double counts, so marking it would put
+the mark on half the audit and mean nothing by it.
+
+Both of those fall out of how it is computed. `COUNTING_NOW` in
+`src/data/audit.ts` is the set of codes actually counting toward the degree,
+walked with the `restated` groups stepped over; a course in a second program is
+marked when it is in that set. Which is why picking up one of the *unmatched*
+courses is not double counting: it was counting toward nothing, so this is the
+first time it has counted at all — and the Economics B.A. is in the catalogue
+partly to show that, since it wants the Spanish and the second history the
+business degree had no use for.
+
+The mark shows on both trees, because it is a fact about the course rather than
+about one of them.
+
+## The program catalogue
+
+`src/data/programs.ts` writes a program the way a catalogue writes one —
+requirements, and the courses each asks for — with nothing about the student in
+it. `auditProgram()` runs that against `STUDENT_RECORD` and produces the same
+`AuditGroup` the degree audit is made of, which is what lets a result be put
+straight onto the page.
+
+That is also what keeps it honest: a course is marked taken because the student
+took it, and the "12 credits to go" on a card is the same count the tree below
+shows. When the two disagreed during the build it was a real bug — seats share
+an empty course code, and keying a record on one made every seat answer for
+every other.
+
+Three programs, chosen rather than listed: a minor the transcript nearly
+answers already, a major the business core almost covers, and a major that
+would put the unmatched dual-enrolment credit to work.
 
 `src/data/programs.ts` holds the catalogue and the matching. A program is the
 same thing an audit is — a number of requirements and how many of them the

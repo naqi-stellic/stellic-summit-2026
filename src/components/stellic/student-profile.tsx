@@ -72,7 +72,7 @@ function ShareBar({
   )
 }
 
-export function ProfileCard() {
+export function ProfileCard({ programs }: { programs: string[] }) {
   const { courses, milestones } = OFFICIAL_PROGRESS
 
   return (
@@ -92,14 +92,17 @@ export function ProfileCard() {
           </div>
           <p className="text-body-md text-gray-80">{AUDIT_STUDENT.standing}</p>
 
-          {/* The degree, then the pathway that laid it out — the same two the
-              plan header names, and each a way in to its own audit. */}
-          <Fact icon="school">
-            <a href="#" className="flex items-center">
-              {AUDIT_STUDENT.program}
-              <Icon name="chevron-right" size={16} className="shrink-0" />
-            </a>
-          </Fact>
+          {/* The degree, then anything the what-if has added beside it, then
+              the pathway that laid the first one out — the same lines the plan
+              header names, and each a way in to its own audit. */}
+          {programs.map((program) => (
+            <Fact key={program} icon="school">
+              <a href="#" className="flex items-center">
+                {program}
+                <Icon name="chevron-right" size={16} className="shrink-0" />
+              </a>
+            </Fact>
+          ))}
           <Fact icon="class">
             <a href="#" className="flex items-center">
               {AUDIT_STUDENT.pathway}
