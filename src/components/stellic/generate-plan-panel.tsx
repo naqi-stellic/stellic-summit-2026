@@ -144,7 +144,11 @@ export function GeneratePlanPanel({
         )}
       >
         <div className="flex w-full items-center gap-2">
-          <div className="flex min-w-0 flex-1 items-center gap-2">
+          {/* Baseline, not centre: two runs of text on one line read as
+              aligned when they sit on the same baseline, and cap-centring a
+              small label beside a larger title leaves it floating two pixels
+              high. */}
+          <div className="flex min-w-0 flex-1 items-baseline gap-2">
             <h2 className="text-caption-lg font-semibold text-foreground">Generate Plan</h2>
             {isStep && (
               <span className="text-overline font-medium tracking-[0.5px] text-gray-80 uppercase">
