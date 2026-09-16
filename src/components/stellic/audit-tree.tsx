@@ -89,7 +89,7 @@ function AuditBar({
    at a glance down the left edge, where a group finishes. Both stop 4px short
    of the cell, which is the gap the row leaves in front of itself. */
 
-function Trail({ cells }: { cells: { line: boolean; elbow?: boolean; last?: boolean }[] }) {
+export function Trail({ cells }: { cells: { line: boolean; elbow?: boolean; last?: boolean }[] }) {
   if (cells.length === 0) return null
 
   return (
@@ -117,7 +117,7 @@ function Trail({ cells }: { cells: { line: boolean; elbow?: boolean; last?: bool
 
 /* ============================================================ rows */
 
-function TreeElement({
+export function TreeElement({
   trail,
   children,
 }: {
@@ -152,7 +152,7 @@ function Tags({ tags, small }: { tags?: string[]; small?: boolean }) {
   )
 }
 
-function CourseRow({ course, bare }: { course: AuditCourse; bare?: boolean }) {
+export function CourseRow({ course, bare }: { course: AuditCourse; bare?: boolean }) {
   return (
     <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px]">
       <div className="flex min-w-0 items-center gap-2">

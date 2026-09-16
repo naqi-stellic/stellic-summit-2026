@@ -32,10 +32,12 @@ they open in their own tab.
 | Prototype | Opens at | Figma | Entry | Notes |
 | --- | --- | --- | --- | --- |
 | Advanced What-If | `/advanced-what-if.html` | [`2274:20653`](https://www.figma.com/design/prhu0x6AaQF2AVtLBFoDq3/Audit-Profile-Planner?node-id=2274-20653) | `src/pages/advanced-what-if.tsx` | [docs](docs/advanced-what-if.md) |
+| Proactive Compliance | `/compliance.html` | from a static mock, not a frame | `src/pages/compliance.tsx` | [docs](docs/compliance.md) |
 
 The two products share the shell, the tokens and the icon set and nothing else.
-Team Plan's two prototypes also share their data and their components; Team
-Progress starts its own, on its own student.
+Team Plan's two prototypes share their data and their components; Team
+Progress' two share the student, the profile cards and the audit tree — the
+compliance screen is the what-if's page with one more tab on it.
 
 ### Adding one
 

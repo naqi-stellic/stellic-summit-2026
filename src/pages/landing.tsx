@@ -18,7 +18,10 @@ const SECTIONS = [
   },
   {
     name: "Team Progress",
-    prototypes: [{ href: "/advanced-what-if.html", name: "Advanced What-If" }],
+    prototypes: [
+      { href: "/advanced-what-if.html", name: "Advanced What-If" },
+      { href: "/compliance.html", name: "Proactive Compliance" },
+    ],
   },
 ]
 

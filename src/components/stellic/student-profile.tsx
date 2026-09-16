@@ -72,7 +72,19 @@ function ShareBar({
   )
 }
 
-export function ProfileCard({ programs }: { programs: string[] }) {
+export function ProfileCard({
+  programs,
+  progressLabel = "Official Progress",
+  actions = ["Request to Review Plan", "Actions"],
+}: {
+  programs: string[]
+  /** What the progress block is a reading of. The compliance screen reads the
+   *  plan where Progress reads the registrar. */
+  progressLabel?: string
+  /** What can be done to this record from here. A staff screen has one more
+   *  to offer than a student's does. */
+  actions?: string[]
+}) {
   const { courses, milestones } = OFFICIAL_PROGRESS
 
   return (
@@ -120,9 +132,10 @@ export function ProfileCard({ programs }: { programs: string[] }) {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-start gap-2">
-          <Button>Request to Review Plan</Button>
-          <Button>Actions</Button>
+        <div className="flex shrink-0 flex-wrap items-start gap-2">
+          {actions.map((action) => (
+            <Button key={action}>{action}</Button>
+          ))}
           <Button size="icon" aria-label="History">
             <Icon name="watch-later" size={16} />
           </Button>
@@ -131,7 +144,7 @@ export function ProfileCard({ programs }: { programs: string[] }) {
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <p className="text-body-md font-semibold text-gray-100">Official Progress</p>
+          <p className="text-body-md font-semibold text-gray-100">{progressLabel}</p>
           <Icon name="info" size={16} className="text-gray-80" />
         </div>
         <div className="flex flex-wrap items-start gap-6">
@@ -279,8 +292,10 @@ export function AuditControls({
   views: { id: string; label: string; bar: { taken: number; inProgress: number; planned: number } }[]
   view: string
   onSelectView: (id: string) => void
-  scopes: string[]
-  scope: string
+  /** Omitted where there is nothing to scope: the compliance ruleset is read
+   *  whole or not at all. */
+  scopes?: string[]
+  scope?: string
   lastComputed: string
 }) {
   return (
@@ -373,19 +388,21 @@ export function AuditControls({
         </div>
 
         <div className="flex flex-col items-end gap-1">
-          <div className="flex items-start gap-2">
-            <Button size="icon" aria-label="Recompute audit">
-              <Icon name="refresh" size={16} />
-            </Button>
-            <button
-              type="button"
-              className="flex h-9 w-[200px] cursor-pointer items-center gap-2 rounded-md border border-input bg-card px-[11px] text-body-md shadow-xs"
-            >
-              <span className="flex-1 truncate text-left">{scope}</span>
-              <Icon name="expand-more" size={16} />
-              <span className="sr-only">of {scopes.join(", ")}</span>
-            </button>
-          </div>
+          {scopes && scope && (
+            <div className="flex items-start gap-2">
+              <Button size="icon" aria-label="Recompute audit">
+                <Icon name="refresh" size={16} />
+              </Button>
+              <button
+                type="button"
+                className="flex h-9 w-[200px] cursor-pointer items-center gap-2 rounded-md border border-input bg-card px-[11px] text-body-md shadow-xs"
+              >
+                <span className="flex-1 truncate text-left">{scope}</span>
+                <Icon name="expand-more" size={16} />
+                <span className="sr-only">of {scopes.join(", ")}</span>
+              </button>
+            </div>
+          )}
           <div className="flex items-center gap-1 text-body-md text-gray-80">
             <Icon name="timer" size={16} />
             {lastComputed}

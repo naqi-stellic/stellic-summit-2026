@@ -19,7 +19,7 @@ type NavItem = {
 /* Which product the page belongs to. The nav is the same nav either way — what
  * differs is the row you are standing on, and whether Schedule is opened onto
  * its terms, which it is only where a term is what you came to work on. */
-export type NavSection = "plan" | "progress"
+export type NavSection = "plan" | "progress" | "staff"
 
 const SCHEDULE: NavItem = {
   label: "Schedule",
@@ -41,7 +41,24 @@ const EXPLORE: NavItem[] = [
   { label: "Programs", strong: true, sub: true },
 ]
 
+/* The staff side of the product is a different nav altogether: it is a list of
+   everything there is, not a path through one student's degree. */
+const STAFF: NavItem[] = [
+  { label: "Students", glyph: "s-check", strong: true, active: true },
+  { label: "Programs", strong: true },
+  { label: "Courses", strong: true },
+  { label: "Pathways", strong: true },
+  { label: "Appointments", strong: true },
+  { label: "Transfer", strong: true },
+  { label: "Requests", strong: true },
+  { label: "Reviews", strong: true },
+  { label: "Staff", strong: true },
+  { label: "Analytics", strong: true },
+]
+
 function nav(section: NavSection): NavItem[] {
+  if (section === "staff") return STAFF
+
   const here = (label: string) => label === (section === "plan" ? "Plan Your Path" : "Track Progress")
 
   return [

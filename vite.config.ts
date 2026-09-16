@@ -23,6 +23,7 @@ export default defineConfig({
         generator: path.resolve(import.meta.dirname, 'generator.html'),
         planner: path.resolve(import.meta.dirname, 'planner.html'),
         'advanced-what-if': path.resolve(import.meta.dirname, 'advanced-what-if.html'),
+        compliance: path.resolve(import.meta.dirname, 'compliance.html'),
       },
     },
   },
