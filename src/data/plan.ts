@@ -810,7 +810,15 @@ export function scheduleTerm(term: Term, turn = 0): Term {
 /** Settles a course on a class: the section, where it meets, and everything
  *  else that only exists once one has been picked. Standing in for a real
  *  section search, which would show what is on offer and let you choose. */
-export function chooseSection(years: Year[], termId: string, courseId: string): Year[] {
+export function chooseSection(
+  years: Year[],
+  termId: string,
+  courseId: string,
+  /** Whether the student picked this class themselves. A class handed out
+   *  because the term's schedule is already open is not their choice, so a
+   *  generated schedule is free to move it. */
+  byHand = true
+): Year[] {
   return years.map((year) => ({
     ...year,
     terms: year.terms.map((term) => {
@@ -834,7 +842,7 @@ export function chooseSection(years: Year[], termId: string, courseId: string): 
                 ...c,
                 section: "Lec-01",
                 /* Chosen by hand, so a generated schedule leaves it be. */
-                settled: true,
+                ...(byHand ? { settled: true } : {}),
                 classNo: c.classNo ?? String(3000 + used * 17 + 41),
                 meetings: slot,
               }

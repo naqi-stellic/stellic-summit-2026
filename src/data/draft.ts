@@ -7,6 +7,7 @@ import {
 import {
   CREDITS_PER_COURSE,
   PLANNING_RULES,
+  chooseSection,
   emptyYear,
   findCourse,
   findTerm,
@@ -756,7 +757,7 @@ export function fillSeat(years: Year[], courseId: string, entry: CatalogEntry): 
   const found = findCourse(years, courseId)
   if (!found || found.term.locked || !found.course.placeholder) return years
 
-  return mapTerm(years, found.term.id, (term) => ({
+  const filled = mapTerm(years, found.term.id, (term) => ({
     ...term,
     courses: term.courses.map((c) =>
       c.id !== courseId
@@ -775,6 +776,13 @@ export function fillSeat(years: Year[], courseId: string, entry: CatalogEntry): 
           }
     ),
   }))
+
+  /* Where the term's classes are already out, the course arrives with one:
+     a seat that has been filled but cannot be registered is a dead end, and
+     the student chose the course, not the sitting of it. */
+  return found.term.scheduled
+    ? chooseSection(filled, found.term.id, courseId, false)
+    : filled
 }
 
 /** Gives a seat back: the course goes and the requirement it was answering

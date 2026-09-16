@@ -245,6 +245,12 @@ course from a seat's search and adding it to that seat's own term fills it;
 choosing a different term adds it there instead and leaves the seat where it
 is.
 
+Where the term's classes are already out, filling hands the course one. Only a
+course with a class can go through registration, so a seat filled without one
+would be a dead end: chosen, and still not registrable. The class is not marked
+as the student's own choice — they picked the course, not the sitting of it —
+so a generated schedule is free to move it.
+
 Registering settles it. The class is the student's from then on, so the seat
 has done its job: the band goes, and with it the way back to a held seat.
 
