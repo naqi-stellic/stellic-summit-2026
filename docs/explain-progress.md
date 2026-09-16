@@ -13,19 +13,24 @@ The audit is a verdict. This is the working. Every row already says *what* —
 taken, in progress, remaining — and nothing on the page said *why*, which is
 the only thing a student argues with.
 
-Point at a requirement and two things appear:
+**The tag is the control.** `fulfill all` is already the name of the
+requirement's first constraint, so pressing it opens the rest of them —
+underneath the row, indented a level past it, because they are about that
+requirement rather than beside it. A second button saying "rules" would have
+been naming the same thing twice.
 
-**rules** opens the catalogue's own wording underneath the row, as a row of its
-own indented one level past it — it is about that requirement, not beside it.
-No marks and no fractions: it is what the catalogue says, not a measurement.
+The card is the catalogue's own wording: no marks and no fractions, because it
+is what the rule says and not a measurement of anyone.
 
-**explain** opens the panel beside the tree, which is the same wording measured
-against this student.
+**explain** opens the panel beside the tree, which is that same wording
+measured against this student. It sits on the row, and again in the card's
+header next to its search — from the card you should not have to go back to the
+row to ask.
 
-Both hold their space until the row is pointed at (`group-hover`,
-`group-focus-within`), so nothing on the page moves as the pointer travels down
-it, and both are always visible on a touch screen, where there is no pointer to
-travel.
+`explain` and a search sit on every requirement row, and hold their space until
+the row is pointed at (`group-hover`, `group-focus-within`) so nothing moves as
+the pointer travels down the tree. On a touch screen, where there is no pointer
+to travel, they are always out.
 
 ## Three kinds of rule
 
@@ -42,12 +47,23 @@ That third row is the one worth getting right. "Courses may double count
 without limit with other programs" is not an achievement; ticking it green
 would say the student had done something.
 
-The first constraint on every requirement is derived rather than written:
-"fulfill all of the following" is a claim about the tree, and the tree is right
-there — so it counts whatever the requirement actually holds, its courses where
-it holds courses and its sub-requirements where it holds those. The rest are
-catalogue facts and are written down, but the courses they name are real ones
-off this student's record, which is what lets a mapping cite them.
+The first constraint is derived rather than written, because it is a claim
+about the tree and the tree is right there — and **which** claim comes from the
+requirement's own tag. "Fulfill any" is satisfied by one of its children;
+"at least 12 credits" is counted in credits; everything else wants all of
+whatever it holds. Getting that wrong would put "fulfill all — 1/3" on a
+requirement that only ever wanted one.
+
+Everything after it belongs to that requirement and no other. The degree's own
+rulebook — the course set, double counting, developmental coursework, the
+upper-division floor, the Pass/No Pass and transfer-grade caps — is read out at
+the top and nowhere else; printing it under every requirement was what made
+them all read alike. Underneath, a requirement says its own thing: Business
+Core will not take College Algebra for Business Calculus, General Education
+wants two of its eight from outside the College of Business and will not take a
+Pass/No Pass, Open Electives will take any course nothing else has claimed —
+which is most of the transcript, and is computed from `COUNTING_NOW` rather
+than listed.
 
 ## Three verdicts
 

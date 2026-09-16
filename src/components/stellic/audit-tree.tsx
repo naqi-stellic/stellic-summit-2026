@@ -146,20 +146,43 @@ export function TreeElement({
 
 /** The tags after a requirement's name. The degree and its programs carry the
  *  smaller Badge/Tag; everything under them carries the shadcn badge. */
-function Tags({ tags, small }: { tags?: string[]; small?: boolean }) {
+function Tags({
+  tags,
+  small,
+  onToggle,
+  open,
+}: {
+  tags?: string[]
+  small?: boolean
+  /** Given, the first tag is the way into the rules it is the headline of.
+   *  "fulfill all" is already the name of the constraint; a second control
+   *  beside it saying "rules" would be naming it twice. */
+  onToggle?: () => void
+  open?: boolean
+}) {
   if (!tags?.length) return null
 
   return (
     <>
-      {tags.map((tag) => (
-        <Badge
-          key={tag}
-          variant="outline"
-          className={cn("font-normal", small && "text-label-sm")}
-        >
-          {tag}
-        </Badge>
-      ))}
+      {tags.map((tag, i) => {
+        const className = cn("font-normal", small && "text-label-sm")
+
+        if (i === 0 && onToggle) {
+          return (
+            <Badge key={tag} variant="outline" asChild className={className}>
+              <button type="button" onClick={onToggle} aria-expanded={open} className="cursor-pointer hover:bg-gray-5">
+                {tag}
+              </button>
+            </Badge>
+          )
+        }
+
+        return (
+          <Badge key={tag} variant="outline" className={className}>
+            {tag}
+          </Badge>
+        )
+      })}
     </>
   )
 }
@@ -193,39 +216,34 @@ export function CourseRow({ course, bare }: { course: AuditCourse; bare?: boolea
   )
 }
 
-/** The two things a row offers when the prototype explains itself: its own
- *  rules, opened underneath it, and the panel that reads them out. Hidden
- *  until the row is pointed at — they hold their space, so nothing moves. */
+/** What a row offers once the prototype explains itself. Hidden until the row
+ *  is pointed at — they hold their space, so nothing moves as the pointer
+ *  travels down the tree — and always out on a touch screen, where there is no
+ *  pointer to travel. */
 function RowTools({
   group,
-  rulesOpen,
-  onToggleRules,
   onExplain,
 }: {
   group: AuditGroup
-  rulesOpen: boolean
-  onToggleRules?: () => void
   onExplain?: (group: AuditGroup) => void
 }) {
   if (!onExplain) return null
 
+  const shown =
+    "shrink-0 cursor-pointer rounded-md border border-gray-40 bg-card text-label-md " +
+    "text-foreground transition-opacity hover:bg-gray-5 group-hover:opacity-100 " +
+    "group-focus-within:opacity-100 max-md:opacity-100 md:opacity-0"
+
   return (
     <>
-      {onToggleRules && (
-        <button
-          type="button"
-          onClick={onToggleRules}
-          aria-expanded={rulesOpen}
-          className="cursor-pointer rounded-md border border-gray-40 bg-card px-[7px] py-px text-label-md text-foreground transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 max-md:opacity-100 md:opacity-0"
-        >
-          rules
-        </button>
-      )}
       <button
         type="button"
-        onClick={() => onExplain(group)}
-        className="cursor-pointer rounded-md border border-gray-40 bg-card px-[7px] py-px text-label-md text-foreground transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 max-md:opacity-100 md:opacity-0"
+        aria-label={`Search within ${group.name}`}
+        className={cn(shown, "flex size-5 items-center justify-center")}
       >
+        <Icon name="s-search" size={12} />
+      </button>
+      <button type="button" onClick={() => onExplain(group)} className={cn(shown, "px-[7px] py-px")}>
         explain
       </button>
     </>
@@ -237,11 +255,14 @@ function GroupRow({
   open = true,
   onToggle,
   tools,
+  rules,
 }: {
   group: AuditGroup
   open?: boolean
   onToggle?: () => void
   tools?: React.ReactNode
+  /** Whether the row's own rules can be opened from its first tag, and are. */
+  rules?: { open: boolean; onToggle: () => void }
 }) {
   /* The degree heads the tree rather than hanging off it, so it is drawn on
      nothing: no ground, no border, and the counts in place of a mark. What it
@@ -264,7 +285,7 @@ function GroupRow({
               <p className="text-caption-lg font-semibold">{group.name}</p>
               <Icon name="expand-more" size={10} className="shrink-0" />
               <Icon name="more-horiz" size={14} className="shrink-0" />
-              <Tags tags={group.tags} small />
+              <Tags tags={group.tags} small onToggle={rules?.onToggle} open={rules?.open} />
               {tools}
             </div>
             {group.subtitle && (
@@ -307,7 +328,7 @@ function GroupRow({
       ) : (
         <Icon name="chevron-right" size={14} className="shrink-0" />
       )}
-      <Tags tags={group.tags} />
+      <Tags tags={group.tags} onToggle={rules?.onToggle} open={rules?.open} />
       {tools}
     </div>
   )
@@ -349,13 +370,11 @@ function EntryRows({
           group={entry}
           open={open}
           onToggle={() => onToggle(entry.id)}
-          tools={
-            <RowTools
-              group={entry}
-              rulesOpen={rulesOpen}
-              onToggleRules={explain?.constraints ? () => onToggle(rulesId) : undefined}
-              onExplain={explain?.onExplain}
-            />
+          tools={<RowTools group={entry} onExplain={explain?.onExplain} />}
+          rules={
+            explain?.constraints
+              ? { open: rulesOpen, onToggle: () => onToggle(rulesId) }
+              : undefined
           }
         />
       )}
@@ -435,7 +454,7 @@ export function AuditTree({ audit, explain }: { audit: AuditGroup; explain?: Exp
       <TreeElement trail={[]}>
         <GroupRow
           group={audit}
-          tools={<RowTools group={audit} rulesOpen={false} onExplain={explain?.onExplain} />}
+          tools={<RowTools group={audit} onExplain={explain?.onExplain} />}
         />
       </TreeElement>
       {audit.children.map((child, i) => (

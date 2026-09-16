@@ -207,16 +207,36 @@ export function ExplainPanel({ group, onClose }: { group: AuditGroup; onClose: (
    no marks, no fractions — those belong to the panel, which is measuring the
    student against them. */
 
-export function ConstraintsCard({ group }: { group: AuditGroup }) {
+export function ConstraintsCard({
+  group,
+  onExplain,
+}: {
+  group: AuditGroup
+  onExplain?: (group: AuditGroup) => void
+}) {
   const constraints = constraintsFor(group)
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1 rounded-md border border-gray-40 bg-card p-[15px]">
       <div className="flex items-center justify-between gap-2 pb-2">
         <p className="text-body-md font-semibold text-foreground">Constraints</p>
-        <Button size="icon" aria-label="Search constraints" className="size-5">
-          <Icon name="s-search" size={14} />
-        </Button>
+        {/* The rules are printed here; the panel is where they are measured
+            against the student. Offering it from the card means you do not
+            have to go back to the row to ask. */}
+        <div className="flex shrink-0 items-center gap-2">
+          <Button size="icon" aria-label="Search constraints" className="size-5">
+            <Icon name="s-search" size={14} />
+          </Button>
+          {onExplain && (
+            <button
+              type="button"
+              onClick={() => onExplain(group)}
+              className="cursor-pointer rounded-md border border-gray-40 bg-card px-[7px] py-px text-label-md text-foreground transition-colors hover:bg-gray-5"
+            >
+              explain
+            </button>
+          )}
+        </div>
       </div>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-body-md text-gray-80">
         {constraints.map((constraint) => (

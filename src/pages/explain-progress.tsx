@@ -82,7 +82,9 @@ export function ExplainProgress() {
                 audit={AUDIT}
                 explain={{
                   onExplain: setExplaining,
-                  constraints: (group) => <ConstraintsCard group={group} />,
+                  constraints: (group) => (
+                    <ConstraintsCard group={group} onExplain={setExplaining} />
+                  ),
                 }}
               />
               <UnmatchedSection
