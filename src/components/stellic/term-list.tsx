@@ -175,7 +175,12 @@ function CourseRow({
           </div>
 
           <div className="w-[121px] shrink-0">
-            <StatusPill status={status}>{status}</StatusPill>
+            {/* A class that has gone through registration is done with, which
+                is what the list calls it: the planner's cards still say
+                registered, because there the word is about the plan. */}
+            <StatusPill status={status}>
+              {status === "registered" ? "Complete" : status}
+            </StatusPill>
           </div>
 
           {/* Where a rule used to divide the two halves of the row. A band
