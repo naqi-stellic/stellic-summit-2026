@@ -399,6 +399,10 @@ every semester, a fourth-year elective once a year — which is what makes the
 question worth asking at all, and what "Only Fall" is warning about where the
 list is grouped by term rather than by requirement.
 
+What the list is narrowed to is held by the page rather than by the panel:
+opening one of these courses closes the panel to make room for it, and coming
+back finds the list as it was left.
+
 A requirement leaves the list once it has a term. A course is recognised by its
 name wherever it was placed from; a seat cannot be — every seat reads alike —
 so a placed seat remembers which outstanding requirement it answers, and the

@@ -1,6 +1,5 @@
 import { useDraggable } from "@dnd-kit/core"
 import { cn } from "cn"
-import { useState } from "react"
 
 import { Icon } from "@/components/icon"
 import {
@@ -138,6 +137,11 @@ function answers(entry: CatalogEntry, field: string): string | string[] {
 const GROUPINGS = ["Requirement", "Term offered"] as const
 type Grouping = (typeof GROUPINGS)[number]
 
+/** What the list is narrowed to and how it is filed. */
+export type Narrowing = { filters: FilterState; grouping: Grouping }
+
+export const NARROWING_DEFAULT: Narrowing = { filters: {}, grouping: "Requirement" }
+
 /** What a requirement is filed under, which is the whole of the grouping. A
  *  course that comes round once a year says so where it is filed: that is the
  *  fact worth knowing about it when you are deciding what to take when. */
@@ -205,6 +209,8 @@ function Meter({ total, shares }: { total: number; shares: Share[] }) {
 export function RequirementsPanel({
   entries,
   years,
+  narrowing,
+  onNarrow,
   onOpenCourse,
 }: {
   /** What is still to place, in the order the degree asks for it, each with
@@ -212,11 +218,17 @@ export function RequirementsPanel({
   entries: { entry: CatalogEntry; index: number }[]
   /** The plan as it stands, for the shares at the top. */
   years: Year[]
+  /** How the list is narrowed and filed. Held by the page rather than here,
+   *  so opening one of these courses and coming back finds the list as it was
+   *  left rather than as it starts. */
+  narrowing: Narrowing
+  onNarrow: (next: Narrowing) => void
   /** Opens one of them on its own, by its place in the outstanding list. */
   onOpenCourse?: (index: number) => void
 }) {
-  const [filters, setFilters] = useState<FilterState>({})
-  const [grouping, setGrouping] = useState<Grouping>("Requirement")
+  const { filters, grouping } = narrowing
+  const setFilters = (next: FilterState) => onNarrow({ ...narrowing, filters: next })
+  const setGrouping = (next: Grouping) => onNarrow({ ...narrowing, grouping: next })
 
   const placed = years.reduce(
     (sum, year) => sum + year.terms.reduce((n, term) => n + term.courses.length, 0),

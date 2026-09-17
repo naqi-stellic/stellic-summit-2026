@@ -24,9 +24,11 @@ import { CoursePanel } from "@/components/stellic/course-panel"
 import { PlaceholderPanel } from "@/components/stellic/placeholder-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
 import {
+  NARROWING_DEFAULT,
   RequirementRow,
   RequirementsPanel,
   requirementIndex,
+  type Narrowing,
 } from "@/components/stellic/requirements-panel"
 import { ReviewDialog } from "@/components/stellic/review-dialog"
 import { ReviewPanel } from "@/components/stellic/review-panel"
@@ -286,6 +288,10 @@ export function PlanYourPath({
   /* Whether what the degree still wants is showing beside the plan, to be
      dragged into it. */
   const [reqsOpen, setReqsOpen] = useState(false)
+  /* How the remaining list is narrowed, kept here rather than in the panel:
+     opening one of those courses closes the panel, and coming back should
+     find the list as it was left. */
+  const [narrowing, setNarrowing] = useState<Narrowing>(NARROWING_DEFAULT)
   /* A course from the remaining list, opened on its own before it is anywhere
      in the plan. */
   const [openCourse, setOpenCourse] = useState<{
@@ -824,6 +830,8 @@ export function PlanYourPath({
           <RequirementsPanel
             entries={requirements}
             years={shown}
+            narrowing={narrowing}
+            onNarrow={setNarrowing}
             onOpenCourse={(index) => {
               const found = requirements.find((r) => r.index === index)
               if (found) {
