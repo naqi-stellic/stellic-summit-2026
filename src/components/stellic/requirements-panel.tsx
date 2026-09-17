@@ -3,7 +3,12 @@ import { cn } from "cn"
 import { useState } from "react"
 
 import { Icon } from "@/components/icon"
-import { FilterBar, matches, type FilterState } from "@/components/stellic/filter-bar"
+import {
+  FilterBar,
+  matches,
+  type FilterGroup,
+  type FilterState,
+} from "@/components/stellic/filter-bar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { offeredIn, type CatalogEntry, type TermName } from "@/data/catalog"
-import { PREREQ_STANDING_LABEL, prereqStanding } from "@/data/course-detail"
+import { PREREQ_LABEL, prereqsMet } from "@/data/course-detail"
 import { DEGREE, planStanding, type Year } from "@/data/plan"
 
 /* Everything the degree still wants, with nowhere to be yet. The plan is not
@@ -85,7 +90,7 @@ export function RequirementRow({
  * take it yet. */
 const TERMS: TermName[] = ["Fall", "Spring", "Summer"]
 
-const FILTERS = [
+const FILTERS: FilterGroup[] = [
   {
     id: "kind",
     label: "Type",
@@ -95,15 +100,14 @@ const FILTERS = [
         label: "Type",
         placeholder: "Courses or placeholders",
         options: ["Courses", "Placeholders"],
+        mode: "menu",
       },
     ],
   },
   {
     id: "offered",
     label: "Offered",
-    fields: [
-      { id: "offered", label: "Offered in", placeholder: "Select term", options: TERMS },
-    ],
+    fields: [{ id: "offered", label: "Offered in", placeholder: "Select term", options: TERMS }],
   },
   {
     id: "prereqs",
@@ -113,7 +117,8 @@ const FILTERS = [
         id: "prereqs",
         label: "Prerequisites",
         placeholder: "Select standing",
-        options: Object.values(PREREQ_STANDING_LABEL),
+        options: [PREREQ_LABEL.met, PREREQ_LABEL.not],
+        mode: "menu",
       },
     ],
   },
@@ -126,7 +131,7 @@ function answers(entry: CatalogEntry, field: string): string | string[] {
   if (field === "kind") return entry.placeholder ? "Placeholders" : "Courses"
   if (entry.placeholder) return []
   if (field === "offered") return offeredIn(entry.code)
-  if (field === "prereqs") return PREREQ_STANDING_LABEL[prereqStanding(entry)]
+  if (field === "prereqs") return prereqsMet(entry) ? PREREQ_LABEL.met : PREREQ_LABEL.not
   return []
 }
 
@@ -294,37 +299,10 @@ export function RequirementsPanel({
         />
       </div>
 
-      <FilterBar
-        groups={FILTERS}
-        filters={filters}
-        onChange={setFilters}
-        trailing={
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="flex cursor-pointer items-center gap-1 text-body-md text-gray-80"
-              >
-                Group by: <span className="text-gray-100">{grouping}</span>
-                <Icon name="expand-more" size={16} className="shrink-0" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[180px]">
-              {GROUPINGS.map((option) => (
-                <DropdownMenuItem
-                  key={option}
-                  onSelect={() => setGrouping(option)}
-                  className="py-1.5 text-body-md"
-                >
-                  {option}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        }
-      />
+      <FilterBar groups={FILTERS} filters={filters} onChange={setFilters} />
 
-      <div className="flex w-full items-center justify-between gap-2">
+      <div className="flex w-full flex-col gap-1">
+        <div className="flex w-full items-center justify-between gap-2">
         <h3 className="min-w-0 text-body-md font-semibold text-gray-100">
           {/* Narrowed, the count says what of what: the degree still wants all
               of them, and this is the part you are looking at. */}
@@ -338,6 +316,32 @@ export function RequirementsPanel({
         >
           view in Progress
         </a>
+        </div>
+
+        {/* How the list below is filed, which belongs under what it is filing
+            rather than up among the questions that narrow it. */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex w-fit cursor-pointer items-center gap-1 text-body-md text-gray-80"
+            >
+              Group by: <span className="text-gray-100">{grouping}</span>
+              <Icon name="expand-more" size={16} className="shrink-0" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-[180px]">
+            {GROUPINGS.map((option) => (
+              <DropdownMenuItem
+                key={option}
+                onSelect={() => setGrouping(option)}
+                className="py-1.5 text-body-md"
+              >
+                {option}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {entries.length === 0 && (

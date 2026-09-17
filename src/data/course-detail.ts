@@ -434,23 +434,12 @@ export function meetingLines(meetings: Meeting[] = []): string[] {
   )
 }
 
-/** Where a course stands against its own prerequisites, which is what tells
- *  you whether you can act on it now: `met` where some option is already
- *  earned in full, `soon` where the only pieces missing from an option are
- *  under way this term, and `later` where something is still to start. */
-export type PrereqStanding = "met" | "soon" | "later"
-
-export function prereqStanding(entry: CatalogEntry): PrereqStanding {
+/** Whether a course can be taken as things stand: some option is already
+ *  earned in full, or it asks for nothing at all. Anything still waiting on a
+ *  course under way has not been met yet, however close it is. */
+export function prereqsMet(entry: CatalogEntry): boolean {
   const { options } = prerequisites(entry, seedOf(entry.code))
-  /* A course that asks for nothing can be taken whenever it is offered. */
-  if (options.length === 0) return "met"
-  if (options.some((option) => option.state === "earned")) return "met"
-  if (options.some((option) => option.state === "progress")) return "soon"
-  return "later"
+  return options.length === 0 || options.some((option) => option.state === "earned")
 }
 
-export const PREREQ_STANDING_LABEL: Record<PrereqStanding, string> = {
-  met: "Met",
-  soon: "Met after this term",
-  later: "Not yet",
-}
+export const PREREQ_LABEL = { met: "Met", not: "Not yet" } as const
