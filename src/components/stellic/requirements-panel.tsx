@@ -260,9 +260,8 @@ export function RequirementsPanel({
       </header>
 
       {/* The two meters are one reading of the degree, so they stand closer to
-          each other than to what is above and below them — and on a ground of
-          their own, which is what says they are one thing. */}
-      <div className="flex w-full flex-col gap-4 rounded-md bg-gray-0 p-4">
+          each other than to what is above and below them. */}
+      <div className="flex w-full flex-col gap-4">
       <div className="flex w-full flex-col gap-2">
         <span className="text-body-md font-semibold text-foreground">Courses</span>
         <Meter
