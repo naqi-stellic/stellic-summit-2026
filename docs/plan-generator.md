@@ -381,6 +381,24 @@ lands in the term being read rather than only on the canvas. The card header's
 plus opens the same menu the planner's "+ Add to Term" opens, so a term can be
 planned into with or without the panel.
 
+Thirty-three requirements in the order the degree asks for them is the
+registrar's order, and it says nothing about which of them could be acted on
+today. Three filters say it — what it is, when it runs, and whether its
+prerequisites are met — and they layer: Only Courses, offered in Fall,
+prerequisites Met leaves the dozen or so that could go into the next term.
+The row is the one Advanced What-If uses, lifted out of it into
+`filter-bar.tsx`, so both screens ask their own questions through the same
+buttons, popovers and pills. A field whose answers can be layered keeps the
+search box that collects them as tags; one that takes a single answer gets a
+select in the same titled box.
+
+Two of the three read what the plan already holds: a seat knows it is a seat,
+and the prerequisite tree already says whether an option is earned. When a
+course runs is new, seeded off the code the way sections are — the foundations
+every semester, a fourth-year elective once a year — which is what makes the
+question worth asking at all, and what "Only Fall" is warning about where the
+list is grouped by term rather than by requirement.
+
 A requirement leaves the list once it has a term. A course is recognised by its
 name wherever it was placed from; a seat cannot be — every seat reads alike —
 so a placed seat remembers which outstanding requirement it answers, and the
