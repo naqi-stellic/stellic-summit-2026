@@ -138,13 +138,27 @@ function answers(entry: CatalogEntry, field: string): string | string[] {
 const GROUPINGS = ["Requirement", "Term offered"] as const
 type Grouping = (typeof GROUPINGS)[number]
 
-/** What a requirement is filed under, which is the whole of the grouping. */
+/** What a requirement is filed under, which is the whole of the grouping. A
+ *  course that comes round once a year says so where it is filed: that is the
+ *  fact worth knowing about it when you are deciding what to take when. */
 function groupName(entry: CatalogEntry, by: Grouping): string {
   if (by === "Requirement") return entry.reason ?? "Other requirements"
   if (entry.placeholder) return "Any term"
   const terms = offeredIn(entry.code)
-  return terms.length > 1 ? terms.join(" and ") : terms[0]
+  return terms.length > 1 ? terms.join(" and ") : `Only ${terms[0]}`
 }
+
+/* Every term first, then the ones that come round once a year, then the seats
+   that have no offerings of their own. Groups outside this read in the order
+   the degree asks for them, which is the order they arrive in. */
+const TERM_GROUP_ORDER = [
+  "Fall and Spring and Summer",
+  "Fall and Spring",
+  "Only Fall",
+  "Only Spring",
+  "Only Summer",
+  "Any term",
+]
 
 /** One of the three shares of the degree, drawn as a length of the bar and
  *  read back underneath it. */
@@ -229,6 +243,9 @@ export function RequirementsPanel({
     if (group) group.entries.push({ entry, index })
     else groups.push({ name, entries: [{ entry, index }] })
   })
+  if (grouping === "Term offered") {
+    groups.sort((a, b) => TERM_GROUP_ORDER.indexOf(a.name) - TERM_GROUP_ORDER.indexOf(b.name))
+  }
 
   return (
     /* pb-28 keeps the last few rows clear of the assistant, which floats over
@@ -299,7 +316,13 @@ export function RequirementsPanel({
         />
       </div>
 
-      <FilterBar groups={FILTERS} filters={filters} onChange={setFilters} />
+      <div className="flex w-full flex-col gap-2">
+        <span className="flex items-center gap-1 text-body-md font-semibold text-foreground">
+          <Icon name="filter-alt" size={16} className="text-gray-100" />
+          Filter
+        </span>
+        <FilterBar groups={FILTERS} filters={filters} onChange={setFilters} />
+      </div>
 
       <div className="flex w-full flex-col gap-1">
         <div className="flex w-full items-center justify-between gap-2">

@@ -466,6 +466,16 @@ const ICONS = {
     ],
   },
 
+  /** The funnel, for narrowing a list down. */
+  "filter-alt": {
+    viewBox: "0 0 24 24",
+    parts: [
+      {
+        d: "M4.25 5.61C6.27 8.2 10 13 10 13v5c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-5s3.72-4.8 5.74-7.39c.51-.66.04-1.61-.79-1.61H5.04c-.83 0-1.3.95-.79 1.61z",
+      },
+    ],
+  },
+
   /* The glyphs that name the course sidebar's sections. */
   settings: {
     viewBox: "0 0 24 24",
