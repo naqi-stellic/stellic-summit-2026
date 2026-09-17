@@ -1,8 +1,17 @@
 import { useDraggable } from "@dnd-kit/core"
 import { cn } from "cn"
+import { useState } from "react"
 
 import { Icon } from "@/components/icon"
-import type { CatalogEntry } from "@/data/catalog"
+import { FilterBar, matches, type FilterState } from "@/components/stellic/filter-bar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { offeredIn, type CatalogEntry, type TermName } from "@/data/catalog"
+import { PREREQ_STANDING_LABEL, prereqStanding } from "@/data/course-detail"
 import { DEGREE, planStanding, type Year } from "@/data/plan"
 
 /* Everything the degree still wants, with nowhere to be yet. The plan is not
@@ -70,15 +79,87 @@ export function RequirementRow({
   )
 }
 
+/* What the list can be narrowed to. The row is the one Advanced What-If uses;
+ * what belongs here is the three questions worth asking of a requirement you
+ * are about to place: is it a course or a seat, when does it run, and can you
+ * take it yet. */
+const TERMS: TermName[] = ["Fall", "Spring", "Summer"]
+
+const FILTERS = [
+  {
+    id: "kind",
+    label: "Type",
+    fields: [
+      {
+        id: "kind",
+        label: "Type",
+        placeholder: "Courses or placeholders",
+        options: ["Courses", "Placeholders"],
+      },
+    ],
+  },
+  {
+    id: "offered",
+    label: "Offered",
+    fields: [
+      { id: "offered", label: "Offered in", placeholder: "Select term", options: TERMS },
+    ],
+  },
+  {
+    id: "prereqs",
+    label: "Prerequisites",
+    fields: [
+      {
+        id: "prereqs",
+        label: "Prerequisites",
+        placeholder: "Select standing",
+        options: Object.values(PREREQ_STANDING_LABEL),
+      },
+    ],
+  },
+]
+
+/** What a requirement answers each filter with. A seat has no course behind
+ *  it, so it has neither offerings nor prerequisites — it answers only the
+ *  question about what it is. */
+function answers(entry: CatalogEntry, field: string): string | string[] {
+  if (field === "kind") return entry.placeholder ? "Placeholders" : "Courses"
+  if (entry.placeholder) return []
+  if (field === "offered") return offeredIn(entry.code)
+  if (field === "prereqs") return PREREQ_STANDING_LABEL[prereqStanding(entry)]
+  return []
+}
+
+const GROUPINGS = ["Requirement", "Term offered"] as const
+type Grouping = (typeof GROUPINGS)[number]
+
+/** What a requirement is filed under, which is the whole of the grouping. */
+function groupName(entry: CatalogEntry, by: Grouping): string {
+  if (by === "Requirement") return entry.reason ?? "Other requirements"
+  if (entry.placeholder) return "Any term"
+  const terms = offeredIn(entry.code)
+  return terms.length > 1 ? terms.join(" and ") : terms[0]
+}
+
 /** One of the three shares of the degree, drawn as a length of the bar and
  *  read back underneath it. */
-type Share = { label: string; count: number; icon: "check" | "shopping-cart" | "crop-square"; bar: string; tone: string }
+type Share = {
+  label: string
+  count: number
+  icon: "check" | "watch-later" | "crop-square"
+  bar: string
+  tone: string
+}
 
 function Meter({ total, shares }: { total: number; shares: Share[] }) {
+  /* A share of nothing is not a share: it draws no bar and it has nothing to
+     report, so it is left out rather than shown as a nought. */
+  const held = shares.filter((share) => share.count > 0)
+
   return (
     <div className="flex w-full flex-col gap-2">
       <span className="flex h-1.5 w-full overflow-hidden rounded-md bg-gray-5">
-        {shares.map((share) => (
+        {held.map((share) => (
           <span
             key={share.label}
             className={share.bar}
@@ -87,7 +168,7 @@ function Meter({ total, shares }: { total: number; shares: Share[] }) {
         ))}
       </span>
       <span className="flex flex-wrap items-center gap-4">
-        {shares.map((share) => (
+        {held.map((share) => (
           <span
             key={share.label}
             title={share.label}
@@ -115,6 +196,9 @@ export function RequirementsPanel({
   /** Opens one of them on its own, by its place in the outstanding list. */
   onOpenCourse?: (index: number) => void
 }) {
+  const [filters, setFilters] = useState<FilterState>({})
+  const [grouping, setGrouping] = useState<Grouping>("Requirement")
+
   const placed = years.reduce(
     (sum, year) => sum + year.terms.reduce((n, term) => n + term.courses.length, 0),
     0
@@ -124,11 +208,18 @@ export function RequirementsPanel({
      from the other two. */
   const done = planStanding(years).completed.reqs
 
+  /* Only what the filters leave. They narrow the list rather than the degree,
+     so the meters above go on describing the whole of it. */
+  const shown = entries.filter(({ entry }) =>
+    matches(filters, (field) => answers(entry, field))
+  )
+
   /* Grouped the way the degree asks for them — core before concentration
-     before general — which is the order they are listed in. */
+     before general — which is the order they are listed in, unless the
+     student would rather see when they can be taken. */
   const groups: { name: string; entries: { entry: CatalogEntry; index: number }[] }[] = []
-  entries.forEach(({ entry, index }) => {
-    const name = entry.reason ?? "Other requirements"
+  shown.forEach(({ entry, index }) => {
+    const name = groupName(entry, grouping)
     const group = groups.find((g) => g.name === name)
     if (group) group.entries.push({ entry, index })
     else groups.push({ name, entries: [{ entry, index }] })
@@ -161,7 +252,8 @@ export function RequirementsPanel({
             {
               label: "Planned",
               count: placed,
-              icon: "shopping-cart",
+              /* Under way rather than bought: the clock, not the trolley. */
+              icon: "watch-later",
               bar: "bg-warning-25",
               tone: "text-warning-50",
             },
@@ -202,9 +294,43 @@ export function RequirementsPanel({
         />
       </div>
 
+      <FilterBar
+        groups={FILTERS}
+        filters={filters}
+        onChange={setFilters}
+        trailing={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex cursor-pointer items-center gap-1 text-body-md text-gray-80"
+              >
+                Group by: <span className="text-gray-100">{grouping}</span>
+                <Icon name="expand-more" size={16} className="shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px]">
+              {GROUPINGS.map((option) => (
+                <DropdownMenuItem
+                  key={option}
+                  onSelect={() => setGrouping(option)}
+                  className="py-1.5 text-body-md"
+                >
+                  {option}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      />
+
       <div className="flex w-full items-center justify-between gap-2">
         <h3 className="min-w-0 text-body-md font-semibold text-gray-100">
-          {entries.length} Remaining Requirement{entries.length === 1 ? "" : "s"}
+          {/* Narrowed, the count says what of what: the degree still wants all
+              of them, and this is the part you are looking at. */}
+          {shown.length === entries.length
+            ? `${entries.length} Remaining Requirement${entries.length === 1 ? "" : "s"}`
+            : `${shown.length} of ${entries.length} Remaining Requirements`}
         </h3>
         <a
           href="#"
@@ -217,6 +343,12 @@ export function RequirementsPanel({
       {entries.length === 0 && (
         <p className="text-body-md text-gray-80">
           Every requirement has a term. There is nothing left to place.
+        </p>
+      )}
+
+      {entries.length > 0 && shown.length === 0 && (
+        <p className="text-body-md text-gray-80">
+          Nothing left to place answers all of those at once. Try dropping one.
         </p>
       )}
 

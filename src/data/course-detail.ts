@@ -433,3 +433,24 @@ export function meetingLines(meetings: Meeting[] = []): string[] {
     (g) => `${g.days.map((d) => DAY_LETTER[d] ?? "").join("")} ${clock(g.from)} - ${clock(g.to)}`
   )
 }
+
+/** Where a course stands against its own prerequisites, which is what tells
+ *  you whether you can act on it now: `met` where some option is already
+ *  earned in full, `soon` where the only pieces missing from an option are
+ *  under way this term, and `later` where something is still to start. */
+export type PrereqStanding = "met" | "soon" | "later"
+
+export function prereqStanding(entry: CatalogEntry): PrereqStanding {
+  const { options } = prerequisites(entry, seedOf(entry.code))
+  /* A course that asks for nothing can be taken whenever it is offered. */
+  if (options.length === 0) return "met"
+  if (options.some((option) => option.state === "earned")) return "met"
+  if (options.some((option) => option.state === "progress")) return "soon"
+  return "later"
+}
+
+export const PREREQ_STANDING_LABEL: Record<PrereqStanding, string> = {
+  met: "Met",
+  soon: "Met after this term",
+  later: "Not yet",
+}

@@ -118,3 +118,29 @@ export const REPLACEMENT_SEAT: CatalogEntry = {
   reason: "Seat held for a course you pick later",
   placeholder: true,
 }
+
+
+/* ------------------------------------------------------------- offerings */
+
+export type TermName = "Fall" | "Spring" | "Summer"
+
+/** Which terms a course runs in. The catalogue does not say, so it is seeded
+ *  off the code the way sections and prerequisites are: the same course always
+ *  reads the same, most run in both semesters, a few in one, and only a
+ *  handful over the summer. */
+export function offeredIn(code: string): TermName[] {
+  const seed = [...code].reduce((n, c) => n + c.charCodeAt(0), 0)
+  const level = Number(code.replace(/\D+/g, "")) || 100
+  /* The capstone is the exception worth writing down: it is taken last, and
+     the school runs it once a year. */
+  if (code === "BUS 495") return ["Spring"]
+
+  const both: TermName[] = ["Fall", "Spring"]
+  const one: TermName[] = seed % 2 === 0 ? ["Fall"] : ["Spring"]
+  /* How often a course comes round follows how deep it is. The foundations
+     run every semester because everyone needs them; a fourth-year elective
+     runs once a year, which is what makes when it runs worth filtering on. */
+  const terms = level >= 400 ? (seed % 4 === 0 ? both : one) : level >= 300 ? (seed % 3 === 0 ? one : both) : both
+  /* Summer is a short list: the foundations, and nothing deep. */
+  return level < 300 && seed % 3 === 0 ? [...terms, "Summer"] : terms
+}

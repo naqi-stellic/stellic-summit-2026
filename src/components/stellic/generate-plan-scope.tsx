@@ -38,9 +38,12 @@ function ProgressBar({ segments }: { segments: Segment[] }) {
 }
 
 function Tally({ items }: { items: { icon: IconName; tone: string; value: number }[] }) {
+  /* The same rule the bar follows: nothing of a share means no share. */
+  const held = items.filter((item) => item.value > 0)
+
   return (
     <div className="flex flex-wrap items-center gap-x-[17px]">
-      {items.map((item) => (
+      {held.map((item) => (
         <span
           key={item.icon + item.value}
           className="flex items-center gap-1 text-body-md text-gray-80"
@@ -97,7 +100,7 @@ export function GeneratePlanScope({
           <Tally
             items={[
               { icon: "check", tone: "text-success-50", value: standing.completed.reqs },
-              { icon: "check", tone: "text-warning-25", value: standing.planned.reqs },
+              { icon: "watch-later", tone: "text-warning-25", value: standing.planned.reqs },
               { icon: "crop-square", tone: "text-alert-50", value: standing.remaining.reqs },
             ]}
           />
