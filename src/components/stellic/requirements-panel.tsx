@@ -99,7 +99,7 @@ const FILTERS: FilterGroup[] = [
         id: "kind",
         label: "Type",
         placeholder: "Courses or placeholders",
-        options: ["Courses", "Placeholders"],
+        options: ["Only Courses", "Only Placeholders"],
         mode: "menu",
       },
     ],
@@ -128,7 +128,7 @@ const FILTERS: FilterGroup[] = [
  *  it, so it has neither offerings nor prerequisites — it answers only the
  *  question about what it is. */
 function answers(entry: CatalogEntry, field: string): string | string[] {
-  if (field === "kind") return entry.placeholder ? "Placeholders" : "Courses"
+  if (field === "kind") return entry.placeholder ? "Only Placeholders" : "Only Courses"
   if (entry.placeholder) return []
   if (field === "offered") return offeredIn(entry.code)
   if (field === "prereqs") return prereqsMet(entry) ? PREREQ_LABEL.met : PREREQ_LABEL.not
@@ -260,8 +260,9 @@ export function RequirementsPanel({
       </header>
 
       {/* The two meters are one reading of the degree, so they stand closer to
-          each other than to what is above and below them. */}
-      <div className="flex w-full flex-col gap-4">
+          each other than to what is above and below them — and on a ground of
+          their own, which is what says they are one thing. */}
+      <div className="flex w-full flex-col gap-4 rounded-md bg-gray-0 p-4">
       <div className="flex w-full flex-col gap-2">
         <span className="text-body-md font-semibold text-foreground">Courses</span>
         <Meter
