@@ -250,7 +250,7 @@ export function RequirementsPanel({
   return (
     /* pb-28 keeps the last few rows clear of the assistant, which floats over
        the foot of whatever is beside the plan. */
-    <aside className="flex h-full w-full flex-col gap-6 overflow-x-clip overflow-y-auto bg-card p-6 pb-28">
+    <aside className="flex h-full w-full flex-col gap-8 overflow-x-clip overflow-y-auto bg-card p-6 pb-28">
       <header className="flex w-full flex-col gap-2">
         <h2 className="text-h300 font-semibold text-gray-100">Add remaining courses</h2>
         <p className="text-body-md text-gray-80">
@@ -259,6 +259,9 @@ export function RequirementsPanel({
         </p>
       </header>
 
+      {/* The two meters are one reading of the degree, so they stand closer to
+          each other than to what is above and below them. */}
+      <div className="flex w-full flex-col gap-4">
       <div className="flex w-full flex-col gap-2">
         <span className="text-body-md font-semibold text-foreground">Courses</span>
         <Meter
@@ -315,6 +318,7 @@ export function RequirementsPanel({
           ]}
         />
       </div>
+      </div>
 
       <div className="flex w-full flex-col gap-2">
         <span className="flex items-center gap-1 text-body-md font-semibold text-foreground">
@@ -324,6 +328,8 @@ export function RequirementsPanel({
         <FilterBar groups={FILTERS} filters={filters} onChange={setFilters} />
       </div>
 
+      {/* The list and what heads it: one block, with its own rhythm inside. */}
+      <div className="flex w-full flex-col gap-6">
       <div className="flex w-full flex-col gap-1">
         <div className="flex w-full items-center justify-between gap-2">
         <h3 className="min-w-0 text-body-md font-semibold text-gray-100">
@@ -395,6 +401,7 @@ export function RequirementsPanel({
           ))}
         </div>
       ))}
+      </div>
     </aside>
   )
 }

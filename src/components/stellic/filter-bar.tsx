@@ -27,9 +27,9 @@ export type FilterField = {
   placeholder: string
   /** What this field can be filtered to, as the caller finds them. */
   options: string[]
-  /** How the field is answered. A field with a long list of answers gets a
-   *  search box that collects them as tags; one with two or three gets the
-   *  answers themselves, which is a shorter way to the same place. */
+  /** How the field is answered. A field whose answers can be layered gets a
+   *  search box that collects them as tags; one that takes a single answer
+   *  gets a select, which is the same box opening onto the answers. */
   mode?: "search" | "menu"
 }
 
@@ -147,6 +147,76 @@ function FilterFieldInput({
   )
 }
 
+/** A field with a short list of answers: the same box the search field
+ *  stands in, opening onto the answers themselves rather than onto a search. */
+function FilterSelectInput({
+  field,
+  values,
+  onChange,
+}: {
+  field: FilterField
+  values: string[]
+  onChange: (next: string[]) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const chosen = values[0]
+
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-body-md font-semibold text-foreground">{field.label}</p>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="flex h-9 w-full cursor-pointer items-center gap-2 rounded-md border border-gray-40 bg-card px-[11px] text-left"
+          >
+            <span
+              className={cn(
+                "min-w-0 flex-1 truncate text-body-md",
+                chosen ? "text-gray-100" : "text-gray-80"
+              )}
+            >
+              {chosen ?? field.placeholder}
+            </span>
+            <Icon name="expand-more" size={16} className="shrink-0 text-gray-60" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="flex w-[var(--radix-popover-trigger-width)] flex-col p-1"
+        >
+          {field.options.map((option) => {
+            const held = option === chosen
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => {
+                  /* One answer at a time, and picking the one already held
+                     puts it down again. */
+                  onChange(held ? [] : [option])
+                  setOpen(false)
+                }}
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left",
+                  "text-body-md text-gray-100 hover:bg-gray-5"
+                )}
+              >
+                <Icon
+                  name="check"
+                  size={16}
+                  className={cn("shrink-0", held ? "text-primary-50" : "opacity-0")}
+                />
+                {option}
+              </button>
+            )
+          })}
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+}
+
 function FilterButton({
   group,
   filters,
@@ -158,9 +228,6 @@ function FilterButton({
 }) {
   const [open, setOpen] = useState(false)
   const held = group.fields.some((field) => (filters[field.id]?.length ?? 0) > 0)
-  /* A group that asks one short question answers it in the button's own
-     popover rather than behind a search box inside it. */
-  const menu = group.fields.length === 1 && group.fields[0].mode === "menu"
 
   const clear = () => {
     const next = { ...filters }
@@ -194,48 +261,18 @@ function FilterButton({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className={cn(
-          "flex flex-col",
-          menu ? "w-[var(--radix-popover-trigger-width)] min-w-44 p-1" : "w-[320px] gap-4 p-4"
-        )}
-      >
-        {menu
-          ? group.fields[0].options.map((option) => {
-              const held = (filters[group.fields[0].id] ?? []).includes(option)
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => {
-                    /* One answer at a time, and picking the one already held
-                       is how it is put down again. */
-                    onChange({ ...filters, [group.fields[0].id]: held ? [] : [option] })
-                    setOpen(false)
-                  }}
-                  className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left",
-                    "text-body-md text-gray-100 hover:bg-gray-5"
-                  )}
-                >
-                  <Icon
-                    name="check"
-                    size={16}
-                    className={cn("shrink-0", held ? "text-primary-50" : "opacity-0")}
-                  />
-                  {option}
-                </button>
-              )
-            })
-          : group.fields.map((field) => (
-              <FilterFieldInput
-                key={field.id}
-                field={field}
-                values={filters[field.id] ?? []}
-                onChange={(next) => onChange({ ...filters, [field.id]: next })}
-              />
-            ))}
+      <PopoverContent align="start" className="flex w-[320px] flex-col gap-4 p-4">
+        {group.fields.map((field) => {
+          const Input = field.mode === "menu" ? FilterSelectInput : FilterFieldInput
+          return (
+            <Input
+              key={field.id}
+              field={field}
+              values={filters[field.id] ?? []}
+              onChange={(next) => onChange({ ...filters, [field.id]: next })}
+            />
+          )
+        })}
       </PopoverContent>
     </Popover>
   )
