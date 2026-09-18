@@ -1,4 +1,4 @@
-import { AUDIT_STUDENT, STUDENT_RECORD, type AuditCourse } from "@/data/audit"
+import { AUDIT_STUDENT, DEVELOPMENTAL, STUDENT_RECORD, type AuditCourse } from "@/data/audit"
 import { recordMappings, type Constraint, type CourseMapping } from "@/data/explain"
 import { CREDITS_PER_COURSE, DEGREE } from "@/data/plan"
 
@@ -246,8 +246,27 @@ export const RULESET: ComplianceCheck = {
    take — plus the enrolment status that decides how much of the award is paid.
    Illustrative rather than authoritative, like the ruleset above it. */
 
-const ATTEMPTED = EARNED + IN_PROGRESS
-const PACE = Math.round((EARNED / ATTEMPTED) * 100)
+/** Developmental coursework. The degree will not count it — progress toward a
+ *  degree means degree-applicable credit, which is why `EARNED` above leaves it
+ *  out and the NCAA checks refuse it. Federal aid is not asking that question:
+ *  pace and the timeframe cap count everything a student sat, and the GPA
+ *  counts everything they were graded on. Two standards, the same transcript,
+ *  a different answer — which is the argument for the screen. */
+const DEVELOPMENTAL_CREDITS = DEVELOPMENTAL.courses.reduce(
+  (sum, course) => sum + course.credits,
+  0
+)
+
+/** Everything finished, degree-applicable or not. The pace test's numerator. */
+const COMPLETED = EARNED + DEVELOPMENTAL_CREDITS
+
+/** What carries grade points: taken here, graded on a letter. Transfer credit
+ *  arrives with units and no grade, so the GPA is a smaller number of credits
+ *  than either of the two above. */
+const GRADED = (YEAR_ONE.length + DEVELOPMENTAL.courses.length) * CREDITS_PER_COURSE
+
+const ATTEMPTED = COMPLETED + IN_PROGRESS
+const PACE = Math.round((COMPLETED / ATTEMPTED) * 100)
 /** 150% of the published program length, which is where aid stops. */
 const MAX_TIMEFRAME = DEGREE.credits * 1.5
 /** The credits the pace test wants completed, which is 67% of everything
@@ -266,7 +285,9 @@ export const AID: ComplianceCheck = {
   state: "outstanding",
   outstanding: 1,
   constraints: 8,
-  credits: EARNED,
+  /* What aid has banked, which is more than the degree has: developmental
+     credit counts here and not there. */
+  credits: COMPLETED,
   open: true,
   children: [
     {
@@ -277,7 +298,7 @@ export const AID: ComplianceCheck = {
       name: "Cumulative GPA",
       state: "met",
       constraints: 3,
-      credits: EARNED,
+      credits: GRADED,
       rule: "2.0 minimum cumulative GPA",
       children: [
         {
@@ -286,7 +307,7 @@ export const AID: ComplianceCheck = {
           name: "Cumulative GPA at or above 2.0",
           state: "met",
           constraints: 1,
-          credits: EARNED,
+          credits: GRADED,
           rule: `Currently ${CGPA}`,
           children: [],
         },
@@ -320,7 +341,7 @@ export const AID: ComplianceCheck = {
       name: "Pace of Completion",
       state: "met",
       constraints: 3,
-      credits: EARNED,
+      credits: COMPLETED,
       rule: `${PACE}% of attempted credits completed, against a 67% minimum`,
       children: [
         {
@@ -329,8 +350,8 @@ export const AID: ComplianceCheck = {
           name: "Complete at least 67% of attempted credits",
           state: "met",
           constraints: 1,
-          credits: EARNED,
-          rule: `${EARNED} completed of ${ATTEMPTED} attempted`,
+          credits: COMPLETED,
+          rule: `${COMPLETED} completed of ${ATTEMPTED} attempted`,
           children: [],
         },
         {
@@ -516,10 +537,17 @@ const CODES = {
   registered: [...STUDENT_RECORD.values()]
     .filter((course) => course.mark === "registered")
     .map((course) => course.code),
+  developmental: DEVELOPMENTAL.courses.map((course) => course.code),
 }
 
-/** Everything on the record, which is what the timeframe cap counts. */
-const ALL_ATTEMPTED = [...CODES.yearOne, ...CODES.carriedIn, ...CODES.yearTwoFall]
+/** Everything on the record, which is what the timeframe cap counts — and it
+ *  means everything, developmental coursework included. */
+const ALL_ATTEMPTED = [
+  ...CODES.yearOne,
+  ...CODES.carriedIn,
+  ...CODES.yearTwoFall,
+  ...CODES.developmental,
+]
 
 /* Every constraint below is one of the requirement editor's own templates —
    "At least [x] units in total", "At most [x] courses/units with defined
@@ -564,6 +592,10 @@ const YEAR_ONE_EXPLAIN: CheckExplain = {
   counting: CODES.yearOne,
   refused: [
     { codes: CODES.carriedIn, reason: "Transfer status, capped at 0 units" },
+    {
+      codes: CODES.developmental,
+      reason: "Attribute Developmental Mathematics — not degree-applicable",
+    },
   ],
 }
 
@@ -605,6 +637,7 @@ const YEAR_TWO_EXPLAIN: CheckExplain = {
   refused: [
     { codes: CODES.yearOne, reason: "Outside the terms this check counts" },
     { codes: CODES.carriedIn, reason: "Outside the terms this check counts" },
+    { codes: CODES.developmental, reason: "Outside the terms this check counts" },
     { codes: CODES.registered, reason: "Grade IP — no units earned yet" },
   ],
 }
@@ -657,6 +690,10 @@ const PTD_EXPLAIN: CheckExplain = {
   refused: [
     { codes: CODES.yearTwoFall, reason: "Grade IP, capped at 0 units" },
     { codes: CODES.registered, reason: "Grade IP, capped at 0 units" },
+    {
+      codes: CODES.developmental,
+      reason: "Attribute Developmental Mathematics — not degree-applicable",
+    },
   ],
 }
 
@@ -691,7 +728,7 @@ const GPA_EXPLAIN: CheckExplain = {
       ],
     },
   ],
-  counting: CODES.yearOne,
+  counting: [...CODES.yearOne, ...CODES.developmental],
   refused: [
     { codes: CODES.carriedIn, reason: "Transfer grade, capped at 0 units" },
     {
@@ -703,15 +740,16 @@ const GPA_EXPLAIN: CheckExplain = {
 
 const PACE_EXPLAIN: CheckExplain = {
   title: "Pace of Completion",
-  lede: `${EARNED} credits completed of ${ATTEMPTED} attempted — ${PACE}% against a 67% floor. The test people fail without noticing, because the denominator holds things the transcript does not show as failures: withdrawals, incompletes, and every course still under way.`,
+  lede: `${COMPLETED} credits completed of ${ATTEMPTED} attempted — ${PACE}% against a 67% floor. The test people fail without noticing, because the denominator holds things the transcript does not show as failures: withdrawals, incompletes, and every course still under way.`,
   constraints: [
     {
       id: "pace-ratio",
       text: `At least ${PACE_FLOOR} units in total`,
       notes: [
         { text: `67% of the ${ATTEMPTED} credits attempted so far. The floor moves every time the student registers.` },
+        { text: `${DEVELOPMENTAL_CREDITS} of the ${COMPLETED} completed are developmental: the degree will not count them and this test will.` },
       ],
-      progress: { met: EARNED, total: PACE_FLOOR },
+      progress: { met: COMPLETED, total: PACE_FLOOR },
     },
     {
       id: "pace-attempted",
@@ -735,7 +773,7 @@ const PACE_EXPLAIN: CheckExplain = {
       limit: { used: CARRIED_IN.length * CREDITS_PER_COURSE, cap: CARRIED_IN.length * CREDITS_PER_COURSE },
     },
   ],
-  counting: [...CODES.yearOne, ...CODES.carriedIn],
+  counting: [...CODES.yearOne, ...CODES.carriedIn, ...CODES.developmental],
   refused: [
     { codes: CODES.yearTwoFall, reason: "Grade IP — attempted, not completed" },
   ],
