@@ -224,7 +224,7 @@ function Bar({ meter }: { meter: Meter }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="flex h-1.5 w-[168px] overflow-hidden rounded-full bg-gray-40">
+      <span className="flex h-1.5 w-full overflow-hidden rounded-full bg-gray-40">
         {SHARES.map((share) => (
           <span
             key={share.key}
@@ -246,13 +246,23 @@ function Bar({ meter }: { meter: Meter }) {
 }
 
 function Portrait({ student }: { student: Student }) {
-  if (student.photo) {
-    return (
-      <img src={student.photo} alt="" className="size-11 shrink-0 rounded-full object-cover" />
-    )
+  const [failed, setFailed] = useState(false)
+
+  /* A drawn face rather than two letters if the photograph does not arrive:
+     eight initials read as eight labels, which is the opposite of what the row
+     is trying to say. */
+  if (failed) {
+    return <StudentAvatar seed={student.username} size={44} className="shrink-0 rounded-full" />
   }
 
-  return <StudentAvatar seed={student.username} size={44} className="shrink-0 rounded-full" />
+  return (
+    <img
+      src={student.photo}
+      alt=""
+      onError={() => setFailed(true)}
+      className="size-11 shrink-0 rounded-full object-cover"
+    />
+  )
 }
 
 function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
@@ -277,7 +287,7 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
 
       {/* Every column holds its width down the whole list. A row is read
           against the rows above it, and a column that moves cannot be. */}
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex w-[280px] shrink-0 flex-col gap-2 max-lg:w-[200px]">
         {student.programs.map((program) => (
           <p key={program.name} className="flex flex-wrap items-center gap-2 text-body-md text-gray-80">
             {program.name}
@@ -292,7 +302,7 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
         </Badge>
       </div>
 
-      <div className="flex w-[252px] shrink-0 flex-col gap-4">
+      <div className="flex min-w-[240px] flex-1 flex-col gap-4">
         <div className="flex flex-col gap-2">
           <p className="text-body-md font-semibold text-foreground">Courses</p>
           <Bar meter={student.courses} />

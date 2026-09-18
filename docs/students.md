@@ -38,13 +38,16 @@ The count is the point: the list is a sample, not the cohort.
 
 Everybody has a face. Two letters in a coloured disc is what a product shows
 when it has nothing, and on a list of eight people it reads as eight labels
-rather than eight students — the opposite of what the row is trying to say. So
-`StudentAvatar` draws one instead, out of four choices seeded on the username,
-which means the same person is always the same face however the list re-sorts.
-Illustrated rather than photographic on purpose: a prototype that ships
-strangers' photographs puts real people on a screen they never agreed to, and a
-keynote that reaches for a photo service is one dropped network away from eight
-broken images. Scott keeps his own photograph, because we have it.
+rather than eight students — the opposite of what the row is trying to say.
+
+The photographs are in `public/faces/`, from
+[randomuser.me](https://randomuser.me), whose portrait set is published for
+exactly this: mockups and prototypes. They are held in the repo rather than
+fetched, so the screen does not depend on a network at the moment somebody is
+standing in front of it. Scott keeps his own.
+
+`StudentAvatar` is still there as the fallback, drawing a face out of four
+choices seeded on the username, for the case where an image does not arrive.
 
 ## A row
 
@@ -63,6 +66,14 @@ not offered, Tobias has no graduation application on file.
 
 Scott's name leads through to his record on
 [Proactive Compliance](compliance.md). The rest are the cohort he is in.
+
+## Not the same student twice
+
+The plan this prototype opens onto is not the plan the Team Plan prototypes
+hold, and that is allowed: those two are about the plan, this one is about the
+record. Where they disagree — the courses in the term under way, the incoming
+credit — the record on this side is the one the audit, the compliance ruleset
+and this list all agree on.
 
 ## What is drawn and not wired
 

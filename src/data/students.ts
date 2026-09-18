@@ -80,7 +80,9 @@ export type Student = {
   standing: string
   /** Out of five, as the record reads it. */
   engage: number
-  photo?: string
+  /** Their own face. Everybody has one — a list of eight people drawn as eight
+   *  labels is the opposite of what the row is trying to say. */
+  photo: string
   programs: Enrolment[]
   cgpa: string
   courses: Meter
@@ -111,6 +113,7 @@ export const ROSTER: Student[] = [
   },
   {
     username: "aosei",
+    photo: "/faces/aosei.jpg",
     name: "Amara Osei",
     standing: "Junior",
     engage: 4,
@@ -121,6 +124,7 @@ export const ROSTER: Student[] = [
   },
   {
     username: "jmiller",
+    photo: "/faces/jmiller.jpg",
     name: "Jonah Miller",
     standing: "Sophomore",
     engage: 3,
@@ -132,6 +136,7 @@ export const ROSTER: Student[] = [
   },
   {
     username: "syildiz",
+    photo: "/faces/syildiz.jpg",
     name: "Selin Yıldız",
     standing: "Junior",
     engage: 5,
@@ -142,6 +147,7 @@ export const ROSTER: Student[] = [
   },
   {
     username: "twren",
+    photo: "/faces/twren.jpg",
     name: "Tobias Wren",
     standing: "Senior",
     engage: 2,
@@ -153,6 +159,7 @@ export const ROSTER: Student[] = [
   },
   {
     username: "dramos",
+    photo: "/faces/dramos.jpg",
     name: "Diego Ramos",
     standing: "Senior",
     engage: 4,
@@ -163,6 +170,7 @@ export const ROSTER: Student[] = [
   },
   {
     username: "falamin",
+    photo: "/faces/falamin.jpg",
     name: "Farah Al-Amin",
     standing: "Senior",
     engage: 3,
@@ -173,6 +181,7 @@ export const ROSTER: Student[] = [
   },
   {
     username: "rnakamura",
+    photo: "/faces/rnakamura.jpg",
     name: "Ryo Nakamura",
     standing: "Freshman",
     engage: 2,
