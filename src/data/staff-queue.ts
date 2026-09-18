@@ -41,55 +41,73 @@ export const REPORTS: Report[] = [
   { title: "Missing Grad Clearance", count: "22 students", tag: "Manual" },
 ]
 
+/** Everybody who turns up in this queue, and their face.
+ *
+ *  Keyed by name rather than by username, because most rows here name a
+ *  student and only some carry a username — and a row that shows two grey
+ *  letters beside a row that shows a photograph of the same person, which is
+ *  what the Transfer tab was doing, reads as two different people. */
+const FACES: Record<string, string> = {
+  "Fawad Miller": "/faces/fmiller.jpg",
+  "Ryo Nakamura": "/faces/rnakamura.jpg",
+  "Bríd O'Sullivan": "/faces/bosullivan.jpg",
+  "Farah Al-Amin": "/faces/falamin.jpg",
+  "Jonah Miller": "/faces/jmiller.jpg",
+  "Amara Osei": "/faces/aosei.jpg",
+  "Selin Yıldız": "/faces/syildiz.jpg",
+  "Tobias Wren": "/faces/twren.jpg",
+  "Diego Ramos": "/faces/dramos.jpg",
+  "Priya Chandran": "/faces/pchandran.jpg",
+  "Ingrid Castellanos": "/faces/icastellanos.jpg",
+  "Alexander Mitchell": "/faces/amitchell.jpg",
+  "Tomas Reyes": "/faces/treyes.jpg",
+  "Aaron Scott": "/faces/ascott.jpg",
+  "Aaron Lewis": "/faces/alewis.jpg",
+  "Aaron Kelley": "/faces/akelley.jpg",
+}
+
+/** The face for a name, where there is one. Initials stay as the fallback. */
+export const faceOf = (name: string): string | undefined => FACES[name]
+
 /* ============================================================ Today */
 
 export type TodayAppt = {
   title: string
   when: string
-  /** The people in the room, and how many more than fit. */
-  who: { initials: string; color: string }[]
-  more?: number
+  /** Who is in the room. One person, on every one of these — a transfer
+   *  officer's day is a queue of individual transcripts, not a lecture. */
+  who: { initials: string; color: string; photo?: string }[]
   /** How long until it starts, on the ones close enough to say. */
   starts?: string
 }
 
+/* Jessica's morning. Four one-to-ones, and every topic is transfer work —
+   this board belongs to the transfer office, so a day of "Group Advising" was
+   somebody else's job showing through. Two of the four are the students whose
+   credit reviews are waiting in Open Items below: you meet the person whose
+   transcript you are about to decide on. */
 export const TODAY: TodayAppt[] = [
   {
-    title: "Fawad Miller / Advising",
+    title: "Fawad Miller / Transfer credit review",
     when: "11:30am – 12:30pm",
-    who: [{ initials: "FM", color: "#b54708" }],
+    who: [{ initials: "FM", color: "#b54708", photo: "/faces/fmiller.jpg" }],
     starts: "In 1 hour",
   },
   {
-    title: "Group Advising",
-    when: "11:30am – 12:30pm",
-    who: [
-      { initials: "GA", color: "#175cd3" },
-      { initials: "SR", color: "#087443" },
-      { initials: "TW", color: "#9f1ab1" },
-    ],
-    more: 23,
+    title: "Ryo Nakamura / Course equivalency question",
+    when: "1:00pm – 1:30pm",
+    who: [{ initials: "RN", color: "#175cd3", photo: "/faces/rnakamura.jpg" }],
     starts: "In 2 hours",
   },
   {
-    title: "Group Advising",
-    when: "11:30am – 12:30pm",
-    who: [
-      { initials: "LF", color: "#b42318" },
-      { initials: "AO", color: "#026aa2" },
-      { initials: "JM", color: "#3e4784" },
-    ],
-    more: 23,
+    title: "Bríd O'Sullivan / Incoming credit appeal",
+    when: "2:00pm – 2:45pm",
+    who: [{ initials: "BO", color: "#087443", photo: "/faces/bosullivan.jpg" }],
   },
   {
-    title: "Group Advising",
-    when: "11:30am – 12:30pm",
-    who: [
-      { initials: "SY", color: "#087443" },
-      { initials: "DR", color: "#b54708" },
-      { initials: "IC", color: "#175cd3" },
-    ],
-    more: 23,
+    title: "Farah Al-Amin / Transcript evaluation",
+    when: "3:15pm – 3:45pm",
+    who: [{ initials: "FA", color: "#9f1ab1", photo: "/faces/falamin.jpg" }],
   },
 ]
 

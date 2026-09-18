@@ -83,7 +83,7 @@ export function RowSubject({
   sub,
   subStrong,
 }: {
-  face?: { initials: string; color: string }
+  face?: { initials: string; color: string; photo?: string }
   title: ReactNode
   sub?: ReactNode
   /** A version or a term is a fact, not a caption — it keeps full contrast. */
@@ -91,7 +91,15 @@ export function RowSubject({
 }) {
   return (
     <>
-      {face && <Face initials={face.initials} color={face.color} size={32} className="mt-px" />}
+      {face && (
+        <Face
+          initials={face.initials}
+          color={face.color}
+          photo={face.photo}
+          size={32}
+          className="mt-px"
+        />
+      )}
       <div className="w-[252px] shrink-0 max-lg:w-[180px]">
         <p className="text-body-md font-semibold text-foreground">{title}</p>
         {sub && (

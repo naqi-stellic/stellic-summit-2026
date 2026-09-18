@@ -199,13 +199,11 @@ function Home({ who, inert, without }: StaffHomeProps) {
                             key={face.initials}
                             initials={face.initials}
                             color={face.color}
+                            photo={face.photo}
                             size={26}
                             className={index > 0 ? "-ml-[7px] border-2 border-white" : ""}
                           />
                         ))}
-                        {appt.more && (
-                          <span className="ml-1.5 text-label-md text-gray-80">+{appt.more}</span>
-                        )}
                       </span>
                       {appt.starts && (
                         <span className="text-label-md text-gray-80">{appt.starts}</span>

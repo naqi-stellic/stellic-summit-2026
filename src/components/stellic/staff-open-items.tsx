@@ -40,6 +40,7 @@ import {
   NOTES,
   NOTE_VIEWS,
   WORKFLOWS,
+  faceOf,
   openSteps,
   routedTo,
   yourStep,
@@ -546,7 +547,7 @@ function Exceptions({
             }
           >
             <RowSubject
-              face={{ initials: row.initials, color: row.color }}
+              face={{ initials: row.initials, color: row.color, photo: faceOf(row.student) }}
               title={row.student}
               sub={row.username}
             />
@@ -687,7 +688,7 @@ function Workflows({
           }
         >
           <RowSubject
-            face={{ initials: row.initials, color: row.color }}
+            face={{ initials: row.initials, color: row.color, photo: faceOf(row.student) }}
             title={row.student}
             sub={row.program}
           />
@@ -737,7 +738,7 @@ function Notes({
       {rows.map((note) => (
         <Row key={note.id}>
           <RowSubject
-            face={{ initials: note.initials, color: note.color }}
+            face={{ initials: note.initials, color: note.color, photo: faceOf(note.student) }}
             title={note.student}
             sub={note.program}
           />
