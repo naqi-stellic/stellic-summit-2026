@@ -43,16 +43,20 @@ function Filters() {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3">
       <p className="flex items-center gap-1.5 text-body-md text-gray-100">
-        <Icon name="filter-list" size={14} className="text-gray-80" />
+        <Icon name="filter-alt" size={14} className="text-gray-80" />
         Filters
       </p>
       <div className="flex flex-wrap gap-2">
         {/* The assistant is a filter like the rest, and first because it is the
             one you reach for when you cannot name the filter you want. */}
         <Button size="sm">
-          <Icon name="auto-awesome" size={14} />
+          <Icon name="auto-awesome-outline" size={14} />
           Filter Assistant
         </Button>
+        {/* The assistant is a filter and it is not one of the twenty: it is how
+            you reach them when you cannot name the one you want. The rule says
+            so without a second heading. */}
+        <span className="mx-1 h-8 w-px shrink-0 self-center bg-gray-40" />
         {FILTERS.map((filter) => (
           <Button key={filter} size="sm">
             {filter}
