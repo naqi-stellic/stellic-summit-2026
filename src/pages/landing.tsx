@@ -35,7 +35,7 @@ const SECTIONS = [
         entries: [
           {
             href: "/compliance.html",
-            name: "Student record",
+            name: "Student profile",
             blurb: "One student, read against a ruleset instead of their degree.",
             /* What to click, in order. A prototype that takes four clicks to
                reach the thing it is about should say which four rather than
@@ -45,7 +45,7 @@ const SECTIONS = [
           {
             href: "/students.html",
             name: "Student search",
-            blurb: "The same question asked of the institution: who else is short?",
+            blurb: "The same question, asked of the whole institution.",
             route: ["Students", "Remaining", "Scott Abott", "Compliance"],
           },
         ],
@@ -101,10 +101,9 @@ function Way({ href, name }: Entry) {
  *  ends every card on this page — it already means "onward" here. */
 function Route({ steps }: { steps: string[] }) {
   return (
-    /* A hairline above it, so it reads as the walk rather than as a second
-       sentence. The last step is the point of the walk, so it is the one drawn
-       at full strength. */
-    <p className="mt-auto flex flex-wrap items-center gap-x-1 gap-y-0.5 border-t border-gray-5 pt-2 text-label-md text-gray-80">
+    /* The last step is the point of the walk, so it is the one drawn at full
+       strength. */
+    <p className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-label-md text-gray-80">
       {steps.map((step, i) => (
         <span key={step} className="flex items-center gap-1">
           {i > 0 && <Icon name="chevron-right" size={12} className="shrink-0 text-gray-60" />}
@@ -118,37 +117,42 @@ function Route({ steps }: { steps: string[] }) {
 }
 
 /** A prototype with more than one door. The card stops being the link — it
- *  cannot be two of them — so it keeps the name and the doors sit under it as
- *  a pair, each named for where you start rather than for what you will see,
- *  and each carrying the walk from there to the point of the thing. */
+ *  cannot be two of them — so it keeps the name and the doors are rows beneath
+ *  it, each named for where you start rather than for what you will see, and
+ *  each carrying the walk from there to the point of the thing. */
 function Ways({ name, entries }: { name: string; entries: Entry[] }) {
   return (
     <div className="flex flex-col gap-3 rounded-md border border-gray-40 bg-card p-[19px] shadow-sm">
-      <span className="text-h300 font-semibold text-gray-100">{name}</span>
-      {/* Side by side where there is room, because they are alternatives
-          rather than steps — stacked, the second reads as following the
-          first. */}
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="min-w-0 text-h300 font-semibold text-gray-100">{name}</span>
+        {/* Said rather than counted by eye, because the rows underneath are the
+            only ones on this page that are not whole prototypes. */}
+        <span className="shrink-0 text-label-md text-gray-80">
+          {entries.length} entry points
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2">
         {entries.map((entry) => (
           <a
             key={entry.href}
             href={entry.href}
             target="_blank"
             rel="noreferrer"
-            className="group flex flex-col gap-2 rounded-md border border-gray-40 bg-card p-[11px] transition-colors hover:border-primary-50 hover:bg-gray-0"
+            className="group flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-gray-40 bg-card p-[11px] transition-colors hover:border-primary-50 hover:bg-gray-0"
           >
-            <span className="flex items-center gap-2">
-              <span className="min-w-0 flex-1 text-body-md font-semibold text-gray-100">
-                {entry.name}
-              </span>
-              <Icon
-                name="chevron-right"
-                size={16}
-                className="shrink-0 text-gray-60 transition-all group-hover:translate-x-0.5 group-hover:text-primary-50"
-              />
+            <span className="flex min-w-[200px] flex-1 flex-col gap-0.5">
+              <span className="text-body-md font-semibold text-gray-100">{entry.name}</span>
+              {entry.blurb && <span className="text-label-md text-gray-80">{entry.blurb}</span>}
             </span>
-            {entry.blurb && <span className="text-label-md text-gray-80">{entry.blurb}</span>}
+            {/* The walk sits at the end of the row, next to the chevron that
+                starts it — the two together are one gesture. */}
             {entry.route && <Route steps={entry.route} />}
+            <Icon
+              name="chevron-right"
+              size={16}
+              className="shrink-0 text-gray-60 transition-all group-hover:translate-x-0.5 group-hover:text-primary-50"
+            />
           </a>
         ))}
       </div>
