@@ -437,7 +437,18 @@ function initialFold(audit: AuditGroup): Set<string> {
   return folded
 }
 
-export function AuditTree({ audit, explain }: { audit: AuditGroup; explain?: Explain }) {
+export function AuditTree({
+  audit,
+  credential,
+  explain,
+}: {
+  audit: AuditGroup
+  /** What the degree confers, above the program that earns it. A registrar
+   *  reads the credential first — it is the thing with a name on a certificate
+   *  — and the program is how it is being got. */
+  credential?: string
+  explain?: Explain
+}) {
   const [folded, setFolded] = useState(() => initialFold(audit))
 
   const toggle = (id: string) =>
@@ -449,6 +460,9 @@ export function AuditTree({ audit, explain }: { audit: AuditGroup; explain?: Exp
 
   return (
     <div className="flex flex-col gap-2">
+      {credential && (
+        <p className="pb-1 text-caption-lg font-semibold text-gray-100">{credential}</p>
+      )}
       {/* The degree heads the tree rather than hanging off it, so it is the one
           row with no trail beside it. */}
       <TreeElement trail={[]}>

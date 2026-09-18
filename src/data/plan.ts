@@ -103,6 +103,12 @@ export const STUDENT = { name: "Scott Abott", username: "sabott" }
  *  which is what makes "5 reqs · 15 credits" read consistently. */
 export const DEGREE = {
   program: "Business Administration, B.S.",
+  /** What the degree confers. The program is how it is earned; this is the
+   *  thing with a name on the certificate, and an audit reads it first. */
+  credential: "B.S. Business",
+  /** The program on its own, without the credential trailing it — which is how
+   *  it reads once the credential is stated above it. */
+  major: "Business Administration",
   concentration: "Finance",
   /** Declared alongside the concentration. Three of the degree's requirements
    *  answer to it rather than to the major, which is what makes the pair worth

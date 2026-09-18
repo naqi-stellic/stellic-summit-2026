@@ -1,5 +1,5 @@
 import { cn } from "cn"
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
@@ -72,6 +72,39 @@ function ShareBar({
   )
 }
 
+/** Scott's own face. A record of a person leads with the person, and initials
+ *  are what you show when you have not got one — so they stay as the fallback
+ *  rather than as the design. */
+export function StudentFace({ size = 40, className }: { size?: number; className?: string }) {
+  const [failed, setFailed] = useState(false)
+
+  if (failed || !AUDIT_STUDENT.photo) {
+    return (
+      <span
+        style={{ width: size, height: size, fontSize: size * 0.32 }}
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-full bg-gray-40 leading-none text-white",
+          className
+        )}
+      >
+        {AUDIT_STUDENT.initials}
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={AUDIT_STUDENT.photo}
+      alt={AUDIT_STUDENT.name}
+      width={size}
+      height={size}
+      onError={() => setFailed(true)}
+      style={{ width: size, height: size }}
+      className={cn("shrink-0 rounded-full object-cover", className)}
+    />
+  )
+}
+
 export function ProfileCard({
   programs,
   progressLabel = "Official Progress",
@@ -90,9 +123,7 @@ export function ProfileCard({
   return (
     <ProgressCard className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start gap-4">
-        <span className="flex size-[124px] shrink-0 items-center justify-center rounded-full bg-gray-40 text-[40px] leading-none text-white">
-          {AUDIT_STUDENT.initials}
-        </span>
+        <StudentFace size={124} />
 
         <div className="flex min-w-[240px] flex-1 flex-col gap-2">
           <p className="text-h300 font-semibold text-gray-100">{AUDIT_STUDENT.name}</p>
@@ -179,7 +210,7 @@ export function ProfileCard({
 /** The three cards under the profile: who to ask, how it is going, and what
  *  they care about. */
 export function NetworkRow() {
-  const { advisor, engage, interests } = AUDIT_STUDENT
+  const { advisor, engage } = AUDIT_STUDENT
 
   return (
     <div className="flex flex-wrap items-stretch gap-4">
@@ -239,12 +270,6 @@ export function NetworkRow() {
         </div>
       </ProgressCard>
 
-      <ProgressCard className="flex min-w-[280px] flex-1 flex-col gap-4">
-        <p className="text-body-md font-semibold text-gray-80">Interests</p>
-        <p className="text-body-md text-gray-80">
-          {interests.length ? interests.join(", ") : "No interests added"}
-        </p>
-      </ProgressCard>
     </div>
   )
 }

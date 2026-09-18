@@ -335,7 +335,7 @@ export function auditProgram(program: Program, alongside: boolean): AuditGroup {
     id: program.id,
     level: "degree",
     name: `${program.name} [${program.kind.toLowerCase()}]`,
-    subtitle: `${program.school} · ${program.department} · Catalog Term: Fall 2026`,
+    subtitle: `${program.school} · ${program.department} · Catalog Term: Fall 2025`,
     tags: [`fulfill all | at least ${programTotal(program) * CREDITS_PER_COURSE} credits`],
     counts: { requirements: standing.remaining, milestones: 0 },
     bar: {

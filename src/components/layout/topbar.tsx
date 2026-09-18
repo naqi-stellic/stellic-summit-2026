@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
+import { StudentFace } from "@/components/stellic/student-profile"
 
 export function Topbar({ title, account }: {
   title: string
@@ -36,11 +37,9 @@ export function Topbar({ title, account }: {
         <button type="button" aria-label="Notifications" className="shrink-0 text-gray-100">
           <Icon name="s-notification" size={24} />
         </button>
-        {account ?? (
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-field text-gray-0">
-            CN
-          </span>
-        )}
+        {/* Whose session this is. On a student's own surfaces that is Scott,
+            so the circle is his face; a staff page passes its own. */}
+        {account ?? <StudentFace size={40} />}
       </div>
     </header>
   )

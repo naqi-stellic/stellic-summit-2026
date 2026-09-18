@@ -100,13 +100,29 @@ const VERDICT: Record<MappingVerdict, string> = {
   "not considered": "bg-gray-5 text-foreground",
 }
 
-export function ExplainPanel({ group, onClose }: { group: AuditGroup; onClose: () => void }) {
+export function ExplainPanel({
+  group,
+  title,
+  standing: given,
+  constraints: told,
+  onClose,
+}: {
+  /** A requirement off the audit, which the panel reads for itself. */
+  group?: AuditGroup
+  /** Where the panel is asked about something that is not a requirement — a
+   *  compliance check, say — the caller names it and hands over the rules,
+   *  because nothing else on the page can derive them. */
+  title?: string
+  standing?: { earned: number; needed: number; toGo: string }
+  constraints?: Constraint[]
+  onClose: () => void
+}) {
   const [mappings, setMappings] = useState(false)
   const [find, setFind] = useState("")
 
-  const constraints = constraintsFor(group)
-  const standing = explainStanding(group)
-  const all = courseMappings(group)
+  const constraints = told ?? (group ? constraintsFor(group) : [])
+  const standing = given ?? (group ? explainStanding(group) : { earned: 0, needed: 0, toGo: "" })
+  const all = group ? courseMappings(group) : []
   const shown = find
     ? all.filter((mapping) =>
         `${mapping.course.code} ${mapping.course.name}`.toLowerCase().includes(find.toLowerCase())
@@ -124,7 +140,7 @@ export function ExplainPanel({ group, onClose }: { group: AuditGroup; onClose: (
 
       <div className="flex flex-1 flex-col gap-8 p-6 pb-28">
         <div className="flex flex-col gap-2">
-          <h3 className="text-h300 font-semibold text-foreground">{group.name}</h3>
+          <h3 className="text-h300 font-semibold text-foreground">{title ?? group?.name}</h3>
           {/* The standing in one sentence, before any of the rules. Whatever
               else the panel says, this is the thing that was asked. */}
           <p className="text-body-md text-gray-80">
@@ -147,6 +163,7 @@ export function ExplainPanel({ group, onClose }: { group: AuditGroup; onClose: (
           ))}
         </section>
 
+        {all.length > 0 && (
         <section className="flex flex-col gap-2">
           <button
             type="button"
@@ -209,6 +226,7 @@ export function ExplainPanel({ group, onClose }: { group: AuditGroup; onClose: (
             </div>
           )}
         </section>
+        )}
       </div>
     </aside>
   )

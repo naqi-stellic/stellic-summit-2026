@@ -121,6 +121,33 @@ function PlanFacet({ label, values }: { label: string; values: string[] }) {
   )
 }
 
+/** Where the planner was opened from, if it was opened from anywhere:
+ *  `?from=compliance` on the URL, put there by the record that sent you. */
+function CameFrom() {
+  const back =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("from")
+
+  const inside = (
+    <>
+      {STUDENT.name}
+      <Icon name="chevron-right" size={16} />
+    </>
+  )
+
+  if (!back) return <span className="flex items-center gap-1 text-gray-80">{inside}</span>
+
+  return (
+    <a
+      href={`/${back}.html`}
+      className="flex items-center gap-1 text-gray-80 hover:text-gray-100"
+    >
+      {inside}
+    </a>
+  )
+}
+
 export function PlanHeader({
   actions,
   tabs,
@@ -223,10 +250,10 @@ export function PlanHeader({
         {/* Whose plan, then which of their plans. The student's name reads as
             the trail you came in on, so it is set back in gray. */}
         <h2 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-h400 font-semibold">
-          <span className="flex items-center gap-1 text-gray-80">
-            {STUDENT.name}
-            <Icon name="chevron-right" size={16} />
-          </span>
+          {/* The trail you came in on. Arrived from a student's record and it
+              is a way back to it; opened on its own and it is just the trail,
+              so it stays a span rather than pretending to lead somewhere. */}
+          <CameFrom />
           <span className="flex items-center gap-1 text-gray-100">
             Primary Plan
             <Icon name="expand-more" size={16} />
@@ -246,7 +273,7 @@ export function PlanHeader({
           `Minor in ${DEGREE.minor}`,
         ]}
       />
-      <PlanFacet label="Pathway:" values={["Business Administration: Fall Start 2026 [BSc]"]} />
+      <PlanFacet label="Pathway:" values={["Business Administration: Fall Start 2025 [BSc]"]} />
 
     </section>
 

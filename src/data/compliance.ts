@@ -1,4 +1,5 @@
 import { STUDENT_RECORD, type AuditCourse } from "@/data/audit"
+import type { Constraint } from "@/data/explain"
 import { CREDITS_PER_COURSE, DEGREE } from "@/data/plan"
 
 /* Proactive Compliance: the same student, read against an eligibility ruleset
@@ -19,7 +20,7 @@ import { CREDITS_PER_COURSE, DEGREE } from "@/data/plan"
  * screen: nothing on Progress would tell you this student is six credits short
  * of staying eligible. */
 
-export type CheckState = "met" | "pending" | "outstanding"
+export type CheckState = "met" | "pending" | "planned" | "outstanding"
 
 export type ComplianceCheck = {
   kind: "check"
@@ -33,23 +34,18 @@ export type ComplianceCheck = {
   constraints: number
   /** Credits banked against it so far. */
   credits: number
-  /** What the check is actually asking for, said in one line. */
+  /** What the plan would put against it, where the plan reaches it. Read only
+   *  by the Planned view; the Official one does not know the plan exists. */
+  planned?: number
+  /** What the check is actually asking for, said in one line. Off the row now
+   *  — a check states its name and its count, and the reading is in Explain. */
   rule?: string
   /** Folded open when the page loads. Only the year under way is. */
   open?: boolean
   children: ComplianceEntry[]
 }
 
-/** Not a rule of its own: a note about where some of these credits landed, as
- *  the audit's own double-counting question asked the other way round. */
-export type CountingGroup = {
-  kind: "counting"
-  id: string
-  label: string
-  children: AuditCourse[]
-}
-
-export type ComplianceEntry = ComplianceCheck | CountingGroup | AuditCourse
+export type ComplianceEntry = ComplianceCheck | AuditCourse
 
 /** A course as the student's record already has it, so the compliance tree and
  *  the degree audit can never disagree about a grade or a term. */
@@ -103,7 +99,7 @@ export const RULESET: ComplianceCheck = {
     {
       kind: "check",
       id: "year-1",
-      name: "Year 1 check",
+      name: "Year 1",
       state: "met",
       constraints: 3,
       credits: 30,
@@ -113,7 +109,7 @@ export const RULESET: ComplianceCheck = {
     {
       kind: "check",
       id: "year-2",
-      name: "Year 2 check",
+      name: "Year 2",
       state: "pending",
       constraints: 3,
       credits: IN_PROGRESS,
@@ -129,15 +125,7 @@ export const RULESET: ComplianceCheck = {
           credits: EARNED,
           rule: `${NEEDED_BY_YEAR_THREE} of ${DEGREE.credits} credits before year 3 — ${SHORTFALL} short`,
           open: true,
-          children: [
-            ...YEAR_ONE,
-            {
-              kind: "counting",
-              id: "year-2-ptd-carried",
-              label: `${CARRIED_IN.length} counting towards Open Electives`,
-              children: CARRIED_IN,
-            },
-          ],
+          children: [...YEAR_ONE, ...CARRIED_IN],
         },
         {
           kind: "check",
@@ -157,6 +145,7 @@ export const RULESET: ComplianceCheck = {
           outstanding: 1,
           constraints: 2,
           credits: 0,
+          planned: 6,
           rule: "6 credits minimum in the term",
           children: [],
         },
@@ -168,6 +157,7 @@ export const RULESET: ComplianceCheck = {
           outstanding: 1,
           constraints: 2,
           credits: IN_PROGRESS,
+          planned: IN_PROGRESS + 6,
           rule: "18 credits across the academic year",
           children: [],
         },
@@ -176,18 +166,19 @@ export const RULESET: ComplianceCheck = {
     {
       kind: "check",
       id: "year-3",
-      name: "Year 3 check",
+      name: "Year 3",
       state: "outstanding",
       outstanding: 3,
       constraints: 3,
       credits: 0,
+      planned: 30,
       rule: "60% of the degree before year 4",
       children: [],
     },
     {
       kind: "check",
       id: "year-4",
-      name: "Year 4 check",
+      name: "Year 4",
       state: "outstanding",
       outstanding: 3,
       constraints: 3,
@@ -198,7 +189,7 @@ export const RULESET: ComplianceCheck = {
     {
       kind: "check",
       id: "year-5",
-      name: "Year 5 check",
+      name: "Year 5",
       state: "outstanding",
       outstanding: 3,
       constraints: 3,
@@ -208,6 +199,170 @@ export const RULESET: ComplianceCheck = {
     },
   ],
 }
+
+/* ---------------------------------------------------------------- aid
+   Federal financial aid measures the same transcript against a different
+   clock, which is the point of putting it under the first one: a student can
+   be ineligible to play and perfectly fine for aid, or the other way round,
+   and neither ruleset can see the other.
+
+   Satisfactory Academic Progress is three tests — a qualitative one on GPA, a
+   quantitative one on pace, and a ceiling on how long the whole thing may
+   take — plus the enrolment status that decides how much of the award is paid.
+   Illustrative rather than authoritative, like the ruleset above it. */
+
+const ATTEMPTED = EARNED + IN_PROGRESS
+const PACE = Math.round((EARNED / ATTEMPTED) * 100)
+/** 150% of the published program length, which is where aid stops. */
+const MAX_TIMEFRAME = DEGREE.credits * 1.5
+/** What a full award asks of a term, against what next term has in it. */
+const FULL_TIME = 12
+const SPRING_PLANNED = 6
+
+export const AID: ComplianceCheck = {
+  kind: "check",
+  id: "sap-2026",
+  name: "Federal Financial Aid",
+  state: "outstanding",
+  outstanding: 1,
+  constraints: 8,
+  credits: EARNED,
+  open: true,
+  children: [
+    {
+      kind: "check",
+      id: "sap-gpa",
+      name: "Cumulative GPA",
+      state: "met",
+      constraints: 2,
+      credits: EARNED,
+      rule: "2.0 minimum cumulative GPA",
+      children: [],
+    },
+    {
+      kind: "check",
+      id: "sap-pace",
+      name: "Pace of Completion",
+      state: "met",
+      constraints: 2,
+      credits: EARNED,
+      rule: `${PACE}% of attempted credits completed, against a 67% minimum`,
+      children: [],
+    },
+    {
+      kind: "check",
+      id: "sap-timeframe",
+      name: "Maximum Timeframe",
+      state: "pending",
+      constraints: 2,
+      credits: ATTEMPTED,
+      rule: `${ATTEMPTED} of ${MAX_TIMEFRAME} credits attempted`,
+      children: [],
+    },
+    {
+      /* The one that is going wrong, and it is going wrong for the same reason
+         the NCAA year check is: next term is half a term. */
+      kind: "check",
+      id: "sap-enrolment",
+      name: "Enrolment Status: Spring 2027",
+      state: "outstanding",
+      outstanding: 1,
+      constraints: 2,
+      credits: SPRING_PLANNED,
+      rule: `${FULL_TIME} credits for a full award — ${SPRING_PLANNED} planned`,
+      children: [],
+    },
+  ],
+}
+
+/* ---------------------------------------------------------------- planned
+   The same ruleset read against the plan rather than against the record.
+
+   Everything the plan reaches turns from outstanding to planned and carries
+   what the plan would put against it. That is the argument for having the
+   view at all: the plan closes the NCAA year check — 21 credits against the
+   18 it wants — and does not close the aid one, because six credits in the
+   spring is half a term whatever it does for eligibility. Two rulesets, one
+   plan, two different answers. */
+
+function asPlanned(check: ComplianceCheck): ComplianceCheck {
+  const reached = check.planned !== undefined
+
+  return {
+    ...check,
+    state: reached ? "planned" : check.state,
+    credits: check.planned ?? check.credits,
+    outstanding: reached ? undefined : check.outstanding,
+    children: check.children.map((child) =>
+      child.kind === "check" ? asPlanned(child) : child
+    ),
+  }
+}
+
+export const PLANNED_RULESET = asPlanned(RULESET)
+export const PLANNED_AID = asPlanned(AID)
+
+/* ---------------------------------------------------------------- explain
+   Why a check stands where it does.
+
+   A check fails for a reason that is never on the row: which credits counted,
+   which were excluded, and which clock was running. These are the rules behind
+   the one check the screen is about, written the way the ruleset writes them.
+
+   ---- EDITING ----
+   This is the copy that appears in the Explain sidebar. It is plain data —
+   `text` is the rule, `notes` are the lines under it, `progress` and `limit`
+   draw the fraction on the right. Change the words here and the panel follows.
+   -------------------------------------------------------------------------- */
+
+export const PTD_CONSTRAINTS: Constraint[] = [
+  {
+    id: "ptd-percent",
+    text: `${PERCENT_BY_YEAR_THREE * 100}% of the degree completed before the third year of enrollment`,
+    notes: [
+      { text: `${NEEDED_BY_YEAR_THREE} of ${DEGREE.credits} credits, measured at the start of the fall term` },
+    ],
+    progress: { met: EARNED, total: NEEDED_BY_YEAR_THREE },
+  },
+  {
+    id: "ptd-degree-applicable",
+    text: "Only degree-applicable credit counts toward this percentage",
+    notes: [
+      { text: "Credit that satisfies no requirement still counts if it is accepted toward the degree total:" },
+      { text: "Dual enrollment, transfer and test credit accepted by the registrar" },
+    ],
+  },
+  {
+    id: "ptd-min-grade",
+    text: "Pass with minimum grade D",
+    notes: [{ text: "A failed course is attempted, not earned, and counts against pace rather than progress" }],
+  },
+  {
+    id: "ptd-remedial",
+    text: "Do not count courses from a given set",
+    notes: [
+      { text: "Remedial and developmental coursework, to a maximum of 6 credits in the first year only" },
+    ],
+    limit: { used: 0, cap: 6 },
+  },
+  {
+    id: "ptd-declared",
+    text: "Student must have 1 attributes/tags",
+    notes: [{ text: `Tag: ${DEGREE.concentration} concentration declared before the third year` }],
+    progress: { met: 1, total: 1 },
+  },
+]
+
+/** The line the Explain panel opens with, in the panel's own shape. */
+export const PTD_STANDING = {
+  earned: EARNED,
+  needed: NEEDED_BY_YEAR_THREE,
+  toGo: `${SHORTFALL} to go before the third year`,
+}
+
+/** Which checks have something to explain. Only the one that is going wrong —
+ *  an Explain on a check nobody is asking about is a button in the way. */
+export const EXPLAINABLE = new Set(["year-2-ptd"])
 
 export const COMPLIANCE_TABS = [
   { id: "progress", label: "Progress" },

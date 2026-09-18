@@ -35,7 +35,7 @@ export type AuditCourse = {
   name: string
   credits: number
   mark: AuditMark
-  /** "Taken in Fall '26", "In progress · Fall '27" — empty on a line the audit
+  /** "Taken in Fall '25", "In progress · Fall '27" — empty on a line the audit
    *  is only holding a place for. */
   result?: string
   grade?: string
@@ -84,26 +84,29 @@ export const AUDIT_STUDENT = {
   name: STUDENT.name,
   username: STUDENT.username,
   email: `${STUDENT.username}@stellic.com`,
-  /** The same two letters the plan header names him by. */
+  /** The same two letters the plan header names him by. Kept as the fallback
+   *  for anywhere the photo has not loaded. */
   initials: "SA",
-  /** Started Fall 2026 and partway through his second year. */
+  /** His own face, which is what a record of a person should lead with. */
+  photo: "/scott-abott.jpg",
+  /** Started Fall 2025 and partway through his second year. */
   standing: "Sophomore",
   program: `${DEGREE.program} (${DEGREE.concentration})`,
-  pathway: "Business Administration: Fall Start 2026",
+  pathway: "Business Administration: Fall Start 2025",
   campus: "Main campus",
-  /** Entry year, written the way the registrar writes it: EY 2026 Fall. */
-  entry: "2026 Fall",
+  /** Entry year, written the way the registrar writes it: EY 2025 Fall. */
+  entry: "2025 Fall",
   level: "Undergrad",
   /** The advisor the plan's review requests go to. */
   advisor: { name: "Mark Stehlik", initials: "MS", others: 1 },
-  engage: { stars: 5, term: "Fall '27", termGpa: "3.42", cgpa: "3.38" },
+  engage: { stars: 5, term: "Fall '26", termGpa: "3.42", cgpa: "3.38" },
   interests: [],
 }
 
-/** The term under way, and the classes in it — Fall 2027, which is the term
+/** The term under way, and the classes in it — Fall 2026, which is the term
  *  the planner opens on. */
 export const CURRENT_TERM = {
-  name: "Fall 2027",
+  name: "Fall 2026",
   credits: 15,
   courses: ["FIN 301", "ACCT 202", "ECON 202", "STAT 210", "MKTG 201"],
 }
@@ -140,8 +143,9 @@ const TREE: AuditGroup = {
   kind: "group",
   id: "bsba",
   level: "degree",
-  name: DEGREE.program,
-  subtitle: "Applied Version: Fall 2026 to present · Catalog Term: Fall 2026",
+  /* Named without the credential, which the tree states above it. */
+  name: DEGREE.major,
+  subtitle: "Applied Version: Fall 2025 to present · Catalog Term: Fall 2025",
   tags: [`fulfill all | at least ${DEGREE.credits} credits`],
   pgpa: "PGPA 3.38",
   children: [
@@ -153,11 +157,11 @@ const TREE: AuditGroup = {
       mark: "in-progress",
       tags: ["fulfill all"],
       children: [
-        course("ENGL 101", "Composition I", "taken", "Taken in Fall '26", "A-"),
-        course("HIST 110", "World Civilizations", "taken", "Taken in Fall '26", "B+"),
-        course("PSYC 101", "Introduction to Psychology", "taken", "Taken in Fall '26", "A"),
-        course("ART 105", "Visual Culture", "taken", "Taken in Spring '27", "B"),
-        course("COMM 230", "Public Speaking", "taken", "Taken in Spring '27", "A-"),
+        course("ENGL 101", "Composition I", "taken", "Taken in Fall '25", "A-"),
+        course("HIST 110", "World Civilizations", "taken", "Taken in Fall '25", "B+"),
+        course("PSYC 101", "Introduction to Psychology", "taken", "Taken in Fall '25", "A"),
+        course("ART 105", "Visual Culture", "taken", "Taken in Spring '26", "B"),
+        course("COMM 230", "Public Speaking", "taken", "Taken in Spring '26", "A-"),
         course("ENGL 210", "Advanced Composition", "remaining"),
         course("PHIL 240", "Business Ethics", "remaining"),
         course("HIST 205", "Modern World History", "remaining"),
@@ -171,11 +175,11 @@ const TREE: AuditGroup = {
       mark: "in-progress",
       tags: ["fulfill all"],
       children: [
-        course("BUS 101", "Introduction to Business", "taken", "Taken in Fall '26", "A"),
-        course("MATH 140", "Business Calculus", "taken", "Taken in Fall '26", "B"),
-        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
-        course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '27", "B+"),
-        course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '27", "A"),
+        course("BUS 101", "Introduction to Business", "taken", "Taken in Fall '25", "A"),
+        course("MATH 140", "Business Calculus", "taken", "Taken in Fall '25", "B"),
+        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
+        course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '26", "B+"),
+        course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '26", "A"),
         course("ACCT 202", "Managerial Accounting", "in-progress", "In progress · Fall '27"),
         course("ECON 202", "Principles of Macroeconomics", "in-progress", "In progress · Fall '27"),
         course("STAT 210", "Business Statistics", "in-progress", "In progress · Fall '27"),
@@ -310,9 +314,9 @@ const TREE: AuditGroup = {
       restated: true,
       tags: ["at least 30 credits", "Additional Check"],
       children: [
-        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
-        course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '27", "B+"),
-        course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '27", "A"),
+        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
+        course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '26", "B+"),
+        course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '26", "A"),
         course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
       ],
     },
@@ -325,11 +329,11 @@ const TREE: AuditGroup = {
       restated: true,
       tags: [`at least ${DEGREE.credits} credits`, "Additional Check"],
       children: [
-        course("BUS 101", "Introduction to Business", "taken", "Taken in Fall '26", "A"),
-        course("MATH 140", "Business Calculus", "taken", "Taken in Fall '26", "B"),
-        course("ENGL 101", "Composition I", "taken", "Taken in Fall '26", "A-"),
-        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '27", "A-"),
-        course("COMM 230", "Public Speaking", "taken", "Taken in Spring '27", "A-"),
+        course("BUS 101", "Introduction to Business", "taken", "Taken in Fall '25", "A"),
+        course("MATH 140", "Business Calculus", "taken", "Taken in Fall '25", "B"),
+        course("ENGL 101", "Composition I", "taken", "Taken in Fall '25", "A-"),
+        course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
+        course("COMM 230", "Public Speaking", "taken", "Taken in Spring '26", "A-"),
         course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
         course("FIN 340", "Investments & Portfolio Management", "registered", "Registered · Spring '28"),
       ],

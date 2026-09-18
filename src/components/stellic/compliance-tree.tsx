@@ -4,7 +4,8 @@ import { useState } from "react"
 import { Icon } from "@/components/icon"
 import { CourseRow, TreeElement } from "@/components/stellic/audit-tree"
 import { Badge } from "@/components/ui/badge"
-import type { CheckState, ComplianceCheck, ComplianceEntry } from "@/data/compliance"
+import { Button } from "@/components/ui/button"
+import { EXPLAINABLE, type CheckState, type ComplianceCheck, type ComplianceEntry } from "@/data/compliance"
 
 /* The eligibility ruleset, drawn with the degree audit's own tree. Every part
  * of it is that tree's — the trail, the course rows, the folding — because a
@@ -22,6 +23,9 @@ const STATE: Record<CheckState, string> = {
   /* Under way and not yet failed. Warning rather than alert: there is still
      time to fix it, which is the entire premise of a proactive screen. */
   pending: "bg-warning-50 text-white",
+  /* The audit's own planned mark: outlined rather than filled, because a plan
+     is a statement of intent and the record has not seen it. */
+  planned: "border border-warning-50 bg-warning-5 text-warning-50",
   outstanding: "border border-alert-100 text-alert-100",
 }
 
@@ -36,6 +40,7 @@ function CheckMark({ check }: { check: ComplianceCheck }) {
       <Icon name="outlined-flag" size={16} />
       {check.state === "met" && <Icon name="check" size={14} />}
       {check.state === "pending" && <Icon name="watch-later" size={16} />}
+      {check.state === "planned" && <Icon name="check" size={14} />}
       {check.state === "outstanding" && (
         <span className="min-w-4 text-center text-body-md font-semibold">
           {check.outstanding ?? 0}
@@ -49,15 +54,20 @@ function CheckRow({
   check,
   open,
   onToggle,
+  onExplain,
 }: {
   check: ComplianceCheck
   open: boolean
   onToggle: () => void
+  /** Offered on the checks that have working to show. */
+  onExplain?: () => void
 }) {
   const hasChildren = check.children.length > 0
 
   return (
-    <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-gray-5 p-[7px]">
+    /* The audit's own requirement ground. It had been grey, which made the
+       same row read as two different things on two tabs. */
+    <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px]">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <CheckMark check={check} />
         <p className="text-body-md font-semibold">{check.name}</p>
@@ -81,26 +91,20 @@ function CheckRow({
         <Badge variant="outline" className="font-normal">
           {check.constraints} constraints
         </Badge>
-        {/* What the check is asking for. The frame leaves this to a tooltip;
-            said out loud it is the only thing on the row anyone can act on. */}
-        {check.rule && <span className="text-body-md text-gray-80">{check.rule}</span>}
       </div>
-      {/* Credits banked, not credits wanted — the other way round from a
-          requirement, and the reason it sits where the progress bar does. */}
-      <Badge variant="outline" className="shrink-0 font-normal">
-        {check.credits} credits
-      </Badge>
-    </div>
-  )
-}
-
-/** Where some of these credits are landing. It states a fact rather than
- *  asking for anything, so it carries no mark at all. */
-function CountingRow({ label }: { label: string }) {
-  return (
-    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-md border border-gray-40 bg-gray-5 p-[7px]">
-      <p className="text-body-md font-semibold">{label}</p>
-      <Icon name="chevron-right" size={14} className="shrink-0" />
+      <div className="flex shrink-0 items-center gap-2">
+        {/* The verdict is on the row; the working is behind this. */}
+        {onExplain && (
+          <Button size="sm" onClick={onExplain}>
+            Explain
+          </Button>
+        )}
+        {/* Credits banked, not credits wanted — the other way round from a
+            requirement, and the reason it sits where the progress bar does. */}
+        <Badge variant="outline" className="font-normal">
+          {check.credits} credits
+        </Badge>
+      </div>
     </div>
   )
 }
@@ -111,12 +115,14 @@ function EntryRows({
   last,
   folded,
   onToggle,
+  onExplain,
 }: {
   entry: ComplianceEntry
   stem: boolean[]
   last: boolean
   folded: Set<string>
   onToggle: (id: string) => void
+  onExplain?: (id: string) => void
 }) {
   const trail = [...stem.map((line) => ({ line })), { line: true, elbow: true, last }]
 
@@ -131,11 +137,14 @@ function EntryRows({
   const open = !folded.has(entry.id)
   const row = (
     <TreeElement trail={trail}>
-      {entry.kind === "check" ? (
-        <CheckRow check={entry} open={open} onToggle={() => onToggle(entry.id)} />
-      ) : (
-        <CountingRow label={entry.label} />
-      )}
+      <CheckRow
+        check={entry}
+        open={open}
+        onToggle={() => onToggle(entry.id)}
+        onExplain={
+          onExplain && EXPLAINABLE.has(entry.id) ? () => onExplain(entry.id) : undefined
+        }
+      />
     </TreeElement>
   )
 
@@ -152,6 +161,7 @@ function EntryRows({
           last={i === entry.children.length - 1}
           folded={folded}
           onToggle={onToggle}
+          onExplain={onExplain}
         />
       ))}
     </>
@@ -178,7 +188,13 @@ function initialFold(root: ComplianceCheck): Set<string> {
   return folded
 }
 
-export function ComplianceTree({ ruleset }: { ruleset: ComplianceCheck }) {
+export function ComplianceTree({
+  ruleset,
+  onExplain,
+}: {
+  ruleset: ComplianceCheck
+  onExplain?: (id: string) => void
+}) {
   const [folded, setFolded] = useState(() => initialFold(ruleset))
 
   const toggle = (id: string) =>
@@ -220,6 +236,7 @@ export function ComplianceTree({ ruleset }: { ruleset: ComplianceCheck }) {
             entry={child}
             stem={[]}
             last={i === ruleset.children.length - 1}
+            onExplain={onExplain}
             folded={folded}
             onToggle={toggle}
           />

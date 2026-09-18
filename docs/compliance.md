@@ -77,7 +77,58 @@ drift between this screen and Progress.
 Only the year under way opens unfolded. Five years of checks opened whole would
 be several hundred rows of things that have not happened yet.
 
+## Two rulesets
+
+**NCAA 2026** and **Federal Financial Aid**, one under the other and both open.
+That is the argument for having two: they measure the same transcript against
+clocks that know nothing about each other. Aid's three tests — a qualitative one
+on GPA, a quantitative one on pace, and a ceiling on how long the whole thing
+may take — are all fine. Eligibility is not. A student can be ineligible to play
+and perfectly funded, or the other way round, and neither ruleset can see the
+other.
+
+Both are illustrative rather than authoritative. What matters is that they are
+time-boxed, countable, and can fail while the degree audit looks healthy.
+
+## Official and Planned
+
+The toggle works. Everything the plan reaches turns from outstanding to planned
+and carries what the plan would put against it — `planned` on a check, read by
+`asPlanned()` in `src/data/compliance.ts` and by nothing else, so the Official
+view does not know the plan exists.
+
+It is worth doing because the two rulesets answer differently. The plan closes
+the NCAA year check — 21 credits against the 18 it wants — and leaves the aid
+check open, because six credits in the spring is half a term whatever it does
+for eligibility. One plan, two verdicts.
+
+## Explain
+
+The verdict is on the row; the working is behind an **Explain** button, offered
+only on the check that is going wrong. It opens the same sidebar Explain
+Progress uses — `ExplainPanel`, which now takes its content either from an audit
+group it reads itself or from a caller that hands it over, because a compliance
+check is not a requirement and nothing on the page could derive its rules.
+
+**Editing the copy:** the constraints are plain data in `PTD_CONSTRAINTS` in
+`src/data/compliance.ts`, under a marked `---- EDITING ----` block. `text` is
+the rule, `notes` are the lines under it, `progress` and `limit` draw the
+fraction on the right. Change the words there and the panel follows. No markup,
+no JSX.
+
+## Progress
+
+Both tabs are live and Progress is the real audit — the same `AUDIT` tree
+Advanced What-If renders, headed by the credential the degree confers with the
+program under it. Nobody standing on Progress would have any reason to open
+Compliance, which is exactly why Compliance has to exist.
+
+**Plans** is not a tab: it is the planner. It opens `/planner.html?from=compliance`,
+and the planner's student breadcrumb reads that parameter and becomes the way
+back.
+
 ## What is drawn and not wired
+
 
 Only Compliance leads anywhere; the five others read as normal and simply do
 not take a press. Official / Planned toggles and both read the same ruleset. The profile's three actions are
