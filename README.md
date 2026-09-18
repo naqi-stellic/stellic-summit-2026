@@ -67,8 +67,8 @@ drive on a projector, and nobody wants to watch that. What keeps it honest is
 that every field ends up holding exactly what a person would have typed, and
 the control clears and re-runs like any other.
 
-**Use one rhythm everywhere.** `TYPING` in
-`src/components/stellic/student-filters.tsx` is it: a base gap of 58ms, up to
+**Use one rhythm everywhere.** `TYPING` and `useScript` in
+`src/lib/typing.ts` are it: a base gap of 58ms, up to
 40ms of jitter on top so no two keystrokes are the same, 52ms more after a
 space, and 110ms more after a colon or a comma. A fixed interval reads as a
 teleprinter; what makes it look like somebody at a keyboard is that the rhythm
@@ -83,6 +83,11 @@ taking it is what puts the full name in the field. A field that types all
 twenty-seven characters is a machine filling in a form; this is somebody
 searching. Same for a dropdown: it opens, the options are on screen, and the
 answer is taken off the list rather than appearing in the trigger.
+
+**A field that fills itself in is still the person's field.** Clicking into
+the course search on Explain types `math` and stops; backspace over it and
+type something else and the script is called off mid-word rather than fighting
+you for the box. It fills once — the second visit is yours from the start.
 
 **And while the answer is on its way**, the thing being replaced goes: the old
 answer is worse than nothing, so it is a `Spinner` on its own, with the count

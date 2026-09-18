@@ -1,11 +1,12 @@
 import { cn } from "cn"
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { AuditMarkIcon } from "@/components/stellic/audit-tree"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { AuditGroup } from "@/data/audit"
+import { useScript } from "@/lib/typing"
 import {
   constraintStatus,
   constraintsFor,
@@ -95,6 +96,11 @@ function ConstraintRow({ constraint, last }: { constraint: Constraint; last: boo
   )
 }
 
+/** What the search types for you. Three courses answer to it and they are not
+ *  the same answer — one counting, one refused for its code, one refused for
+ *  an attribute — which is the whole of what course mappings are for. */
+const FIND_EXAMPLE = "math"
+
 const VERDICT: Record<MappingVerdict, string> = {
   counting: "bg-success-5 text-success-100",
   "not counting": "bg-alert-5 text-alert-100",
@@ -129,6 +135,19 @@ export function ExplainPanel({
 }) {
   const [mappingsOpen, setMappingsOpen] = useState(false)
   const [find, setFind] = useState("")
+  /* The search fills itself in the first time it is clicked into, and then it
+     is an ordinary field: "math" is the shortest way to show a requirement
+     refusing a course, and typing it out on a projector is not. One shot —
+     the second visit is the student's own, and the first keystroke they make
+     calls the script off mid-word rather than fighting them for the box. */
+  const script = useScript()
+  const filled = useRef(false)
+
+  const autofill = () => {
+    if (filled.current) return
+    filled.current = true
+    void script.type(FIND_EXAMPLE, setFind)
+  }
 
   const constraints = told ?? (group ? constraintsFor(group) : [])
   const standing = group ? explainStanding(group) : null
@@ -202,7 +221,11 @@ export function ExplainPanel({
                 <input
                   type="search"
                   value={find}
-                  onChange={(event) => setFind(event.target.value)}
+                  onFocus={autofill}
+                  onChange={(event) => {
+                    script.stop()
+                    setFind(event.target.value)
+                  }}
                   placeholder="Find a course"
                   className="min-w-0 flex-1 bg-transparent text-body-md text-foreground placeholder:text-gray-80 focus:outline-none"
                 />

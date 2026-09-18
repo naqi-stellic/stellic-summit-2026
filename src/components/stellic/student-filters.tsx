@@ -1,5 +1,5 @@
 import { cn } from "cn"
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { QUERY, type Applied } from "@/data/students"
+import { useScript } from "@/lib/typing"
 
 /* The two filters that do something.
  *
@@ -26,62 +27,6 @@ import { QUERY, type Applied } from "@/data/students"
  * product behaviour: a query with four parts is four dropdowns to drive on a
  * projector, and nobody wants to watch that. What it is doing is honest —
  * every field ends up holding what somebody would have typed. */
-
-/* How fast a person types, which is not how fast a machine can. A fixed
- * interval reads as a teleprinter; what makes it look like somebody at a
- * keyboard is that no two keystrokes are the same length, that a space is a
- * moment to think, and that punctuation is a longer one.
- *
- * Any prototype doing a scripted fill should use these rather than picking its
- * own numbers — see README, "Fields that fill themselves in". */
-export const TYPING = {
-  /** The base gap between keystrokes. */
-  char: 58,
-  /** Added at random on top, so the rhythm never repeats. */
-  jitter: 40,
-  /** Extra after a space: the gap between words. */
-  word: 52,
-  /** Extra after a colon or a comma, where a person pauses. */
-  punctuation: 110,
-}
-
-/** How long a field sits finished before the next one starts. */
-const BEAT = 460
-
-const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms))
-
-const keystroke = (previous: string) =>
-  TYPING.char +
-  Math.random() * TYPING.jitter +
-  (previous === " " ? TYPING.word : 0) +
-  (/[:,.]/.test(previous) ? TYPING.punctuation : 0)
-
-/** A sequence that stops if the popover goes away mid-run. */
-function useScript() {
-  const alive = useRef(true)
-  useEffect(() => {
-    alive.current = true
-    return () => {
-      alive.current = false
-    }
-  }, [])
-
-  const type = async (text: string, set: (value: string) => void) => {
-    for (let i = 1; i <= text.length; i += 1) {
-      if (!alive.current) return false
-      set(text.slice(0, i))
-      await sleep(keystroke(text[i - 1]))
-    }
-    return alive.current
-  }
-
-  const wait = async (ms = BEAT) => {
-    await sleep(ms)
-    return alive.current
-  }
-
-  return { type, wait }
-}
 
 /* ---------------------------------------------------------------- pieces */
 
