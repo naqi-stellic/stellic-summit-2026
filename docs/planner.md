@@ -27,3 +27,10 @@ two prototypes start from the same place and can be read against each other.
 Everything else is the same components and the same behaviour, so a change to
 either prototype's shared parts lands in both. What is meant to differ goes in
 `src/pages/planner.tsx`.
+
+## Opened from a record
+
+`/planner.html?from=compliance` is the same planner standing on a different
+student's plan: `recordPlan()` derives the terms from the audit, the nav stays
+the staff nav, and the breadcrumb becomes the way back to the record. Opened on
+its own, none of that happens and this is Team Plan's planner exactly.

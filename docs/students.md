@@ -67,13 +67,22 @@ not offered, Tobias has no graduation application on file.
 Scott's name leads through to his record on
 [Proactive Compliance](compliance.md). The rest are the cohort he is in.
 
-## Not the same student twice
+## The same student on both sides of the click
 
-The plan this prototype opens onto is not the plan the Team Plan prototypes
-hold, and that is allowed: those two are about the plan, this one is about the
-record. Where they disagree — the courses in the term under way, the incoming
-credit — the record on this side is the one the audit, the compliance ruleset
-and this list all agree on.
+Team Plan's prototypes open on a plan of their own, and that is fine: they are
+about the plan. This side is about the record, and a staff member who opens
+Plans from a student's audit has to find the same student on the other side of
+it.
+
+So `/planner.html?from=compliance` builds its plan from the audit rather than
+from Team Plan's data — `recordPlan()` in `src/data/record-plan.ts`. It reads
+the audit's own marks: what is under way goes in the term under way, what is
+registered or planned goes in the term after, and the seat the audit is still
+holding open stays a placeholder. The incoming credit is the audit's dual
+enrollment, which is the same four courses its unmatched list is built from.
+
+Derived rather than written down, so the two cannot drift. Opened on its own,
+`/planner.html` is Team Plan's, unchanged.
 
 ## What is drawn and not wired
 

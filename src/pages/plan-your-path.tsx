@@ -20,6 +20,7 @@ import { DraftBar, DraftOutline } from "@/components/stellic/draft-frame"
 import { MetadataProvider } from "@/components/stellic/course-metadata"
 import { GenerateTermPanel } from "@/components/stellic/generate-term-panel"
 import { IncomingCredits, INCOMING_LABEL } from "@/components/stellic/incoming-credits"
+import type { IncomingGroup } from "@/data/incoming"
 import { CoursePanel } from "@/components/stellic/course-panel"
 import { PlaceholderPanel } from "@/components/stellic/placeholder-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
@@ -238,6 +239,7 @@ function termBanner(term: Term, drafting: boolean, onRegister: (term: Term) => v
 export function PlanYourPath({
   generators = true,
   initialYears = INITIAL_YEARS,
+  incoming,
 }: {
   /* Whether this prototype offers to generate: the plan, a term, a schedule.
      Without them the planner is the same in every other way — the same cards,
@@ -245,6 +247,8 @@ export function PlanYourPath({
   generators?: boolean
   /** What the plan holds when it opens. */
   initialYears?: Year[]
+  /** The credit the student arrived with, where it is not the default set. */
+  incoming?: IncomingGroup[]
 } = {}) {
   /* Whether somebody arrived here from a student's record. Read once: it
      decides the nav as well as the way back on the breadcrumb. */
@@ -959,6 +963,7 @@ export function PlanYourPath({
               than swapping the cards in place. */}
           <div key={draft ? `draft-${streamId}` : "plan"} className="contents">
             <IncomingCredits
+              groups={incoming}
               collapsed={collapsed.includes(INCOMING_LABEL)}
               onToggleCollapse={() => toggleCollapsed(INCOMING_LABEL)}
             />
