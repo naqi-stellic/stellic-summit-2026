@@ -64,7 +64,10 @@ export function Compliance() {
   return (
     <AppShell
       section="staff"
-      assistant={false}
+      /* The assistant is offered, but there is nothing here to generate — a
+         compliance screen is read, not drafted — so it keeps its own button
+         and the pill beside it stays away. */
+      assistLabel={null}
       panel={
         explained ? (
           <ExplainPanel

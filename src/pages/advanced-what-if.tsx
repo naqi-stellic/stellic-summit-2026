@@ -134,7 +134,10 @@ export function AdvancedWhatIf() {
   return (
     <AppShell
       section="progress"
-      assistant={false}
+      /* Nothing to generate from here — the what-if is asked in the panel, not
+         drafted by the assistant — so the pill stays away and the button
+         does not. */
+      assistLabel={null}
       panel={
         discovering ? (
           <DiscoverPanel

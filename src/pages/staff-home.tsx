@@ -82,7 +82,6 @@ function Home({ who, inert, without }: StaffHomeProps) {
       /* The form belongs to Transfer, so the nav says so while it is open. */
       navCurrent={writing ? "Transfer" : "Home"}
       title={writing ? "Transfer" : "Home"}
-      assistant={false}
       account={
         <Face photo={persona.photo} initials={persona.initials} color="#6f7782" size={40} />
       }

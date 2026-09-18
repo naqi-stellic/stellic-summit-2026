@@ -34,7 +34,7 @@ export function Students() {
   }
 
   return (
-    <AppShell section="staff" navCurrent="Students" title="Students" assistant={false}>
+    <AppShell section="staff" navCurrent="Students" title="Students">
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 py-8">
         <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6">
           <SearchPanel
