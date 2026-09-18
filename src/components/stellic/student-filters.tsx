@@ -184,41 +184,57 @@ export function RemainingFilter({
 
   /* Clicking into the program field is the whole gesture: it answers itself,
      then answers everything that depended on it. */
-  const run = async () => {
+  /* Each answer on its own, so the order can follow the question. */
+  const fillCount = async () => {
+    if (!(await type(QUERY.remaining, setCount))) return false
+    return wait(300)
+  }
+
+  const fillProgram = async () => {
+    if (!(await type(QUERY.program, setProgram))) return false
+    if (!(await wait())) return false
+    setProgramSet(true)
+    return wait(300)
+  }
+
+  /* Only the part of the requirement's name a person would remember. The list
+     narrows to one on it, and taking that row is what fills the field with the
+     whole name — typing all twenty-seven characters would be a machine filling
+     in a form rather than somebody searching. */
+  const fillRequirement = async () => {
+    if (!(await type(QUERY.requirementTyped, setRequirement))) return false
+    if (!(await wait())) return false
+    setRequirement(QUERY.requirement)
+    setRequirementSet(true)
+    return wait(300)
+  }
+
+  /* A choice rather than something typed, so it is made the way a person would
+     make it: the list opens, both versions are on screen, and Planned is the
+     one taken. Setting the value silently would change the query without ever
+     showing what it was chosen over. */
+  const fillAudit = async () => {
+    setAuditOpen(true)
+    if (!(await wait(620))) return false
+    setAudit(QUERY.audit)
+    if (!(await wait(420))) return false
+    setAuditOpen(false)
+    return wait(360)
+  }
+
+  /* Whichever field was clicked into is the one that answers first — you asked
+     it, so it should be the one that moves. The rest follow in the order the
+     form asks them. */
+  const run = async (from: "count" | "program") => {
     if (running || programSet) return
     setRunning(true)
 
-    /* From the top of the form, whichever field was clicked into to start it.
-       The count is the first thing the query says — who has anything left on
-       this check — so it is the first thing filled. */
-    if (!(await type(QUERY.remaining, setCount))) return
-    if (!(await wait(300))) return
+    const order =
+      from === "count"
+        ? [fillCount, fillProgram, fillRequirement, fillAudit]
+        : [fillProgram, fillCount, fillRequirement, fillAudit]
 
-    if (!(await type(QUERY.program, setProgram))) return
-    if (!(await wait())) return
-    setProgramSet(true)
-    if (!(await wait(300))) return
-
-    /* Only the part of the requirement's name a person would remember. The
-       list narrows to one on it, and taking that row is what fills the field
-       with the whole name — typing all twenty-seven characters would be a
-       machine filling in a form rather than somebody searching. */
-    if (!(await type(QUERY.requirementTyped, setRequirement))) return
-    if (!(await wait())) return
-    setRequirement(QUERY.requirement)
-    setRequirementSet(true)
-    if (!(await wait(300))) return
-
-    /* The last answer is a choice rather than something typed, so it is made
-       the way a person would make it: the list opens, both versions are on
-       screen, and Planned is the one taken. Setting the value silently would
-       change the query without ever showing what it was chosen over. */
-    setAuditOpen(true)
-    if (!(await wait(620))) return
-    setAudit(QUERY.audit)
-    if (!(await wait(420))) return
-    setAuditOpen(false)
-    if (!(await wait(360))) return
+    for (const step of order) if (!(await step())) return
 
     onApply()
     setRunning(false)
@@ -273,7 +289,7 @@ export function RemainingFilter({
                 /* Clicked, not focused. The popover puts the caret in its first
                    field on open, so a fill hung on focus would start itself
                    before anybody had asked for it. */
-                onClick={run}
+                onClick={() => run("count")}
                 onChange={(event) => setCount(event.target.value)}
                 placeholder="e.g 3-5 or >3"
                 className="min-w-0 flex-1 text-body-md"
@@ -299,8 +315,8 @@ export function RemainingFilter({
                   value={program}
                   placeholder="Search Programs"
                   readOnly
-                  onFocus={run}
-                  onClick={run}
+                  onFocus={() => run("program")}
+                  onClick={() => run("program")}
                 />
                 {program && <Suggestion value={QUERY.program} />}
               </span>
@@ -473,7 +489,7 @@ export function AppliedFilters({
 }) {
   const pills = [
     applied.requirement &&
-      `Remaining ${QUERY.requirement} in ${QUERY.program} · ${QUERY.audit} audit`,
+      `Remaining ${QUERY.remaining} · ${QUERY.requirement} in ${QUERY.program} · ${QUERY.audit} audit`,
     applied.entryYear && `Entry year ${QUERY.entryYear}`,
   ].filter(Boolean) as string[]
 
