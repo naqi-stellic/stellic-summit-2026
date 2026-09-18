@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 
 import { Icon } from "@/components/icon"
+import { useScript } from "@/lib/typing"
 import { Button } from "@/components/ui/button"
 import { ExploreShell } from "@/components/stellic/explore-shell"
 import {
@@ -326,6 +327,10 @@ export function Explore() {
   )
 }
 
+/** What the institution search types for you. The shortest thing that narrows
+ *  the list to one, which is what a person would have typed. */
+const SEARCH_EXAMPLE = "Berkshire"
+
 /* ============================================================ Transcript step */
 
 /** Where the credits came from, and how you want to hand them over.
@@ -348,6 +353,31 @@ function TranscriptStep({
 }) {
   const [query, setQuery] = useState(institution)
   const chosen = kind === "exam" || Boolean(institution)
+
+  /* The field fills itself in the first time it is clicked into: "Berkshire"
+     is what somebody would type, the list narrows to one on it, and taking
+     that row is what puts the whole name in. Typing all twenty-eight
+     characters on a projector is not a demonstration of anything.
+
+     It is the person's field afterwards — the first keystroke calls the
+     script off, and it only ever fills once. */
+  const script = useScript()
+  const filled = useRef(false)
+
+  const autofill = () => {
+    if (filled.current || kind === "exam" || institution) return
+    filled.current = true
+    void (async () => {
+      if (!(await script.type(SEARCH_EXAMPLE, setQuery))) return
+      if (!(await script.wait())) return
+      const found = INSTITUTIONS.find((name) =>
+        name.toLowerCase().startsWith(SEARCH_EXAMPLE.toLowerCase())
+      )
+      if (!found) return
+      onInstitution(found)
+      setQuery(found)
+    })()
+  }
 
   const matches =
     query.trim() && query !== institution
@@ -381,7 +411,10 @@ function TranscriptStep({
                 value={kind === "exam" ? EXAM_BOARD : query}
                 searching={!chosen}
                 readOnly={kind === "exam"}
+                onFocus={autofill}
+                onClick={autofill}
                 onChange={(event) => {
+                  script.stop()
                   setQuery(event.target.value)
                   onInstitution("")
                 }}

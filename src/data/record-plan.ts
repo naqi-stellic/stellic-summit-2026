@@ -1,5 +1,5 @@
 import { AUDIT, CURRENT_TERM, DUAL_ENROLMENT, type AuditEntry, type AuditMark } from "@/data/audit"
-import type { IncomingGroup } from "@/data/incoming"
+import { TRANSFER_COLLEGE, type IncomingGroup } from "@/data/incoming"
 import { emptyYear, type PlannedCourse, type Year } from "@/data/plan"
 
 /* The plan as this student's record has it.
@@ -190,7 +190,7 @@ export function recordIncoming(): IncomingGroup[] {
         id: `i-${course.code}`,
         code: course.code,
         name: course.name,
-        detail: "Taken before enrollment",
+        detail: TRANSFER_COLLEGE,
         credits: course.credits,
       })),
     },

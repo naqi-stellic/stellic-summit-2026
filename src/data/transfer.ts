@@ -14,6 +14,13 @@
  * when it does not — and the difference between `pending` and `none` is the
  * difference between "a human still has to look" and "we looked". */
 
+import { DUAL_ENROLMENT } from "@/data/audit"
+import { ARTICULATIONS } from "@/data/staff-insights"
+
+/** The two the transfer office has not settled yet, read from the insights
+ *  they appear in rather than named twice. */
+const PENDING_REVIEW = ARTICULATIONS.slice(0, 2)
+
 export const UNIVERSITY = "Stellic University"
 
 /** What it is called in running text, where the full name would be the longest
@@ -22,7 +29,15 @@ export const UNIVERSITY_SHORT = "Stellic"
 
 /** Whoever is asking. They are a visitor, not a student: an email and nothing
  *  else, which is exactly what the landing screen promised to ask for. */
-export const VISITOR = { email: "mjs@gmail.com", initials: "MS" }
+/* The same student the rest of the prototypes follow, two years earlier.
+ * Prospective Student Lite is Scott before he enrolled — which is why the
+ * address is a personal one: he has no account here yet, and the credit he is
+ * asking about is the credit his audit will later call dual enrolment. */
+export const VISITOR = {
+  name: "Scott Abott",
+  email: "scott.abott@gmail.com",
+  initials: "SA",
+}
 
 /* ---- Transcripts ---------------------------------------------------- */
 
@@ -59,8 +74,10 @@ export const CREDIT_KINDS: Array<{
   },
 ]
 
-/** Enough institutions for the search to be a search. Cambridge College is the
- *  one the design picks, and the one the courses below came from. */
+/** Enough institutions for the search to be a search. Berkshire Community
+ *  College is the one this flow picks, and the one the courses below came
+ *  from — the same college the Transfers insights are about, so the two
+ *  prototypes are describing one transcript rather than two. */
 export const INSTITUTIONS = [
   "Cambridge College",
   "Cambridge Community College",
@@ -94,50 +111,62 @@ export type TransferCourse = {
   equivalent?: { code: string; name: string; credits: number; grade: string }
 }
 
+/* Scott's transcript, and it is the one his audit already knows about.
+ *
+ * Four of these were confirmed and became the twelve credits of dual enrolment
+ * the degree audit carries; two are still pending, which is exactly why a
+ * transfer officer is looking at them in Transfer Insights; one answers to
+ * nothing here. Both ends are read from where they already live — the granted
+ * courses from the audit, the pending pair from the articulations — so a
+ * prospective student, a staff member and a degree audit cannot end up
+ * describing different transcripts.
+ *
+ * Berkshire numbers its courses and this university names its own, which is
+ * why the two columns read differently: the left is what they taught, the
+ * right is what it is worth here. */
+
+const CONFIRMED_SOURCE: Record<string, { code: string; name: string; term: string }> = {
+  "MATH 110": { code: "21-1010", name: "Introductory Algebra", term: "Fall 2024" },
+  "ENGL 100": { code: "21-1100", name: "Composition I", term: "Fall 2024" },
+  "HIST 101": { code: "21-2200", name: "United States History I", term: "Spring 2025" },
+  "SPAN 101": { code: "21-1500", name: "Spanish I", term: "Spring 2025" },
+}
+
 export const TRANSFER_COURSES: TransferCourse[] = [
-  {
-    code: "BUS 101",
-    name: "Introduction to Business",
-    term: "Fall 2022",
-    credits: 6,
-    grade: "B",
-    verdict: "confirmed",
-    equivalent: { code: "BUS 120", name: "Foundations of Business", credits: 6, grade: "B" },
-  },
-  {
-    code: "ACC 201",
-    name: "Principles of Accounting",
-    term: "Fall 2022",
-    credits: 4,
-    grade: "D",
-    verdict: "confirmed",
-    equivalent: { code: "ACC 210", name: "Financial Accounting", credits: 4, grade: "D" },
-  },
-  {
-    code: "MKT 210",
-    name: "Principles of Marketing",
-    term: "Spring 2023",
-    credits: 4,
-    grade: "B",
-    verdict: "confirmed",
-    equivalent: { code: "MKT 230", name: "Marketing Fundamentals", credits: 4, grade: "B" },
-  },
+  ...DUAL_ENROLMENT.courses.map((granted) => {
+    const source = CONFIRMED_SOURCE[granted.code]
+    return {
+      code: source.code,
+      name: source.name,
+      term: source.term,
+      credits: granted.credits,
+      grade: granted.grade ?? "",
+      verdict: "confirmed" as const,
+      equivalent: {
+        code: granted.code,
+        name: granted.name,
+        credits: granted.credits,
+        grade: granted.grade ?? "",
+      },
+    }
+  }),
   /* No equivalent has been agreed, so it is nobody's call but a human's. That
-     is the whole of what "pending review" means here. */
-  {
-    code: "MGT 305",
-    name: "Organizational Behavior",
-    term: "Spring 2023",
-    credits: 8,
-    grade: "C",
-    verdict: "pending",
-  },
+     is the whole of what "pending review" means here — and these two are the
+     ones the transfer office has 62 other students waiting on. */
+  ...PENDING_REVIEW.map((row, i) => ({
+    code: row.from.code,
+    name: row.from.name,
+    term: i === 0 ? "Fall 2024" : "Spring 2025",
+    credits: i === 0 ? 6 : 4,
+    grade: i === 0 ? "B" : "B+",
+    verdict: "pending" as const,
+  })),
   /* The elective that does not count: nothing wrong with it, nothing here
      that it answers to. */
   {
-    code: "HIST 110",
+    code: "21-3300",
     name: "World History I",
-    term: "Fall 2022",
+    term: "Fall 2024",
     credits: 3,
     grade: "C",
     verdict: "none",

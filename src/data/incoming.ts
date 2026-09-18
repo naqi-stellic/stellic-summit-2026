@@ -1,3 +1,9 @@
+import { DUAL_ENROLMENT } from "@/data/audit"
+
+/** Where it came from. One college, named the same on every screen that
+ *  mentions it. */
+export const TRANSFER_COLLEGE = "Berkshire Community College"
+
 /* Credit the student arrived with. It is not a year and it is not a term —
  * nothing here was taken on a timetable this plan knows about — so it is kept
  * as what it is: three kinds of incoming credit, each from somewhere. */
@@ -21,61 +27,26 @@ export type IncomingGroup = {
   items: IncomingCredit[]
 }
 
-/* What was brought in, as it was brought in: the courses another college
- * taught and the exams a board set, not the courses of ours they stand for.
- * Which of ours they answer to is the audit's business, not the planner's.
- * Two kinds only — what came from elsewhere, and what was taken here before
- * the first year began. */
+/* What was brought in, and it is the same credit every other prototype has
+   him carrying: four courses from Berkshire Community College, taken before
+   he enrolled. Read from the audit rather than written down again — the
+   planner opened from a record derives exactly this list, and two planners
+   disagreeing about what a student arrived with is the kind of thing nobody
+   notices until it is on a projector. */
 export const INCOMING_CREDITS: IncomingGroup[] = [
   {
-    /* Everything brought in from elsewhere, whoever it came from: a college
-       that taught it or a board that examined it. Where it came from is the
-       line under the name, which is what tells the two apart. */
-    kind: "Transfer Credits",
-    items: [
-      {
-        id: "t1",
-        code: "ENG 101",
-        name: "English Composition I",
-        detail: "Mesa Community College",
-        credits: 3,
-      },
-      {
-        id: "t2",
-        code: "MAT 151",
-        name: "College Algebra",
-        detail: "Mesa Community College",
-        credits: 3,
-      },
-      {
-        id: "x1",
-        code: "College Board",
-        name: "AP Calculus BC",
-        detail: "Score 5",
-        credits: 3,
-      },
-      {
-        id: "x2",
-        code: "College Board",
-        name: "AP US History",
-        detail: "Score 4",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    /* Courses of this campus, taken before the first year began. They read the
-       way every other course of ours reads, minus the class: which sitting of
-       it you attended is not something the plan keeps this far back. */
-    kind: "Pre-Year 1",
-    items: [
-      {
-        id: "p1",
-        code: "SPAN 101",
-        name: "Elementary Spanish I",
-        credits: 3,
-      },
-    ],
+    /* Named the way the audit names it. Credit earned at a college while
+       still at school is dual enrolment, and calling it "Transfer Credits"
+       here and "Dual Enrollment" on the record was two names for four
+       courses. */
+    kind: "Dual Enrollment",
+    items: DUAL_ENROLMENT.courses.map((course) => ({
+      id: `i-${course.code}`,
+      code: course.code,
+      name: course.name,
+      detail: TRANSFER_COLLEGE,
+      credits: course.credits,
+    })),
   },
 ]
 

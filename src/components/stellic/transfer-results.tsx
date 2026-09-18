@@ -1,8 +1,9 @@
 import type { ReactNode } from "react"
 import { cn } from "cn"
 
+import { StudentFace } from "@/components/stellic/student-profile"
+
 import { Icon } from "@/components/icon"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ExploreCard, ExploreCardBody, SectionLabel } from "@/components/stellic/transfer-wizard"
@@ -257,11 +258,7 @@ export function VisitorRail({
     <ExploreCard className={cn("w-full @7xl:w-[360px]", className)}>
       <div className="flex flex-col gap-6 px-[31px] py-[23px]">
         <div className="flex items-center gap-3">
-          <Avatar size="lg">
-            <AvatarFallback className="text-field text-foreground">
-              {VISITOR.initials}
-            </AvatarFallback>
-          </Avatar>
+          <StudentFace size={40} />
           <p className="min-w-0 flex-1 truncate text-sm text-gray-80">{VISITOR.email}</p>
         </div>
 

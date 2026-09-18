@@ -35,7 +35,7 @@ import {
  *
  * So the page is not an empty form. The incoming course is already on the left,
  * and the right-hand column arrives holding Stellic's proposals — each one a
- * dashed card with an Add, a Hide, and, behind the badge, the evidence it was
+ * dashed card with an Add and, behind the badge, the evidence it was
  * proposed from. Adding one turns it into an ordinary course on the rule.
  * Nothing is decided until it is, which is the whole difference between a
  * suggestion and a default. */
@@ -78,15 +78,7 @@ function CourseCard({ course, onRemove }: { course: Course; onRemove: () => void
 /** A course Stellic is proposing. Dashed, because nothing about it is settled,
  *  and the badge carries the reason rather than asking you to take it on
  *  faith — a suggestion that cannot say why is just an instruction. */
-function SuggestionCard({
-  suggestion,
-  onAdd,
-  onHide,
-}: {
-  suggestion: Suggestion
-  onAdd: () => void
-  onHide: () => void
-}) {
+function SuggestionCard({ suggestion, onAdd }: { suggestion: Suggestion; onAdd: () => void }) {
   return (
     <div className="flex flex-col gap-2 rounded-md border border-dashed border-gray-40 bg-gray-0 p-[15px]">
       <div className="flex items-start justify-between gap-3">
@@ -103,9 +95,6 @@ function SuggestionCard({
       <div className="flex items-center gap-2 pt-1">
         <Button size="sm" onClick={onAdd}>
           Add
-        </Button>
-        <Button size="sm" onClick={onHide}>
-          Hide
         </Button>
       </div>
     </div>
@@ -238,7 +227,6 @@ export function CreateEquivalency({
   /* The rule opens with nothing accepted — every home course on it is one
      Stellic has proposed and nobody has agreed to yet. */
   const [added, setAdded] = useState<Course[]>([])
-  const [dropped, setDropped] = useState(false)
   const [source, setSource] = useState([row.from])
   const [reviewing, setReviewing] = useState(false)
   const [looking, setLooking] = useState(false)
@@ -248,7 +236,10 @@ export function CreateEquivalency({
 
   /* One suggestion, the one the insight row named. It is offered until it is
      taken or put away, and then the column is whatever is on the rule. */
-  const offered = dropped || added.length ? null : row.suggestion
+  /* The suggestion stands until it is taken. There had been a way to dismiss
+     it, which only ever emptied the one part of the form that had an answer
+     in it. */
+  const offered = added.length ? null : row.suggestion
 
   const elsewhere = (what: string) => toast(`${what} (Exists in the real app)`)
 
@@ -342,17 +333,18 @@ export function CreateEquivalency({
                 <CourseCard
                   key={course.code}
                   course={course}
-                  onRemove={() => {
+                  /* Taking it back out offers it again. It had stayed gone,
+                     which left the form with no answer in it and no way to
+                     ask for one. */
+                  onRemove={() =>
                     setAdded((all) => all.filter((other) => other.code !== course.code))
-                    setDropped(true)
-                  }}
+                  }
                 />
               ))}
               {offered && (
                 <SuggestionCard
                   suggestion={offered}
                   onAdd={() => setAdded([{ code: offered.code, name: offered.name }])}
-                  onHide={() => setDropped(true)}
                 />
               )}
               <AddSlot>

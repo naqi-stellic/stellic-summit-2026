@@ -1,8 +1,7 @@
 import type { ReactNode } from "react"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { VISITOR } from "@/data/transfer"
+import { StudentFace } from "@/components/stellic/student-profile"
 
 /* The chrome for a screen that is not the product.
  *
@@ -41,11 +40,7 @@ export function ExploreShell({
         </div>
         <div className="flex shrink-0 items-center gap-4">
           <Button>Need help?</Button>
-          <Avatar size="lg">
-            <AvatarFallback className="text-body-md text-foreground">
-              {VISITOR.initials}
-            </AvatarFallback>
-          </Avatar>
+          <StudentFace size={40} />
         </div>
       </header>
 

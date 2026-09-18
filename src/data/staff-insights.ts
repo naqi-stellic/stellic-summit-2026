@@ -370,7 +370,7 @@ export type Suggestion = Course & { because: string }
 /* ---------------------------------------------------------------- lookup
    What the assistant finds when asked about an incoming course.
 
-   Nobody here has Seneca's catalogue. Somebody normally opens a tab, searches
+   Nobody here has Berkshire's catalogue. Somebody normally opens a tab, searches
    a college's site and reads a paragraph, which is the slow half of writing an
    equivalency — so the assistant goes and reads it, and shows its sources so
    the reading can be checked rather than trusted. */
@@ -421,12 +421,12 @@ export const ARTICULATIONS: Articulation[] = [
   {
     id: "eq1",
     from: { code: "21-1200", name: "Calculus I" },
-    institution: "Seneca College",
+    institution: "Berkshire Community College",
     suggestion: {
       code: "31-1200",
       name: "Calculus I",
       because:
-        "Matched to 31-1200 on 36 of the last 38 transfers from Seneca College, every one of them approved.",
+        "Matched to 31-1200 on 36 of the last 38 transfers from Berkshire Community College, every one of them approved.",
     },
     impact: "38 pending articulations",
     pending: 38,
@@ -434,21 +434,21 @@ export const ARTICULATIONS: Articulation[] = [
     vis: ["jessica"],
     details: {
       title: "21-1200: Calculus I",
-      school: "Seneca College",
+      school: "Berkshire Community College",
       summary:
         "Limits, continuity, and the derivative, developed from first principles and applied to rates of change, curve sketching and optimisation. The term closes on the definite integral and the fundamental theorem. Six credit hours across lecture and tutorial, with a…",
-      sources: ["catalog.senecacollege.ca", "math.senecacollege.ca"],
+      sources: ["catalog.berkshirecc.edu", "math.berkshirecc.edu"],
     },
   },
   {
     id: "eq2",
     from: { code: "21-2445", name: "Biology I" },
-    institution: "Seneca College",
+    institution: "Berkshire Community College",
     suggestion: {
       code: "32-1100",
       name: "Foundations of Biology",
       because:
-        "Matched to 32-1100 on 22 of the last 24 transfers from Seneca College. The other two were waived.",
+        "Matched to 32-1100 on 22 of the last 24 transfers from Berkshire Community College. The other two were waived.",
     },
     impact: "24 pending articulations",
     pending: 24,
@@ -456,10 +456,10 @@ export const ARTICULATIONS: Articulation[] = [
     vis: ["jessica"],
     details: {
       title: "21-2445: Biology I",
-      school: "Seneca College",
+      school: "Berkshire Community College",
       summary:
         "Cell structure and function, bioenergetics, molecular genetics and the principles of inheritance, taught alongside a weekly laboratory. Students practise microscopy, aseptic technique and experimental design, and keep a lab notebook assessed as part of the…",
-      sources: ["catalog.senecacollege.ca", "science.senecacollege.ca"],
+      sources: ["catalog.berkshirecc.edu", "science.berkshirecc.edu"],
     },
   },
   {
