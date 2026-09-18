@@ -364,6 +364,14 @@ export const PTD_STANDING = {
  *  an Explain on a check nobody is asking about is a button in the way. */
 export const EXPLAINABLE = new Set(["year-2-ptd"])
 
+/** The rules behind a check, for the box that opens under its badge. Every
+ *  check states its own rule, so every badge opens onto something; the one the
+ *  screen is about has the whole set written out. */
+export function constraintsForCheck(check: ComplianceCheck): Constraint[] {
+  if (check.id === "year-2-ptd") return PTD_CONSTRAINTS
+  return check.rule ? [{ id: `${check.id}-rule`, text: check.rule }] : []
+}
+
 export const COMPLIANCE_TABS = [
   { id: "progress", label: "Progress" },
   { id: "plans", label: "Plans" },

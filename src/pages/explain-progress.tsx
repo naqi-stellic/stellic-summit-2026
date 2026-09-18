@@ -80,7 +80,7 @@ export function ExplainProgress() {
               explain={{
                 onExplain: setExplaining,
                 constraints: (group) => (
-                  <ConstraintsCard group={group} onExplain={setExplaining} />
+                  <ConstraintsCard group={group} onExplain={() => setExplaining(group)} />
                 ),
               }}
             />

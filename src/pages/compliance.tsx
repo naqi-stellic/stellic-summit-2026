@@ -26,9 +26,7 @@ import {
   PTD_CONSTRAINTS,
   PTD_STANDING,
   RULESET,
-  SHORTFALL,
 } from "@/data/compliance"
-import { DEGREE } from "@/data/plan"
 
 /* Proactive Compliance — the same student record read against an eligibility
  * ruleset instead of against their degree.
@@ -117,23 +115,6 @@ export function Compliance() {
               {/* A second ruleset, under the first rather than instead of it:
                   two clocks on one transcript, and neither can see the other. */}
               <ComplianceTree ruleset={planned ? PLANNED_AID : AID} />
-              {/* The one thing on the page worth acting on, said once, where
-                  the eye lands after the tree rather than before it. */}
-              <p className="text-body-md text-gray-80">
-                {planned ? (
-                  <>
-                    The plan closes the year check — 21 credits against the 18 it wants — and
-                    leaves the aid check open, because six credits in the spring is half a term
-                    whatever it does for eligibility.
-                  </>
-                ) : (
-                  <>
-                    {SHORTFALL} credits short of what the third year asks for, against a{" "}
-                    {DEGREE.credits}-credit degree. Nothing on Progress would say so — the degree
-                    is on track.
-                  </>
-                )}
-              </p>
             </section>
           )}
         </div>

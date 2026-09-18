@@ -240,12 +240,16 @@ export function ExplainPanel({
 
 export function ConstraintsCard({
   group,
+  constraints: told,
   onExplain,
 }: {
-  group: AuditGroup
-  onExplain?: (group: AuditGroup) => void
+  group?: AuditGroup
+  /** Handed over where the row is not a requirement — a compliance check has
+   *  rules too, and nothing on that page could derive them. */
+  constraints?: Constraint[]
+  onExplain?: () => void
 }) {
-  const constraints = constraintsFor(group)
+  const constraints = told ?? (group ? constraintsFor(group) : [])
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1 rounded-md border border-gray-40 bg-card p-[15px]">
@@ -258,7 +262,7 @@ export function ConstraintsCard({
           {onExplain && (
             <button
               type="button"
-              onClick={() => onExplain(group)}
+              onClick={onExplain}
               className="cursor-pointer rounded-md border border-gray-40 bg-card px-[7px] py-px text-label-md text-foreground transition-colors hover:bg-gray-5"
             >
               explain

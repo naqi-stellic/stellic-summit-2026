@@ -104,8 +104,14 @@ for eligibility. One plan, two verdicts.
 
 ## Explain
 
-The verdict is on the row; the working is behind an **Explain** button, offered
-only on the check that is going wrong. It opens the same sidebar Explain
+The verdict is on the row; the working is behind it, in the audit's own two
+moves. The **constraints badge** is the way into the rules — it is already the
+name of the thing, so a second control beside it saying "rules" would be naming
+it twice — and every check opens onto at least its own rule, with the one the
+screen is about carrying the whole set. **Explain** and search arrive on hover,
+on the row the pointer is on rather than all of them at once, and always on a
+touch screen where there is no pointer to travel. Explain is offered only on the
+check that is going wrong. It opens the same sidebar Explain
 Progress uses — `ExplainPanel`, which now takes its content either from an audit
 group it reads itself or from a caller that hands it over, because a compliance
 check is not a requirement and nothing on the page could derive its rules.

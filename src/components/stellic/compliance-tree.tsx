@@ -4,8 +4,14 @@ import { useState } from "react"
 import { Icon } from "@/components/icon"
 import { CourseRow, TreeElement } from "@/components/stellic/audit-tree"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { EXPLAINABLE, type CheckState, type ComplianceCheck, type ComplianceEntry } from "@/data/compliance"
+import { ConstraintsCard } from "@/components/stellic/explain-panel"
+import {
+  EXPLAINABLE,
+  constraintsForCheck,
+  type CheckState,
+  type ComplianceCheck,
+  type ComplianceEntry,
+} from "@/data/compliance"
 
 /* The eligibility ruleset, drawn with the degree audit's own tree. Every part
  * of it is that tree's — the trail, the course rows, the folding — because a
@@ -50,24 +56,56 @@ function CheckMark({ check }: { check: ComplianceCheck }) {
   )
 }
 
+/** The audit's own hover tools, in the audit's own words. They arrive on the
+ *  row the pointer is on rather than on all of them at once, and always on a
+ *  touch screen, where there is no pointer to travel. */
+function CheckTools({ name, onExplain }: { name: string; onExplain?: () => void }) {
+  if (!onExplain) return null
+
+  const shown =
+    "shrink-0 cursor-pointer rounded-md border border-gray-40 bg-card text-label-md " +
+    "text-foreground transition-opacity hover:bg-gray-5 group-hover:opacity-100 " +
+    "group-focus-within:opacity-100 max-md:opacity-100 md:opacity-0"
+
+  return (
+    <>
+      <button type="button" onClick={onExplain} className={cn(shown, "px-[7px] py-px")}>
+        explain
+      </button>
+      <button
+        type="button"
+        aria-label={`Search within ${name}`}
+        className={cn(shown, "flex size-5 items-center justify-center")}
+      >
+        <Icon name="s-search" size={12} />
+      </button>
+    </>
+  )
+}
+
 function CheckRow({
   check,
   open,
   onToggle,
   onExplain,
+  rules,
+  onToggleRules,
 }: {
   check: ComplianceCheck
   open: boolean
   onToggle: () => void
   /** Offered on the checks that have working to show. */
   onExplain?: () => void
+  /** Whether the rules are open underneath this row. */
+  rules?: boolean
+  onToggleRules?: () => void
 }) {
   const hasChildren = check.children.length > 0
 
   return (
     /* The audit's own requirement ground. It had been grey, which made the
        same row read as two different things on two tabs. */
-    <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px]">
+    <div className="group flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px]">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <CheckMark check={check} />
         <p className="text-body-md font-semibold">{check.name}</p>
@@ -88,23 +126,31 @@ function CheckRow({
         ) : (
           <Icon name="chevron-right" size={14} className="shrink-0" />
         )}
-        <Badge variant="outline" className="font-normal">
-          {check.constraints} constraints
-        </Badge>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        {/* The verdict is on the row; the working is behind this. */}
-        {onExplain && (
-          <Button size="sm" onClick={onExplain}>
-            Explain
-          </Button>
+        {/* The badge is already the name of the thing; a second control beside
+            it saying "rules" would be naming it twice. */}
+        {onToggleRules ? (
+          <Badge variant="outline" asChild className="font-normal">
+            <button
+              type="button"
+              onClick={onToggleRules}
+              aria-expanded={rules}
+              className="cursor-pointer hover:bg-gray-5"
+            >
+              {check.constraints} constraints
+            </button>
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="font-normal">
+            {check.constraints} constraints
+          </Badge>
         )}
-        {/* Credits banked, not credits wanted — the other way round from a
-            requirement, and the reason it sits where the progress bar does. */}
-        <Badge variant="outline" className="font-normal">
-          {check.credits} credits
-        </Badge>
+        <CheckTools name={check.name} onExplain={onExplain} />
       </div>
+      {/* Credits banked, not credits wanted — the other way round from a
+          requirement, and the reason it sits where the progress bar does. */}
+      <Badge variant="outline" className="shrink-0 font-normal">
+        {check.credits} credits
+      </Badge>
     </div>
   )
 }
@@ -116,6 +162,8 @@ function EntryRows({
   folded,
   onToggle,
   onExplain,
+  rules,
+  onToggleRules,
 }: {
   entry: ComplianceEntry
   stem: boolean[]
@@ -123,6 +171,9 @@ function EntryRows({
   folded: Set<string>
   onToggle: (id: string) => void
   onExplain?: (id: string) => void
+  /** Which rows have their rules open underneath them. */
+  rules: Set<string>
+  onToggleRules: (id: string) => void
 }) {
   const trail = [...stem.map((line) => ({ line })), { line: true, elbow: true, last }]
 
@@ -144,15 +195,39 @@ function EntryRows({
         onExplain={
           onExplain && EXPLAINABLE.has(entry.id) ? () => onExplain(entry.id) : undefined
         }
+        rules={rules.has(entry.id)}
+        onToggleRules={
+          constraintsForCheck(entry).length ? () => onToggleRules(entry.id) : undefined
+        }
       />
     </TreeElement>
   )
 
-  if (entry.children.length === 0 || !open) return row
+  /* The rules, printed under the row they belong to and indented with its
+     children, because that is where they are true. */
+  const card = rules.has(entry.id) && (
+    <TreeElement
+      trail={[...stem.map((line) => ({ line })), { line: true, elbow: true, last: !open }]}
+    >
+      <ConstraintsCard
+        constraints={constraintsForCheck(entry)}
+        onExplain={onExplain && EXPLAINABLE.has(entry.id) ? () => onExplain(entry.id) : undefined}
+      />
+    </TreeElement>
+  )
+
+  if (entry.children.length === 0 || !open)
+    return (
+      <>
+        {row}
+        {card}
+      </>
+    )
 
   return (
     <>
       {row}
+      {card}
       {entry.children.map((child, i) => (
         <EntryRows
           key={childId(child)}
@@ -162,6 +237,8 @@ function EntryRows({
           folded={folded}
           onToggle={onToggle}
           onExplain={onExplain}
+          rules={rules}
+          onToggleRules={onToggleRules}
         />
       ))}
     </>
@@ -196,6 +273,16 @@ export function ComplianceTree({
   onExplain?: (id: string) => void
 }) {
   const [folded, setFolded] = useState(() => initialFold(ruleset))
+  /* Which rows are showing their rules. Held here so the whole ruleset shares
+     one answer, as the folding does. */
+  const [rules, setRules] = useState(() => new Set<string>())
+
+  const toggleRules = (id: string) =>
+    setRules((current) => {
+      const next = new Set(current)
+      if (!next.delete(id)) next.add(id)
+      return next
+    })
 
   const toggle = (id: string) =>
     setFolded((current) => {
@@ -239,6 +326,8 @@ export function ComplianceTree({
             onExplain={onExplain}
             folded={folded}
             onToggle={toggle}
+            rules={rules}
+            onToggleRules={toggleRules}
           />
         ))}
     </div>
