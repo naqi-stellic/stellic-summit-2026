@@ -51,7 +51,12 @@ export function Students() {
             running={running}
             onOpen={(student) => {
               if (student.username === AUDIT_STUDENT.username) {
-                window.location.href = "/compliance.html"
+                /* Opening a name from a roster is opening a student record, and
+                   a record opens on Progress. The compliance question is the one
+                   this list was filtered by, not the one you asked by clicking
+                   somebody's name — so the tab you land on says where you came
+                   from rather than which page you landed on. */
+                window.location.href = "/compliance.html?from=students"
               }
             }}
           />

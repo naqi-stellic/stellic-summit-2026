@@ -3,6 +3,7 @@ import { useState } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
 import { ComplianceTree } from "@/components/stellic/compliance-tree"
+import { cameFrom } from "@/components/stellic/plan-header"
 import { ExplainPanel } from "@/components/stellic/explain-panel"
 import {
   AuditControls,
@@ -45,7 +46,10 @@ import {
  * exist. */
 
 export function Compliance() {
-  const [tab, setTab] = useState("compliance")
+  /* Straight to the URL, and Compliance is what was asked for. Through a name
+     on the Students roster, and it is a record being opened — which opens
+     where every other record does. */
+  const [tab, setTab] = useState(cameFrom() === "students" ? "progress" : "compliance")
   const [view, setView] = useState("official")
   /* Which check is being explained, beside it rather than over it: the answer
      only means anything against the row it is about. Held as the row's id
