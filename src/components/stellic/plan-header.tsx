@@ -123,11 +123,16 @@ function PlanFacet({ label, values }: { label: string; values: string[] }) {
 
 /** Where the planner was opened from, if it was opened from anywhere:
  *  `?from=compliance` on the URL, put there by the record that sent you. */
+export function cameFrom(): string | null {
+  if (typeof window === "undefined") return null
+  const from = new URLSearchParams(window.location.search).get("from")
+  /* A page name and nothing else, so the value on the URL cannot point the
+     link at somewhere it was not meant to. */
+  return from && /^[a-z-]+$/.test(from) ? from : null
+}
+
 function CameFrom() {
-  const back =
-    typeof window === "undefined"
-      ? null
-      : new URLSearchParams(window.location.search).get("from")
+  const back = cameFrom()
 
   const inside = (
     <>

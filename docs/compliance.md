@@ -149,8 +149,10 @@ row was taken out of the middle of it. Nobody standing on Progress would have an
 Compliance, which is exactly why Compliance has to exist.
 
 **Plans** is not a tab: it is the planner. It opens `/planner.html?from=compliance`,
-and the planner's student breadcrumb reads that parameter and becomes the way
-back.
+and the planner reads that parameter twice: the student breadcrumb becomes the
+way back, and the nav stays the institution's list rather than becoming the
+student's own — arriving from a record, you are still a staff member looking at
+somebody else's plan.
 
 ## What is drawn and not wired
 

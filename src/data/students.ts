@@ -81,8 +81,6 @@ export type Student = {
   /** Out of five, as the record reads it. */
   engage: number
   photo?: string
-  /** Avatar ground where there is no photo. */
-  colour: string
   programs: Enrolment[]
   cgpa: string
   courses: Meter
@@ -102,7 +100,6 @@ export const ROSTER: Student[] = [
     standing: AUDIT_STUDENT.standing,
     engage: AUDIT_STUDENT.engage.lit,
     photo: AUDIT_STUDENT.photo,
-    colour: "#6941c6",
     programs: [
       { name: "Business Administration, B.S. (Finance)" },
       { name: "Data Analytics [minor]" },
@@ -117,7 +114,6 @@ export const ROSTER: Student[] = [
     name: "Amara Osei",
     standing: "Junior",
     engage: 4,
-    colour: "#026aa2",
     programs: [{ name: "Political Science, B.A." }],
     cgpa: "2.81",
     courses: { done: 24, inProgress: 6, remaining: 10 },
@@ -128,7 +124,6 @@ export const ROSTER: Student[] = [
     name: "Jonah Miller",
     standing: "Sophomore",
     engage: 3,
-    colour: "#3e4784",
     programs: [{ name: "Computer Science, B.S." }, { name: "Mathematics", declared: false }],
     cgpa: "3.12",
     courses: { done: 18, inProgress: 5, remaining: 17 },
@@ -140,7 +135,6 @@ export const ROSTER: Student[] = [
     name: "Selin Yıldız",
     standing: "Junior",
     engage: 5,
-    colour: "#087443",
     programs: [{ name: "Biology, B.S." }],
     cgpa: "3.64",
     courses: { done: 26, inProgress: 6, remaining: 8 },
@@ -151,7 +145,6 @@ export const ROSTER: Student[] = [
     name: "Tobias Wren",
     standing: "Senior",
     engage: 2,
-    colour: "#9f1ab1",
     programs: [{ name: "Graphic Design, B.F.A." }],
     cgpa: "2.94",
     courses: { done: 33, inProgress: 6, remaining: 1 },
@@ -163,7 +156,6 @@ export const ROSTER: Student[] = [
     name: "Diego Ramos",
     standing: "Senior",
     engage: 4,
-    colour: "#175cd3",
     programs: [{ name: "Computer Science, B.S." }],
     cgpa: "3.41",
     courses: { done: 38, inProgress: 2, remaining: 0 },
@@ -174,7 +166,6 @@ export const ROSTER: Student[] = [
     name: "Farah Al-Amin",
     standing: "Senior",
     engage: 3,
-    colour: "#b54708",
     programs: [{ name: "Biology, B.S." }],
     cgpa: "3.28",
     courses: { done: 36, inProgress: 2, remaining: 2 },
@@ -185,7 +176,6 @@ export const ROSTER: Student[] = [
     name: "Ryo Nakamura",
     standing: "Freshman",
     engage: 2,
-    colour: "#0b7a6b",
     programs: [
       { name: "Computer Science, B.S." },
       { name: "Business Administration", declared: false },
@@ -204,10 +194,3 @@ export const ROSTER_VIEWS = [
   "Registration View",
   "Advising View",
 ]
-
-export const initials = (name: string) =>
-  name
-    .split(" ")
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")

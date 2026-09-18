@@ -5,6 +5,7 @@ import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { StudentAvatar } from "@/components/stellic/student-avatar"
 import { EngageBolts } from "@/components/stellic/student-profile"
 import { AUDIT_STUDENT } from "@/data/audit"
 import {
@@ -14,7 +15,6 @@ import {
   ROSTER_TOTAL,
   ROSTER_VIEWS,
   SAVED_REPORTS,
-  initials,
   type Meter,
   type SavedReport,
   type Student,
@@ -144,7 +144,7 @@ export function SearchPanel() {
 
 function ReportCard({ report }: { report: SavedReport }) {
   return (
-    <div className={cn(CARD, "flex min-h-[148px] w-[248px] shrink-0 flex-col gap-2 p-4")}>
+    <div className={cn(CARD, "flex min-h-[148px] flex-col gap-2 p-4")}>
       <div className="flex items-start justify-between gap-2">
         <p className="min-w-0 text-body-md font-semibold text-foreground">{report.name}</p>
         {/* The default report is the product's, not somebody's, so there is
@@ -180,14 +180,16 @@ export function SavedReports() {
         <Icon name="expand-more" size={12} className={cn(!open && "-rotate-90")} />
       </Button>
 
+      {/* The reports fill the row the two panels around them fill. Four saved
+          and the way to make a fifth is five columns exactly. */}
       {open && (
-        <div className="flex flex-wrap gap-4">
+        <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-3 @5xl:grid-cols-5">
           {SAVED_REPORTS.map((report) => (
             <ReportCard key={report.name} report={report} />
           ))}
           <button
             type="button"
-            className="flex min-h-[148px] w-[248px] shrink-0 cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-40 text-body-md text-gray-80 hover:bg-gray-0"
+            className="flex min-h-[148px] cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-40 text-body-md text-gray-80 hover:bg-gray-0"
           >
             + Add New Manual Report
           </button>
@@ -238,22 +240,11 @@ function Bar({ meter }: { meter: Meter }) {
 function Portrait({ student }: { student: Student }) {
   if (student.photo) {
     return (
-      <img
-        src={student.photo}
-        alt=""
-        className="size-11 shrink-0 rounded-full object-cover"
-      />
+      <img src={student.photo} alt="" className="size-11 shrink-0 rounded-full object-cover" />
     )
   }
 
-  return (
-    <span
-      style={{ background: student.colour }}
-      className="flex size-11 shrink-0 items-center justify-center rounded-full text-body-md font-semibold text-white"
-    >
-      {initials(student.name)}
-    </span>
-  )
+  return <StudentAvatar seed={student.username} size={44} className="shrink-0 rounded-full" />
 }
 
 function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {

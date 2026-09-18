@@ -34,6 +34,7 @@ import { ReviewDialog } from "@/components/stellic/review-dialog"
 import { ReviewPanel } from "@/components/stellic/review-panel"
 import { PendingReviewProvider } from "@/components/stellic/review-state"
 import {
+  cameFrom,
   PlanHeader,
   type PlanAction,
   type TabTerm,
@@ -245,6 +246,10 @@ export function PlanYourPath({
   /** What the plan holds when it opens. */
   initialYears?: Year[]
 } = {}) {
+  /* Whether somebody arrived here from a student's record. Read once: it
+     decides the nav as well as the way back on the breadcrumb. */
+  const opened = cameFrom()
+
   const [years, setYears] = useState(initialYears)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   /* Where the course under the cursor would land if it were let go. Only set
@@ -690,14 +695,20 @@ export function PlanYourPath({
       }}
     >
     <AppShell
-      navTerms={scheduleTerms}
+      /* Opened from a student's record, the planner is still a staff member
+         looking at somebody else's plan, so the nav stays the institution's
+         list rather than becoming the student's own. */
+      section={opened ? "staff" : "plan"}
+      navTerms={opened ? undefined : scheduleTerms}
       /* A term view stands on its own term where the nav lists it, and on Plan
          Your Path where it does not — a term with no schedule is somewhere you
          got to through the plan. */
       navCurrent={
-        openTerm && scheduleTerms.some((term) => term.name === openTerm.name)
-          ? openTerm.name
-          : undefined
+        opened
+          ? "Students"
+          : openTerm && scheduleTerms.some((term) => term.name === openTerm.name)
+            ? openTerm.name
+            : undefined
       }
       assistLabel={
         generators ? (draft ? "Make changes to Generated plan" : "Generate with Assistant") : null

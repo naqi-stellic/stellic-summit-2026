@@ -36,6 +36,16 @@ when it moves.
 **The cohort.** Eighteen hundred and fifty-four people, eight of them on screen.
 The count is the point: the list is a sample, not the cohort.
 
+Everybody has a face. Two letters in a coloured disc is what a product shows
+when it has nothing, and on a list of eight people it reads as eight labels
+rather than eight students — the opposite of what the row is trying to say. So
+`StudentAvatar` draws one instead, out of four choices seeded on the username,
+which means the same person is always the same face however the list re-sorts.
+Illustrated rather than photographic on purpose: a prototype that ships
+strangers' photographs puts real people on a screen they never agreed to, and a
+keynote that reaches for a photo service is one dropped network away from eight
+broken images. Scott keeps his own photograph, because we have it.
+
 ## A row
 
 Not "who is this" but "how is this one going". Every column holds its width
