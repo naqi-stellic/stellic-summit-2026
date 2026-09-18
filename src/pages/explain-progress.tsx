@@ -3,6 +3,7 @@ import { useState } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
 import { ConstraintsCard, ExplainPanel } from "@/components/stellic/explain-panel"
+import { constraintsFor } from "@/data/explain"
 import {
   AuditControls,
   NetworkRow,
@@ -82,6 +83,7 @@ export function ExplainProgress() {
                 constraints: (group) => (
                   <ConstraintsCard group={group} onExplain={() => setExplaining(group)} />
                 ),
+                count: (group) => constraintsFor(group).length,
               }}
             />
             <UnmatchedSection

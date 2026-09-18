@@ -44,8 +44,12 @@ export type Constraint = {
   notes?: ConstraintNote[]
   limit?: { used: number; cap: number }
   progress?: { met: number; total: number }
-  /** Courses this rule keeps out. */
+  /** Courses this rule keeps out, by code. */
   blocks?: string[]
+  /** And by attribute, which is how a catalogue actually writes it: the rule
+   *  names a tag and catches whatever carries it, rather than a list somebody
+   *  has to keep up to date. */
+  blocksAttributes?: string[]
   /** What a blocked course is told, where the rule's own wording is not the
    *  reason. A course already counting elsewhere has not failed a constraint —
    *  it has been spent. */
@@ -61,6 +65,30 @@ export function constraintStatus(constraint: Constraint): ConstraintStatus {
   if (constraint.limit) return constraint.limit.used > constraint.limit.cap ? "unmet" : "ok"
   return "rule"
 }
+
+/** Courses the P/N limit does not touch. The catalogue names them, and a
+ *  course on this list can be passed without spending any of the twelve. */
+const PASS_EXEMPT = [
+  "ATHP 101",
+  "BSAD 111",
+  "BSAD 222",
+  "BSAD 333",
+  "COMB 101E",
+  "FITN 140",
+  "MLSC 101",
+  "MLSC 201",
+  "MUSC 120",
+  "UNIV 101",
+]
+
+/** Every course sitting on a pass/no-pass grade that the limit counts. Read
+ *  off the record rather than typed, so putting another P on the transcript
+ *  moves the fraction and the advice with it. */
+const PASSED: AuditCourse[] = [...STUDENT_RECORD.values()].filter(
+  (course) => course.grade === "P" && !PASS_EXEMPT.includes(course.code)
+)
+
+const PASS_CREDITS = PASSED.reduce((sum, course) => sum + course.credits, 0)
 
 /* ------------------------------------------------------------ the catalogue */
 
@@ -93,53 +121,50 @@ const PROGRAM_RULES: Constraint[] = [
   },
   {
     id: "pass-grades",
-    text: "At most 12 units with defined grades",
-    limit: { used: 0, cap: 12 },
+    text: "At most 12 credits with the grading option pass/no pass",
+    limit: { used: PASS_CREDITS, cap: 12 },
     notes: [
-      { text: "Grades: P" },
+      /* What has been spent, before what is exempt from spending it. The
+         fraction on the right is the answer to "can I take another one"; this
+         is what it is made of. */
+      { text: "Already counted against this limit:" },
+      { codes: PASSED.map((course) => course.code) },
       { text: "The following courses will not impact this limit:" },
-      {
-        codes: [
-          "ATHP 101",
-          "BSAD 111",
-          "BSAD 222",
-          "BSAD 333",
-          "COMB 101E",
-          "FITN 140",
-          "MLSC 101",
-          "MLSC 201",
-          "MUSC 120",
-          "UNIV 101",
-        ],
-      },
+      { codes: PASS_EXEMPT },
     ],
   },
   {
     id: "low-grades",
-    text: "At most 9 units with defined grades",
+    text: "At most 9 credits with transfer grades of C- or lower",
     limit: { used: 0, cap: 9 },
-    notes: [{ text: "Grades: C-, D+, D, D-, F" }, { text: "Transfer coursework only" }],
   },
   {
     id: "military",
-    text: "Take at most 15 credits from the following attributes:",
+    text: "Take at most 15 credits that match the following",
     limit: { used: 3, cap: 15 },
     notes: [
-      { text: "AERO or equivalent; MLSC or equivalent; NAVS or equivalent" },
+      { text: "Course with one of these attributes: AERO or equivalent; MLSC or equivalent; NAVS or equivalent" },
       { text: "Course with an enrollment tag Military Transfer Credit" },
     ],
   },
   {
     id: "developmental",
-    text: "Do not count courses from a given set",
+    text: "Following courses will not count",
     notes: [
       { codes: ["MATH 110", "ENGL 100"] },
       {
-        text: "Courses with attributes: DVAL or equivalent; Developmental Mathematics; Developmental Composition; ESL Composition; Study Skills",
+        text: "Course with one of these attributes: DVAL or equivalent; Developmental Mathematics; Developmental Composition; ESL Composition; Study Skills",
         truncated: true,
       },
     ],
     blocks: ["MATH 110", "ENGL 100"],
+    blocksAttributes: [
+      "DVAL",
+      "Developmental Mathematics",
+      "Developmental Composition",
+      "ESL Composition",
+      "Study Skills",
+    ],
   },
 ]
 
@@ -378,17 +403,29 @@ export type CourseMapping = {
  *  it is worded as "not considered" rather than as a refusal — the requirement
  *  has no opinion about a course it was never offered. */
 export function courseMappings(group: AuditGroup): CourseMapping[] {
+  const constraints = constraintsFor(group)
   const blocked = new Map<string, string>()
-  constraintsFor(group).forEach((constraint) =>
-    constraint.blocks?.forEach((code) => {
-      if (!blocked.has(code)) {
-        blocked.set(
-          code,
-          constraint.blockReason ?? `Does not satisfy "${constraint.text}"`
-        )
-      }
+
+  const refuse = (code: string, why: string) => {
+    if (!blocked.has(code)) blocked.set(code, why)
+  }
+
+  constraints.forEach((constraint) => {
+    const said = constraint.blockReason ?? `Does not satisfy "${constraint.text}"`
+    constraint.blocks?.forEach((code) => refuse(code, said))
+
+    /* A rule written against a tag catches whatever carries it, so the reason
+       names the tag rather than the rule alone — "does not satisfy Following
+       courses will not count" leaves a student asking which part of it they
+       fell foul of. */
+    if (!constraint.blocksAttributes) return
+    STUDENT_RECORD.forEach((course) => {
+      const caught = course.attributes?.find((attribute) =>
+        constraint.blocksAttributes!.includes(attribute)
+      )
+      if (caught) refuse(course.code, `${said} — attribute ${caught}`)
     })
-  )
+  })
 
   return recordMappings([...countedBy(group)], blocked)
 }

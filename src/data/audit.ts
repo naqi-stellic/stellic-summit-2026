@@ -43,6 +43,11 @@ export type AuditCourse = {
    *  is on the record, never on an additional check — those always double
    *  count, so the mark would be on every row and mean nothing. */
   doubleCounts?: boolean
+  /** What the registrar has tagged this course with. Constraints are written
+   *  against attributes rather than against lists of codes — "courses with
+   *  attribute Developmental Mathematics do not count" is the rule, and the
+   *  codes it catches are whatever happens to carry the tag. */
+  attributes?: string[]
 }
 
 /** A requirement: a named thing the degree asks for, holding courses or
@@ -148,11 +153,12 @@ function course(
   name: string,
   mark: AuditMark,
   result?: string,
-  grade?: string
+  grade?: string,
+  attributes?: string[]
 ): AuditCourse {
   /* Two elective seats read exactly alike, so the row needs an identity of its
      own rather than borrowing its course's. */
-  return { kind: "course", id: `c${++seq}`, code, name, credits: 3, mark, result, grade }
+  return { kind: "course", id: `c${++seq}`, code, name, credits: 3, mark, result, grade, attributes }
 }
 
 /* The credential heads the tree and the program hangs off it — the thing that
@@ -196,8 +202,11 @@ const TREE: AuditGroup = {
         course("ENGL 101", "Composition I", "taken", "Taken in Fall '25", "A-"),
         course("HIST 110", "World Civilizations", "taken", "Taken in Fall '25", "B+"),
         course("PSYC 101", "Introduction to Psychology", "taken", "Taken in Fall '25", "A"),
-        course("ART 105", "Visual Culture", "taken", "Taken in Spring '26", "B"),
-        course("COMM 230", "Public Speaking", "taken", "Taken in Spring '26", "A-"),
+        /* Taken pass/no-pass. Three of them across the degree, which is what
+           the program's 12-credit P/N limit is measuring — the whole of the
+           question "can I take another one next term". */
+        course("ART 105", "Visual Culture (P/N)", "taken", "Taken in Spring '26", "P"),
+        course("COMM 230", "Public Speaking (P/N)", "taken", "Taken in Spring '26", "P"),
         course("ENGL 210", "Advanced Composition", "remaining"),
         course("PHIL 240", "Business Ethics", "remaining"),
         course("HIST 205", "Modern World History", "remaining"),
@@ -215,7 +224,7 @@ const TREE: AuditGroup = {
         course("MATH 140", "Business Calculus", "taken", "Taken in Fall '25", "B"),
         course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
         course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '26", "B+"),
-        course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '26", "A"),
+        course("MIS 120", "Business Technology Essentials (P/N)", "taken", "Taken in Spring '26", "P"),
         milestone("Declare a concentration", "taken", "Signed off Spring '26"),
         course("ACCT 202", "Managerial Accounting", "in-progress", "In progress · Fall '26"),
         course("ECON 202", "Principles of Macroeconomics", "in-progress", "In progress · Fall '26"),
@@ -357,7 +366,7 @@ const TREE: AuditGroup = {
       children: [
         course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
         course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '26", "B+"),
-        course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '26", "A"),
+        course("MIS 120", "Business Technology Essentials (P/N)", "taken", "Taken in Spring '26", "P"),
         milestone("Declare a concentration", "taken", "Signed off Spring '26"),
         course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '26"),
       ],
@@ -375,7 +384,7 @@ const TREE: AuditGroup = {
         course("MATH 140", "Business Calculus", "taken", "Taken in Fall '25", "B"),
         course("ENGL 101", "Composition I", "taken", "Taken in Fall '25", "A-"),
         course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
-        course("COMM 230", "Public Speaking", "taken", "Taken in Spring '26", "A-"),
+        course("COMM 230", "Public Speaking (P/N)", "taken", "Taken in Spring '26", "P"),
         course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '26"),
         course("FIN 340", "Investments & Portfolio Management", "registered", "Registered · Spring '27"),
       ],
@@ -498,6 +507,19 @@ export const AUDIT_TOTAL = DEGREE.requirements
 export const UNMATCHED_BLURB =
   "These courses are in plan, but are not fulfilling any requirement"
 
+/** Credit the degree will not count, for a different reason than the dual
+ *  enrolment below: it is passed, it is on this institution's own transcript,
+ *  and it satisfies nothing because of what it is tagged. The program's
+ *  "Following courses will not count" constraint is written against that tag,
+ *  so this is the course that constraint is about. */
+export const DEVELOPMENTAL = {
+  courses: [
+    course("MATH 100A", "Intermediate Algebra", "taken", "Taken in Fall '25", "C", [
+      "Developmental Mathematics",
+    ]),
+  ],
+}
+
 export const DUAL_ENROLMENT = {
   courses: [
     course("MATH 110", "College Algebra", "taken", "Taken in Fall '24", "A"),
@@ -534,6 +556,7 @@ export const STUDENT_RECORD: Map<string, AuditCourse> = (() => {
   /* The unmatched courses are held too. The degree has no use for them, which
      is exactly why they are worth offering to another one. */
   DUAL_ENROLMENT.courses.forEach((course) => held.set(course.code, course))
+  DEVELOPMENTAL.courses.forEach((course) => held.set(course.code, course))
 
   return held
 })()

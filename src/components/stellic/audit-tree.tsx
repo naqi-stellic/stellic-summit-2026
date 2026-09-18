@@ -18,6 +18,9 @@ export type Explain = {
   onExplain: (group: AuditGroup) => void
   /** Whether the row's own rules can be opened underneath it. */
   constraints?: (group: AuditGroup) => React.ReactNode
+  /** How many rules there are, for the chip that opens them. The tree does not
+   *  know how a requirement's constraints are worked out, so it asks. */
+  count?: (group: AuditGroup) => number
 }
 
 /* The degree audit, drawn as a tree. Every row is the same three parts: the
@@ -30,9 +33,16 @@ export type Explain = {
    which is the whole of it — a course, a requirement and a whole program all
    read their state off the same six squares. */
 
+/** The UI Kit ships two in-progress marks and lets the institution pick:
+ *  Option A is the green clock, Option B the orange one. Most partners do not
+ *  read green as "not finished yet", so this is Option B — and it is one
+ *  constant rather than a colour buried in the map below, because it is a
+ *  choice somebody makes rather than a fact about the design. */
+const IN_PROGRESS = "bg-warning-50 text-white"
+
 const MARK: Record<AuditMark, { ground: string; icon?: IconName; glyph?: number }> = {
   taken: { ground: "bg-success-50 text-white", icon: "check", glyph: 14 },
-  "in-progress": { ground: "bg-success-50 text-white", icon: "watch-later", glyph: 16 },
+  "in-progress": { ground: IN_PROGRESS, icon: "watch-later", glyph: 16 },
   registered: { ground: "bg-warning-50 text-white", icon: "event-available", glyph: 16 },
   planned: { ground: "border border-warning-50 bg-warning-5 text-warning-50", icon: "check", glyph: 14 },
   /* Nothing placed against it yet, and something has to be: an empty box in
@@ -167,14 +177,19 @@ function Tags({
   small,
   onToggle,
   open,
+  count,
 }: {
   tags?: string[]
   small?: boolean
-  /** Given, the first tag is the way into the rules it is the headline of.
-   *  "fulfill all" is already the name of the constraint; a second control
-   *  beside it saying "rules" would be naming it twice. */
+  /** Given, the first tag is the way into the rules it is the headline of. A
+   *  second control beside it saying "rules" would be naming it twice. */
   onToggle?: () => void
   open?: boolean
+  /** How many rules are behind the chip. "fulfill all" names one of them and
+   *  says nothing about the other five, so where there are several the chip
+   *  counts them instead. Where there is genuinely only one, its own name is
+   *  the more useful label and it keeps it. */
+  count?: number
 }) {
   if (!tags?.length) return null
 
@@ -184,10 +199,11 @@ function Tags({
         const className = cn("font-normal", small && "text-label-sm")
 
         if (i === 0 && onToggle) {
+          const label = count && count > 1 ? `${count} constraints` : tag
           return (
             <Badge key={tag} variant="outline" asChild className={className}>
               <button type="button" onClick={onToggle} aria-expanded={open} className="cursor-pointer hover:bg-gray-5">
-                {tag}
+                {label}
               </button>
             </Badge>
           )
@@ -264,10 +280,15 @@ function RowTools({
 }) {
   if (!onExplain) return null
 
+  /* Pointed at, or reached by keyboard. It had been `focus-within`, which
+     kept the tools out on any row holding a focused control — clicking the
+     constraints chip left focus in the row, so General Education wore its
+     explain button permanently. `focus-visible` is the keyboard's focus and
+     not the mouse's, which is the distinction that was wanted. */
   const shown =
     "shrink-0 cursor-pointer rounded-md border border-gray-40 bg-card text-label-md " +
     "text-foreground transition-opacity hover:bg-gray-5 group-hover:opacity-100 " +
-    "group-focus-within:opacity-100 max-md:opacity-100 md:opacity-0"
+    "group-has-[:focus-visible]:opacity-100 max-md:opacity-100 md:opacity-0"
 
   return (
     <>
@@ -297,7 +318,7 @@ function GroupRow({
   onToggle?: () => void
   tools?: React.ReactNode
   /** Whether the row's own rules can be opened from its first tag, and are. */
-  rules?: { open: boolean; onToggle: () => void }
+  rules?: { open: boolean; onToggle: () => void; count?: number }
 }) {
   /* The degree heads the tree rather than hanging off it, so it is drawn on
      nothing: no ground, no border, and the counts in place of a mark. What it
@@ -321,7 +342,13 @@ function GroupRow({
               <p className="text-caption-lg font-semibold">{group.name}</p>
               <Icon name="expand-more" size={10} className="shrink-0" />
               <Icon name="more-horiz" size={14} className="shrink-0" />
-              <Tags tags={group.tags} small onToggle={rules?.onToggle} open={rules?.open} />
+              <Tags
+                tags={group.tags}
+                small
+                onToggle={rules?.onToggle}
+                open={rules?.open}
+                count={rules?.count}
+              />
               {tools}
             </div>
             {group.subtitle && (
@@ -397,7 +424,7 @@ function GroupRow({
       ) : (
         <Icon name="chevron-right" size={14} className="shrink-0" />
       )}
-      <Tags tags={group.tags} onToggle={rules?.onToggle} open={rules?.open} />
+      <Tags tags={group.tags} onToggle={rules?.onToggle} open={rules?.open} count={rules?.count} />
       {tools}
     </div>
   )
@@ -444,7 +471,11 @@ function EntryRows({
           tools={<RowTools group={entry} onExplain={explain?.onExplain} />}
           rules={
             explain?.constraints
-              ? { open: rulesOpen, onToggle: () => onToggle(rulesId) }
+              ? {
+                  open: rulesOpen,
+                  onToggle: () => onToggle(rulesId),
+                  count: explain.count?.(entry),
+                }
               : undefined
           }
         />
