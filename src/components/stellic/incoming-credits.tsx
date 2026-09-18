@@ -115,11 +115,13 @@ export function IncomingCredits({
         </div>
 
         {/* The same grid a year's terms stand in, so two cards here are as
-            wide as Fall and Spring are. */}
+            wide as Fall and Spring are — and one card is as wide as the year,
+            rather than a half-card with a hole beside it. */}
         <div
           className={cn(
-            "grid w-full grid-cols-1 gap-4 @3xl:grid-cols-2",
-            groups.length > 2 && "@6xl:grid-cols-3"
+            "grid w-full grid-cols-1 gap-4",
+            groups.length === 2 && "@3xl:grid-cols-2",
+            groups.length > 2 && "@3xl:grid-cols-2 @6xl:grid-cols-3"
           )}
         >
           {groups.map((group) => (

@@ -35,11 +35,10 @@ export type IncomingGroup = {
    notices until it is on a projector. */
 export const INCOMING_CREDITS: IncomingGroup[] = [
   {
-    /* Named the way the audit names it. Credit earned at a college while
-       still at school is dual enrolment, and calling it "Transfer Credits"
-       here and "Dual Enrollment" on the record was two names for four
-       courses. */
-    kind: "Dual Enrollment",
+    /* The planner's own word for it. The audit calls the same four courses
+       dual enrolment, which is what they were; a plan only cares that they
+       came from somewhere else. */
+    kind: "Transfer Credits",
     items: DUAL_ENROLMENT.courses.map((course) => ({
       id: `i-${course.code}`,
       code: course.code,

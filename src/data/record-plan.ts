@@ -185,7 +185,7 @@ export function recordPlan(): Year[] {
 export function recordIncoming(): IncomingGroup[] {
   return [
     {
-      kind: "Dual Enrollment",
+      kind: "Transfer Credits",
       items: DUAL_ENROLMENT.courses.map((course) => ({
         id: `i-${course.code}`,
         code: course.code,
