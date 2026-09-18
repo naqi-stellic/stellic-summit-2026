@@ -1,3 +1,4 @@
+import { cn } from "cn"
 import { useEffect, useRef, useState } from "react"
 
 import { AppShell } from "@/components/layout/app-shell"
@@ -60,8 +61,30 @@ export function AdvancedWhatIf() {
      answer. */
   const auditRef = useRef<HTMLElement>(null)
   const addedRef = useRef<HTMLDivElement>(null)
+  /* Held on the thing that changed for a moment after it arrives. A scroll on
+     a page of trees that look alike can be missed entirely; a ring that fades
+     says which one of them is the answer. */
+  const [landed, setLanded] = useState(false)
 
   useEffect(() => () => window.clearTimeout(beat.current), [])
+
+  /* The anchor. An effect rather than a callback on the timer, because the
+     tree has to be in the document before anything can scroll to it — React
+     has committed by the time this runs, and a `requestAnimationFrame` inside
+     the timeout had not. */
+  useEffect(() => {
+    if (recomputing || !applied) return
+
+    /* Changing a major rewrites the tree at the top of the card; adding a
+       programme hangs a second one underneath, forty rows down. Either way,
+       land on the one that changed rather than on the card that holds it. */
+    const landing = applied.mode === "add" ? addedRef.current : auditRef.current
+    landing?.scrollIntoView({ behavior: "smooth", block: "start" })
+
+    setLanded(true)
+    const fade = window.setTimeout(() => setLanded(false), 1600)
+    return () => window.clearTimeout(fade)
+  }, [recomputing, applied])
 
   const second = applied?.mode === "add" ? auditProgram(applied.program, true) : null
   const primary =
@@ -100,14 +123,7 @@ export function AdvancedWhatIf() {
               setRecomputing(true)
               setApplied({ program, mode })
               window.clearTimeout(beat.current)
-              beat.current = window.setTimeout(() => {
-                setRecomputing(false)
-                /* After paint, or there is nothing to scroll to yet. */
-                requestAnimationFrame(() => {
-                  const landing = mode === "add" ? addedRef.current : auditRef.current
-                  landing?.scrollIntoView({ behavior: "smooth", block: "start" })
-                })
-              }, 900)
+              beat.current = window.setTimeout(() => setRecomputing(false), 900)
             }}
             onClose={() => setDiscovering(false)}
           />
@@ -141,7 +157,11 @@ export function AdvancedWhatIf() {
             /* 40 between the tree, the unmatched list and the banner: three
                separate things in one card, and at 24 they read as one list
                that changes its mind twice. */
-            className="scroll-mt-4 flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card"
+            className={cn(
+              "scroll-mt-4 flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card",
+              "ring-primary-50 transition-shadow duration-500",
+              landed && applied?.mode === "change" && "ring-2"
+            )}
           >
             {recomputing ? (
               /* The old tree goes rather than sitting there greyed: it is the
@@ -158,7 +178,14 @@ export function AdvancedWhatIf() {
                 nothing has claimed, which is where it would fall on the
                 record: another thing the transcript is being read against. */}
             {second && (
-              <div ref={addedRef} className="scroll-mt-4">
+              <div
+                ref={addedRef}
+                className={cn(
+                  "scroll-mt-4 rounded-md ring-primary-50 transition-shadow duration-500",
+                  /* The ring needs room to sit outside the rows it is around. */
+                  landed && "ring-2 ring-offset-8 ring-offset-card"
+                )}
+              >
                 <AuditTree audit={second} />
               </div>
             )}
