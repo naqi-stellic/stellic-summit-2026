@@ -5,7 +5,13 @@ import { Icon, type IconName } from "@/components/icon"
 import { useIsStaff } from "@/components/layout/section"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { AUDIT_STUDENT, CURRENT_TERM, OFFICIAL_PROGRESS } from "@/data/audit"
+import {
+  AUDIT_STUDENT,
+  CURRENT_TERM,
+  OFFICIAL_PROGRESS,
+  type AuditStanding,
+  type MilestoneStanding,
+} from "@/data/audit"
 
 /* The head of the progress screen: who the student is, how far through they
  * are, who is looking after them, and what they are taking right now. Four
@@ -136,8 +142,14 @@ export function ProfileCard({
   programs,
   progressLabel = "Official Progress",
   actions = ["Request to Review Plan", "Actions"],
+  progress = OFFICIAL_PROGRESS,
 }: {
   programs: string[]
+  /** What the bars are a reading of. The record's own standing by default;
+   *  a what-if hands over the standing of whatever is on the page, because a
+   *  bar that still counts the degree you just replaced is measuring a tree
+   *  nobody is looking at. */
+  progress?: { courses: AuditStanding; milestones: MilestoneStanding }
   /** What the progress block is a reading of. The compliance screen reads the
    *  plan where Progress reads the registrar. */
   progressLabel?: string
@@ -145,7 +157,7 @@ export function ProfileCard({
    *  to offer than a student's does. */
   actions?: string[]
 }) {
-  const { courses, milestones } = OFFICIAL_PROGRESS
+  const { courses, milestones } = progress
   const staff = useIsStaff()
   const shown = staff ? actions.filter((action) => !STUDENT_ONLY.has(action)) : actions
 

@@ -393,6 +393,9 @@ const TREE: AuditGroup = {
  *
  *  Additional checks are stepped over: they re-list courses counted already,
  *  so walking into them would count the same course twice. */
+export type AuditStanding = ReturnType<typeof auditStanding>
+export type MilestoneStanding = ReturnType<typeof milestoneStanding>
+
 export function auditStanding(audit: AuditGroup) {
   const marks: AuditMark[] = []
 

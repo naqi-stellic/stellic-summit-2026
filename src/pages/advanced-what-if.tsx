@@ -25,6 +25,8 @@ import {
   AUDIT_TABS,
   AUDIT_VIEWS,
   LAST_COMPUTED,
+  auditStanding,
+  milestoneStanding,
   UNMATCHED_BLURB,
   unmatchedAgainst,
 } from "@/data/audit"
@@ -99,7 +101,27 @@ export function AdvancedWhatIf() {
   /* Asked again of whatever is on screen: a program that takes up a course
      the degree ignored has matched it, and one that drops a course the degree
      wanted has unmatched it. */
-  const unmatched = unmatchedAgainst(second ? [primary, second] : [primary])
+  const trees = second ? [primary, second] : [primary]
+  const unmatched = unmatchedAgainst(trees)
+
+  /* And the bars at the top are read off the same trees. They had been the
+     record's own standing, fixed — so switching a major left the header
+     saying ten taken of forty while the tree underneath it said two of forty,
+     and adding a minor added six requirements the bar never heard about. A
+     what-if that does not reach the top of the page is only half a what-if. */
+  const progress = {
+    courses: trees
+      .map(auditStanding)
+      .reduce((all, one) => ({
+        taken: all.taken + one.taken,
+        inProgress: all.inProgress + one.inProgress,
+        remaining: all.remaining + one.remaining,
+        claimed: all.claimed + one.claimed,
+      })),
+    milestones: trees
+      .map(milestoneStanding)
+      .reduce((all, one) => ({ done: all.done + one.done, total: all.total + one.total })),
+  }
 
   /* The profile says what the student is on, so it has to say this as well. */
   const programs =
@@ -134,7 +156,13 @@ export function AdvancedWhatIf() {
           against the width they actually have rather than the window's. */}
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 py-8">
         <div className="mx-auto flex w-full max-w-[1518px] flex-col gap-4">
-          <ProfileCard programs={programs} />
+          <ProfileCard
+            programs={programs}
+            progress={progress}
+            /* The record's own label is "Official Progress", and this is not
+               the record once something has been applied to it. */
+            progressLabel={applied ? "Planned Progress" : undefined}
+          />
           <NetworkRow />
           <TermStrip />
 
