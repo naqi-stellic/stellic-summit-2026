@@ -30,6 +30,7 @@ export default defineConfig({
         'staff-home': path.resolve(import.meta.dirname, 'staff-home.html'),
         explore: path.resolve(import.meta.dirname, 'explore.html'),
         'transfer-insights': path.resolve(import.meta.dirname, 'transfer-insights.html'),
+        students: path.resolve(import.meta.dirname, 'students.html'),
       },
     },
   },

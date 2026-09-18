@@ -14,6 +14,10 @@ type NavItem = {
   sub?: boolean
   active?: boolean
   badge?: string
+  /** Where the row leads, on the rows that lead anywhere. The rest are drawn
+   *  because the nav is the institution's own list and leaving them out would
+   *  misrepresent it — they just have nothing built behind them. */
+  href?: string
   /** A small chip after the label. Unlike `badge` this one is meant to be
    *  read: it says the row is new, not that something is waiting in it. */
   chip?: string
@@ -50,8 +54,8 @@ const EXPLORE: NavItem[] = [
    everything there is, not a path through one student's degree — so no rings
    either. A ring marks where you are on a path, and this is not one. */
 const STAFF: NavItem[] = [
-  { label: "Home", strong: true, chip: "Beta" },
-  { label: "Students", strong: true },
+  { label: "Home", strong: true, chip: "Beta", href: "/staff-home.html" },
+  { label: "Students", strong: true, href: "/students.html" },
   { label: "Programs", strong: true },
   { label: "Courses", strong: true },
   { label: "Pathways", strong: true },
@@ -192,7 +196,7 @@ export function SidebarNav({
           {nav(section, current, terms).map((item) => (
             <a
               key={item.label}
-              href="#"
+              href={item.href ?? "#"}
               aria-current={item.active ? "page" : undefined}
               className={cn(
                 "flex h-9 w-60 shrink-0 items-center gap-2 px-6 py-2 text-white",

@@ -35,6 +35,7 @@ they open in their own tab.
 | Proactive Compliance | `/compliance.html` | from a static mock, not a frame | `src/pages/compliance.tsx` | [docs](docs/compliance.md) |
 | Explain Progress | `/explain.html` | from a static mock, not a frame | `src/pages/explain-progress.tsx` | [docs](docs/explain-progress.md) |
 | Staff Home | `/staff-home.html` | from a static mock, not a frame | `src/pages/staff-home.tsx` | [docs](docs/staff-home.md) |
+| Students | `/students.html` | from a screenshot of the product | `src/pages/students.tsx` | [docs](docs/students.md) |
 
 **Team Explore**
 

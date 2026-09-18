@@ -9,6 +9,7 @@ import {
   type ScheduleTerm,
 } from "@/components/layout/sidebar"
 import { Topbar } from "@/components/layout/topbar"
+import { StudentFace } from "@/components/stellic/student-profile"
 import { Button } from "@/components/ui/button"
 import {
   ResizableHandle,
@@ -81,7 +82,12 @@ export function AppShell({
           <div className="max-md:hidden">
             <SidebarMasthead open={nav} onToggle={() => setNav(!nav)} />
           </div>
-          <Topbar title={title ?? SECTION_TITLE[section]} account={account} />
+          {/* A student's own surfaces are signed in as the student, so the
+              circle is his face. A staff screen is somebody else entirely. */}
+          <Topbar
+            title={title ?? SECTION_TITLE[section]}
+            account={account ?? (section === "staff" ? undefined : <StudentFace size={40} />)}
+          />
         </div>
 
         <div className="flex min-h-0 flex-1">
