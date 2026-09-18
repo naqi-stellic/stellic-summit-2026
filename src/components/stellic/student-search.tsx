@@ -339,18 +339,7 @@ function Portrait({ student }: { student: Student }) {
   )
 }
 
-function Row({
-  student,
-  answering,
-  onOpen,
-}: {
-  student: Student
-  /** Whether the list was found by the year-two check, in which case the row
-   *  says where this student stands on it. A result that does not answer the
-   *  question it was found by is a list, not a result. */
-  answering?: boolean
-  onOpen?: () => void
-}) {
+function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
   return (
     <div className="flex items-start gap-6 border-b border-gray-40 p-6 transition-colors last:border-b-0 hover:bg-gray-0">
       <Checkbox aria-label={`Select ${student.name}`} className="mt-1 shrink-0" />
@@ -391,18 +380,11 @@ function Row({
         <div className="flex flex-col gap-2">
           <p className="text-body-md font-semibold text-foreground">Courses</p>
           <Bar meter={student.courses} />
-          {/* No warnings under the meter for now — a list of eight rows each
-              flagging something of its own is a list nobody reads. `alert` is
-              still on the record, unrendered, for when they come back.
-
-              What is left is the answer to the query the row was found by, and
-              it is set as a fact rather than an alarm: nothing has gone wrong,
-              this is simply what was asked for. */}
-          {answering && student.yearTwo && (
-            <p className="text-body-md text-gray-80">
-              {QUERY.requirement} — <span className="text-gray-100">{student.yearTwo}</span>
-            </p>
-          )}
+          {/* Nothing under the meter. A list of eight rows each flagging
+              something of its own is a list nobody reads, and restating the
+              query on every row that matched it is the same noise wearing a
+              calmer voice — the pills above already say what was asked.
+              `alert` and `yearTwo` stay on the record, unrendered. */}
         </div>
         <div className="flex flex-col gap-2">
           <p className="flex items-center gap-1.5 text-body-md font-semibold text-foreground">
@@ -499,7 +481,6 @@ export function Roster({
           <Row
             key={student.username}
             student={student}
-            answering={applied.requirement}
             onOpen={() => onOpen?.(student)}
           />
         ))}

@@ -20,12 +20,12 @@ import {
 import {
   AID,
   COMPLIANCE_TABS,
+  EXPLAIN,
   LAST_COMPUTED,
   PLANNED_AID,
   PLANNED_RULESET,
-  PTD_CONSTRAINTS,
-  PTD_STANDING,
   RULESET,
+  mappingsForCheck,
 } from "@/data/compliance"
 
 /* Proactive Compliance — the same student record read against an eligibility
@@ -47,24 +47,28 @@ import {
 export function Compliance() {
   const [tab, setTab] = useState("compliance")
   const [view, setView] = useState("official")
-  /* The working behind a check, beside it rather than over it: the answer only
-     means anything against the row it is about. */
-  const [explaining, setExplaining] = useState(false)
+  /* Which check is being explained, beside it rather than over it: the answer
+     only means anything against the row it is about. Held as the row's id
+     rather than as a flag, because seven of them have working to show and the
+     panel has to know which one it was asked about. */
+  const [explaining, setExplaining] = useState<string | null>(null)
 
   const planned = view === "planned"
   const unmatched = unmatchedAgainst([AUDIT])
+  const explained = explaining ? EXPLAIN[explaining] : undefined
 
   return (
     <AppShell
       section="staff"
       assistant={false}
       panel={
-        explaining ? (
+        explained ? (
           <ExplainPanel
-            title="Progress to Degree Check"
-            standing={PTD_STANDING}
-            constraints={PTD_CONSTRAINTS}
-            onClose={() => setExplaining(false)}
+            title={explained.title}
+            lede={explained.lede}
+            constraints={explained.constraints}
+            mappings={mappingsForCheck(explaining!)}
+            onClose={() => setExplaining(null)}
           />
         ) : undefined
       }
@@ -110,11 +114,17 @@ export function Compliance() {
             <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
               <ComplianceTree
                 ruleset={planned ? PLANNED_RULESET : RULESET}
-                onExplain={() => setExplaining(true)}
+                onExplain={setExplaining}
               />
               {/* A second ruleset, under the first rather than instead of it:
-                  two clocks on one transcript, and neither can see the other. */}
-              <ComplianceTree ruleset={planned ? PLANNED_AID : AID} />
+                  two clocks on one transcript, and neither can see the other.
+                  Its checks explain themselves the same way — an aid standard
+                  is coded out of the same constraints a degree is, which is
+                  the argument for it being on this screen at all. */}
+              <ComplianceTree
+                ruleset={planned ? PLANNED_AID : AID}
+                onExplain={setExplaining}
+              />
             </section>
           )}
         </div>

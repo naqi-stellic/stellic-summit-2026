@@ -378,11 +378,8 @@ export type CourseMapping = {
  *  it is worded as "not considered" rather than as a refusal — the requirement
  *  has no opinion about a course it was never offered. */
 export function courseMappings(group: AuditGroup): CourseMapping[] {
-  const counting = countedBy(group)
-  const constraints = constraintsFor(group)
-
   const blocked = new Map<string, string>()
-  constraints.forEach((constraint) =>
+  constraintsFor(group).forEach((constraint) =>
     constraint.blocks?.forEach((code) => {
       if (!blocked.has(code)) {
         blocked.set(
@@ -393,8 +390,34 @@ export function courseMappings(group: AuditGroup): CourseMapping[] {
     })
   )
 
+  return recordMappings([...countedBy(group)], blocked)
+}
+
+/** The same reading, for a rule that is not a requirement.
+ *
+ *  A compliance check counts credit too, and it refuses credit for reasons a
+ *  degree audit would never give — earned before enrolment, in progress rather
+ *  than earned, carrying no grade points. Nothing on that page can derive
+ *  those, so the check names the codes and the reason and this lays them
+ *  against the record the same way. */
+export function recordMappings(
+  counting: string[],
+  refused: Map<string, string> | { codes: string[]; reason: string }[] = []
+): CourseMapping[] {
+  const counts = new Set(counting)
+
+  const blocked =
+    refused instanceof Map
+      ? refused
+      : refused.reduce((all, { codes, reason }) => {
+          codes.forEach((code) => {
+            if (!all.has(code)) all.set(code, reason)
+          })
+          return all
+        }, new Map<string, string>())
+
   return [...STUDENT_RECORD.values()].map((course) => {
-    if (counting.has(course.code)) return { course, verdict: "counting" as const }
+    if (counts.has(course.code)) return { course, verdict: "counting" as const }
 
     const reason = blocked.get(course.code)
     if (reason) return { course, verdict: "not counting" as const, reason }

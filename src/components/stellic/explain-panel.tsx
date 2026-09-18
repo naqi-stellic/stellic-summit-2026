@@ -13,6 +13,7 @@ import {
   explainStanding,
   type Constraint,
   type ConstraintStatus,
+  type CourseMapping,
   type MappingVerdict,
 } from "@/data/explain"
 
@@ -103,8 +104,9 @@ const VERDICT: Record<MappingVerdict, string> = {
 export function ExplainPanel({
   group,
   title,
-  standing: given,
+  lede,
   constraints: told,
+  mappings: mapped,
   onClose,
 }: {
   /** A requirement off the audit, which the panel reads for itself. */
@@ -113,16 +115,24 @@ export function ExplainPanel({
    *  compliance check, say — the caller names it and hands over the rules,
    *  because nothing else on the page can derive them. */
   title?: string
-  standing?: { earned: number; needed: number; toGo: string }
+  /** The opening sentence, where the caller has one. A requirement's standing
+   *  is a fraction and reads the same every time; a check's is an argument,
+   *  and "24 of 24, met with six to spare" is not that sentence with different
+   *  numbers in it. */
+  lede?: string
   constraints?: Constraint[]
+  /** The record read against the thing being explained. Handed over for the
+   *  same reason the rules are: a check is not a requirement, so nothing here
+   *  could work out which courses it counts. */
+  mappings?: CourseMapping[]
   onClose: () => void
 }) {
-  const [mappings, setMappings] = useState(false)
+  const [mappingsOpen, setMappingsOpen] = useState(false)
   const [find, setFind] = useState("")
 
   const constraints = told ?? (group ? constraintsFor(group) : [])
-  const standing = given ?? (group ? explainStanding(group) : { earned: 0, needed: 0, toGo: "" })
-  const all = group ? courseMappings(group) : []
+  const standing = group ? explainStanding(group) : null
+  const all = mapped ?? (group ? courseMappings(group) : [])
   const shown = find
     ? all.filter((mapping) =>
         `${mapping.course.code} ${mapping.course.name}`.toLowerCase().includes(find.toLowerCase())
@@ -143,13 +153,19 @@ export function ExplainPanel({
           <h3 className="text-h300 font-semibold text-foreground">{title ?? group?.name}</h3>
           {/* The standing in one sentence, before any of the rules. Whatever
               else the panel says, this is the thing that was asked. */}
-          <p className="text-body-md text-gray-80">
-            You've earned{" "}
-            <span className="font-semibold text-foreground">
-              {standing.earned} of the {standing.needed} credits
-            </span>{" "}
-            this requirement needs. {standing.toGo} to go
-          </p>
+          {lede ? (
+            <p className="text-body-md text-gray-80">{lede}</p>
+          ) : (
+            standing && (
+              <p className="text-body-md text-gray-80">
+                You've earned{" "}
+                <span className="font-semibold text-foreground">
+                  {standing.earned} of the {standing.needed} credits
+                </span>{" "}
+                this requirement needs. {standing.toGo} to go
+              </p>
+            )
+          )}
         </div>
 
         <section className="flex flex-col gap-2">
@@ -167,19 +183,19 @@ export function ExplainPanel({
         <section className="flex flex-col gap-2">
           <button
             type="button"
-            onClick={() => setMappings(!mappings)}
-            aria-expanded={mappings}
+            onClick={() => setMappingsOpen(!mappingsOpen)}
+            aria-expanded={mappingsOpen}
             className="flex cursor-pointer items-center gap-2 pb-2 text-left"
           >
             <span className="text-body-md font-semibold text-foreground">Course mappings</span>
             <Icon
               name="chevron-right"
               size={14}
-              className={cn("transition-transform", mappings && "rotate-90")}
+              className={cn("transition-transform", mappingsOpen && "rotate-90")}
             />
           </button>
 
-          {mappings && (
+          {mappingsOpen && (
             <div className="flex flex-col gap-4">
               <label className="flex h-9 items-center gap-2 rounded-md border border-input bg-card px-[11px]">
                 <Icon name="s-search" size={16} className="shrink-0 text-gray-80" />

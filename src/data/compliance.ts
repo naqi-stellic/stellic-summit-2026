@@ -1,5 +1,5 @@
 import { AUDIT_STUDENT, STUDENT_RECORD, type AuditCourse } from "@/data/audit"
-import type { Constraint } from "@/data/explain"
+import { recordMappings, type Constraint, type CourseMapping } from "@/data/explain"
 import { CREDITS_PER_COURSE, DEGREE } from "@/data/plan"
 
 /* Proactive Compliance: the same student, read against an eligibility ruleset
@@ -465,70 +465,417 @@ export const PLANNED_AID = asPlanned(AID)
    Why a check stands where it does.
 
    A check fails for a reason that is never on the row: which credits counted,
-   which were excluded, and which clock was running. These are the rules behind
-   the one check the screen is about, written the way the ruleset writes them.
+   which were excluded, and which clock was running. This is that reasoning,
+   for every check worth asking about.
+
+   The constraints are written in Stellic's own constraint language rather than
+   in prose, because that is what an institution would have built them out of.
+   "At least [x] units in total", "At most [x] courses/units with defined
+   grades", "Pass with minimum grade [x]", "Do not count courses from a given
+   set", "Count [xx-xxx] only if taken at [term] or later" — these are the
+   templates in the requirement builder, and an eligibility ruleset is coded
+   the same way a degree is. Saying it in the product's own words is the claim:
+   this is not a second system bolted on beside the audit.
 
    ---- EDITING ----
    This is the copy that appears in the Explain sidebar. It is plain data —
    `text` is the rule, `notes` are the lines under it, `progress` and `limit`
-   draw the fraction on the right. Change the words here and the panel follows.
+   draw the fraction on the right. `counting` and `refused` are the course
+   mappings: which codes the check is counting, and which it is turning down
+   and why. Change the words here and the panel follows.
    -------------------------------------------------------------------------- */
 
-export const PTD_CONSTRAINTS: Constraint[] = [
-  {
-    id: "ptd-percent",
-    text: `${PERCENT_BY_YEAR_THREE * 100}% of the degree completed before the third year of enrollment`,
-    notes: [
-      { text: `${NEEDED_BY_YEAR_THREE} of ${DEGREE.credits} credits, measured at the start of the fall term` },
-    ],
-    progress: { met: EARNED, total: NEEDED_BY_YEAR_THREE },
-  },
-  {
-    id: "ptd-degree-applicable",
-    text: "Only degree-applicable credit counts toward this percentage",
-    notes: [
-      { text: "Credit that satisfies no requirement still counts if it is accepted toward the degree total:" },
-      { text: "Dual enrollment, transfer and test credit accepted by the registrar" },
-    ],
-  },
-  {
-    id: "ptd-min-grade",
-    text: "Pass with minimum grade D",
-    notes: [{ text: "A failed course is attempted, not earned, and counts against pace rather than progress" }],
-  },
-  {
-    id: "ptd-remedial",
-    text: "Do not count courses from a given set",
-    notes: [
-      { text: "Remedial and developmental coursework, to a maximum of 6 credits in the first year only" },
-    ],
-    limit: { used: 0, cap: 6 },
-  },
-  {
-    id: "ptd-declared",
-    text: "Student must have 1 attributes/tags",
-    notes: [{ text: `Tag: ${DEGREE.concentration} concentration declared before the third year` }],
-    progress: { met: 1, total: 1 },
-  },
-]
-
-/** The line the Explain panel opens with, in the panel's own shape. */
-export const PTD_STANDING = {
-  earned: EARNED,
-  needed: NEEDED_BY_YEAR_THREE,
-  toGo: `${SHORTFALL} to go before the third year`,
+/** Everything the Explain sidebar needs for one check. A check is not a
+ *  requirement, so nothing on the page can derive any of this — the ruleset
+ *  has to say it. */
+export type CheckExplain = {
+  /** The heading, which is the check's own name. */
+  title: string
+  /** The one sentence the panel opens on, before any rule. Written out rather
+   *  than assembled from a fraction: a check that passed and a check that is
+   *  six credits short are not the same sentence with different numbers. */
+  lede: string
+  constraints: Constraint[]
+  /** Codes this check is counting. */
+  counting?: string[]
+  /** Codes it is turning down, with the reason it gives. A course the check
+   *  never looked at is neither — it is left out of both lists. */
+  refused?: { codes: string[]; reason: string }[]
 }
 
-/** Which checks have something to explain. Only the one that is going wrong —
- *  an Explain on a check nobody is asking about is a button in the way. */
-export const EXPLAINABLE = new Set(["year-2-ptd"])
+const CODES = {
+  yearOne: YEAR_ONE.map((course) => course.code),
+  yearTwoFall: YEAR_TWO_FALL.map((course) => course.code),
+  carriedIn: CARRIED_IN.map((course) => course.code),
+  /* A seat already taken for a term that has not started. Read off the record
+     rather than listed here, so a second registration next week is caught by
+     every check that has an opinion about it. */
+  registered: [...STUDENT_RECORD.values()]
+    .filter((course) => course.mark === "registered")
+    .map((course) => course.code),
+}
 
-/** The rules behind a check, for the box that opens under its badge. Every
- *  check states its own rule, so every badge opens onto something; the one the
- *  screen is about has the whole set written out. */
+/** Everything on the record, which is what the timeframe cap counts. */
+const ALL_ATTEMPTED = [...CODES.yearOne, ...CODES.carriedIn, ...CODES.yearTwoFall]
+
+/* Year 1 — a year that passed, and the sidebar still has something to say: it
+   passed with six credits to spare, and it passed without any of the credit
+   the student walked in with. */
+const YEAR_ONE_EXPLAIN: CheckExplain = {
+  title: "Year 1",
+  lede: `Earned ${YEAR_ONE.length * CREDITS_PER_COURSE} credits against the 24 the first year asks for. Met, with ${YEAR_ONE.length * CREDITS_PER_COURSE - 24} to spare.`,
+  constraints: [
+    {
+      id: "y1-total",
+      text: "At least 24 units in total",
+      notes: [
+        { text: "Measured across the first academic year of full-time enrollment: Fall 2025 through Summer 2026" },
+      ],
+      progress: { met: YEAR_ONE.length * CREDITS_PER_COURSE, total: 24 },
+    },
+    {
+      id: "y1-regular-terms",
+      text: "At least 18 courses/units excluding the given course set",
+      notes: [
+        { text: "Course set: summer and intersession terms. Three quarters of the year's credit has to come from the two regular terms." },
+      ],
+      progress: { met: YEAR_ONE.length * CREDITS_PER_COURSE, total: 18 },
+    },
+    {
+      id: "y1-min-grade",
+      text: "Pass with minimum grade D",
+      notes: [{ text: "Only passing grades count toward the check by default" }],
+    },
+    { id: "y1-min-units", text: "Minimum of 1 unit for each course counted" },
+    {
+      id: "y1-transfer",
+      text: "At most 0 courses/units with transfer status",
+      notes: [
+        { text: "Credit earned before the first term of full-time enrollment was not earned in the academic year, so the year check cannot count it — even though the progress-to-degree check below can:" },
+        { codes: CODES.carriedIn },
+      ],
+      limit: { used: 0, cap: 0 },
+    },
+  ],
+  counting: CODES.yearOne,
+  refused: [
+    {
+      codes: CODES.carriedIn,
+      reason: "Earned before first full-time enrollment — not earned in the academic year",
+    },
+  ],
+}
+
+/* Year 2 — the year under way, and the one carrying the problem. It holds four
+   checks and has cleared one of them. */
+const YEAR_TWO_EXPLAIN: CheckExplain = {
+  title: "Year 2",
+  lede: `${IN_PROGRESS} credits in progress against the 18 the year asks for, and one of the four checks inside it cleared. The spring is where both of the others are decided.`,
+  constraints: [
+    {
+      id: "y2-subs",
+      text: "Fulfill all of the following sub-requirements",
+      notes: [
+        { text: "Progress to Degree, the two term checks, and the academic year check" },
+      ],
+      progress: { met: 1, total: 4 },
+    },
+    {
+      id: "y2-total",
+      text: "At least 18 units in total",
+      notes: [
+        { text: `Fall 2026 through Summer 2027. ${IN_PROGRESS} credits are under way and ${SPRING_PLANNED} more are planned for the spring, which would clear it at ${IN_PROGRESS + SPRING_PLANNED} — on the plan, not yet on the record.` },
+      ],
+      progress: { met: IN_PROGRESS, total: 18 },
+    },
+    {
+      id: "y2-term-floor",
+      text: "At least 6 units in total",
+      notes: [{ text: "Applied to each regular term separately, not to the year" }],
+      progress: { met: IN_PROGRESS, total: 6 },
+    },
+    {
+      id: "y2-withdrawals",
+      text: "At most 0 courses/units with defined grades",
+      notes: [
+        { text: "Grades: W, I, NP. A dropped course is attempted but not earned, and the year check counts earned credit only." },
+      ],
+      limit: { used: 0, cap: 0 },
+    },
+    {
+      id: "y2-certified",
+      text: "Student must have 1 attributes/tags",
+      notes: [{ text: "Tag: certified as a full-time student-athlete for the academic year" }],
+      progress: { met: 1, total: 1 },
+    },
+  ],
+  counting: CODES.yearTwoFall,
+  refused: [
+    {
+      codes: CODES.yearOne,
+      reason: "Earned in the previous academic year — counted there",
+    },
+    {
+      codes: CODES.carriedIn,
+      reason: "Earned before first full-time enrollment",
+    },
+    {
+      codes: CODES.registered,
+      reason: "Registered for the spring — inside the year, but not earned until the term closes",
+    },
+  ],
+}
+
+/* Progress to Degree — the check the whole screen exists for. Its mappings are
+   the argument: the fourteen courses it counts include four the degree audit
+   has on its unmatched list, and exclude five that are on screen right now. */
+const PTD_EXPLAIN: CheckExplain = {
+  title: "Progress to Degree Check",
+  lede: `Earned ${EARNED} of the ${NEEDED_BY_YEAR_THREE} credits this check needs before the third year. ${SHORTFALL} to go.`,
+  constraints: [
+    {
+      id: "ptd-percent",
+      text: `${PERCENT_BY_YEAR_THREE * 100}% of the degree completed before the third year of enrollment`,
+      notes: [
+        { text: `${NEEDED_BY_YEAR_THREE} of ${DEGREE.credits} credits, measured at the start of the fall term` },
+      ],
+      progress: { met: EARNED, total: NEEDED_BY_YEAR_THREE },
+    },
+    {
+      id: "ptd-degree-applicable",
+      text: "Only degree-applicable credit counts toward this percentage",
+      notes: [
+        { text: "Credit that satisfies no requirement still counts if it is accepted toward the degree total:" },
+        { text: "Dual enrollment, transfer and test credit accepted by the registrar" },
+        { codes: CODES.carriedIn },
+      ],
+    },
+    {
+      id: "ptd-earned-only",
+      text: "At most 0 courses/units with defined grades",
+      notes: [
+        { text: "Grades: IP. Credit is earned at the end of the term, and this check is measured at the start of the fall — so the five courses under way are not in the count yet:" },
+        { codes: CODES.yearTwoFall },
+      ],
+      limit: { used: 0, cap: 0 },
+    },
+    {
+      id: "ptd-min-grade",
+      text: "Pass with minimum grade D",
+      notes: [{ text: "A failed course is attempted, not earned, and counts against pace rather than progress" }],
+    },
+    {
+      id: "ptd-remedial",
+      text: "Do not count courses from a given set",
+      notes: [
+        { text: "Remedial and developmental coursework, to a maximum of 6 credits in the first year only" },
+      ],
+      limit: { used: 0, cap: 6 },
+    },
+    {
+      id: "ptd-declared",
+      text: "Student must have 1 attributes/tags",
+      notes: [{ text: `Tag: ${DEGREE.concentration} concentration declared before the third year` }],
+      progress: { met: 1, total: 1 },
+    },
+  ],
+  counting: [...CODES.yearOne, ...CODES.carriedIn],
+  refused: [
+    {
+      codes: CODES.yearTwoFall,
+      reason: "In progress — credit is earned at the end of the term, and the check is measured before it",
+    },
+    {
+      codes: CODES.registered,
+      reason: "Registered for a term the check is measured before",
+    },
+  ],
+}
+
+/* ---- aid ---- */
+
+const GPA_EXPLAIN: CheckExplain = {
+  title: "Cumulative GPA",
+  lede: `A cumulative ${CGPA} against the 2.0 the qualitative standard asks for. The only one of the four tests that is about how well the work was done rather than how much of it there is.`,
+  constraints: [
+    {
+      id: "gpa-min",
+      text: "At least 2.0 cumulative GPA",
+      notes: [{ text: "Measured on all credit attempted at this institution" }],
+      progress: { met: Number(CGPA), total: 2 },
+    },
+    {
+      id: "gpa-no-grade-points",
+      text: "At most 0 courses/units with transfer grades",
+      notes: [
+        { text: "Accepted transfer and dual-enrollment credit is granted units but no grade points, so it moves pace and timeframe without ever moving the GPA:" },
+        { codes: CODES.carriedIn },
+      ],
+      limit: { used: 0, cap: 0 },
+    },
+    {
+      id: "gpa-when",
+      text: "Evaluated at the end of each academic year",
+      notes: [{ text: "Last evaluated at the close of Spring 2026. Courses under way carry no grade until the term closes." }],
+    },
+    {
+      id: "gpa-repeats",
+      text: "A repeated course counts at its highest grade",
+      notes: [{ text: "No repeated coursework on the record" }],
+    },
+  ],
+  counting: CODES.yearOne,
+  refused: [
+    { codes: CODES.carriedIn, reason: "Transfer credit carries units but no grade points" },
+    {
+      codes: [...CODES.yearTwoFall, ...CODES.registered],
+      reason: "No grade until the term closes",
+    },
+  ],
+}
+
+const PACE_EXPLAIN: CheckExplain = {
+  title: "Pace of Completion",
+  lede: `${EARNED} credits completed of ${ATTEMPTED} attempted — ${PACE}% against a 67% floor. The test people fail without noticing, because the denominator counts things the transcript does not.`,
+  constraints: [
+    {
+      id: "pace-ratio",
+      text: "Complete at least 67% of all attempted credits",
+      notes: [{ text: `${EARNED} completed of ${ATTEMPTED} attempted, measured cumulatively rather than term by term` }],
+      progress: { met: PACE, total: 67 },
+    },
+    {
+      id: "pace-attempted",
+      text: "At most 0 courses/units with defined grades",
+      notes: [
+        { text: "Grades: W, I, F, NP. A withdrawal, an incomplete and a failure are all attempted and none of them are completed, so each one pulls the ratio down twice." },
+      ],
+      limit: { used: 0, cap: 0 },
+    },
+    {
+      id: "pace-in-progress",
+      text: "Courses in progress are attempted, not completed",
+      notes: [
+        { text: `The ${YEAR_TWO_FALL.length} courses under way are in the denominator now and join the numerator when the term closes:` },
+        { codes: CODES.yearTwoFall },
+      ],
+    },
+    {
+      id: "pace-transfer",
+      text: "Accepted transfer credit counts as both attempted and completed",
+      notes: [
+        { text: `${CARRIED_IN.length * CREDITS_PER_COURSE} credits of dual enrollment accepted, which is the one place transfer credit helps rather than hurts:` },
+        { codes: CODES.carriedIn },
+      ],
+    },
+  ],
+  counting: [...CODES.yearOne, ...CODES.carriedIn],
+  refused: [
+    {
+      codes: CODES.yearTwoFall,
+      reason: "Attempted, not yet completed — in the denominator only",
+    },
+  ],
+}
+
+const TIMEFRAME_EXPLAIN: CheckExplain = {
+  title: "Maximum Timeframe",
+  lede: `${ATTEMPTED} of ${MAX_TIMEFRAME} attempted credits used, with ${MAX_TIMEFRAME - ATTEMPTED} of headroom. Aid stops at the cap whether or not the degree is finished, which is why it is worth watching this early.`,
+  constraints: [
+    {
+      id: "tf-cap",
+      text: `At most ${MAX_TIMEFRAME} units in total`,
+      notes: [{ text: `150% of the published program length of ${DEGREE.credits} credits` }],
+      limit: { used: ATTEMPTED, cap: MAX_TIMEFRAME },
+    },
+    {
+      id: "tf-everything",
+      text: "Every attempted credit counts, including transfer, repeats and withdrawals",
+      notes: [
+        { text: "Nothing is excluded from this one. A course dropped in week three and a course accepted from another institution both spend the same headroom." },
+      ],
+    },
+    {
+      id: "tf-unreachable",
+      text: "Aid ends once the degree cannot be finished inside the cap",
+      notes: [
+        { text: "Assessed each time the standard is evaluated, not only when the cap is reached" },
+      ],
+    },
+  ],
+  counting: ALL_ATTEMPTED,
+}
+
+const ENROLMENT_EXPLAIN: CheckExplain = {
+  title: "Enrolment Status: Spring 2027",
+  lede: `${SPRING_PLANNED} credits planned against the ${FULL_TIME} a full award asks for. Half-time: the award pays, and it pays half.`,
+  constraints: [
+    {
+      id: "enrol-full",
+      text: `At least ${FULL_TIME} units in total`,
+      notes: [{ text: "Full-time enrollment for the term. Below it the award is prorated rather than withdrawn." }],
+      progress: { met: SPRING_PLANNED, total: FULL_TIME },
+    },
+    {
+      id: "enrol-term",
+      text: "Count units only if taken at Spring 2027 semester or later and if taken at Spring 2027 semester or earlier",
+      notes: [
+        { text: "Enrollment status is a fact about one term. Nothing earned before it and nothing planned after it changes this answer." },
+      ],
+    },
+    {
+      id: "enrol-pell",
+      text: "Pell is prorated by enrollment intensity",
+      notes: [{ text: "Half-time pays half the scheduled award for the term" }],
+    },
+    {
+      id: "enrol-loans",
+      text: "At least 6 units in total",
+      notes: [{ text: "Direct Loans require at least half-time enrollment. This one clears." }],
+      progress: { met: SPRING_PLANNED, total: 6 },
+    },
+  ],
+}
+
+/** Every check with working to show, keyed by the row it belongs to. */
+export const EXPLAIN: Record<string, CheckExplain> = {
+  "year-1": YEAR_ONE_EXPLAIN,
+  "year-2": YEAR_TWO_EXPLAIN,
+  "year-2-ptd": PTD_EXPLAIN,
+  "sap-gpa": GPA_EXPLAIN,
+  "sap-pace": PACE_EXPLAIN,
+  "sap-timeframe": TIMEFRAME_EXPLAIN,
+  "sap-enrolment": ENROLMENT_EXPLAIN,
+}
+
+/** Which checks offer the button. Derived, so a check with an explanation
+ *  written for it can never be the one row that does not offer it. */
+export const EXPLAINABLE = new Set(Object.keys(EXPLAIN))
+
+/** The rules behind a check, for the box that opens under its badge. A check
+ *  with an explanation shows the whole set; every other check states its own
+ *  one-line rule, so every badge opens onto something. */
 export function constraintsForCheck(check: ComplianceCheck): Constraint[] {
-  if (check.id === "year-2-ptd") return PTD_CONSTRAINTS
+  const explain = EXPLAIN[check.id]
+  if (explain) return explain.constraints
   return check.rule ? [{ id: `${check.id}-rule`, text: check.rule }] : []
+}
+
+/** How many constraints the row should claim. Where the rules are written out
+ *  it is how many there are: a row saying "2 constraints" that opens onto six
+ *  is wrong about the only number it carries. Where they are not, the
+ *  ruleset's own count stands. */
+export function constraintCount(check: ComplianceCheck): number {
+  return EXPLAIN[check.id]?.constraints.length ?? check.constraints
+}
+
+/** The record laid against one check: what it counts, what it turns down and
+ *  why. Empty where the check is not about coursework on the record — next
+ *  term's enrolment status has nothing to map. */
+export function mappingsForCheck(id: string): CourseMapping[] {
+  const explain = EXPLAIN[id]
+  if (!explain?.counting) return []
+  return recordMappings(explain.counting, explain.refused)
 }
 
 export const COMPLIANCE_TABS = [

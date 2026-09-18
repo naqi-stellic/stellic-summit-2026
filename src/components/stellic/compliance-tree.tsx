@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { ConstraintsCard } from "@/components/stellic/explain-panel"
 import {
   EXPLAINABLE,
+  constraintCount,
   constraintsForCheck,
   type CheckState,
   type ComplianceCheck,
@@ -162,12 +163,12 @@ function CheckRow({
               aria-expanded={rules}
               className="cursor-pointer hover:bg-gray-5"
             >
-              {check.constraints} constraints
+              {constraintCount(check)} constraints
             </button>
           </Badge>
         ) : (
           <Badge variant="outline" className="font-normal">
-            {check.constraints} constraints
+            {constraintCount(check)} constraints
           </Badge>
         )}
         <CheckTools name={check.name} onExplain={onExplain} />
