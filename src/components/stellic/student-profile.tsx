@@ -214,7 +214,9 @@ export function NetworkRow() {
 
   return (
     <div className="flex flex-wrap items-stretch gap-4">
-      <ProgressCard className="flex min-w-[280px] flex-1 flex-col gap-4">
+      {/* Two cards, half each. Neither is the more important one, and a fixed
+          width on the second made the first take whatever was left. */}
+      <ProgressCard className="flex min-w-[280px] flex-1 basis-0 flex-col gap-4">
         <p className="text-body-md font-semibold text-gray-80">Student Success Network</p>
         <div className="flex items-start gap-4">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-5 text-body-md text-gray-80">
@@ -243,7 +245,7 @@ export function NetworkRow() {
         </a>
       </ProgressCard>
 
-      <ProgressCard className="flex w-[422px] items-start justify-between gap-4 max-lg:w-full">
+      <ProgressCard className="flex min-w-[280px] flex-1 basis-0 items-start justify-between gap-4">
         <div className="flex flex-col gap-4">
           <p className="text-body-md font-semibold text-gray-80">Stellic Engage</p>
           <div className="flex gap-0.5">

@@ -37,10 +37,10 @@ const MARK: Record<AuditMark, { ground: string; icon?: IconName; glyph?: number 
   planned: { ground: "border border-warning-50 bg-warning-5 text-warning-50", icon: "check", glyph: 14 },
   /* Nothing placed against it yet, and something has to be: an empty box in
      the colour of the count it is adding to. */
-  remaining: { ground: "border border-alert-50" },
+  remaining: { ground: "border border-alert-50 text-alert-50" },
   /* Nothing placed against it and nothing needs to be. A rule, not a box to
      fill, so it is struck through rather than left open. */
-  optional: { ground: "border border-gray-80" },
+  optional: { ground: "border border-gray-80 text-gray-80" },
 }
 
 export function AuditMarkIcon({
