@@ -446,6 +446,14 @@ width instead of leaving a rail for it to sit behind. The planner's place in
 the tree does not change either way, so collapsing the nav mid-draft keeps
 the draft, the scroll and any drag in progress.
 
+## What opens folded
+
+The credit brought in, and any year already finished. Both are a record rather
+than a plan — there is nothing left to do to either — so they state what they
+came to and keep it behind the chevron. Team Plan's own plan starts at the year
+under way and has no finished years in it; a plan opened from a student's
+record does.
+
 ## Fidelity
 
 Diffed against a 1:1 export of the Figma frame at 1920×2184. Every structural

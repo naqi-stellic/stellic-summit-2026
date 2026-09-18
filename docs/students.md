@@ -81,7 +81,9 @@ the audit's own marks and puts every course back where the record says it was:
 - **taken** goes in the term that passed it, read off the course's own result
   line — "Taken in Spring '26" is the only record of which term it belongs to,
   so it is read rather than written down a second time. That is the ten courses
-  of 2025-2026, thirty credits, the year Compliance checks first.
+  of 2025-2026, thirty credits, the year Compliance checks first. It opens
+  folded, as a finished year does: there is nothing left to do to it, so it
+  states what it came to and keeps the rest behind the chevron.
 - **in progress** goes in the term under way — the five of Fall 2026.
 - **registered** and **planned** go in the term after, and the seat the audit
   is still holding open stays a placeholder.

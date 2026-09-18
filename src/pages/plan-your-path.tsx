@@ -279,7 +279,14 @@ export function PlanYourPath({
    * back does not cost the plan its scroll position or its draft. */
   const [openTermId, setOpenTermId] = useState<string | null>(null)
   /* What is finished comes folded away; the rest come open. */
-  const [collapsed, setCollapsed] = useState<string[]>([INCOMING_LABEL])
+  /* What the plan opens folded: the credit brought in, and any year already
+     finished. Both are a record rather than a plan — there is nothing left to
+     do to them — so they state what they came to and keep it behind the
+     chevron until somebody asks. */
+  const [collapsed, setCollapsed] = useState<string[]>(() => [
+    INCOMING_LABEL,
+    ...initialYears.filter((year) => year.phase === "complete").map((year) => year.label),
+  ])
   /* Which details the cards are showing. Plan details owns this, and every
      card in the plan — canvas or term — answers to the same list. */
   const [metadata, setMetadata] = useState<MetadataField[]>(METADATA_DEFAULT)
