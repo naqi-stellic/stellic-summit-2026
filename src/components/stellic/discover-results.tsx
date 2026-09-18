@@ -53,7 +53,7 @@ function ProgramCard({
   loaded,
   selected,
   onSelect,
-  actions,
+  intent,
   onAdd,
   onSwitch,
 }: {
@@ -63,7 +63,9 @@ function ProgramCard({
   selected: boolean
   onSelect: () => void
   /** Whether this run is going to change the record, or only look at it. */
-  actions: boolean
+  /** What this run came to do, which decides which of the two is the
+   *  primary. `null` when nothing is going to change the record. */
+  intent: "add" | "change" | null
   onAdd: () => void
   onSwitch: () => void
 }) {
@@ -133,13 +135,26 @@ function ProgramCard({
         <div className="flex flex-wrap items-center gap-2">
           {/* Just exploring changes nothing, so there is nothing to press but
               the way to read more. */}
-          {actions && (
+          {/* The primary is what was asked for. Somebody changing their major
+              came to press Switch to, and the other one is the thing they
+              might do instead — so it is offered, quietly, and named for what
+              it would do rather than repeating the card's own word. Only a
+              major can take a major's place, so only a major offers it. */}
+          {intent === "change" && (
+            <>
+              {program.kind === "Major" && (
+                <Button variant="primary" onClick={onSwitch}>
+                  Switch to
+                </Button>
+              )}
+              <Button onClick={onAdd}>Add additional</Button>
+            </>
+          )}
+          {intent === "add" && (
             <>
               <Button variant="primary" onClick={onAdd}>
                 Add Program
               </Button>
-              {/* Only a major can take a major's place, so only a major offers
-                  it. Adding is offered by anything. */}
               {program.kind === "Major" && <Button onClick={onSwitch}>Switch to</Button>}
             </>
           )}
@@ -155,7 +170,7 @@ export function DiscoverResults({
   loaded,
   selected,
   onSelect,
-  actions,
+  intent,
   onAdd,
   onSwitch,
 }: {
@@ -164,7 +179,7 @@ export function DiscoverResults({
   loaded: string[]
   selected: string | null
   onSelect: (id: string) => void
-  actions: boolean
+  intent: "add" | "change" | null
   onAdd: (program: Program) => void
   onSwitch: (program: Program) => void
 }) {
@@ -213,7 +228,7 @@ export function DiscoverResults({
               loaded={loaded.includes(program.id)}
               selected={program.id === selected}
               onSelect={() => onSelect(program.id)}
-              actions={actions}
+              intent={intent}
               onAdd={() => onAdd(program)}
               onSwitch={() => onSwitch(program)}
             />

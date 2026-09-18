@@ -320,7 +320,7 @@ export function DiscoverPanel({
           loaded={loaded}
           selected={chosen}
           onSelect={setChosen}
-          actions={intent !== "explore"}
+          intent={intent === "add" || intent === "change" ? intent : null}
           onAdd={(program) => {
             onApply(program, "add")
             onClose()
