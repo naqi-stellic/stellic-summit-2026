@@ -89,6 +89,12 @@ export type Student = {
   milestones: Meter
   /** The one thing wrong with this record, where there is one. */
   alert?: string
+  /** The year they arrived, which is what Demographics filters on. */
+  entryYear: number
+  /** What the NCAA year-two check is still short, where it is short. Present
+   *  on the students the saved query is looking for, and the reason the row
+   *  answers the question it was found by. */
+  yearTwo?: string
 }
 
 /** How many the institution has, against how many are on screen. The number is
@@ -102,6 +108,8 @@ export const ROSTER: Student[] = [
     standing: AUDIT_STUDENT.standing,
     engage: AUDIT_STUDENT.engage.lit,
     photo: AUDIT_STUDENT.photo,
+    entryYear: 2025,
+    yearTwo: "3 credits short",
     programs: [
       { name: "Business Administration, B.S. (Finance)" },
       { name: "Data Analytics [minor]" },
@@ -112,8 +120,63 @@ export const ROSTER: Student[] = [
     alert: "6 credits short of NCAA progress",
   },
   {
+    username: "pchandran",
+    photo: "/faces/pchandran.jpg",
+    entryYear: 2025,
+    yearTwo: "3 credits short",
+    name: "Priya Chandran",
+    standing: "Sophomore",
+    engage: 4,
+    programs: [{ name: "Computer Science, B.S." }],
+    cgpa: "3.55",
+    courses: { done: 11, inProgress: 5, remaining: 24 },
+    milestones: { done: 1, inProgress: 0, remaining: 2 },
+  },
+  {
+    username: "mvega",
+    photo: "/faces/mvega.jpg",
+    entryYear: 2025,
+    yearTwo: "6 credits short",
+    name: "Marisol Vega",
+    standing: "Sophomore",
+    engage: 2,
+    programs: [{ name: "Business Administration, B.S." }],
+    cgpa: "2.88",
+    courses: { done: 9, inProgress: 3, remaining: 28 },
+    milestones: { done: 1, inProgress: 0, remaining: 2 },
+    alert: "Below full-time enrollment",
+  },
+  {
+    username: "akwok",
+    photo: "/faces/akwok.jpg",
+    entryYear: 2025,
+    yearTwo: "9 credits short",
+    name: "Aiden Kwok",
+    standing: "Sophomore",
+    engage: 1,
+    programs: [{ name: "Biology, B.S." }],
+    cgpa: "2.41",
+    courses: { done: 8, inProgress: 3, remaining: 29 },
+    milestones: { done: 0, inProgress: 1, remaining: 2 },
+    alert: "No plan on file",
+  },
+  {
+    username: "nhaddad",
+    photo: "/faces/nhaddad.jpg",
+    entryYear: 2025,
+    yearTwo: "3 credits short",
+    name: "Nadia Haddad",
+    standing: "Sophomore",
+    engage: 3,
+    programs: [{ name: "Political Science, B.A." }],
+    cgpa: "3.21",
+    courses: { done: 10, inProgress: 5, remaining: 25 },
+    milestones: { done: 1, inProgress: 0, remaining: 2 },
+  },
+  {
     username: "aosei",
     photo: "/faces/aosei.jpg",
+    entryYear: 2024,
     name: "Amara Osei",
     standing: "Junior",
     engage: 4,
@@ -125,6 +188,8 @@ export const ROSTER: Student[] = [
   {
     username: "jmiller",
     photo: "/faces/jmiller.jpg",
+    entryYear: 2025,
+    yearTwo: "6 credits short",
     name: "Jonah Miller",
     standing: "Sophomore",
     engage: 3,
@@ -137,6 +202,7 @@ export const ROSTER: Student[] = [
   {
     username: "syildiz",
     photo: "/faces/syildiz.jpg",
+    entryYear: 2024,
     name: "Selin Yıldız",
     standing: "Junior",
     engage: 5,
@@ -148,6 +214,7 @@ export const ROSTER: Student[] = [
   {
     username: "twren",
     photo: "/faces/twren.jpg",
+    entryYear: 2022,
     name: "Tobias Wren",
     standing: "Senior",
     engage: 2,
@@ -160,6 +227,7 @@ export const ROSTER: Student[] = [
   {
     username: "dramos",
     photo: "/faces/dramos.jpg",
+    entryYear: 2022,
     name: "Diego Ramos",
     standing: "Senior",
     engage: 4,
@@ -171,6 +239,7 @@ export const ROSTER: Student[] = [
   {
     username: "falamin",
     photo: "/faces/falamin.jpg",
+    entryYear: 2022,
     name: "Farah Al-Amin",
     standing: "Senior",
     engage: 3,
@@ -182,6 +251,7 @@ export const ROSTER: Student[] = [
   {
     username: "rnakamura",
     photo: "/faces/rnakamura.jpg",
+    entryYear: 2026,
     name: "Ryo Nakamura",
     standing: "Freshman",
     engage: 2,
@@ -203,3 +273,34 @@ export const ROSTER_VIEWS = [
   "Registration View",
   "Advising View",
 ]
+
+/* ---------------------------------------------------------------- the query
+
+   What the search is pointed at when it opens. Not a filter the prototype
+   invents: it is the question the compliance screen leaves you with — Scott is
+   six credits short of the year-two check, so who else is? — asked of the whole
+   institution rather than of one record.
+
+   The Remaining filter needs a program before it can name a requirement, and
+   the program it is given is a compliance ruleset. That is the claim worth
+   making: a ruleset is auditable like a program, so it is searchable like one.
+*/
+
+export const QUERY = {
+  program: "NCAA 2026",
+  requirement: "Academic Year Check: Year 2",
+  audit: "Planned",
+  entryYear: 2025,
+}
+
+export type Applied = {
+  requirement?: boolean
+  entryYear?: boolean
+}
+
+/** Whether a student answers the query as far as it has been filled in. */
+export function matches(student: Student, applied: Applied) {
+  if (applied.requirement && !student.yearTwo) return false
+  if (applied.entryYear && student.entryYear !== QUERY.entryYear) return false
+  return true
+}

@@ -97,6 +97,48 @@ against six planned is the argument the NCAA and aid checks are having.
 Derived rather than written down, so the two cannot drift. Opened on its own,
 `/planner.html` is Team Plan's, unchanged.
 
+## The query
+
+Figma: none — `public/requirement-dropdown.jpg` and `public/requirement-applied.jpg`,
+screenshots of the real filter.
+
+Eighteen of the twenty filters are named and inert. **Remaining** and
+**Demographics** work, because between them they ask the question Proactive
+Compliance leaves you with: Scott is short on the year-two check, so who else
+is?
+
+Remaining opens a popover with the six fields the product has, and the third of
+them is the claim worth making. A requirement belongs to a program, so the
+program comes first — *"Pick a Program first"* — and the program this one is
+given is **NCAA 2026**, a compliance ruleset. A ruleset is auditable like a
+program, so it is searchable like one, and every check inside it is a
+requirement you can ask the institution about.
+
+### It fills itself in
+
+Clicking into the Program field types `NCAA 2026` out a character at a time,
+shows the match, takes it, then goes on to answer everything that depended on
+it: the requirement, then the audit version. Demographics does the same with
+the entry year.
+
+That is a stage affordance and not a product behaviour, and it is worth being
+plain about which. A query with four parts is four dropdowns to drive on a
+projector and nobody wants to watch that. What it does is honest — every field
+ends up holding exactly what somebody would have typed, and the filter clears
+and re-runs like any other.
+
+### What comes back
+
+Six students out of 1854, and the count is the point: the thing you found on one
+record is a cohort. Each row answers the question it was found by — *"Academic
+Year Check: Year 2 — 3 credits short"* — in the line where the row's own alert
+would otherwise sit, because a result that does not answer its own query is a
+list.
+
+**save as report** puts the query in the cards above it as a fifth, tracked.
+That is the loop the screen is built on: the saved reports are somebody's
+questions, kept.
+
 ## What is drawn and not wired
 
 The filters, the saved reports, Actions, sort and the grid view are all named

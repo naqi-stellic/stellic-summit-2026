@@ -16,12 +16,20 @@ import { StudentAvatar } from "@/components/stellic/student-avatar"
 import { EngageBolts } from "@/components/stellic/student-profile"
 import { AUDIT_STUDENT } from "@/data/audit"
 import {
+  AppliedFilters,
+  DemographicsFilter,
+  RemainingFilter,
+} from "@/components/stellic/student-filters"
+import {
   APPLIED,
   FILTERS,
   ROSTER,
   ROSTER_TOTAL,
   ROSTER_VIEWS,
+  QUERY,
   SAVED_REPORTS,
+  matches,
+  type Applied,
   type Meter,
   type SavedReport,
   type Student,
@@ -39,7 +47,15 @@ const CARD = "rounded-md border border-gray-40 bg-card shadow-xs"
 
 /* ---------------------------------------------------------------- asking */
 
-function Filters() {
+function Filters({
+  applied,
+  onApply,
+  onClear,
+}: {
+  applied: Applied
+  onApply: (which: keyof Applied) => void
+  onClear: () => void
+}) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3">
       <p className="flex items-center gap-1.5 text-body-md text-gray-100">
@@ -57,11 +73,29 @@ function Filters() {
             you reach them when you cannot name the one you want. The rule says
             so without a second heading. */}
         <span className="mx-1 h-8 w-px shrink-0 self-center bg-gray-40" />
-        {FILTERS.map((filter) => (
-          <Button key={filter} size="sm">
-            {filter}
-          </Button>
-        ))}
+        {FILTERS.map((filter) =>
+          /* Eighteen are named and inert. These two ask the question the
+             compliance screen leaves you with. */
+          filter === "Demographics" ? (
+            <DemographicsFilter
+              key={filter}
+              on={!!applied.entryYear}
+              onApply={() => onApply("entryYear")}
+              onClear={onClear}
+            />
+          ) : filter === "Remaining" ? (
+            <RemainingFilter
+              key={filter}
+              on={!!applied.requirement}
+              onApply={() => onApply("requirement")}
+              onClear={onClear}
+            />
+          ) : (
+            <Button key={filter} size="sm">
+              {filter}
+            </Button>
+          )
+        )}
       </div>
     </div>
   )
@@ -117,8 +151,19 @@ function Applied() {
   )
 }
 
-export function SearchPanel() {
+export function SearchPanel({
+  applied,
+  onApply,
+  onClear,
+  onSave,
+}: {
+  applied: Applied
+  onApply: (which: keyof Applied) => void
+  onClear: () => void
+  onSave: () => void
+}) {
   const [keywords, setKeywords] = useState("")
+  const filtering = !!applied.requirement || !!applied.entryYear
 
   return (
     <div className={CARD}>
@@ -144,9 +189,15 @@ export function SearchPanel() {
             search by usernames
           </button>
         </div>
-        <Filters />
+        <Filters applied={applied} onApply={onApply} onClear={onClear} />
       </div>
-      <Applied />
+      {/* Applied filters take the row the recent students had: what is
+          narrowing the list is one question at a time, not two. */}
+      {filtering ? (
+        <AppliedFilters applied={applied} onReset={onClear} onSave={onSave} />
+      ) : (
+        <Applied />
+      )}
     </div>
   )
 }
@@ -177,8 +228,21 @@ function ReportCard({ report }: { report: SavedReport }) {
   )
 }
 
-export function SavedReports() {
+export function SavedReports({ saved }: { saved?: boolean }) {
   const [open, setOpen] = useState(true)
+
+  /* A saved query joins the cards it was saved into. That is the loop the
+     screen is built on: the reports are somebody's questions, kept. */
+  const reports = saved
+    ? [
+        ...SAVED_REPORTS,
+        {
+          name: `Remaining ${QUERY.requirement}`,
+          count: "6 students",
+          tracked: true,
+        },
+      ]
+    : SAVED_REPORTS
 
   return (
     <div className="flex flex-col gap-4">
@@ -187,7 +251,7 @@ export function SavedReports() {
         aria-expanded={open}
         onClick={() => setOpen(!open)}
       >
-        {SAVED_REPORTS.length - 1} Saved Reports
+        {reports.length - 1} Saved Reports
         <Icon name="expand-more" size={12} className={cn(!open && "-rotate-90")} />
       </Button>
 
@@ -196,7 +260,7 @@ export function SavedReports() {
           it is not a report. */}
       {open && (
         <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-2 @5xl:grid-cols-4">
-          {SAVED_REPORTS.map((report) => (
+          {reports.map((report) => (
             <ReportCard key={report.name} report={report} />
           ))}
           <button
@@ -269,7 +333,18 @@ function Portrait({ student }: { student: Student }) {
   )
 }
 
-function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
+function Row({
+  student,
+  answering,
+  onOpen,
+}: {
+  student: Student
+  /** Whether the list was found by the year-two check, in which case the row
+   *  says where this student stands on it. A result that does not answer the
+   *  question it was found by is a list, not a result. */
+  answering?: boolean
+  onOpen?: () => void
+}) {
   return (
     <div className="flex items-start gap-6 border-b border-gray-40 p-6 transition-colors last:border-b-0 hover:bg-gray-0">
       <Checkbox aria-label={`Select ${student.name}`} className="mt-1 shrink-0" />
@@ -310,11 +385,18 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
         <div className="flex flex-col gap-2">
           <p className="text-body-md font-semibold text-foreground">Courses</p>
           <Bar meter={student.courses} />
-          {student.alert && (
+          {answering && student.yearTwo ? (
             <p className="flex items-start gap-1.5 text-body-md text-warning-50">
               <Icon name="error-outline" size={14} className="mt-0.5 shrink-0" />
-              {student.alert}
+              {QUERY.requirement} — {student.yearTwo}
             </p>
+          ) : (
+            student.alert && (
+              <p className="flex items-start gap-1.5 text-body-md text-warning-50">
+                <Icon name="error-outline" size={14} className="mt-0.5 shrink-0" />
+                {student.alert}
+              </p>
+            )
           )}
         </div>
         <div className="flex flex-col gap-2">
@@ -329,16 +411,28 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
   )
 }
 
-export function Roster({ onOpen }: { onOpen?: (student: Student) => void }) {
+export function Roster({
+  applied,
+  onOpen,
+}: {
+  applied: Applied
+  onOpen?: (student: Student) => void
+}) {
   const [view, setView] = useState(ROSTER_VIEWS[0])
   const [grid, setGrid] = useState(false)
+
+  const found = ROSTER.filter((student) => matches(student, applied))
+  const filtering = !!applied.requirement || !!applied.entryYear
+  /* Unfiltered, the list is a sample of an institution and says so. Filtered,
+     it is the whole answer, and the number is the point. */
+  const total = filtering ? found.length : ROSTER_TOTAL
 
   return (
     <div className={CARD}>
       <div className="flex flex-wrap items-center gap-4 border-b border-gray-40 p-6">
         <Checkbox aria-label="Select every student" className="shrink-0" />
         <p className="text-h300 font-semibold text-gray-100">
-          0 / {ROSTER_TOTAL} students
+          0 / {total} students
         </p>
 
         <div className="ml-auto flex flex-wrap items-center gap-3">
@@ -385,8 +479,13 @@ export function Roster({ onOpen }: { onOpen?: (student: Student) => void }) {
       </div>
 
       <div className="overflow-x-auto">
-        {ROSTER.map((student) => (
-          <Row key={student.username} student={student} onOpen={() => onOpen?.(student)} />
+        {found.map((student) => (
+          <Row
+            key={student.username}
+            student={student}
+            answering={applied.requirement}
+            onOpen={() => onOpen?.(student)}
+          />
         ))}
       </div>
     </div>
