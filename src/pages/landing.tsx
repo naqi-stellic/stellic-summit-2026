@@ -33,8 +33,21 @@ const SECTIONS = [
            and the answer is a list you click a name out of. Landing on one of
            them and never finding the other would be missing half of it. */
         entries: [
-          { href: "/compliance.html", name: "Student record" },
-          { href: "/students.html", name: "Student search" },
+          {
+            href: "/compliance.html",
+            name: "Student record",
+            blurb: "One student, read against a ruleset instead of their degree.",
+            /* What to click, in order. A prototype that takes four clicks to
+               reach the thing it is about should say which four rather than
+               leaving somebody to find them in front of a room. */
+            route: ["Scott Abott", "Compliance"],
+          },
+          {
+            href: "/students.html",
+            name: "Student search",
+            blurb: "The same question asked of the institution: who else is short?",
+            route: ["Students", "Remaining", "Scott Abott", "Compliance"],
+          },
         ],
       },
       { href: "/explain.html", name: "Explain Progress" },
@@ -52,7 +65,14 @@ const SECTIONS = [
 
 const REPO = "https://github.com/naqi-stellic/stellic-summit-2026"
 
-type Entry = { href: string; name: string }
+type Entry = {
+  href: string
+  name: string
+  /** One line on what this way in is for. */
+  blurb?: string
+  /** The clicks from here to the thing worth seeing, in order. */
+  route?: string[]
+}
 
 /** One way into a prototype: the card is the link, and the chevron is a
  *  signpost rather than a second thing to hit. */
@@ -77,28 +97,58 @@ function Way({ href, name }: Entry) {
   )
 }
 
+/** The clicks, in order. Chevrons rather than arrows, because the same glyph
+ *  ends every card on this page — it already means "onward" here. */
+function Route({ steps }: { steps: string[] }) {
+  return (
+    /* A hairline above it, so it reads as the walk rather than as a second
+       sentence. The last step is the point of the walk, so it is the one drawn
+       at full strength. */
+    <p className="mt-auto flex flex-wrap items-center gap-x-1 gap-y-0.5 border-t border-gray-5 pt-2 text-label-md text-gray-80">
+      {steps.map((step, i) => (
+        <span key={step} className="flex items-center gap-1">
+          {i > 0 && <Icon name="chevron-right" size={12} className="shrink-0 text-gray-60" />}
+          <span className={i === steps.length - 1 ? "font-semibold text-gray-100" : undefined}>
+            {step}
+          </span>
+        </span>
+      ))}
+    </p>
+  )
+}
+
 /** A prototype with more than one door. The card stops being the link — it
- *  cannot be two of them — so it keeps the name and the ways in sit under it,
- *  named for where you start rather than for what you will see. */
+ *  cannot be two of them — so it keeps the name and the doors sit under it as
+ *  a pair, each named for where you start rather than for what you will see,
+ *  and each carrying the walk from there to the point of the thing. */
 function Ways({ name, entries }: { name: string; entries: Entry[] }) {
   return (
     <div className="flex flex-col gap-3 rounded-md border border-gray-40 bg-card p-[19px] shadow-sm">
       <span className="text-h300 font-semibold text-gray-100">{name}</span>
-      <div className="flex flex-wrap gap-2">
+      {/* Side by side where there is room, because they are alternatives
+          rather than steps — stacked, the second reads as following the
+          first. */}
+      <div className="grid gap-2 sm:grid-cols-2">
         {entries.map((entry) => (
           <a
             key={entry.href}
             href={entry.href}
             target="_blank"
             rel="noreferrer"
-            className="group flex items-center gap-1.5 rounded-md border border-gray-40 bg-card px-[11px] py-[7px] text-body-md text-gray-100 transition-colors hover:border-primary-50 hover:bg-gray-0"
+            className="group flex flex-col gap-2 rounded-md border border-gray-40 bg-card p-[11px] transition-colors hover:border-primary-50 hover:bg-gray-0"
           >
-            {entry.name}
-            <Icon
-              name="chevron-right"
-              size={14}
-              className="shrink-0 text-gray-60 transition-all group-hover:translate-x-0.5 group-hover:text-primary-50"
-            />
+            <span className="flex items-center gap-2">
+              <span className="min-w-0 flex-1 text-body-md font-semibold text-gray-100">
+                {entry.name}
+              </span>
+              <Icon
+                name="chevron-right"
+                size={16}
+                className="shrink-0 text-gray-60 transition-all group-hover:translate-x-0.5 group-hover:text-primary-50"
+              />
+            </span>
+            {entry.blurb && <span className="text-label-md text-gray-80">{entry.blurb}</span>}
+            {entry.route && <Route steps={entry.route} />}
           </a>
         ))}
       </div>
