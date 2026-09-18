@@ -64,7 +64,7 @@ function Applied() {
   if (!chips.length) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-t border-gray-40 px-6 py-3.5">
+    <div className="flex items-center gap-3 border-t border-gray-40 py-3.5 pr-4 pl-6">
       <button
         type="button"
         onClick={() => setChips([])}
@@ -72,29 +72,33 @@ function Applied() {
       >
         Clear All
       </button>
-      {chips.map((chip) => (
-        <span
-          key={chip.username}
-          className="flex items-center gap-2 rounded-md bg-gray-5 px-3 py-1.5 text-body-md text-gray-100"
-        >
-          <Icon name="watch-later" size={14} className="shrink-0 text-gray-80" />
-          {chip.name}
-          <span className="text-gray-60">·</span>
-          <span className="text-gray-80">{chip.username}</span>
-          <button
-            type="button"
-            aria-label={`Remove ${chip.name}`}
-            onClick={() => setChips((all) => all.filter((other) => other !== chip))}
-            className="cursor-pointer text-gray-80 hover:text-gray-100"
+      {/* The chips run off the end rather than wrapping: the row is one line
+          whatever is applied to it, and the arrow is how you reach the rest. */}
+      <div className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto">
+        {chips.map((chip) => (
+          <span
+            key={chip.username}
+            className="flex shrink-0 items-center gap-2 rounded-full bg-gray-5 px-3.5 py-1.5 text-body-md text-gray-100"
           >
-            <Icon name="close" size={12} />
-          </button>
-        </span>
-      ))}
+            <Icon name="history" size={14} className="shrink-0 text-gray-80" />
+            {chip.name}
+            <span className="text-gray-60">•</span>
+            <span className="text-gray-80">{chip.username}</span>
+            <button
+              type="button"
+              aria-label={`Remove ${chip.name}`}
+              onClick={() => setChips((all) => all.filter((other) => other !== chip))}
+              className="cursor-pointer text-gray-80 hover:text-gray-100"
+            >
+              <Icon name="close" size={12} />
+            </button>
+          </span>
+        ))}
+      </div>
       <button
         type="button"
         aria-label="More applied filters"
-        className="ml-auto flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-input bg-card text-gray-80 hover:bg-gray-5"
+        className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-input bg-card text-gray-80 hover:bg-gray-5"
       >
         <Icon name="chevron-right" size={14} />
       </button>
@@ -196,9 +200,11 @@ export function SavedReports() {
 /* ---------------------------------------------------------------- roster */
 
 const SHARES = [
-  { key: "done", colour: "bg-success-50" },
-  { key: "inProgress", colour: "bg-warning-25" },
-  { key: "remaining", colour: "bg-gray-40" },
+  { key: "done", colour: "bg-success-50", dot: "bg-success-50" },
+  { key: "inProgress", colour: "bg-warning-25", dot: "bg-warning-25" },
+  /* The bar's last share is the ground it sits on, so the dot naming it has to
+     be darker than the bar or there is nothing to see. */
+  { key: "remaining", colour: "bg-gray-40", dot: "bg-gray-60" },
 ] as const
 
 /** Three shares of one line, and the legend under it. A share of nothing is
@@ -220,7 +226,7 @@ function Bar({ meter }: { meter: Meter }) {
       <span className="flex flex-wrap items-center gap-x-3">
         {SHARES.filter((share) => meter[share.key] > 0).map((share) => (
           <span key={share.key} className="flex items-center gap-1.5">
-            <span className={cn("size-1.5 shrink-0 rounded-full", share.colour)} />
+            <span className={cn("size-1.5 shrink-0 rounded-full", share.dot)} />
             <span className="text-label-md text-gray-80">{meter[share.key]}</span>
           </span>
         ))}
@@ -252,11 +258,11 @@ function Portrait({ student }: { student: Student }) {
 
 function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
   return (
-    <div className="flex items-start gap-4 border-b border-gray-40 p-6 transition-colors last:border-b-0 hover:bg-gray-0">
+    <div className="flex items-start gap-6 border-b border-gray-40 p-6 transition-colors last:border-b-0 hover:bg-gray-0">
       <Checkbox aria-label={`Select ${student.name}`} className="mt-1 shrink-0" />
       <Portrait student={student} />
 
-      <div className="flex w-[220px] shrink-0 flex-col gap-1 max-lg:w-[170px]">
+      <div className="flex w-[212px] shrink-0 flex-col gap-1 max-lg:w-[160px]">
         <button
           type="button"
           onClick={onOpen}
@@ -270,8 +276,8 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
         <EngageBolts lit={student.engage} of={AUDIT_STUDENT.engage.bolts} />
       </div>
 
-      {/* What they are on. A programme nobody has declared yet says so, because
-          it is the difference between a plan and a record. */}
+      {/* Every column holds its width down the whole list. A row is read
+          against the rows above it, and a column that moves cannot be. */}
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         {student.programs.map((program) => (
           <p key={program.name} className="flex flex-wrap items-center gap-2 text-body-md text-gray-80">
@@ -281,11 +287,13 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
         ))}
       </div>
 
-      <Badge variant="outline" className="mt-0.5 shrink-0 font-normal">
-        CGPA {student.cgpa}
-      </Badge>
+      <div className="w-[120px] shrink-0">
+        <Badge variant="outline" className="font-normal">
+          CGPA {student.cgpa}
+        </Badge>
+      </div>
 
-      <div className="flex w-[200px] shrink-0 flex-col gap-4">
+      <div className="flex w-[196px] shrink-0 flex-col gap-4">
         <div className="flex flex-col gap-2">
           <p className="text-body-md font-semibold text-foreground">Courses</p>
           <Bar meter={student.courses} />
@@ -298,7 +306,7 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
         </div>
         <div className="flex flex-col gap-2">
           <p className="flex items-center gap-1.5 text-body-md font-semibold text-foreground">
-            <Icon name="outlined-flag" size={14} className="text-gray-80" />
+            <Icon name="outlined-flag" size={14} />
             Milestones/Other
           </p>
           <Bar meter={student.milestones} />

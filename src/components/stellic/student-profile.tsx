@@ -75,9 +75,9 @@ function ShareBar({
 /** Scott's own face. A record of a person leads with the person, and initials
  *  are what you show when you have not got one — so they stay as the fallback
  *  rather than as the design. */
-/** How much of Stellic this student is actually using, in three steps. The
- *  unlit ones stay on the row: three of three and two of three have to be
- *  telling apart at a glance, and two bolts alone do not. */
+/** How much of Stellic this student is actually using. The unlit bolts stay on
+ *  the row: three of five and five of five have to be telling apart at a
+ *  glance, and three bolts alone do not. */
 export function EngageBolts({ lit, of, size = 14 }: { lit: number; of: number; size?: number }) {
   return (
     <span className="flex gap-0.5">

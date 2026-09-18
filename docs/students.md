@@ -38,8 +38,11 @@ The count is the point: the list is a sample, not the cohort.
 
 ## A row
 
-Not "who is this" but "how is this one going". The name, username and standing,
-the Stellic Engage bolts, what they are on — with **Not Declared** where a
+Not "who is this" but "how is this one going". Every column holds its width
+down the whole list, because a row is read against the rows above it and a
+column that moves cannot be. The name, username and standing, the Stellic
+Engage bolts — five of them, lit as far as the record says, off the same figure
+the profile card reads — what they are on — with **Not Declared** where a
 programme is a plan rather than a record — the CGPA, and then two meters read at
 a glance: courses done, under way and still wanted, and milestones the same. A
 share of nothing is left off the legend rather than written as a zero.
