@@ -76,10 +76,21 @@ it.
 
 So `/planner.html?from=compliance` builds its plan from the audit rather than
 from Team Plan's data — `recordPlan()` in `src/data/record-plan.ts`. It reads
-the audit's own marks: what is under way goes in the term under way, what is
-registered or planned goes in the term after, and the seat the audit is still
-holding open stays a placeholder. The incoming credit is the audit's dual
-enrollment, which is the same four courses its unmatched list is built from.
+the audit's own marks and puts every course back where the record says it was:
+
+- **taken** goes in the term that passed it, read off the course's own result
+  line — "Taken in Spring '26" is the only record of which term it belongs to,
+  so it is read rather than written down a second time. That is the ten courses
+  of 2025-2026, thirty credits, the year Compliance checks first.
+- **in progress** goes in the term under way — the five of Fall 2026.
+- **registered** and **planned** go in the term after, and the seat the audit
+  is still holding open stays a placeholder.
+- **incoming** is the audit's dual enrollment, the same four courses its
+  unmatched list is built from.
+
+Which means the three surfaces add up: twelve incoming credits plus thirty
+earned is the forty-two Compliance measures against, and fifteen in progress
+against six planned is the argument the NCAA and aid checks are having.
 
 Derived rather than written down, so the two cannot drift. Opened on its own,
 `/planner.html` is Team Plan's, unchanged.

@@ -22,7 +22,15 @@ const TERM_OF: Partial<Record<AuditMark, "now" | "next">> = {
   planned: "next",
 }
 
-type Found = { code: string; name: string; mark: AuditMark }
+type Found = { code: string; name: string; mark: AuditMark; result?: string }
+
+/** A finished course says when it was finished — "Taken in Spring '26" — and
+ *  that is the only record of which term it belongs to. Read rather than
+ *  written down a second time. */
+function termOfResult(result?: string): { season: string; year: number } | null {
+  const said = /Taken in (Fall|Spring|Summer) '(\d{2})/.exec(result ?? "")
+  return said ? { season: said[1], year: 2000 + Number(said[2]) } : null
+}
 
 /** Every course the audit has put somewhere, in the order the tree holds them.
  *  Additional checks are stepped over — they re-list courses counted already,
@@ -34,9 +42,10 @@ function scheduled(): Found[] {
   const walk = (entry: AuditEntry) => {
     if (entry.kind === "milestone") return
     if (entry.kind === "course") {
-      if (!entry.code || seen.has(entry.code) || !TERM_OF[entry.mark]) return
+      if (!entry.code || seen.has(entry.code)) return
+      if (!TERM_OF[entry.mark] && entry.mark !== "taken") return
       seen.add(entry.code)
-      found.push({ code: entry.code, name: entry.name, mark: entry.mark })
+      found.push({ code: entry.code, name: entry.name, mark: entry.mark, result: entry.result })
       return
     }
     if (entry.restated) return
@@ -76,7 +85,53 @@ export function recordPlan(): Year[] {
   /* Fall 2026 → Spring 2027: the term under way and the one after it. */
   const start = Number(CURRENT_TERM.name.split(" ")[1])
 
+  /* Everything already passed, back in the term that passed it. A plan that
+     began at the year under way would be telling a staff member the student
+     has done nothing, which the audit beside it flatly contradicts. */
+  const done = courses
+    .filter((course) => course.mark === "taken")
+    .map((course) => ({ ...course, when: termOfResult(course.result) }))
+    .filter((course) => course.when)
+
+  const past: Year[] = []
+  const years = [...new Set(done.map((course) => course.when!.year))].sort()
+  /* A fall and the spring after it are one academic year. */
+  const first = Math.min(...years)
+
+  if (done.length) {
+    const inTerm = (season: string, year: number) =>
+      done.filter((course) => course.when!.season === season && course.when!.year === year)
+
+    past.push({
+      label: `${first}-${first + 1}`,
+      phase: "complete",
+      terms: [
+        {
+          id: `fall-${first}`,
+          name: `Fall ${first}`,
+          window: "Sep - Dec",
+          campus: "Main campus",
+          reviewed: true,
+          locked: true,
+          state: "completed",
+          courses: inTerm("Fall", first).map((course, i) => card(course, i, true)),
+        },
+        {
+          id: `spring-${first + 1}`,
+          name: `Spring ${first + 1}`,
+          window: "Jan - May",
+          campus: "Main campus",
+          reviewed: true,
+          locked: true,
+          state: "completed",
+          courses: inTerm("Spring", first + 1).map((course, i) => card(course, 20 + i, true)),
+        },
+      ],
+    })
+  }
+
   return [
+    ...past,
     {
       label: `${start}-${start + 1}`,
       phase: "active",
