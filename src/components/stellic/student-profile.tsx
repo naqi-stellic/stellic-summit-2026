@@ -2,6 +2,7 @@ import { cn } from "cn"
 import { useState, type ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
+import { useIsStaff } from "@/components/layout/section"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AUDIT_STUDENT, CURRENT_TERM, OFFICIAL_PROGRESS } from "@/data/audit"
@@ -123,6 +124,14 @@ export function StudentFace({ size = 40, className }: { size?: number; className
   )
 }
 
+/** What only the student whose record this is may do. Asking to have your plan
+ *  reviewed is a request made of somebody; a staff member reading the same
+ *  record is that somebody, so the button is not theirs to press.
+ *
+ *  Filtered here rather than left to each page, because every prototype that
+ *  puts a staff nav beside this card would otherwise have to remember. */
+const STUDENT_ONLY = new Set(["Request to Review Plan"])
+
 export function ProfileCard({
   programs,
   progressLabel = "Official Progress",
@@ -137,6 +146,8 @@ export function ProfileCard({
   actions?: string[]
 }) {
   const { courses, milestones } = OFFICIAL_PROGRESS
+  const staff = useIsStaff()
+  const shown = staff ? actions.filter((action) => !STUDENT_ONLY.has(action)) : actions
 
   return (
     <ProgressCard className="flex flex-col gap-6">
@@ -182,7 +193,7 @@ export function ProfileCard({
         </div>
 
         <div className="flex shrink-0 flex-wrap items-start gap-2">
-          {actions.map((action) => (
+          {shown.map((action) => (
             <Button key={action}>{action}</Button>
           ))}
           <Button size="icon" aria-label="History">

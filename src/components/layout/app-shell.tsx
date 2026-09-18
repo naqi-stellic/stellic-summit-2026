@@ -8,6 +8,7 @@ import {
   type NavSection,
   type ScheduleTerm,
 } from "@/components/layout/sidebar"
+import { SectionContext } from "@/components/layout/section"
 import { Topbar } from "@/components/layout/topbar"
 import { Face } from "@/components/stellic/staff-chrome"
 import { StudentFace } from "@/components/stellic/student-profile"
@@ -72,7 +73,10 @@ export function AppShell({
   const [nav, setNav] = useState(true)
 
   return (
-    <>
+    /* Everything below knows which nav it is standing in, so a card deep in
+       the page can tell a student's reading of this record from a staff
+       member's without being handed it. */
+    <SectionContext value={section}>
       <div className="flex h-screen flex-col overflow-hidden">
         {/* Two rows, not two columns: the nav's masthead stands beside the top
             bar and its links beside the page, so collapsing the nav takes the
@@ -164,6 +168,6 @@ export function AppShell({
         </button>
       </div>
       )}
-    </>
+    </SectionContext>
   )
 }
