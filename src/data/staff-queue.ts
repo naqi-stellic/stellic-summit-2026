@@ -49,7 +49,6 @@ export const REPORTS: Report[] = [
  *  what the Transfer tab was doing, reads as two different people. */
 const FACES: Record<string, string> = {
   "Fawad Miller": "/faces/fmiller.jpg",
-  "Ryo Nakamura": "/faces/rnakamura.jpg",
   "Marisol Vega": "/faces/mvega.jpg",
   /* His own portrait rather than one from the faces folder: he is the student
      every other prototype follows, and this is the same photograph. */
@@ -418,8 +417,8 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
         {
           id: "t1",
           name: "Transfer Credit Review",
-          student: "Ryo Nakamura",
-          initials: "RN",
+          student: "Priya Chandran",
+          initials: "PC",
           color: "#3e4784",
           program: "Computer Science, B.S.",
           date: "Aug 3",
