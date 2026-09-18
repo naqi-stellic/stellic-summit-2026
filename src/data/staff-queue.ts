@@ -50,6 +50,7 @@ export const REPORTS: Report[] = [
 const FACES: Record<string, string> = {
   "Fawad Miller": "/faces/fmiller.jpg",
   "Ryo Nakamura": "/faces/rnakamura.jpg",
+  "Marisol Vega": "/faces/mvega.jpg",
   "Bríd O'Sullivan": "/faces/bosullivan.jpg",
   "Farah Al-Amin": "/faces/falamin.jpg",
   "Jonah Miller": "/faces/jmiller.jpg",
@@ -77,37 +78,41 @@ export type TodayAppt = {
   /** Who is in the room. One person, on every one of these — a transfer
    *  officer's day is a queue of individual transcripts, not a lecture. */
   who: { initials: string; color: string; photo?: string }[]
-  /** How long until it starts, on the ones close enough to say. */
+  /** How long until it starts. Every card carries it — a morning you are
+   *  reading at a glance is one where nothing makes you work out the time. */
   starts?: string
 }
 
-/* Jessica's morning. Four one-to-ones, and every topic is transfer work —
-   this board belongs to the transfer office, so a day of "Group Advising" was
-   somebody else's job showing through. Two of the four are the students whose
-   credit reviews are waiting in Open Items below: you meet the person whose
+/* Jessica's morning: four one-to-ones, all of them transcript evaluations.
+   This board belongs to the transfer office, so a day of "Group Advising" was
+   somebody else's job showing through — and a transfer officer's day really
+   does read as the same job four times. Bríd is the one student here whose
+   review is also waiting in Open Items below: you meet the person whose
    transcript you are about to decide on. */
 export const TODAY: TodayAppt[] = [
   {
-    title: "Fawad Miller / Transfer credit review",
+    title: "Fawad Miller / Transcript evaluation",
     when: "11:30am – 12:30pm",
     who: [{ initials: "FM", color: "#b54708", photo: "/faces/fmiller.jpg" }],
     starts: "In 1 hour",
   },
   {
-    title: "Ryo Nakamura / Course equivalency question",
+    title: "Marisol Vega / Transcript evaluation",
     when: "1:00pm – 1:30pm",
-    who: [{ initials: "RN", color: "#175cd3", photo: "/faces/rnakamura.jpg" }],
+    who: [{ initials: "MV", color: "#175cd3", photo: "/faces/mvega.jpg" }],
     starts: "In 2 hours",
   },
   {
-    title: "Bríd O'Sullivan / Incoming credit appeal",
+    title: "Bríd O'Sullivan / Transcript evaluation",
     when: "2:00pm – 2:45pm",
     who: [{ initials: "BO", color: "#087443", photo: "/faces/bosullivan.jpg" }],
+    starts: "In 3 hours",
   },
   {
     title: "Farah Al-Amin / Transcript evaluation",
     when: "3:15pm – 3:45pm",
     who: [{ initials: "FA", color: "#9f1ab1", photo: "/faces/falamin.jpg" }],
+    starts: "In 4 hours",
   },
 ]
 
