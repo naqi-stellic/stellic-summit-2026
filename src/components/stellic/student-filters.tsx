@@ -146,13 +146,27 @@ function Chosen({ value, onClear }: { value: string; onClear: () => void }) {
   )
 }
 
-/** What the typing is matching against, while it is still typing. */
-function Suggestion({ value }: { value: string }) {
+/** What the typing is matching against, while it is still typing. The part
+ *  that has been typed is picked out of the name, because that is the whole
+ *  reason the row is on screen — it is what the field matched on. */
+function Suggestion({ value, match }: { value: string; match?: string }) {
+  const at = match ? value.toLowerCase().indexOf(match.toLowerCase()) : -1
+
   return (
     <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-md border border-gray-40 bg-card p-1 shadow-secondary">
       <span className="flex items-center justify-between gap-2 rounded-md bg-gray-5 px-2 py-1.5 text-body-md text-foreground">
-        {value}
-        <Icon name="check" size={14} className="text-primary-50" />
+        <span className="min-w-0 truncate">
+          {at < 0 ? (
+            value
+          ) : (
+            <>
+              {value.slice(0, at)}
+              <span className="font-semibold">{value.slice(at, at + match!.length)}</span>
+              {value.slice(at + match!.length)}
+            </>
+          )}
+        </span>
+        <Icon name="check" size={14} className="shrink-0 text-primary-50" />
       </span>
     </div>
   )
@@ -233,8 +247,13 @@ export function RemainingFilter({
     setProgramSet(true)
     if (!(await wait(300))) return
 
-    if (!(await type(QUERY.requirement, setRequirement))) return
+    /* Only the part of the requirement's name a person would remember. The
+       list narrows to one on it, and taking that row is what fills the field
+       with the whole name — typing all twenty-seven characters would be a
+       machine filling in a form rather than somebody searching. */
+    if (!(await type(QUERY.requirementTyped, setRequirement))) return
     if (!(await wait())) return
+    setRequirement(QUERY.requirement)
     setRequirementSet(true)
     if (!(await wait(300))) return
 
@@ -325,7 +344,13 @@ export function RemainingFilter({
 
           <Field label="Specific requirement">
             {requirementSet ? (
-              <Chosen value={requirement} onClear={() => setRequirementSet(false)} />
+              <Chosen
+                value={requirement}
+                onClear={() => {
+                  setRequirement("")
+                  setRequirementSet(false)
+                }}
+              />
             ) : (
               <span className="relative block">
                 <SearchBox
@@ -334,7 +359,9 @@ export function RemainingFilter({
                   muted={!programSet}
                   readOnly
                 />
-                {requirement && <Suggestion value={QUERY.requirement} />}
+                {requirement && (
+                  <Suggestion value={QUERY.requirement} match={requirement} />
+                )}
               </span>
             )}
           </Field>

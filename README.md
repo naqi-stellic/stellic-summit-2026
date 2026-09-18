@@ -75,6 +75,15 @@ teleprinter; what makes it look like somebody at a keyboard is that the rhythm
 never repeats and that punctuation is a place to pause. Between one field
 finishing and the next starting, a beat of ~460ms.
 
+**Type what a person types, not what the field ends up holding.** Nobody types
+a requirement's whole name into a typeahead — they type the part they remember,
+watch the list narrow to one, and take that row. So the script types `Year 2`,
+the suggestion shows `Academic **Year 2**…` with the match picked out, and
+taking it is what puts the full name in the field. A field that types all
+twenty-seven characters is a machine filling in a form; this is somebody
+searching. Same for a dropdown: it opens, the options are on screen, and the
+answer is taken off the list rather than appearing in the trigger.
+
 **And while the answer is on its way**, the thing being replaced goes: the old
 answer is worse than nothing, so it is a `Spinner` on its own, with the count
 reset rather than left stale.

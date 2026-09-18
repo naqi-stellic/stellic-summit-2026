@@ -289,6 +289,10 @@ export const ROSTER_VIEWS = [
 export const QUERY = {
   program: "NCAA 2026",
   requirement: "Academic Year Check: Year 2",
+  /** What somebody would actually type to find it. Nobody types a requirement's
+   *  full name into a typeahead — they type the part they remember and take it
+   *  off the list, which is what makes it a search field rather than a form. */
+  requirementTyped: "Year 2",
   audit: "Planned",
   entryYear: 2025,
 }
