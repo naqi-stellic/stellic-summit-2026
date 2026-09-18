@@ -18,6 +18,7 @@ import {
   AUDIT_VIEWS,
   LAST_COMPUTED,
   UNMATCHED_BLURB,
+  programUnder,
   unmatchedAgainst,
   type AuditGroup,
 } from "@/data/audit"
@@ -79,7 +80,11 @@ export function ExplainProgress() {
             <AuditTree
               audit={AUDIT}
               explain={{
-                onExplain: setExplaining,
+                /* The credential row explains the programme under it rather
+                   than itself: the rules are the programme's, and somebody
+                   aiming for one row and hitting the other should still get
+                   the answer they came for. */
+                onExplain: (group) => setExplaining(programUnder(group)),
                 constraints: (group) => (
                   <ConstraintsCard group={group} onExplain={() => setExplaining(group)} />
                 ),

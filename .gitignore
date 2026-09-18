@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Feedback screenshots dropped in public/ to be read, not served. They are
+# somebody's Slack window — the prototypes have no use for them once the
+# feedback is built.
+public/*-feedback.jpg
+public/explain-audit*.jpg

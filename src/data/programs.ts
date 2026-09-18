@@ -1,6 +1,7 @@
 import {
   COUNTING_NOW,
   STUDENT_RECORD,
+  markFrom,
   type AuditCourse,
   type AuditEntry,
   type AuditGroup,
@@ -1048,10 +1049,10 @@ export function auditProgram(program: Program, alongside: boolean): AuditGroup {
 
 /** How a requirement stands, from how its courses do: done when every course
  *  is, under way when any has started, outstanding otherwise. */
+/** The same reading the degree audit does — a requirement's mark is a fact
+ *  about what is inside it, and a what-if requirement is no different. */
 function groupMark(courses: AuditCourse[]): AuditMark {
-  if (courses.every((course) => course.mark === "taken")) return "taken"
-  if (courses.some((course) => course.mark !== "remaining")) return "in-progress"
-  return "remaining"
+  return markFrom(courses.map((course) => course.mark))
 }
 
 /* ------------------------------------------------------------- the figures */

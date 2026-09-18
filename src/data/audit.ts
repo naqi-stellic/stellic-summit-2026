@@ -412,6 +412,82 @@ const TREE: AuditGroup = {
 export type AuditStanding = ReturnType<typeof auditStanding>
 export type MilestoneStanding = ReturnType<typeof milestoneStanding>
 
+/* A requirement's mark is a fact about what is inside it.
+ *
+ * "A registered course in a future term, **or a requirement with a future
+ * registered course**"; "a planned course, **or a requirement with a planned
+ * course**" — the icon glossary defines every requirement state that way, so
+ * the mark is read off the children rather than typed beside the name. It had
+ * been typed, and General Education claimed to be in progress while holding
+ * five finished courses and three nobody had planned.
+ *
+ * `optional` is the exception and stays declared: "not needed" is a fact about
+ * the requirement, not about what is in it. */
+
+/** In the order a requirement reports them: anything under way outranks
+ *  anything merely booked, which outranks anything merely intended. */
+const MARK_ORDER: AuditMark[] = ["in-progress", "registered", "planned"]
+
+export function markFrom(marks: AuditMark[]): AuditMark {
+  if (marks.length === 0) return "remaining"
+  if (marks.every((mark) => mark === "taken")) return "taken"
+  return MARK_ORDER.find((mark) => marks.includes(mark)) ?? "remaining"
+}
+
+/** Every leaf beneath a requirement — courses and milestones both, since a
+ *  milestone is something still needed too. Restated checks are stepped over:
+ *  they re-list what is counted elsewhere. */
+function leavesOf(group: AuditGroup, milestones?: boolean): AuditEntry[] {
+  const found: AuditEntry[] = []
+
+  const walk = (entry: AuditEntry) => {
+    if (entry.kind === "group") {
+      if (!entry.restated) entry.children.forEach(walk)
+      return
+    }
+    if (milestones === undefined) return void found.push(entry)
+    if ((entry.kind === "milestone") === milestones) found.push(entry)
+  }
+  group.children.forEach(walk)
+
+  return found
+}
+
+/** What a requirement still needs, which is the number the mark carries. The
+ *  left box counts coursework and the right one milestones, and the right only
+ *  appears where there are any. */
+export function outstanding(group: AuditGroup) {
+  const short = (milestones: boolean) =>
+    leavesOf(group, milestones).filter((entry) => entry.mark === "remaining").length
+
+  return { courses: short(false), milestones: short(true) }
+}
+
+/** The tree with every requirement's mark recomputed from what it holds. */
+function derived<T extends AuditEntry>(entry: T): T {
+  if (entry.kind !== "group") return entry
+  const children = entry.children.map(derived)
+  const mark =
+    entry.mark === "optional"
+      ? entry.mark
+      : markFrom(
+          leavesOf({ ...entry, children }).flatMap((leaf) => (leaf.mark ? [leaf.mark] : []))
+        )
+
+  return { ...entry, children, mark }
+}
+
+/** The programme under a credential. The credential row explains itself by
+ *  handing over to this — both rows open the same panel, so clicking the wrong
+ *  one still answers the question. */
+export function programUnder(group: AuditGroup): AuditGroup {
+  if (group.level !== "degree") return group
+  const program = group.children.find(
+    (child) => child.kind === "group" && child.level === "program"
+  )
+  return program?.kind === "group" ? program : group
+}
+
 export function auditStanding(audit: AuditGroup) {
   const marks: AuditMark[] = []
 
@@ -461,11 +537,15 @@ export function milestoneStanding(audit: AuditGroup) {
   return { done, total }
 }
 
-const STANDING = auditStanding(TREE)
-const MILESTONES = milestoneStanding(TREE)
+/* Every requirement's mark, recomputed from what it holds, before anything
+   below counts or draws it. */
+const DERIVED = derived(TREE)
+
+const STANDING = auditStanding(DERIVED)
+const MILESTONES = milestoneStanding(DERIVED)
 
 export const AUDIT: AuditGroup = {
-  ...TREE,
+  ...DERIVED,
   bar: {
     taken: STANDING.taken,
     inProgress: STANDING.inProgress,

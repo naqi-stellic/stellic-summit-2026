@@ -380,7 +380,14 @@ function fulfilment(group: AuditGroup): Constraint {
 /** Everything the requirement applies: what it wants, its own rules, and — at
  *  the top only — the rules the whole degree runs on. */
 export function constraintsFor(group: AuditGroup): Constraint[] {
-  if (group.level === "degree") return [fulfilment(group), ...PROGRAM_RULES]
+  /* The programme's rules belong to the programme. They had hung off the
+     credential, one row above — "at least 120 units in total" is a thing
+     Business Administration asks for, not a property of the letters after
+     somebody's name. The credential answers with the same set, because a
+     reader who clicks the row above should still get the answer. */
+  if (group.level === "degree" || group.level === "program") {
+    return [fulfilment(group), ...PROGRAM_RULES]
+  }
   return [fulfilment(group), ...(OWN_RULES[group.id] ?? [])]
 }
 
@@ -423,7 +430,7 @@ export function courseMappings(group: AuditGroup): CourseMapping[] {
       const caught = course.attributes?.find((attribute) =>
         constraint.blocksAttributes!.includes(attribute)
       )
-      if (caught) refuse(course.code, `${said} — attribute ${caught}`)
+      if (caught) refuse(course.code, `${said} because course has the attribute '${caught}'`)
     })
   })
 

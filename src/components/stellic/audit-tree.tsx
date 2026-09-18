@@ -11,6 +11,7 @@ import type {
   AuditMark,
   AuditMilestone,
 } from "@/data/audit"
+import { outstanding } from "@/data/audit"
 
 /** What a row offers beyond reading: the way to ask why it says what it says.
  *  Absent on the prototypes that do not explain anything. */
@@ -56,11 +57,17 @@ const MARK: Record<AuditMark, { ground: string; icon?: IconName; glyph?: number 
 export function AuditMarkIcon({
   mark,
   milestone,
+  count,
   size = 24,
 }: {
   mark: AuditMark
   /** A flag beside the mark: this one is a checkpoint rather than a course. */
   milestone?: boolean
+  /** How many items are still needed, on a requirement that is holding some.
+   *  A course is one item and carries no number; a requirement is a box of
+   *  them, and the number is the count — which is the whole difference
+   *  between the blank remaining mark and the numbered one. */
+  count?: number
   size?: 16 | 24
 }) {
   const { ground, icon, glyph } = MARK[mark]
@@ -68,16 +75,33 @@ export function AuditMarkIcon({
      box. Everything scales off the box rather than being a second set. */
   const scale = size / 24
 
+  /* Only the remaining mark is numbered. The kit ships the count as a variant
+     of that one and of no other, and it reads right: a requirement under way
+     says it is under way, and a requirement waiting says how much for. */
+  const numbered = mark === "remaining" && count !== undefined && count > 0
+
   return (
     <span
-      style={{ width: size, height: size, ...(milestone ? { width: "auto", minWidth: size } : {}) }}
+      style={{
+        height: size,
+        ...(milestone || numbered ? { minWidth: size } : { width: size }),
+      }}
       className={cn(
         "flex shrink-0 items-center justify-center gap-0.5 rounded-md p-0.5",
         ground
       )}
     >
       {milestone && <Icon name="outlined-flag" size={Math.round(16 * scale)} />}
-      {icon && glyph && <Icon name={icon} size={Math.round(glyph * scale)} />}
+      {numbered ? (
+        <span
+          className="min-w-4 text-center font-semibold"
+          style={{ fontSize: Math.round(14 * scale) }}
+        >
+          {count}
+        </span>
+      ) : (
+        icon && glyph && <Icon name={icon} size={Math.round(glyph * scale)} />
+      )}
       {mark === "optional" && <span className="h-px w-2.5 rounded-full bg-gray-80" />}
     </span>
   )
@@ -384,6 +408,10 @@ function GroupRow({
               <Icon name="expand-more" size={10} className="shrink-0" />
               <Icon name="more-horiz" size={14} className="shrink-0" />
               <Tags tags={group.tags} small />
+              {/* This row had been the one level that took the tools and drew
+                  none of them, which left the programme — the row the rules
+                  actually belong to — with no way to ask about itself. */}
+              {tools}
             </div>
             {group.subtitle && (
               <p className="truncate text-body-md text-gray-80">{group.subtitle}</p>
@@ -401,9 +429,17 @@ function GroupRow({
     )
   }
 
+  /* What is still needed, which the mark carries as a number — coursework in
+     the box and milestones in a flagged one beside it, and the flag only where
+     there are any. */
+  const short = outstanding(group)
+
   return (
     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-md border border-gray-40 bg-gray-5 p-[7px]">
-      {group.mark && <AuditMarkIcon mark={group.mark} />}
+      {group.mark && <AuditMarkIcon mark={group.mark} count={short.courses} />}
+      {group.mark === "remaining" && short.milestones > 0 && (
+        <AuditMarkIcon mark="remaining" milestone count={short.milestones} />
+      )}
       <p className="text-body-md font-semibold">{group.name}</p>
       {/* The chevron is the fold. A requirement with nothing under it has
           nothing to fold, so it keeps the mark and not the control. */}
