@@ -10,7 +10,7 @@ import { lookupSteps, type CatalogMatch } from "@/data/staff-insights"
 /* Course Details.
  *
  * Writing an equivalency means knowing what the incoming course actually was,
- * and nobody here has Seneca's catalogue. The slow half of the job is opening a
+ * and nobody here has Berkshire's catalogue. The slow half of the job is opening a
  * tab, finding a college's site and reading a paragraph — so the assistant goes
  * and reads it.
  *
