@@ -127,6 +127,18 @@ projector and nobody wants to watch that. What it does is honest — every field
 ends up holding exactly what somebody would have typed, and the filter clears
 and re-runs like any other.
 
+Each field is the design system's own: `Input` for the ones you type or search
+into, `Select` for the ones you choose from — added in this pass as
+`src/components/ui/select.tsx`, shadcn's, retuned to the Stellic field spec so
+that choosing and typing are the same 36px box.
+
+### While it runs
+
+The list goes and a spinner takes its place, and the count reads `0 / —` until
+the answer arrives. What is on screen until then is the answer to the last
+question, and showing an old answer while a new one is on its way is worse than
+showing none.
+
 ### What comes back
 
 Six students out of 1854, and the count is the point: the thing you found on one

@@ -3,7 +3,15 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { QUERY, type Applied } from "@/data/students"
 
 /* The two filters that do something.
@@ -60,14 +68,47 @@ const Field = ({ label, children }: { label: string; children: ReactNode }) => (
   </label>
 )
 
-const BOX =
-  "flex h-9 w-full items-center gap-2 rounded-md border border-input bg-card px-3 text-body-md"
+/** A search field. The Input carries the box; the glyph sits in its padding
+ *  rather than beside it, so a field you search and a field you type read as
+ *  the same field. */
+function SearchBox({
+  value,
+  placeholder,
+  muted,
+  readOnly,
+  onFocus,
+  onClick,
+}: {
+  value?: string
+  placeholder: string
+  /** Nothing can be typed here yet — it is waiting on another answer. */
+  muted?: boolean
+  readOnly?: boolean
+  onFocus?: () => void
+  onClick?: () => void
+}) {
+  return (
+    <span className="relative flex items-center">
+      <Icon name="s-search" size={14} className="pointer-events-none absolute left-3 text-gray-60" />
+      <Input
+        value={value ?? ""}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        disabled={muted}
+        onFocus={onFocus}
+        onClick={onClick}
+        onChange={() => {}}
+        className={cn("pl-9 text-body-md", muted && "bg-gray-5 opacity-100")}
+      />
+    </span>
+  )
+}
 
 /** A search field that has been answered: the answer sits in it as a value with
  *  a way to take it out again. */
 function Chosen({ value, onClear }: { value: string; onClear: () => void }) {
   return (
-    <span className={cn(BOX, "justify-between")}>
+    <span className="flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-body-md shadow-xs">
       <span className="min-w-0 truncate text-foreground">{value}</span>
       <button
         type="button"
@@ -93,8 +134,36 @@ function Suggestion({ value }: { value: string }) {
   )
 }
 
-const SELECT =
-  "h-9 w-full cursor-pointer rounded-md border border-input bg-card px-3 text-body-md text-foreground"
+/** One of a fixed set. Same box as the fields above it, because choosing and
+ *  typing are the same gesture as far as the form is concerned. */
+function Choose({
+  value,
+  onChange,
+  options,
+  placeholder,
+  className,
+}: {
+  value?: string
+  onChange?: (value: string) => void
+  options: string[]
+  placeholder?: string
+  className?: string
+}) {
+  return (
+    <Select value={value} onValueChange={onChange} defaultValue={value ? undefined : options[0]}>
+      <SelectTrigger className={className}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={option} value={option}>
+            {option}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
 
 /* ---------------------------------------------------------------- remaining */
 
@@ -178,22 +247,13 @@ export function RemainingFilter({
         <div className="flex flex-col gap-4">
           <Field label="Number of requirements remaining">
             <span className="flex gap-2">
-              <input
-                placeholder="e.g 3-5 or >3"
-                className={cn(BOX, "min-w-0 flex-1 placeholder:text-gray-60 focus:outline-none")}
-              />
-              <select className={cn(SELECT, "w-[124px]")} defaultValue="requirements">
-                <option>requirements</option>
-                <option>credits</option>
-              </select>
+              <Input placeholder="e.g 3-5 or >3" className="min-w-0 flex-1 text-body-md" />
+              <Choose options={["requirements", "credits"]} className="w-[124px]" />
             </span>
           </Field>
 
           <Field label="Specific courses remaining">
-            <span className={BOX}>
-              <Icon name="s-search" size={14} className="shrink-0 text-gray-60" />
-              <span className="text-gray-60">Search Courses</span>
-            </span>
+            <SearchBox placeholder="Search Courses" readOnly />
           </Field>
 
           {/* A requirement belongs to a program, so the program comes first —
@@ -204,18 +264,14 @@ export function RemainingFilter({
             {programSet ? (
               <Chosen value={program} onClear={reset} />
             ) : (
-              <span className="relative">
-                <span className={BOX}>
-                  <Icon name="s-search" size={14} className="shrink-0 text-gray-60" />
-                  <input
-                    value={program}
-                    onFocus={run}
-                    onClick={run}
-                    readOnly
-                    placeholder="Search Programs"
-                    className="min-w-0 flex-1 bg-transparent placeholder:text-gray-60 focus:outline-none"
-                  />
-                </span>
+              <span className="relative block">
+                <SearchBox
+                  value={program}
+                  placeholder="Search Programs"
+                  readOnly
+                  onFocus={run}
+                  onClick={run}
+                />
                 {program && <Suggestion value={QUERY.program} />}
               </span>
             )}
@@ -225,42 +281,35 @@ export function RemainingFilter({
             {requirementSet ? (
               <Chosen value={requirement} onClear={() => setRequirementSet(false)} />
             ) : (
-              <span className="relative">
-                <span className={cn(BOX, !programSet && "bg-gray-5")}>
-                  <Icon name="s-search" size={14} className="shrink-0 text-gray-60" />
-                  <span className={cn("min-w-0 truncate", requirement ? "text-foreground" : "text-gray-60")}>
-                    {requirement || (programSet ? "Search requirements" : "Pick a Program first")}
-                  </span>
-                </span>
+              <span className="relative block">
+                <SearchBox
+                  value={requirement}
+                  placeholder={programSet ? "Search requirements" : "Pick a Program first"}
+                  muted={!programSet}
+                  readOnly
+                />
                 {requirement && <Suggestion value={QUERY.requirement} />}
               </span>
             )}
           </Field>
 
           <Field label="Audit Version">
-            <select
-              value={audit}
-              onChange={(event) => setAudit(event.target.value)}
-              className={SELECT}
-            >
-              <option>Official</option>
-              <option>Planned</option>
-            </select>
+            <Choose value={audit} onChange={setAudit} options={["Official", "Planned"]} />
           </Field>
 
           <Field label="Credential">
-            <select className={SELECT} defaultValue="">
-              <option value="">Select option</option>
-              <option>B.S. Business</option>
-            </select>
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bs-business">B.S. Business</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
 
           <Field label="Program level">
-            <select className={SELECT} defaultValue="All program levels">
-              <option>All program levels</option>
-              <option>Undergraduate</option>
-              <option>Graduate</option>
-            </select>
+            <Choose options={["All program levels", "Undergraduate", "Graduate"]} />
           </Field>
         </div>
       </PopoverContent>
@@ -334,43 +383,29 @@ export function DemographicsFilter({
             {yearSet ? (
               <Chosen value={year} onClear={reset} />
             ) : (
-              <span className="relative">
-                <span className={BOX}>
-                  <Icon name="s-search" size={14} className="shrink-0 text-gray-60" />
-                  <input
-                    value={year}
-                    onFocus={run}
-                    onClick={run}
-                    readOnly
-                    placeholder="Search entry years"
-                    className="min-w-0 flex-1 bg-transparent placeholder:text-gray-60 focus:outline-none"
-                  />
-                </span>
+              <span className="relative block">
+                <SearchBox
+                  value={year}
+                  placeholder="Search entry years"
+                  readOnly
+                  onFocus={run}
+                  onClick={run}
+                />
                 {year && <Suggestion value={String(QUERY.entryYear)} />}
               </span>
             )}
           </Field>
 
           <Field label="Level">
-            <select className={SELECT} defaultValue="All levels">
-              <option>All levels</option>
-              <option>Undergrad</option>
-              <option>Graduate</option>
-            </select>
+            <Choose options={["All levels", "Undergrad", "Graduate"]} />
           </Field>
 
           <Field label="Campus">
-            <select className={SELECT} defaultValue="All campuses">
-              <option>All campuses</option>
-              <option>Main campus</option>
-            </select>
+            <Choose options={["All campuses", "Main campus"]} />
           </Field>
 
           <Field label="Student tags">
-            <span className={BOX}>
-              <Icon name="s-search" size={14} className="shrink-0 text-gray-60" />
-              <span className="text-gray-60">Search tags</span>
-            </span>
+            <SearchBox placeholder="Search tags" readOnly />
           </Field>
         </div>
       </PopoverContent>

@@ -5,6 +5,7 @@ import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -172,14 +173,18 @@ export function SearchPanel({
           <label htmlFor="keywords" className="text-body-md text-gray-100">
             Keywords
           </label>
-          <div className="relative flex h-9 items-center rounded-md border border-input bg-card">
-            <Icon name="s-search" size={14} className="absolute left-3 text-gray-60" />
-            <input
+          <div className="relative flex items-center">
+            <Icon
+              name="s-search"
+              size={14}
+              className="pointer-events-none absolute left-3 text-gray-60"
+            />
+            <Input
               id="keywords"
               value={keywords}
               onChange={(event) => setKeywords(event.target.value)}
               placeholder="Student name, username..."
-              className="h-full w-full min-w-0 bg-transparent pr-3 pl-9 text-body-md text-foreground placeholder:text-gray-60 focus:outline-none"
+              className="pl-9 text-body-md"
             />
           </div>
           <button
@@ -413,9 +418,14 @@ function Row({
 
 export function Roster({
   applied,
+  running,
   onOpen,
 }: {
   applied: Applied
+  /** The query is being applied. The list it is about to replace is the old
+   *  answer, and showing an old answer while a new one is on its way is worse
+   *  than showing none. */
+  running?: boolean
   onOpen?: (student: Student) => void
 }) {
   const [view, setView] = useState(ROSTER_VIEWS[0])
@@ -432,7 +442,7 @@ export function Roster({
       <div className="flex flex-wrap items-center gap-4 border-b border-gray-40 p-6">
         <Checkbox aria-label="Select every student" className="shrink-0" />
         <p className="text-h300 font-semibold text-gray-100">
-          0 / {total} students
+          0 / {running ? "—" : total} students
         </p>
 
         <div className="ml-auto flex flex-wrap items-center gap-3">
@@ -478,6 +488,12 @@ export function Roster({
         </div>
       </div>
 
+      {running ? (
+        <div className="flex items-center justify-center gap-3 py-24 text-body-md text-gray-80">
+          <Icon name="refresh" size={16} className="animate-spin text-primary-50" />
+          Finding students
+        </div>
+      ) : (
       <div className="overflow-x-auto">
         {found.map((student) => (
           <Row
@@ -488,6 +504,7 @@ export function Roster({
           />
         ))}
       </div>
+      )}
     </div>
   )
 }

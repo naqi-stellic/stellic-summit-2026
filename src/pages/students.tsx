@@ -22,6 +22,16 @@ export function Students() {
      list answers it, and neither owns the question. */
   const [applied, setApplied] = useState<Applied>({})
   const [saved, setSaved] = useState(false)
+  /* A query takes a moment against eighteen hundred records, and the list is
+     hidden while it does: what is on screen until then is the answer to the
+     last question, not this one. */
+  const [running, setRunning] = useState(false)
+
+  const apply = (which: keyof Applied) => {
+    setRunning(true)
+    setApplied((all) => ({ ...all, [which]: true }))
+    window.setTimeout(() => setRunning(false), 1100)
+  }
 
   return (
     <AppShell section="staff" navCurrent="Students" title="Students" assistant={false}>
@@ -29,7 +39,7 @@ export function Students() {
         <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6">
           <SearchPanel
             applied={applied}
-            onApply={(which) => setApplied((all) => ({ ...all, [which]: true }))}
+            onApply={apply}
             onClear={() => setApplied({})}
             onSave={() => setSaved(true)}
           />
@@ -38,6 +48,7 @@ export function Students() {
               prototype has a record for; the rest are the cohort he is in. */}
           <Roster
             applied={applied}
+            running={running}
             onOpen={(student) => {
               if (student.username === AUDIT_STUDENT.username) {
                 window.location.href = "/compliance.html"
