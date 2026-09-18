@@ -60,9 +60,10 @@ programme is a plan rather than a record — the CGPA, and then two meters read 
 a glance: courses done, under way and still wanted, and milestones the same. A
 share of nothing is left off the legend rather than written as a zero.
 
-Under the course meter, the one thing wrong with this record where there is one:
-Scott is six credits short of NCAA progress, Jonah has a planned course that is
-not offered, Tobias has no graduation application on file.
+Nothing under the course meter warns about anything for now. Eight rows each
+flagging a problem of their own is a list nobody reads, and none of them was the
+thing you came for. `alert` is still on every record, unrendered, for when they
+come back.
 
 Scott's name leads through to his record on
 [Proactive Compliance](compliance.md). The rest are the cohort he is in.
@@ -146,9 +147,9 @@ does, because nothing has been found yet and a stale count is worse than none.
 
 Six students out of 1854, and the count is the point: the thing you found on one
 record is a cohort. Each row answers the question it was found by — *"Academic
-Year Check: Year 2 — 3 credits short"* — in the line where the row's own alert
-would otherwise sit, because a result that does not answer its own query is a
-list.
+Year Check: Year 2 — 3 credits short"* — because a result that does not answer
+its own query is a list. It is set as a fact rather than an alarm: nothing has
+gone wrong, this is what was asked for.
 
 **save as report** puts the query in the cards above it as a fifth, tracked.
 That is the loop the screen is built on: the saved reports are somebody's

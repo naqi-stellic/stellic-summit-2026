@@ -391,18 +391,17 @@ function Row({
         <div className="flex flex-col gap-2">
           <p className="text-body-md font-semibold text-foreground">Courses</p>
           <Bar meter={student.courses} />
-          {answering && student.yearTwo ? (
-            <p className="flex items-start gap-1.5 text-body-md text-warning-50">
-              <Icon name="error-outline" size={14} className="mt-0.5 shrink-0" />
-              {QUERY.requirement} — {student.yearTwo}
+          {/* No warnings under the meter for now — a list of eight rows each
+              flagging something of its own is a list nobody reads. `alert` is
+              still on the record, unrendered, for when they come back.
+
+              What is left is the answer to the query the row was found by, and
+              it is set as a fact rather than an alarm: nothing has gone wrong,
+              this is simply what was asked for. */}
+          {answering && student.yearTwo && (
+            <p className="text-body-md text-gray-80">
+              {QUERY.requirement} — <span className="text-gray-100">{student.yearTwo}</span>
             </p>
-          ) : (
-            student.alert && (
-              <p className="flex items-start gap-1.5 text-body-md text-warning-50">
-                <Icon name="error-outline" size={14} className="mt-0.5 shrink-0" />
-                {student.alert}
-              </p>
-            )
           )}
         </div>
         <div className="flex flex-col gap-2">
