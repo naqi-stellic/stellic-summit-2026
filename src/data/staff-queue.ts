@@ -51,6 +51,9 @@ const FACES: Record<string, string> = {
   "Fawad Miller": "/faces/fmiller.jpg",
   "Ryo Nakamura": "/faces/rnakamura.jpg",
   "Marisol Vega": "/faces/mvega.jpg",
+  /* His own portrait rather than one from the faces folder: he is the student
+     every other prototype follows, and this is the same photograph. */
+  "Scott Abott": "/scott-abott.jpg",
   "Bríd O'Sullivan": "/faces/bosullivan.jpg",
   "Farah Al-Amin": "/faces/falamin.jpg",
   "Jonah Miller": "/faces/jmiller.jpg",
@@ -86,31 +89,30 @@ export type TodayAppt = {
 /* Jessica's morning: four one-to-ones, all of them transcript evaluations.
    This board belongs to the transfer office, so a day of "Group Advising" was
    somebody else's job showing through — and a transfer officer's day really
-   does read as the same job four times. Bríd is the one student here whose
-   review is also waiting in Open Items below: you meet the person whose
-   transcript you are about to decide on. */
+   does read as the same job four times. Fifteen minutes apiece, which is what
+   a transcript takes when the department has already done the reading. */
 export const TODAY: TodayAppt[] = [
   {
     title: "Fawad Miller / Transcript evaluation",
-    when: "11:30am – 12:30pm",
+    when: "11:30am – 11:45am",
     who: [{ initials: "FM", color: "#b54708", photo: "/faces/fmiller.jpg" }],
     starts: "In 1 hour",
   },
   {
     title: "Marisol Vega / Transcript evaluation",
-    when: "1:00pm – 1:30pm",
+    when: "1:00pm – 1:15pm",
     who: [{ initials: "MV", color: "#175cd3", photo: "/faces/mvega.jpg" }],
     starts: "In 2 hours",
   },
   {
     title: "Bríd O'Sullivan / Transcript evaluation",
-    when: "2:00pm – 2:45pm",
+    when: "2:00pm – 2:15pm",
     who: [{ initials: "BO", color: "#087443", photo: "/faces/bosullivan.jpg" }],
     starts: "In 3 hours",
   },
   {
     title: "Farah Al-Amin / Transcript evaluation",
-    when: "3:15pm – 3:45pm",
+    when: "3:15pm – 3:30pm",
     who: [{ initials: "FA", color: "#9f1ab1", photo: "/faces/falamin.jpg" }],
     starts: "In 4 hours",
   },
@@ -443,29 +445,33 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
         {
           id: "t2",
           name: "Transfer Credit Review",
-          student: "Bríd O'Sullivan",
-          initials: "BO",
-          color: "#b42318",
-          program: "Biology, B.S.",
+          /* The student the rest of the prototypes follow, at the other end of
+             his own transcript: these are the two courses Prospective Student
+             Lite leaves sitting in pending review, waiting on the decision
+             that is this row. */
+          student: "Scott Abott",
+          initials: "SA",
+          color: "#087443",
+          program: "Business Administration, B.S. (Finance)",
           date: "Aug 4",
           iso: "2026-08-04",
           vis: ["jessica"],
           fields: [
-            ["Institution", "University College Cork"],
+            ["Institution", "Berkshire Community College"],
             [
               "Incoming courses",
-              "BI1001 → BIOL 1100 · CM1002 → CHEM 1050 · SS1010 → elective credit",
+              "21-1200 Calculus I → 31-1200 Calculus I · 21-2445 Biology I → 32-1100 Foundations of Biology",
             ],
-            ["Grades", "1.1, 1.2, 2.1 on the Irish scale"],
-            ["Syllabi", "3 files attached"],
+            ["Grades", "B, B+"],
+            ["Syllabi", "2 files attached"],
           ],
           steps: [
             {
               state: "done",
               label: "Department evaluation",
-              who: "Biology, routed by course subject · approved by Dr. H. Osei",
+              who: "Mathematics and Biology, routed by course subject · both approved",
               when: "Aug 4",
-              fields: [["Finding", "2 equivalent, 1 as elective credit"]],
+              fields: [["Finding", "Both equivalent — 6 credits and 4 credits"]],
             },
             { state: "cur", label: "Registrar decision", who: "You", when: "now", since: "Aug 4" },
           ],
