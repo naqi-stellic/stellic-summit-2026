@@ -250,6 +250,9 @@ const ATTEMPTED = EARNED + IN_PROGRESS
 const PACE = Math.round((EARNED / ATTEMPTED) * 100)
 /** 150% of the published program length, which is where aid stops. */
 const MAX_TIMEFRAME = DEGREE.credits * 1.5
+/** The credits the pace test wants completed, which is 67% of everything
+ *  attempted — so it moves every time the student registers for anything. */
+const PACE_FLOOR = Math.ceil(ATTEMPTED * 0.67)
 /** What a full award asks of a term, against what next term has in it. */
 const FULL_TIME = 12
 const SPRING_PLANNED = 6
@@ -518,111 +521,91 @@ const CODES = {
 /** Everything on the record, which is what the timeframe cap counts. */
 const ALL_ATTEMPTED = [...CODES.yearOne, ...CODES.carriedIn, ...CODES.yearTwoFall]
 
-/* Year 1 — a year that passed, and the sidebar still has something to say: it
-   passed with six credits to spare, and it passed without any of the credit
-   the student walked in with. */
+/* Every constraint below is one of the requirement editor's own templates —
+   "At least [x] units in total", "At most [x] courses/units with defined
+   grades", "Pass with minimum grade [x]", "Count [xx-xxx] only if taken at [x]
+   semester [xxxx] year or later …", "Must maintain program GPA of at least
+   [x]", "Student must have [x] attributes/tags". Nothing here is a sentence
+   invented for the prototype and dressed up as a rule.
+
+   The notes are the constraint's own configuration: the course set, the grades,
+   the terms, the counts. That is what a note under a constraint holds. The
+   reasoning about why a ruleset is built this way belongs in the lede, where it
+   reads as this prototype's framing rather than as the institution's policy. */
+
 const YEAR_ONE_EXPLAIN: CheckExplain = {
   title: "Year 1",
-  lede: `Earned ${YEAR_ONE.length * CREDITS_PER_COURSE} credits against the 24 the first year asks for. Met, with ${YEAR_ONE.length * CREDITS_PER_COURSE - 24} to spare.`,
+  lede: `Earned ${YEAR_ONE.length * CREDITS_PER_COURSE} credits against the 24 the first year asks for. Met, with ${YEAR_ONE.length * CREDITS_PER_COURSE - 24} to spare — and met without any of the credit carried in, which the check is configured to exclude.`,
   constraints: [
     {
       id: "y1-total",
       text: "At least 24 units in total",
-      notes: [
-        { text: "Measured across the first academic year of full-time enrollment: Fall 2025 through Summer 2026" },
-      ],
+      notes: [{ text: "Terms: Fall 2025, Spring 2026, Summer 2026" }],
       progress: { met: YEAR_ONE.length * CREDITS_PER_COURSE, total: 24 },
     },
     {
       id: "y1-regular-terms",
       text: "At least 18 courses/units excluding the given course set",
-      notes: [
-        { text: "Course set: summer and intersession terms. Three quarters of the year's credit has to come from the two regular terms." },
-      ],
+      notes: [{ text: "Course set: courses taken in Summer 2026" }],
       progress: { met: YEAR_ONE.length * CREDITS_PER_COURSE, total: 18 },
     },
     {
       id: "y1-min-grade",
       text: "Pass with minimum grade D",
-      notes: [{ text: "Only passing grades count toward the check by default" }],
     },
     { id: "y1-min-units", text: "Minimum of 1 unit for each course counted" },
     {
       id: "y1-transfer",
       text: "At most 0 courses/units with transfer status",
-      notes: [
-        { text: "Credit earned before the first term of full-time enrollment was not earned in the academic year, so the year check cannot count it — even though the progress-to-degree check below can:" },
-        { codes: CODES.carriedIn },
-      ],
+      notes: [{ codes: CODES.carriedIn }],
       limit: { used: 0, cap: 0 },
     },
   ],
   counting: CODES.yearOne,
   refused: [
-    {
-      codes: CODES.carriedIn,
-      reason: "Earned before first full-time enrollment — not earned in the academic year",
-    },
+    { codes: CODES.carriedIn, reason: "Transfer status, capped at 0 units" },
   ],
 }
 
-/* Year 2 — the year under way, and the one carrying the problem. It holds four
-   checks and has cleared one of them. */
 const YEAR_TWO_EXPLAIN: CheckExplain = {
   title: "Year 2",
-  lede: `${IN_PROGRESS} credits in progress against the 18 the year asks for, and one of the four checks inside it cleared. The spring is where both of the others are decided.`,
+  lede: `${IN_PROGRESS} credits under way against the 18 the year asks for, and one of the four checks inside it cleared. The spring decides the other three: ${SPRING_PLANNED} planned credits would close the year check at ${IN_PROGRESS + SPRING_PLANNED} and leave the aid one short.`,
   constraints: [
     {
       id: "y2-subs",
       text: "Fulfill all of the following sub-requirements",
-      notes: [
-        { text: "Progress to Degree, the two term checks, and the academic year check" },
-      ],
       progress: { met: 1, total: 4 },
     },
     {
       id: "y2-total",
       text: "At least 18 units in total",
-      notes: [
-        { text: `Fall 2026 through Summer 2027. ${IN_PROGRESS} credits are under way and ${SPRING_PLANNED} more are planned for the spring, which would clear it at ${IN_PROGRESS + SPRING_PLANNED} — on the plan, not yet on the record.` },
-      ],
+      notes: [{ text: "Terms: Fall 2026, Spring 2027, Summer 2027" }],
       progress: { met: IN_PROGRESS, total: 18 },
     },
     {
       id: "y2-term-floor",
       text: "At least 6 units in total",
-      notes: [{ text: "Applied to each regular term separately, not to the year" }],
+      notes: [{ text: "Applied to each regular term rather than to the year" }],
       progress: { met: IN_PROGRESS, total: 6 },
     },
     {
       id: "y2-withdrawals",
       text: "At most 0 courses/units with defined grades",
-      notes: [
-        { text: "Grades: W, I, NP. A dropped course is attempted but not earned, and the year check counts earned credit only." },
-      ],
+      notes: [{ text: "Grades: W, I, NP" }],
       limit: { used: 0, cap: 0 },
     },
     {
       id: "y2-certified",
       text: "Student must have 1 attributes/tags",
-      notes: [{ text: "Tag: certified as a full-time student-athlete for the academic year" }],
+      notes: [{ text: "Attribute: Certified student-athlete 2026-27" }],
       progress: { met: 1, total: 1 },
     },
   ],
   counting: CODES.yearTwoFall,
   refused: [
-    {
-      codes: CODES.yearOne,
-      reason: "Earned in the previous academic year — counted there",
-    },
-    {
-      codes: CODES.carriedIn,
-      reason: "Earned before first full-time enrollment",
-    },
-    {
-      codes: CODES.registered,
-      reason: "Registered for the spring — inside the year, but not earned until the term closes",
-    },
+    { codes: CODES.yearOne, reason: "Outside the terms this check counts" },
+    { codes: CODES.carriedIn, reason: "Outside the terms this check counts" },
+    { codes: CODES.registered, reason: "Grade IP — no units earned yet" },
   ],
 }
 
@@ -631,64 +614,49 @@ const YEAR_TWO_EXPLAIN: CheckExplain = {
    has on its unmatched list, and exclude five that are on screen right now. */
 const PTD_EXPLAIN: CheckExplain = {
   title: "Progress to Degree Check",
-  lede: `Earned ${EARNED} of the ${NEEDED_BY_YEAR_THREE} credits this check needs before the third year. ${SHORTFALL} to go.`,
+  lede: `Earned ${EARNED} of the ${NEEDED_BY_YEAR_THREE} credits this check needs before the third year — ${PERCENT_BY_YEAR_THREE * 100}% of a ${DEGREE.credits}-credit degree. ${SHORTFALL} to go, and the five courses under way do not close it, because they are not earned until the term is.`,
   constraints: [
     {
-      id: "ptd-percent",
-      text: `${PERCENT_BY_YEAR_THREE * 100}% of the degree completed before the third year of enrollment`,
-      notes: [
-        { text: `${NEEDED_BY_YEAR_THREE} of ${DEGREE.credits} credits, measured at the start of the fall term` },
-      ],
+      id: "ptd-total",
+      text: `At least ${NEEDED_BY_YEAR_THREE} units in total`,
+      notes: [{ text: `Measured at the start of Fall 2027` }],
       progress: { met: EARNED, total: NEEDED_BY_YEAR_THREE },
     },
     {
-      id: "ptd-degree-applicable",
-      text: "Only degree-applicable credit counts toward this percentage",
+      id: "ptd-any-course",
+      text: "Any course can satisfy this requirement unless restricted otherwise",
       notes: [
-        { text: "Credit that satisfies no requirement still counts if it is accepted toward the degree total:" },
-        { text: "Dual enrollment, transfer and test credit accepted by the registrar" },
+        { text: "Credit that satisfies no degree requirement still counts here:" },
         { codes: CODES.carriedIn },
       ],
     },
     {
       id: "ptd-earned-only",
       text: "At most 0 courses/units with defined grades",
-      notes: [
-        { text: "Grades: IP. Credit is earned at the end of the term, and this check is measured at the start of the fall — so the five courses under way are not in the count yet:" },
-        { codes: CODES.yearTwoFall },
-      ],
+      notes: [{ text: "Grades: IP" }, { codes: CODES.yearTwoFall }],
       limit: { used: 0, cap: 0 },
     },
     {
       id: "ptd-min-grade",
       text: "Pass with minimum grade D",
-      notes: [{ text: "A failed course is attempted, not earned, and counts against pace rather than progress" }],
     },
     {
       id: "ptd-remedial",
       text: "Do not count courses from a given set",
-      notes: [
-        { text: "Remedial and developmental coursework, to a maximum of 6 credits in the first year only" },
-      ],
+      notes: [{ text: "Course set: courses with attribute Remedial/Developmental" }],
       limit: { used: 0, cap: 6 },
     },
     {
       id: "ptd-declared",
       text: "Student must have 1 attributes/tags",
-      notes: [{ text: `Tag: ${DEGREE.concentration} concentration declared before the third year` }],
+      notes: [{ text: `Attribute: ${DEGREE.concentration} concentration declared` }],
       progress: { met: 1, total: 1 },
     },
   ],
   counting: [...CODES.yearOne, ...CODES.carriedIn],
   refused: [
-    {
-      codes: CODES.yearTwoFall,
-      reason: "In progress — credit is earned at the end of the term, and the check is measured before it",
-    },
-    {
-      codes: CODES.registered,
-      reason: "Registered for a term the check is measured before",
-    },
+    { codes: CODES.yearTwoFall, reason: "Grade IP, capped at 0 units" },
+    { codes: CODES.registered, reason: "Grade IP, capped at 0 units" },
   ],
 }
 
@@ -696,111 +664,104 @@ const PTD_EXPLAIN: CheckExplain = {
 
 const GPA_EXPLAIN: CheckExplain = {
   title: "Cumulative GPA",
-  lede: `A cumulative ${CGPA} against the 2.0 the qualitative standard asks for. The only one of the four tests that is about how well the work was done rather than how much of it there is.`,
+  lede: `A ${CGPA} against the 2.0 floor. The only one of the four aid tests about how well the work was done rather than how much of it there is — and the only one the credit carried in cannot help, because transfer credit arrives with units and no grade points.`,
   constraints: [
     {
       id: "gpa-min",
-      text: "At least 2.0 cumulative GPA",
-      notes: [{ text: "Measured on all credit attempted at this institution" }],
+      text: "Must maintain program GPA of at least 2.0",
+      notes: [{ text: `Cumulative GPA is supplied by the institution rather than computed here: ${CGPA}` }],
       progress: { met: Number(CGPA), total: 2 },
+    },
+    {
+      id: "gpa-scope",
+      text: "Compute GPA for this requirement with courses taken in/after 2025 Fall",
+      notes: [{ text: "The first term of enrollment, so nothing earned before it is in the calculation" }],
     },
     {
       id: "gpa-no-grade-points",
       text: "At most 0 courses/units with transfer grades",
-      notes: [
-        { text: "Accepted transfer and dual-enrollment credit is granted units but no grade points, so it moves pace and timeframe without ever moving the GPA:" },
-        { codes: CODES.carriedIn },
-      ],
+      notes: [{ codes: CODES.carriedIn }],
       limit: { used: 0, cap: 0 },
     },
     {
-      id: "gpa-when",
-      text: "Evaluated at the end of each academic year",
-      notes: [{ text: "Last evaluated at the close of Spring 2026. Courses under way carry no grade until the term closes." }],
-    },
-    {
       id: "gpa-repeats",
-      text: "A repeated course counts at its highest grade",
-      notes: [{ text: "No repeated coursework on the record" }],
+      text: "Unused matched courses are also accounted in the GPA",
+      notes: [
+        { text: "Every attempt at a required course is in the GPA; for the rest, only the counted attempt is. No repeated coursework on this record." },
+      ],
     },
   ],
   counting: CODES.yearOne,
   refused: [
-    { codes: CODES.carriedIn, reason: "Transfer credit carries units but no grade points" },
+    { codes: CODES.carriedIn, reason: "Transfer grade, capped at 0 units" },
     {
       codes: [...CODES.yearTwoFall, ...CODES.registered],
-      reason: "No grade until the term closes",
+      reason: "Taken in/after 2025 Fall but not yet graded",
     },
   ],
 }
 
 const PACE_EXPLAIN: CheckExplain = {
   title: "Pace of Completion",
-  lede: `${EARNED} credits completed of ${ATTEMPTED} attempted — ${PACE}% against a 67% floor. The test people fail without noticing, because the denominator counts things the transcript does not.`,
+  lede: `${EARNED} credits completed of ${ATTEMPTED} attempted — ${PACE}% against a 67% floor. The test people fail without noticing, because the denominator holds things the transcript does not show as failures: withdrawals, incompletes, and every course still under way.`,
   constraints: [
     {
       id: "pace-ratio",
-      text: "Complete at least 67% of all attempted credits",
-      notes: [{ text: `${EARNED} completed of ${ATTEMPTED} attempted, measured cumulatively rather than term by term` }],
-      progress: { met: PACE, total: 67 },
+      text: `At least ${PACE_FLOOR} units in total`,
+      notes: [
+        { text: `67% of the ${ATTEMPTED} credits attempted so far. The floor moves every time the student registers.` },
+      ],
+      progress: { met: EARNED, total: PACE_FLOOR },
     },
     {
       id: "pace-attempted",
       text: "At most 0 courses/units with defined grades",
-      notes: [
-        { text: "Grades: W, I, F, NP. A withdrawal, an incomplete and a failure are all attempted and none of them are completed, so each one pulls the ratio down twice." },
-      ],
+      notes: [{ text: "Grades: W, I, F, NP" }],
       limit: { used: 0, cap: 0 },
     },
     {
       id: "pace-in-progress",
-      text: "Courses in progress are attempted, not completed",
-      notes: [
-        { text: `The ${YEAR_TWO_FALL.length} courses under way are in the denominator now and join the numerator when the term closes:` },
-        { codes: CODES.yearTwoFall },
-      ],
+      text: "At most 0 courses/units with defined grades",
+      notes: [{ text: "Grades: IP" }, { codes: CODES.yearTwoFall }],
+      limit: { used: 0, cap: 0 },
     },
     {
       id: "pace-transfer",
-      text: "Accepted transfer credit counts as both attempted and completed",
+      text: `At most ${CARRIED_IN.length * CREDITS_PER_COURSE} courses/units with transfer status`,
       notes: [
-        { text: `${CARRIED_IN.length * CREDITS_PER_COURSE} credits of dual enrollment accepted, which is the one place transfer credit helps rather than hurts:` },
+        { text: "Accepted transfer credit is the one thing that counts in both halves of the ratio:" },
         { codes: CODES.carriedIn },
       ],
+      limit: { used: CARRIED_IN.length * CREDITS_PER_COURSE, cap: CARRIED_IN.length * CREDITS_PER_COURSE },
     },
   ],
   counting: [...CODES.yearOne, ...CODES.carriedIn],
   refused: [
-    {
-      codes: CODES.yearTwoFall,
-      reason: "Attempted, not yet completed — in the denominator only",
-    },
+    { codes: CODES.yearTwoFall, reason: "Grade IP — attempted, not completed" },
   ],
 }
 
 const TIMEFRAME_EXPLAIN: CheckExplain = {
   title: "Maximum Timeframe",
-  lede: `${ATTEMPTED} of ${MAX_TIMEFRAME} attempted credits used, with ${MAX_TIMEFRAME - ATTEMPTED} of headroom. Aid stops at the cap whether or not the degree is finished, which is why it is worth watching this early.`,
+  lede: `${ATTEMPTED} of ${MAX_TIMEFRAME} attempted credits used, with ${MAX_TIMEFRAME - ATTEMPTED} of headroom. The cap is 150% of the published ${DEGREE.credits}-credit length, and aid stops there whether or not the degree is finished.`,
   constraints: [
     {
       id: "tf-cap",
-      text: `At most ${MAX_TIMEFRAME} units in total`,
-      notes: [{ text: `150% of the published program length of ${DEGREE.credits} credits` }],
+      text: `At most ${MAX_TIMEFRAME} courses/units excluding the given course set`,
+      notes: [{ text: "Course set: empty, so every attempted credit spends the cap" }],
       limit: { used: ATTEMPTED, cap: MAX_TIMEFRAME },
     },
     {
       id: "tf-everything",
-      text: "Every attempted credit counts, including transfer, repeats and withdrawals",
+      text: "Any course can satisfy this requirement unless restricted otherwise",
       notes: [
-        { text: "Nothing is excluded from this one. A course dropped in week three and a course accepted from another institution both spend the same headroom." },
+        { text: "Transfer credit, repeats and withdrawals included — nothing is excluded from this one" },
       ],
     },
     {
-      id: "tf-unreachable",
-      text: "Aid ends once the degree cannot be finished inside the cap",
-      notes: [
-        { text: "Assessed each time the standard is evaluated, not only when the cap is reached" },
-      ],
+      id: "tf-scope",
+      text: "Compute GPA for this requirement with courses taken in/after 2025 Fall",
+      notes: [{ text: "Assessed each time the standard is evaluated, not only when the cap is reached" }],
     },
   ],
   counting: ALL_ATTEMPTED,
@@ -808,35 +769,27 @@ const TIMEFRAME_EXPLAIN: CheckExplain = {
 
 const ENROLMENT_EXPLAIN: CheckExplain = {
   title: "Enrolment Status: Spring 2027",
-  lede: `${SPRING_PLANNED} credits planned against the ${FULL_TIME} a full award asks for. Half-time: the award pays, and it pays half.`,
+  lede: `${SPRING_PLANNED} credits planned against the ${FULL_TIME} a full award asks for. Half-time: the award pays, and it pays half. This is the one aid test the plan makes worse rather than better — the same spring that closes the NCAA year check leaves this one at half.`,
   constraints: [
     {
       id: "enrol-full",
       text: `At least ${FULL_TIME} units in total`,
-      notes: [{ text: "Full-time enrollment for the term. Below it the award is prorated rather than withdrawn." }],
+      notes: [{ text: "Full-time enrollment for the term" }],
       progress: { met: SPRING_PLANNED, total: FULL_TIME },
     },
     {
       id: "enrol-term",
-      text: "Count units only if taken at Spring 2027 semester or later and if taken at Spring 2027 semester or earlier",
-      notes: [
-        { text: "Enrollment status is a fact about one term. Nothing earned before it and nothing planned after it changes this answer." },
-      ],
-    },
-    {
-      id: "enrol-pell",
-      text: "Pell is prorated by enrollment intensity",
-      notes: [{ text: "Half-time pays half the scheduled award for the term" }],
+      text: "Count **-000 to **-999 only if taken at Spring 2027 semester or later and if taken at Spring 2027 semester or earlier",
+      notes: [{ text: "Any course, one term wide" }],
     },
     {
       id: "enrol-loans",
       text: "At least 6 units in total",
-      notes: [{ text: "Direct Loans require at least half-time enrollment. This one clears." }],
+      notes: [{ text: "Half-time floor. This one clears." }],
       progress: { met: SPRING_PLANNED, total: 6 },
     },
   ],
 }
-
 /** Every check with working to show, keyed by the row it belongs to. */
 export const EXPLAIN: Record<string, CheckExplain> = {
   "year-1": YEAR_ONE_EXPLAIN,
