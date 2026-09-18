@@ -132,12 +132,15 @@ into, `Select` for the ones you choose from — added in this pass as
 `src/components/ui/select.tsx`, shadcn's, retuned to the Stellic field spec so
 that choosing and typing are the same 36px box.
 
+The rhythm is `TYPING`, and it is the repo's one answer for this — see README,
+*Fields that fill themselves in*, before writing another.
+
 ### While it runs
 
-The list goes and a spinner takes its place, and the count reads `0 / —` until
-the answer arrives. What is on screen until then is the answer to the last
-question, and showing an old answer while a new one is on its way is worse than
-showing none.
+The list goes and the UI Kit's `Spinner` takes its place, unlabelled: a spinner
+beside the words "Finding students" is the same sentence twice, and the list
+says what it is the moment it arrives. The header reads **0 students** until it
+does, because nothing has been found yet and a stale count is worse than none.
 
 ### What comes back
 

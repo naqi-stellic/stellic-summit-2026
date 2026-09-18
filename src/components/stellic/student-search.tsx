@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import { Spinner } from "@/components/ui/spinner"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -442,7 +443,8 @@ export function Roster({
       <div className="flex flex-wrap items-center gap-4 border-b border-gray-40 p-6">
         <Checkbox aria-label="Select every student" className="shrink-0" />
         <p className="text-h300 font-semibold text-gray-100">
-          0 / {running ? "—" : total} students
+          {/* Nothing has been found yet, so nothing is the count. */}
+          {running ? "0" : `0 / ${total}`} students
         </p>
 
         <div className="ml-auto flex flex-wrap items-center gap-3">
@@ -489,9 +491,8 @@ export function Roster({
       </div>
 
       {running ? (
-        <div className="flex items-center justify-center gap-3 py-24 text-body-md text-gray-80">
-          <Icon name="refresh" size={16} className="animate-spin text-primary-50" />
-          Finding students
+        <div className="flex items-center justify-center py-24">
+          <Spinner />
         </div>
       ) : (
       <div className="overflow-x-auto">

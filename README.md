@@ -55,6 +55,30 @@ standing on a different person. Prospective Student Lite shares less still — i
 here that is nobody signed in to Stellic, so it brings its own chrome and takes
 only the tokens and the icon set.
 
+### Fields that fill themselves in
+
+A prototype that has to demonstrate a query somebody would have typed should
+type it, rather than arriving with it already in the box. Click into the first
+field and it fills itself out, then answers whatever depended on it.
+
+It is a stage affordance and not a product behaviour, and every prototype doing
+it should say so in its own docs. A query with four parts is four dropdowns to
+drive on a projector, and nobody wants to watch that. What keeps it honest is
+that every field ends up holding exactly what a person would have typed, and
+the control clears and re-runs like any other.
+
+**Use one rhythm everywhere.** `TYPING` in
+`src/components/stellic/student-filters.tsx` is it: a base gap of 82ms, up to
+55ms of jitter on top so no two keystrokes are the same, 70ms more after a
+space, and 150ms more after a colon or a comma. A fixed interval reads as a
+teleprinter; what makes it look like somebody at a keyboard is that the rhythm
+never repeats and that punctuation is a place to pause. Between one field
+finishing and the next starting, a beat of ~460ms.
+
+**And while the answer is on its way**, the thing being replaced goes: the old
+answer is worse than nothing, so it is a `Spinner` on its own, with the count
+reset rather than left stale.
+
 ### Adding one
 
 A prototype is a page under `src/pages/`, its data under `src/data/`, and any

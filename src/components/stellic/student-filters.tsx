@@ -27,10 +27,34 @@ import { QUERY, type Applied } from "@/data/students"
  * projector, and nobody wants to watch that. What it is doing is honest —
  * every field ends up holding what somebody would have typed. */
 
-const CHAR_MS = 38
-const BEAT = 420
+/* How fast a person types, which is not how fast a machine can. A fixed
+ * interval reads as a teleprinter; what makes it look like somebody at a
+ * keyboard is that no two keystrokes are the same length, that a space is a
+ * moment to think, and that punctuation is a longer one.
+ *
+ * Any prototype doing a scripted fill should use these rather than picking its
+ * own numbers — see README, "Fields that fill themselves in". */
+export const TYPING = {
+  /** The base gap between keystrokes. */
+  char: 82,
+  /** Added at random on top, so the rhythm never repeats. */
+  jitter: 55,
+  /** Extra after a space: the gap between words. */
+  word: 70,
+  /** Extra after a colon or a comma, where a person pauses. */
+  punctuation: 150,
+}
+
+/** How long a field sits finished before the next one starts. */
+const BEAT = 460
 
 const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms))
+
+const keystroke = (previous: string) =>
+  TYPING.char +
+  Math.random() * TYPING.jitter +
+  (previous === " " ? TYPING.word : 0) +
+  (/[:,.]/.test(previous) ? TYPING.punctuation : 0)
 
 /** A sequence that stops if the popover goes away mid-run. */
 function useScript() {
@@ -46,7 +70,7 @@ function useScript() {
     for (let i = 1; i <= text.length; i += 1) {
       if (!alive.current) return false
       set(text.slice(0, i))
-      await sleep(CHAR_MS)
+      await sleep(keystroke(text[i - 1]))
     }
     return alive.current
   }
