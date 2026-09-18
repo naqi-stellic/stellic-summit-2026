@@ -68,9 +68,9 @@ that every field ends up holding exactly what a person would have typed, and
 the control clears and re-runs like any other.
 
 **Use one rhythm everywhere.** `TYPING` in
-`src/components/stellic/student-filters.tsx` is it: a base gap of 82ms, up to
-55ms of jitter on top so no two keystrokes are the same, 70ms more after a
-space, and 150ms more after a colon or a comma. A fixed interval reads as a
+`src/components/stellic/student-filters.tsx` is it: a base gap of 58ms, up to
+40ms of jitter on top so no two keystrokes are the same, 52ms more after a
+space, and 110ms more after a colon or a comma. A fixed interval reads as a
 teleprinter; what makes it look like somebody at a keyboard is that the rhythm
 never repeats and that punctuation is a place to pause. Between one field
 finishing and the next starting, a beat of ~460ms.

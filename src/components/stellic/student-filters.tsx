@@ -36,13 +36,13 @@ import { QUERY, type Applied } from "@/data/students"
  * own numbers — see README, "Fields that fill themselves in". */
 export const TYPING = {
   /** The base gap between keystrokes. */
-  char: 82,
+  char: 58,
   /** Added at random on top, so the rhythm never repeats. */
-  jitter: 55,
+  jitter: 40,
   /** Extra after a space: the gap between words. */
-  word: 70,
+  word: 52,
   /** Extra after a colon or a comma, where a person pauses. */
-  punctuation: 150,
+  punctuation: 110,
 }
 
 /** How long a field sits finished before the next one starts. */
@@ -166,15 +166,27 @@ function Choose({
   options,
   placeholder,
   className,
+  open,
+  onOpenChange,
 }: {
   value?: string
   onChange?: (value: string) => void
   options: string[]
   placeholder?: string
   className?: string
+  /** Held open from outside, where the script is driving it. A dropdown that
+   *  changes its answer without opening has not shown anybody the choice. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }) {
   return (
-    <Select value={value} onValueChange={onChange} defaultValue={value ? undefined : options[0]}>
+    <Select
+      value={value}
+      onValueChange={onChange}
+      defaultValue={value ? undefined : options[0]}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <SelectTrigger className={className}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
@@ -207,6 +219,7 @@ export function RemainingFilter({
   const [requirement, setRequirement] = useState("")
   const [requirementSet, setRequirementSet] = useState(false)
   const [audit, setAudit] = useState("Official")
+  const [auditOpen, setAuditOpen] = useState(false)
   const [running, setRunning] = useState(false)
 
   /* Clicking into the program field is the whole gesture: it answers itself,
@@ -225,8 +238,16 @@ export function RemainingFilter({
     setRequirementSet(true)
     if (!(await wait(300))) return
 
+    /* The last answer is a choice rather than something typed, so it is made
+       the way a person would make it: the list opens, both versions are on
+       screen, and Planned is the one taken. Setting the value silently would
+       change the query without ever showing what it was chosen over. */
+    setAuditOpen(true)
+    if (!(await wait(620))) return
     setAudit(QUERY.audit)
-    if (!(await wait(500))) return
+    if (!(await wait(420))) return
+    setAuditOpen(false)
+    if (!(await wait(360))) return
 
     onApply()
     setRunning(false)
@@ -238,6 +259,7 @@ export function RemainingFilter({
     setRequirement("")
     setRequirementSet(false)
     setAudit("Official")
+    setAuditOpen(false)
     onClear()
   }
 
@@ -318,7 +340,13 @@ export function RemainingFilter({
           </Field>
 
           <Field label="Audit Version">
-            <Choose value={audit} onChange={setAudit} options={["Official", "Planned"]} />
+            <Choose
+              value={audit}
+              onChange={setAudit}
+              options={["Official", "Planned"]}
+              open={auditOpen}
+              onOpenChange={setAuditOpen}
+            />
           </Field>
 
           <Field label="Credential">

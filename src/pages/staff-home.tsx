@@ -84,9 +84,7 @@ function Home({ who, inert, without }: StaffHomeProps) {
       title={writing ? "Transfer" : "Home"}
       assistant={false}
       account={
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-40 text-field text-gray-0">
-          {persona.initials}
-        </span>
+        <Face photo={persona.photo} initials={persona.initials} color="#6f7782" size={40} />
       }
     >
       {writing ? (

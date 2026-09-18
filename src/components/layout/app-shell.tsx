@@ -9,8 +9,10 @@ import {
   type ScheduleTerm,
 } from "@/components/layout/sidebar"
 import { Topbar } from "@/components/layout/topbar"
+import { Face } from "@/components/stellic/staff-chrome"
 import { StudentFace } from "@/components/stellic/student-profile"
 import { Button } from "@/components/ui/button"
+import { SIGNED_IN } from "@/data/staff-home"
 import {
   ResizableHandle,
   ResizablePanel,
@@ -86,7 +88,19 @@ export function AppShell({
               circle is his face. A staff screen is somebody else entirely. */}
           <Topbar
             title={title ?? SECTION_TITLE[section]}
-            account={account ?? (section === "staff" ? undefined : <StudentFace size={40} />)}
+            account={
+              account ??
+              (section === "staff" ? (
+                <Face
+                  photo={SIGNED_IN.photo}
+                  initials={SIGNED_IN.initials}
+                  color="#6f7782"
+                  size={40}
+                />
+              ) : (
+                <StudentFace size={40} />
+              ))
+            }
           />
         </div>
 

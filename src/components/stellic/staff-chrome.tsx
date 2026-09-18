@@ -270,14 +270,31 @@ export function EmptyState({
 export function Face({
   initials,
   color,
+  photo,
   size = 32,
   className,
 }: {
   initials: string
   color: string
+  /** Where there is one. Initials are what you draw when there is not. */
+  photo?: string
   size?: number
   className?: string
 }) {
+  const [failed, setFailed] = useState(false)
+
+  if (photo && !failed) {
+    return (
+      <img
+        src={photo}
+        alt=""
+        onError={() => setFailed(true)}
+        style={{ width: size, height: size }}
+        className={cn("shrink-0 rounded-full object-cover", className)}
+      />
+    )
+  }
+
   return (
     <span
       style={{ width: size, height: size, background: color, fontSize: size * 0.36 }}

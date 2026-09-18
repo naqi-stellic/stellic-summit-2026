@@ -63,6 +63,9 @@ export type Persona = {
   key: PersonaKey
   name: string
   initials: string
+  /** Their own face, as the student they are looking at has one. Initials stay
+   *  as the fallback for an image that does not arrive. */
+  photo: string
   /** Not rendered anywhere. It is here because a permission set on its own does
    *  not say what job somebody does, and the next reader will want to know. */
   role: string
@@ -77,6 +80,7 @@ export const PERSONAS: Persona[] = [
     key: "marcus",
     name: "Marcus",
     initials: "ML",
+    photo: "/faces/staff-marcus.jpg",
     role: "Registrar",
     perms: {
       auditPublish: true,
@@ -90,6 +94,7 @@ export const PERSONAS: Persona[] = [
     key: "jessica",
     name: "Jessica",
     initials: "J",
+    photo: "/faces/staff-jessica.jpg",
     role: "Transfer office",
     /* Transfer is the work she is here for, so it is where she lands — ahead
        of the appointments that would otherwise take the first slot. */
@@ -106,6 +111,11 @@ export const PERSONAS: Persona[] = [
 ]
 
 export const personaOf = (key: PersonaKey) => PERSONAS.find((p) => p.key === key)!
+
+/** Who is signed in on the staff surfaces that do not name somebody themselves
+ *  — Proactive Compliance, Students. The registrar, which makes the walk from
+ *  Staff Home to a student's record one person's morning rather than three. */
+export const SIGNED_IN = personaOf("marcus")
 
 /* ============================================================ Jobs */
 
