@@ -5,6 +5,13 @@ import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StudentAvatar } from "@/components/stellic/student-avatar"
 import { EngageBolts } from "@/components/stellic/student-profile"
 import { AUDIT_STUDENT } from "@/data/audit"
@@ -78,7 +85,7 @@ function Applied() {
         {chips.map((chip) => (
           <span
             key={chip.username}
-            className="flex shrink-0 items-center gap-2 rounded-full bg-gray-5 px-3.5 py-1.5 text-body-md text-gray-100"
+            className="flex shrink-0 items-center gap-2 rounded-full bg-gray-0 px-3.5 py-1.5 text-body-md text-gray-100"
           >
             <Icon name="history" size={14} className="shrink-0 text-gray-80" />
             {chip.name}
@@ -180,10 +187,11 @@ export function SavedReports() {
         <Icon name="expand-more" size={12} className={cn(!open && "-rotate-90")} />
       </Button>
 
-      {/* The reports fill the row the two panels around them fill. Four saved
-          and the way to make a fifth is five columns exactly. */}
+      {/* Four across, filling the width the two panels around them fill. The
+          way to make a fifth starts the next row rather than joining theirs:
+          it is not a report. */}
       {open && (
-        <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-3 @5xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-2 @5xl:grid-cols-4">
           {SAVED_REPORTS.map((report) => (
             <ReportCard key={report.name} report={report} />
           ))}
@@ -284,7 +292,7 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
         </Badge>
       </div>
 
-      <div className="flex w-[196px] shrink-0 flex-col gap-4">
+      <div className="flex w-[252px] shrink-0 flex-col gap-4">
         <div className="flex flex-col gap-2">
           <p className="text-body-md font-semibold text-foreground">Courses</p>
           <Bar meter={student.courses} />
@@ -311,8 +319,6 @@ export function Roster({ onOpen }: { onOpen?: (student: Student) => void }) {
   const [view, setView] = useState(ROSTER_VIEWS[0])
   const [grid, setGrid] = useState(false)
 
-  const toggle = "flex size-8 items-center justify-center rounded-md transition-colors"
-
   return (
     <div className={CARD}>
       <div className="flex flex-wrap items-center gap-4 border-b border-gray-40 p-6">
@@ -325,40 +331,42 @@ export function Roster({ onOpen }: { onOpen?: (student: Student) => void }) {
           {/* Nothing is selected, so there is nothing to act on yet. */}
           <Button disabled>Actions</Button>
           <span className="h-6 w-px shrink-0 bg-gray-40" />
-          <select
-            value={view}
-            onChange={(event) => setView(event.target.value)}
-            aria-label="How to read the list"
-            className="h-9 cursor-pointer rounded-md border border-input bg-card px-3 text-body-md text-foreground"
-          >
-            {ROSTER_VIEWS.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="w-[220px] justify-between">
+                {view}
+                <Icon name="expand-more" size={12} className="text-gray-80" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[220px]">
+              {ROSTER_VIEWS.map((option) => (
+                <DropdownMenuItem key={option} onSelect={() => setView(option)}>
+                  <span className={cn("flex-1", option === view && "font-semibold")}>{option}</span>
+                  {option === view && (
+                    <Icon name="check" size={14} className="text-primary-50" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button size="icon" aria-label="Sort">
             <Icon name="swap-vert" size={16} />
           </Button>
-          {/* One control, two states, so they sit in one box. */}
-          <span className="flex items-center gap-1 rounded-md border border-input bg-card p-1">
-            <button
-              type="button"
-              onClick={() => setGrid(false)}
-              aria-pressed={!grid}
-              aria-label="List"
-              className={cn(toggle, !grid ? "bg-gray-100 text-white" : "cursor-pointer text-gray-80")}
-            >
-              <Icon name="list" size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setGrid(true)}
-              aria-pressed={grid}
-              aria-label="Grid"
-              className={cn(toggle, grid ? "bg-gray-100 text-white" : "cursor-pointer text-gray-80")}
-            >
-              <Icon name="grid-view" size={16} />
-            </button>
-          </span>
+
+          {/* One control, two states: the segmented group the rest of the
+              product uses, rather than a pair of buttons in a box. */}
+          <Tabs value={grid ? "grid" : "list"} onValueChange={(next) => setGrid(next === "grid")}>
+            <TabsList>
+              <TabsTrigger value="list" aria-label="List" className="px-2.5">
+                <Icon name="list" size={16} />
+              </TabsTrigger>
+              <TabsTrigger value="grid" aria-label="Grid" className="px-2.5">
+                <Icon name="grid-view" size={16} />
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
