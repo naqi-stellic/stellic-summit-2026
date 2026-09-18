@@ -92,8 +92,18 @@ fold from their own row, and inside them the whole row is the control — the
 name, the mark and the space around them — because a chevron is a small target
 for the commonest thing anyone does here. The badges keep their own press.
 
-Both are illustrative rather than authoritative. What matters is that they are
-time-boxed, countable, and can fail while the degree audit looks healthy.
+Every aid check opens onto the rule behind it, and those are the real ones:
+cumulative GPA measured at the close of each academic year with a repeat
+counting at its highest grade; pace as completed over attempted, where a
+withdrawal is an attempt and accepted transfer credit is both; the timeframe
+ceiling at 150% of the published length, counting every attempted credit, with
+aid ending once the degree cannot be finished inside it; and enrollment
+intensity, where twelve credits is a full award, Pell prorates below that and
+Direct Loans stop at half-time.
+
+Both rulesets are illustrative rather than authoritative. What matters is that
+they are time-boxed, countable, and can fail while the degree audit looks
+healthy.
 
 ## Official and Planned
 

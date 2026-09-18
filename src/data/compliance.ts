@@ -1,4 +1,4 @@
-import { STUDENT_RECORD, type AuditCourse } from "@/data/audit"
+import { AUDIT_STUDENT, STUDENT_RECORD, type AuditCourse } from "@/data/audit"
 import type { Constraint } from "@/data/explain"
 import { CREDITS_PER_COURSE, DEGREE } from "@/data/plan"
 
@@ -69,6 +69,11 @@ const YEAR_ONE = [
   "COMM 230",
 ].map(held)
 
+/* The year splits the way the terms did: five in the fall, five in the spring,
+   which is what the record says and what the term checks measure. */
+const YEAR_ONE_FALL = ["BUS 101", "MATH 140", "ENGL 101", "HIST 110", "PSYC 101"].map(held)
+const YEAR_ONE_SPRING = ["ACCT 201", "ECON 201", "MIS 120", "ART 105", "COMM 230"].map(held)
+
 const YEAR_TWO_FALL = ["FIN 301", "ACCT 202", "ECON 202", "STAT 210", "MKTG 201"].map(held)
 
 /** Dual-enrolment credit. It fulfils no requirement — it is the degree audit's
@@ -104,7 +109,38 @@ export const RULESET: ComplianceCheck = {
       constraints: 3,
       credits: 30,
       rule: "24 credits in the first year, 18 of them in the regular terms",
-      children: [],
+      children: [
+        {
+          kind: "check",
+          id: "year-1-fall",
+          name: "Term Check: Fall",
+          state: "met",
+          constraints: 2,
+          credits: YEAR_ONE_FALL.length * CREDITS_PER_COURSE,
+          rule: "6 credits minimum in the term",
+          children: YEAR_ONE_FALL,
+        },
+        {
+          kind: "check",
+          id: "year-1-spring",
+          name: "Term Check: Spring",
+          state: "met",
+          constraints: 2,
+          credits: YEAR_ONE_SPRING.length * CREDITS_PER_COURSE,
+          rule: "6 credits minimum in the term",
+          children: YEAR_ONE_SPRING,
+        },
+        {
+          kind: "check",
+          id: "year-1-year",
+          name: "Academic Year Check: Year 1",
+          state: "met",
+          constraints: 2,
+          credits: (YEAR_ONE_FALL.length + YEAR_ONE_SPRING.length) * CREDITS_PER_COURSE,
+          rule: "24 credits across the academic year",
+          children: [],
+        },
+      ],
     },
     {
       kind: "check",
@@ -217,6 +253,8 @@ const MAX_TIMEFRAME = DEGREE.credits * 1.5
 /** What a full award asks of a term, against what next term has in it. */
 const FULL_TIME = 12
 const SPRING_PLANNED = 6
+/** The cumulative GPA, as the record already reports it. */
+const CGPA = AUDIT_STUDENT.engage.cgpa
 
 export const AID: ComplianceCheck = {
   kind: "check",
@@ -229,26 +267,94 @@ export const AID: ComplianceCheck = {
   open: true,
   children: [
     {
+      /* Qualitative. The only one of the four that is about how well the work
+         was done rather than how much of it there is. */
       kind: "check",
       id: "sap-gpa",
       name: "Cumulative GPA",
       state: "met",
-      constraints: 2,
+      constraints: 3,
       credits: EARNED,
       rule: "2.0 minimum cumulative GPA",
-      children: [],
+      children: [
+        {
+          kind: "check",
+          id: "sap-gpa-min",
+          name: "Cumulative GPA at or above 2.0",
+          state: "met",
+          constraints: 1,
+          credits: EARNED,
+          rule: `Currently ${CGPA}`,
+          children: [],
+        },
+        {
+          kind: "check",
+          id: "sap-gpa-when",
+          name: "Measured at the end of each academic year",
+          state: "met",
+          constraints: 1,
+          credits: 0,
+          rule: "Last evaluated at the close of Spring 2026",
+          children: [],
+        },
+        {
+          kind: "check",
+          id: "sap-gpa-repeats",
+          name: "A repeated course counts at its highest grade",
+          state: "met",
+          constraints: 1,
+          credits: 0,
+          rule: "No repeated coursework on the record",
+          children: [],
+        },
+      ],
     },
     {
+      /* Quantitative. Pace is the one people fail without noticing: it counts
+         what was attempted, and a withdrawal is an attempt. */
       kind: "check",
       id: "sap-pace",
       name: "Pace of Completion",
       state: "met",
-      constraints: 2,
+      constraints: 3,
       credits: EARNED,
       rule: `${PACE}% of attempted credits completed, against a 67% minimum`,
-      children: [],
+      children: [
+        {
+          kind: "check",
+          id: "sap-pace-ratio",
+          name: "Complete at least 67% of attempted credits",
+          state: "met",
+          constraints: 1,
+          credits: EARNED,
+          rule: `${EARNED} completed of ${ATTEMPTED} attempted`,
+          children: [],
+        },
+        {
+          kind: "check",
+          id: "sap-pace-withdrawals",
+          name: "Withdrawals and incompletes count as attempted, not completed",
+          state: "met",
+          constraints: 1,
+          credits: 0,
+          rule: "None on the record",
+          children: [],
+        },
+        {
+          kind: "check",
+          id: "sap-pace-transfer",
+          name: "Accepted transfer credit counts as both attempted and completed",
+          state: "met",
+          constraints: 1,
+          credits: CARRIED_IN.length * CREDITS_PER_COURSE,
+          rule: `${CARRIED_IN.length * CREDITS_PER_COURSE} credits of dual enrollment accepted`,
+          children: [],
+        },
+      ],
     },
     {
+      /* The ceiling. Aid stops at 150% of the published length whether or not
+         the degree is finished, which is why it is worth watching early. */
       kind: "check",
       id: "sap-timeframe",
       name: "Maximum Timeframe",
@@ -256,7 +362,28 @@ export const AID: ComplianceCheck = {
       constraints: 2,
       credits: ATTEMPTED,
       rule: `${ATTEMPTED} of ${MAX_TIMEFRAME} credits attempted`,
-      children: [],
+      children: [
+        {
+          kind: "check",
+          id: "sap-timeframe-cap",
+          name: `Finish within 150% of the program: ${MAX_TIMEFRAME} attempted credits`,
+          state: "pending",
+          constraints: 1,
+          credits: ATTEMPTED,
+          rule: `${MAX_TIMEFRAME - ATTEMPTED} credits of headroom left`,
+          children: [],
+        },
+        {
+          kind: "check",
+          id: "sap-timeframe-counts",
+          name: "Every attempted credit counts, including transfer and repeats",
+          state: "pending",
+          constraints: 1,
+          credits: 0,
+          rule: "Aid ends once the degree cannot be finished inside the cap",
+          children: [],
+        },
+      ],
     },
     {
       /* The one that is going wrong, and it is going wrong for the same reason
@@ -266,10 +393,43 @@ export const AID: ComplianceCheck = {
       name: "Enrolment Status: Spring 2027",
       state: "outstanding",
       outstanding: 1,
-      constraints: 2,
+      constraints: 3,
       credits: SPRING_PLANNED,
       rule: `${FULL_TIME} credits for a full award — ${SPRING_PLANNED} planned`,
-      children: [],
+      children: [
+        {
+          kind: "check",
+          id: "sap-enrolment-full",
+          name: `Full-time enrollment is ${FULL_TIME} credits`,
+          state: "outstanding",
+          outstanding: 1,
+          constraints: 1,
+          credits: SPRING_PLANNED,
+          rule: `${SPRING_PLANNED} planned — half-time`,
+          children: [],
+        },
+        {
+          kind: "check",
+          id: "sap-enrolment-pell",
+          name: "Pell is prorated by enrollment intensity",
+          state: "outstanding",
+          outstanding: 1,
+          constraints: 1,
+          credits: 0,
+          rule: "Half-time pays half the scheduled award",
+          children: [],
+        },
+        {
+          kind: "check",
+          id: "sap-enrolment-loans",
+          name: "Direct Loans require at least half-time enrollment",
+          state: "met",
+          constraints: 1,
+          credits: SPRING_PLANNED,
+          rule: `${SPRING_PLANNED} credits clears the 6-credit floor`,
+          children: [],
+        },
+      ],
     },
   ],
 }

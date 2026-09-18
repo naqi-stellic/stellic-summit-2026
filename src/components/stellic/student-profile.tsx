@@ -75,6 +75,24 @@ function ShareBar({
 /** Scott's own face. A record of a person leads with the person, and initials
  *  are what you show when you have not got one — so they stay as the fallback
  *  rather than as the design. */
+/** How much of Stellic this student is actually using, in three steps. The
+ *  unlit ones stay on the row: three of three and two of three have to be
+ *  telling apart at a glance, and two bolts alone do not. */
+export function EngageBolts({ lit, of, size = 14 }: { lit: number; of: number; size?: number }) {
+  return (
+    <span className="flex gap-0.5">
+      {Array.from({ length: of }, (_, i) => (
+        <Icon
+          key={i}
+          name="bolt"
+          size={size}
+          className={i < lit ? "text-accent-amber" : "text-gray-40"}
+        />
+      ))}
+    </span>
+  )
+}
+
 export function StudentFace({ size = 40, className }: { size?: number; className?: string }) {
   const [failed, setFailed] = useState(false)
 
@@ -248,11 +266,7 @@ export function NetworkRow() {
       <ProgressCard className="flex min-w-[280px] flex-1 basis-0 items-start justify-between gap-4">
         <div className="flex flex-col gap-4">
           <p className="text-body-md font-semibold text-gray-80">Stellic Engage</p>
-          <div className="flex gap-0.5">
-            {Array.from({ length: engage.stars }, (_, i) => (
-              <Icon key={i} name="bolt" size={16} className="text-gray-40" />
-            ))}
-          </div>
+          <EngageBolts lit={engage.lit} of={engage.bolts} size={16} />
         </div>
         <div className="flex flex-col gap-4 text-body-md font-semibold text-gray-80">
           <p>{engage.term}</p>

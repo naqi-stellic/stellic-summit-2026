@@ -112,7 +112,10 @@ export const AUDIT_STUDENT = {
   level: "Undergrad",
   /** The advisor the plan's review requests go to. */
   advisor: { name: "Mark Stehlik", initials: "MS", others: 1 },
-  engage: { stars: 5, term: "Fall '26", termGpa: "3.42", cgpa: "3.38" },
+  /* Engagement is a three-step reading of how much of Stellic a student is
+     actually using — not a grade, and not out of five. One figure, drawn the
+     same way on the record and in the search that finds it. */
+  engage: { bolts: 3, lit: 2, term: "Fall '26", termGpa: "3.42", cgpa: "3.38" },
   interests: [],
 }
 

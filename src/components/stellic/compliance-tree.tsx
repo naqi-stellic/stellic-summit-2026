@@ -120,8 +120,8 @@ function CheckRow({
     <div
       onClick={hasChildren ? onToggle : undefined}
       className={cn(
-        "group flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px]",
-        hasChildren && "cursor-pointer"
+        "group flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px] transition-colors",
+        hasChildren && "cursor-pointer hover:bg-gray-0"
       )}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -130,7 +130,12 @@ function CheckRow({
         {hasChildren ? (
           <button
             type="button"
-            onClick={onToggle}
+            /* The row toggles too, so this has to keep its press to itself —
+               otherwise the chevron folds it and the row unfolds it again. */
+            onClick={(event) => {
+              event.stopPropagation()
+              onToggle()
+            }}
             aria-expanded={open}
             aria-label={`${open ? "Collapse" : "Expand"} ${check.name}`}
             className="shrink-0 cursor-pointer"

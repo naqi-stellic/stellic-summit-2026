@@ -5,6 +5,8 @@ import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { EngageBolts } from "@/components/stellic/student-profile"
+import { AUDIT_STUDENT } from "@/data/audit"
 import {
   APPLIED,
   FILTERS,
@@ -227,23 +229,6 @@ function Bar({ meter }: { meter: Meter }) {
   )
 }
 
-/** Five bolts, and the ones this student has earned. Stellic Engage says how
- *  much of the product they are actually using, which is not a grade. */
-function Engage({ lit }: { lit: number }) {
-  return (
-    <span className="flex gap-0.5">
-      {Array.from({ length: 5 }, (_, i) => (
-        <Icon
-          key={i}
-          name="bolt"
-          size={14}
-          className={i < lit ? "text-accent-amber" : "text-gray-40"}
-        />
-      ))}
-    </span>
-  )
-}
-
 function Portrait({ student }: { student: Student }) {
   if (student.photo) {
     return (
@@ -282,7 +267,7 @@ function Row({ student, onOpen }: { student: Student; onOpen?: () => void }) {
         <p className="text-body-md text-gray-80">
           {student.username} <span className="px-0.5">/</span> {student.standing}
         </p>
-        <Engage lit={student.engage} />
+        <EngageBolts lit={student.engage} of={AUDIT_STUDENT.engage.bolts} />
       </div>
 
       {/* What they are on. A programme nobody has declared yet says so, because

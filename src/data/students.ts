@@ -78,7 +78,7 @@ export type Student = {
   username: string
   name: string
   standing: string
-  /** Out of five. The product draws all five and lights the ones earned. */
+  /** Out of three, as the record reads it. */
   engage: number
   photo?: string
   /** Avatar ground where there is no photo. */
@@ -100,7 +100,7 @@ export const ROSTER: Student[] = [
     username: AUDIT_STUDENT.username,
     name: AUDIT_STUDENT.name,
     standing: AUDIT_STUDENT.standing,
-    engage: 1,
+    engage: AUDIT_STUDENT.engage.lit,
     photo: AUDIT_STUDENT.photo,
     colour: "#6941c6",
     programs: [
@@ -116,7 +116,7 @@ export const ROSTER: Student[] = [
     username: "aosei",
     name: "Amara Osei",
     standing: "Junior",
-    engage: 4,
+    engage: 3,
     colour: "#026aa2",
     programs: [{ name: "Political Science, B.A." }],
     cgpa: "2.81",
@@ -127,7 +127,7 @@ export const ROSTER: Student[] = [
     username: "jmiller",
     name: "Jonah Miller",
     standing: "Sophomore",
-    engage: 3,
+    engage: 2,
     colour: "#3e4784",
     programs: [{ name: "Computer Science, B.S." }, { name: "Mathematics", declared: false }],
     cgpa: "3.12",
@@ -139,7 +139,7 @@ export const ROSTER: Student[] = [
     username: "syildiz",
     name: "Selin Yıldız",
     standing: "Junior",
-    engage: 5,
+    engage: 3,
     colour: "#087443",
     programs: [{ name: "Biology, B.S." }],
     cgpa: "3.64",
@@ -150,7 +150,7 @@ export const ROSTER: Student[] = [
     username: "twren",
     name: "Tobias Wren",
     standing: "Senior",
-    engage: 2,
+    engage: 1,
     colour: "#9f1ab1",
     programs: [{ name: "Graphic Design, B.F.A." }],
     cgpa: "2.94",
@@ -162,7 +162,7 @@ export const ROSTER: Student[] = [
     username: "dramos",
     name: "Diego Ramos",
     standing: "Senior",
-    engage: 4,
+    engage: 3,
     colour: "#175cd3",
     programs: [{ name: "Computer Science, B.S." }],
     cgpa: "3.41",
@@ -173,7 +173,7 @@ export const ROSTER: Student[] = [
     username: "falamin",
     name: "Farah Al-Amin",
     standing: "Senior",
-    engage: 3,
+    engage: 2,
     colour: "#b54708",
     programs: [{ name: "Biology, B.S." }],
     cgpa: "3.28",
@@ -184,7 +184,7 @@ export const ROSTER: Student[] = [
     username: "rnakamura",
     name: "Ryo Nakamura",
     standing: "Freshman",
-    engage: 2,
+    engage: 1,
     colour: "#0b7a6b",
     programs: [
       { name: "Computer Science, B.S." },
