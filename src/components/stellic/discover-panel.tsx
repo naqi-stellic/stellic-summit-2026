@@ -11,6 +11,7 @@ import {
   activeFilters,
   groupOf,
   matchPrograms,
+  programNoun,
   type FilterState,
   type Program,
 } from "@/data/programs"
@@ -154,12 +155,14 @@ function SummaryRow({
 function DiscoverSummary({
   intent,
   filters,
-  matches,
+  programs,
   onEdit,
 }: {
   intent: DiscoverIntent | null
   filters: FilterState
-  matches: number
+  /** What the answers leave, which is the only reading of them that matters
+   *  before the check is run. */
+  programs: Program[]
   onEdit: (step: 1 | 2) => void
 }) {
   const active = activeFilters(filters)
@@ -196,7 +199,8 @@ function DiscoverSummary({
       </div>
 
       <p className="text-body-md text-gray-80">
-        {matches} {matches === 1 ? "program matches" : "programs match"} your selection
+        {programs.length} {programNoun(programs)}{" "}
+        {programs.length === 1 ? "matches" : "match"} your selection
       </p>
     </div>
   )
@@ -305,7 +309,7 @@ export function DiscoverPanel({
           <DiscoverSummary
           intent={intent}
           filters={filters}
-          matches={programs.length}
+          programs={programs}
           onEdit={(step) => setView(step)}
           />
         )}

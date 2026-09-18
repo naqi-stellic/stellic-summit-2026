@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   creditsToGo,
+  programNoun,
   programStanding,
   programTotal,
   reusedCredits,
@@ -169,6 +170,7 @@ export function DiscoverResults({
 }) {
   const waiting = loaded.length < programs.length
 
+
   /* A program cannot be ranked before it has been audited, so the ones that
      have come back sort to the top and the rest hold their catalogue order
      until they do. The list ranks itself as it fills. */
@@ -186,7 +188,7 @@ export function DiscoverResults({
           Programs matching your criteria
         </h3>
         <p className="text-body-md text-gray-80">
-          {programs.length} {programs.length === 1 ? "program" : "programs"}
+          {programs.length} {programNoun(programs)}
           {waiting ? (
             <>
               {" found — loading progress"}

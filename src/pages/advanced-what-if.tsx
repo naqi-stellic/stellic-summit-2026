@@ -54,6 +54,12 @@ export function AdvancedWhatIf() {
      change, and greying them out would say they had. */
   const [recomputing, setRecomputing] = useState(false)
   const beat = useRef<number | undefined>(undefined)
+  /* Where to look when the audit comes back. Changing a major rewrites the
+     tree at the top; adding a programme hangs a second one underneath, forty
+     rows down, and an answer you have to go looking for does not read as an
+     answer. */
+  const auditRef = useRef<HTMLElement>(null)
+  const addedRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => () => window.clearTimeout(beat.current), [])
 
@@ -94,7 +100,14 @@ export function AdvancedWhatIf() {
               setRecomputing(true)
               setApplied({ program, mode })
               window.clearTimeout(beat.current)
-              beat.current = window.setTimeout(() => setRecomputing(false), 900)
+              beat.current = window.setTimeout(() => {
+                setRecomputing(false)
+                /* After paint, or there is nothing to scroll to yet. */
+                requestAnimationFrame(() => {
+                  const landing = mode === "add" ? addedRef.current : auditRef.current
+                  landing?.scrollIntoView({ behavior: "smooth", block: "start" })
+                })
+              }, 900)
             }}
             onClose={() => setDiscovering(false)}
           />
@@ -123,10 +136,13 @@ export function AdvancedWhatIf() {
 
           {/* Only Progress has a design; the other four tabs are named and
               nothing more, which is what the frame shows of them. */}
-          <section /* 40 between the tree, the unmatched list and the banner: three
-                   separate things in one card, and at 24 they read as one
-                   list that changes its mind twice. */
-                className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
+          <section
+            ref={auditRef}
+            /* 40 between the tree, the unmatched list and the banner: three
+               separate things in one card, and at 24 they read as one list
+               that changes its mind twice. */
+            className="scroll-mt-4 flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card"
+          >
             {recomputing ? (
               /* The old tree goes rather than sitting there greyed: it is the
                  answer to a question nobody is asking any more. Same spinner
@@ -141,7 +157,11 @@ export function AdvancedWhatIf() {
             {/* A second program sits under the degree and above the courses
                 nothing has claimed, which is where it would fall on the
                 record: another thing the transcript is being read against. */}
-            {second && <AuditTree audit={second} />}
+            {second && (
+              <div ref={addedRef} className="scroll-mt-4">
+                <AuditTree audit={second} />
+              </div>
+            )}
             <UnmatchedSection
               count={unmatched.length}
               blurb={UNMATCHED_BLURB}

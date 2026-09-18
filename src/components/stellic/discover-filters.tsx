@@ -5,6 +5,8 @@ import {
   FILTER_GROUPS,
   fieldOptions,
   activeFilters,
+  matchPrograms,
+  programNoun,
   type FilterState,
   type Program,
 } from "@/data/programs"
@@ -54,7 +56,8 @@ export function DiscoverFilters({
 
         {activeFilters(filters).length > 0 && (
           <p className={cn("text-body-md", matches === 0 ? "text-alert-100" : "text-gray-80")}>
-            {matches} {matches === 1 ? "program" : "programs"} with selected filters
+            {matches} {programNoun(matchPrograms(filters, onOffer), matches)} with selected
+            filters
           </p>
         )}
       </div>

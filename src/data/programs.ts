@@ -42,8 +42,6 @@ export type Program = {
   requirements: ProgramRequirement[]
 }
 
-const seat = (name: string) => ({ code: "", name })
-
 /* The catalogue: twenty-five programmes, sized the way the registrar sizes them
  * — a certificate is five courses, a minor is six, and a bachelor's is forty,
  * the same forty the student's own degree asks for. Getting that wrong is the
@@ -63,7 +61,184 @@ const seat = (name: string) => ({ code: "", name })
  * business ones carry the business core — if all ten shared the core they would
  * all start from the same green floor and nothing would read as a change. */
 
-const seats = (count: number, label: string) => Array.from({ length: count }, () => seat(label))
+/* Electives are courses, not blanks.
+ *
+ * A requirement that says "three accounting electives" and then draws three
+ * empty rows is telling a student nothing they did not already know. A
+ * catalogue names what may count, so these do: every elective below is a real
+ * row with a code on it, drawn from its department, and an open elective is
+ * drawn from across the university because that is what an open elective is.
+ *
+ * None of these codes are on this student's record, so the standings and the
+ * order of the list are exactly what they were when the seats were blank —
+ * this is the same audit, said properly. */
+
+type Course = { code: string; name: string }
+
+const ELECTIVES = {
+  accounting: [
+    { code: "ACCT 340", name: "Governmental & Nonprofit Accounting" },
+    { code: "ACCT 430", name: "Forensic Accounting" },
+    { code: "ACCT 440", name: "International Accounting" },
+    { code: "ACCT 470", name: "Accounting Analytics" },
+    { code: "ACCT 480", name: "Estate & Gift Taxation" },
+  ],
+  analytics: [
+    { code: "DATA 340", name: "Machine Learning for Business" },
+    { code: "DATA 350", name: "Text Analytics" },
+    { code: "DATA 360", name: "Optimization Methods" },
+    { code: "DATA 410", name: "Cloud Data Platforms" },
+    { code: "DATA 430", name: "Experimentation & A/B Testing" },
+  ],
+  marketing: [
+    { code: "MKTG 340", name: "Services Marketing" },
+    { code: "MKTG 350", name: "Retail Management" },
+    { code: "MKTG 360", name: "Marketing Analytics" },
+    { code: "MKTG 430", name: "Global Marketing" },
+    { code: "MKTG 450", name: "Social Media Strategy" },
+    { code: "MKTG 460", name: "Pricing Strategy" },
+  ],
+  management: [
+    { code: "MGMT 330", name: "Compensation & Benefits" },
+    { code: "MGMT 350", name: "Business Ethics in Practice" },
+    { code: "MGMT 360", name: "Entrepreneurial Management" },
+    { code: "MGMT 420", name: "Talent Acquisition" },
+    { code: "MGMT 440", name: "Strategic Management" },
+    { code: "MGMT 460", name: "Labor Relations" },
+  ],
+  supplyChain: [
+    { code: "OPS 350", name: "Inventory Management" },
+    { code: "OPS 360", name: "Lean Systems" },
+    { code: "OPS 430", name: "Transportation Management" },
+    { code: "OPS 450", name: "Supply Chain Risk" },
+    { code: "OPS 460", name: "Service Operations" },
+    { code: "OPS 470", name: "Sourcing Analytics" },
+  ],
+  international: [
+    { code: "IBUS 320", name: "International Marketing" },
+    { code: "IBUS 340", name: "International Finance" },
+    { code: "IBUS 420", name: "Emerging Markets" },
+    { code: "IBUS 430", name: "Global Supply Networks" },
+    { code: "IBUS 450", name: "International Negotiation" },
+  ],
+  economics: [
+    { code: "ECON 350", name: "Labor Economics" },
+    { code: "ECON 360", name: "Environmental Economics" },
+    { code: "ECON 370", name: "Health Economics" },
+    { code: "ECON 420", name: "Development Economics" },
+    { code: "ECON 430", name: "Game Theory" },
+    { code: "ECON 440", name: "Industrial Organization" },
+  ],
+  psychology: [
+    { code: "PSYC 320", name: "Personality Theory" },
+    { code: "PSYC 340", name: "Health Psychology" },
+    { code: "PSYC 360", name: "Psychology of Learning" },
+    { code: "PSYC 370", name: "Industrial & Organizational Psychology" },
+    { code: "PSYC 420", name: "Psychopharmacology" },
+    { code: "PSYC 430", name: "Forensic Psychology" },
+    { code: "PSYC 440", name: "Cross-Cultural Psychology" },
+  ],
+  communication: [
+    { code: "COMM 320", name: "Intercultural Communication" },
+    { code: "COMM 340", name: "Public Relations" },
+    { code: "COMM 360", name: "Health Communication" },
+    { code: "COMM 370", name: "Political Communication" },
+    { code: "COMM 420", name: "Crisis Communication" },
+    { code: "COMM 430", name: "Digital Storytelling" },
+    { code: "COMM 440", name: "Media Ethics" },
+  ],
+  studio: [
+    { code: "ART 250", name: "Ceramics I" },
+    { code: "ART 260", name: "Photography I" },
+    { code: "ART 320", name: "Painting II" },
+    { code: "ART 340", name: "Printmaking II" },
+    { code: "ART 350", name: "Installation Art" },
+    { code: "ART 360", name: "Book Arts" },
+    { code: "ART 430", name: "Advanced Photography" },
+    { code: "ART 440", name: "Sculpture II" },
+    { code: "ART 460", name: "Artist's Studio Seminar" },
+  ],
+  statistics: [
+    { code: "STAT 350", name: "Experimental Design" },
+    { code: "STAT 360", name: "Time Series Analysis" },
+    { code: "STAT 420", name: "Bayesian Methods" },
+  ],
+  informationSystems: [
+    { code: "MIS 330", name: "Database Systems" },
+    { code: "MIS 350", name: "Networks & Security" },
+    { code: "MIS 430", name: "IT Project Management" },
+  ],
+  history: [
+    { code: "HIST 220", name: "History of the Americas" },
+    { code: "HIST 320", name: "Economic History" },
+    { code: "HIST 340", name: "History of Technology" },
+  ],
+  entrepreneurship: [
+    { code: "ENTR 320", name: "Social Entrepreneurship" },
+    { code: "ENTR 340", name: "Small Business Management" },
+    { code: "ENTR 420", name: "Startup Law" },
+  ],
+  spanish: [
+    { code: "SPAN 210", name: "Spanish Conversation" },
+    { code: "SPAN 310", name: "Spanish for Business" },
+    { code: "SPAN 330", name: "Latin American Literature" },
+  ],
+  artHistory: [
+    { code: "ARTH 280", name: "Arts of Asia" },
+    { code: "ARTH 340", name: "Museum Studies" },
+    { code: "ARTH 360", name: "Art & Society" },
+  ],
+  philosophy: [
+    { code: "PHIL 250", name: "Political Philosophy" },
+    { code: "PHIL 340", name: "Philosophy of Science" },
+    { code: "PHIL 360", name: "Existentialism" },
+  ],
+  music: [
+    { code: "MUSC 230", name: "Music History II" },
+    { code: "MUSC 250", name: "World Music" },
+    { code: "MUSC 330", name: "Conducting" },
+  ],
+  projectManagement: [
+    { code: "PM 330", name: "Agile Delivery" },
+    { code: "PM 350", name: "Risk & Procurement" },
+  ],
+} satisfies Record<string, Course[]>
+
+/** What an open elective may be: anything the university teaches. Deliberately
+ *  nothing this student has taken and nothing any programme below requires, so
+ *  a free choice stays free and cannot quietly satisfy something else. */
+const OPEN_POOL: Course[] = [
+  { code: "ANTH 210", name: "Cultural Anthropology" },
+  { code: "ASTR 150", name: "Introduction to Astronomy" },
+  { code: "CHEM 110", name: "Chemistry in Society" },
+  { code: "CS 150", name: "Introduction to Programming" },
+  { code: "ENVS 200", name: "Environmental Science" },
+  { code: "FILM 220", name: "Introduction to Film Studies" },
+  { code: "FREN 101", name: "Elementary French I" },
+  { code: "GEOL 130", name: "Physical Geology" },
+  { code: "GNDR 210", name: "Gender & Society" },
+  { code: "JOUR 240", name: "News Writing" },
+  { code: "KINE 120", name: "Personal Wellness" },
+  { code: "LING 210", name: "Introduction to Linguistics" },
+  { code: "MUSC 150", name: "Music Appreciation" },
+  { code: "NUTR 130", name: "Principles of Nutrition" },
+  { code: "PHYS 140", name: "Conceptual Physics" },
+  { code: "POLS 200", name: "American Government" },
+  { code: "SOC 200", name: "Introduction to Sociology" },
+  { code: "STAT 150", name: "Statistical Literacy" },
+  { code: "URBP 240", name: "Cities & Urban Life" },
+  { code: "WRIT 220", name: "Professional Writing" },
+  { code: "DANC 150", name: "Dance Appreciation" },
+  { code: "GEOG 210", name: "Human Geography" },
+  { code: "HLTH 200", name: "Public Health Foundations" },
+  { code: "CS 210", name: "Data Structures" },
+]
+
+/** A window onto the open pool, so two programmes do not offer the same
+ *  fifteen courses in the same order. */
+function openElectives(count: number, from: number): Course[] {
+  return Array.from({ length: count }, (_, i) => OPEN_POOL[(from + i) % OPEN_POOL.length])
+}
 
 /** General education, as the College of Business asks for it. */
 const GEN_ED = [
@@ -78,7 +253,7 @@ const GEN_ED = [
   { code: "MATH 140", name: "Business Calculus" },
   { code: "BIOL 105", name: "Principles of Biology" },
   { code: "GEOG 120", name: "World Regional Geography" },
-  seat("General education elective"),
+  { code: "RELS 210", name: "World Religions" },
 ]
 
 /** The quantitative variant: a degree that runs on statistics asks for the
@@ -144,7 +319,7 @@ const ARTS_STUDIO_FOUNDATIONS = [
   { code: "ARTH 250", name: "History of Western Art II" },
   { code: "PHIL 210", name: "Aesthetics" },
   { code: "BIOL 105", name: "Principles of Biology" },
-  seat("Fine arts general education elective"),
+  { code: "THTR 210", name: "Acting I" },
 ]
 
 type MajorSpec = {
@@ -158,9 +333,12 @@ type MajorSpec = {
   /** The business core, for the colleges that run on one. */
   shared?: { id: string; name: string; courses: { code: string; name: string }[] }
   core: { name: string; courses: { code: string; name: string }[] }
-  /** What the major calls its own electives. */
+  /** What the major calls its own electives, and the courses that may count. */
   electiveLabel: string
-  electives: number
+  electives: Course[]
+  /** Where this programme starts reading the open pool, so no two offer the
+   *  same list in the same order. */
+  openFrom: number
 }
 
 /** A bachelor's, assembled from its blocks. Forty courses every time: the
@@ -171,7 +349,7 @@ function major(spec: MajorSpec): Program {
     spec.foundation.courses.length +
     (spec.shared?.courses.length ?? 0) +
     spec.core.courses.length +
-    spec.electives
+    spec.electives.length
   const open = 40 - named
 
   return {
@@ -208,8 +386,8 @@ function major(spec: MajorSpec): Program {
       {
         id: `${spec.id}-electives`,
         name: `${spec.electiveLabel} Electives`,
-        tags: [`at least ${spec.electives * CREDITS_PER_COURSE} credits`],
-        courses: seats(spec.electives, `${spec.electiveLabel} elective`),
+        tags: [`at least ${spec.electives.length * CREDITS_PER_COURSE} credits`],
+        courses: spec.electives,
       },
       ...(open > 0
         ? [
@@ -217,7 +395,7 @@ function major(spec: MajorSpec): Program {
               id: `${spec.id}-open`,
               name: "Open Electives",
               tags: [`at least ${open * CREDITS_PER_COURSE} credits`],
-              courses: seats(open, "Open elective"),
+              courses: openElectives(open, spec.openFrom),
             },
           ]
         : []),
@@ -232,7 +410,9 @@ function minor(spec: {
   name: string
   school: string
   department: string
-  core: { code: string; name: string }[]
+  core: Course[]
+  /** The courses its own electives may be taken from. */
+  electives: Course[]
 }): Program {
   return {
     id: spec.id,
@@ -253,7 +433,7 @@ function minor(spec: {
         id: `${spec.id}-electives`,
         name: `${spec.name} Electives`,
         tags: [`at least ${(6 - spec.core.length) * CREDITS_PER_COURSE} credits`],
-        courses: seats(6 - spec.core.length, `${spec.name} elective`),
+        courses: spec.electives.slice(0, 6 - spec.core.length),
       },
     ],
   }
@@ -285,7 +465,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Accounting",
-    electives: 3,
+    electives: ELECTIVES.accounting.slice(0, 3),
+    openFrom: 0,
   }),
   major({
     id: "business-analytics-bs",
@@ -308,7 +489,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Analytics",
-    electives: 3,
+    electives: ELECTIVES.analytics.slice(0, 3),
+    openFrom: 3,
   }),
   major({
     id: "marketing-bs",
@@ -330,7 +512,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Marketing",
-    electives: 4,
+    electives: ELECTIVES.marketing.slice(0, 4),
+    openFrom: 6,
   }),
   major({
     id: "management-bs",
@@ -351,7 +534,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Management",
-    electives: 5,
+    electives: ELECTIVES.management.slice(0, 5),
+    openFrom: 9,
   }),
   major({
     id: "supply-chain-bs",
@@ -372,7 +556,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Supply Chain",
-    electives: 5,
+    electives: ELECTIVES.supplyChain.slice(0, 5),
+    openFrom: 12,
   }),
   major({
     id: "international-business-bs",
@@ -395,7 +580,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "International Business",
-    electives: 4,
+    electives: ELECTIVES.international.slice(0, 4),
+    openFrom: 15,
   }),
   major({
     id: "economics-ba",
@@ -425,7 +611,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Economics",
-    electives: 5,
+    electives: ELECTIVES.economics.slice(0, 5),
+    openFrom: 18,
   }),
   major({
     id: "psychology-ba",
@@ -451,7 +638,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Psychology",
-    electives: 6,
+    electives: ELECTIVES.psychology.slice(0, 6),
+    openFrom: 21,
   }),
   major({
     id: "communication-ba",
@@ -476,7 +664,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Communication",
-    electives: 6,
+    electives: ELECTIVES.communication.slice(0, 6),
+    openFrom: 2,
   }),
   major({
     id: "studio-art-bfa",
@@ -507,7 +696,8 @@ const MAJORS: Program[] = [
       ],
     },
     electiveLabel: "Studio",
-    electives: 8,
+    electives: ELECTIVES.studio.slice(0, 8),
+    openFrom: 8,
   }),
 ]
 
@@ -524,6 +714,7 @@ const MINORS: Program[] = [
       { code: "STAT 210", name: "Business Statistics" },
       { code: "DATA 220", name: "Foundations of Data Analytics" },
     ],
+    electives: ELECTIVES.analytics,
   }),
   minor({
     id: "economics-minor",
@@ -536,6 +727,7 @@ const MINORS: Program[] = [
       { code: "MATH 140", name: "Business Calculus" },
       { code: "ECON 310", name: "Money & Banking" },
     ],
+    electives: ELECTIVES.economics,
   }),
   minor({
     id: "accounting-minor",
@@ -548,6 +740,7 @@ const MINORS: Program[] = [
       { code: "ACCT 310", name: "Intermediate Accounting I" },
       { code: "ACCT 330", name: "Cost Accounting" },
     ],
+    electives: ELECTIVES.accounting,
   }),
   minor({
     id: "statistics-minor",
@@ -560,6 +753,7 @@ const MINORS: Program[] = [
       { code: "STAT 320", name: "Econometrics for Business" },
       { code: "STAT 340", name: "Predictive Modeling" },
     ],
+    electives: ELECTIVES.statistics,
   }),
   minor({
     id: "marketing-minor",
@@ -572,6 +766,7 @@ const MINORS: Program[] = [
       { code: "MKTG 320", name: "Marketing Research" },
       { code: "MKTG 330", name: "Digital Marketing" },
     ],
+    electives: ELECTIVES.marketing,
   }),
   minor({
     id: "information-systems-minor",
@@ -584,6 +779,7 @@ const MINORS: Program[] = [
       { code: "MIS 310", name: "Systems Analysis & Design" },
       { code: "MIS 410", name: "Data Management & Governance" },
     ],
+    electives: ELECTIVES.informationSystems,
   }),
   minor({
     id: "history-minor",
@@ -596,6 +792,7 @@ const MINORS: Program[] = [
       { code: "HIST 205", name: "Modern World History" },
       { code: "HIST 310", name: "Historiography" },
     ],
+    electives: ELECTIVES.history,
   }),
   minor({
     id: "management-minor",
@@ -608,6 +805,7 @@ const MINORS: Program[] = [
       { code: "MGMT 320", name: "Human Resource Management" },
       { code: "BLAW 301", name: "Business Law & Ethics" },
     ],
+    electives: ELECTIVES.management,
   }),
   minor({
     id: "entrepreneurship-minor",
@@ -620,6 +818,7 @@ const MINORS: Program[] = [
       { code: "ENTR 310", name: "New Venture Creation" },
       { code: "ENTR 400", name: "Venture Finance" },
     ],
+    electives: ELECTIVES.entrepreneurship,
   }),
   minor({
     id: "communication-minor",
@@ -632,6 +831,7 @@ const MINORS: Program[] = [
       { code: "COMM 310", name: "Rhetorical Theory" },
       { code: "COMM 350", name: "Persuasion" },
     ],
+    electives: ELECTIVES.communication,
   }),
   minor({
     id: "psychology-minor",
@@ -644,6 +844,7 @@ const MINORS: Program[] = [
       { code: "PSYC 230", name: "Social Psychology" },
       { code: "PSYC 310", name: "Cognitive Psychology" },
     ],
+    electives: ELECTIVES.psychology,
   }),
   minor({
     id: "spanish-minor",
@@ -656,6 +857,7 @@ const MINORS: Program[] = [
       { code: "SPAN 201", name: "Intermediate Spanish I" },
       { code: "SPAN 202", name: "Intermediate Spanish II" },
     ],
+    electives: ELECTIVES.spanish,
   }),
   minor({
     id: "art-history-minor",
@@ -668,6 +870,7 @@ const MINORS: Program[] = [
       { code: "ARTH 250", name: "History of Western Art II" },
       { code: "ARTH 320", name: "Modern & Contemporary Art" },
     ],
+    electives: ELECTIVES.artHistory,
   }),
   minor({
     id: "philosophy-minor",
@@ -680,6 +883,7 @@ const MINORS: Program[] = [
       { code: "PHIL 310", name: "Ethical Theory" },
       { code: "PHIL 330", name: "Philosophy of Mind" },
     ],
+    electives: ELECTIVES.philosophy,
   }),
   minor({
     id: "music-minor",
@@ -692,6 +896,7 @@ const MINORS: Program[] = [
       { code: "MUSC 210", name: "Music History I" },
       { code: "MUSC 310", name: "Applied Studio" },
     ],
+    electives: ELECTIVES.music,
   }),
 ]
 
@@ -720,7 +925,7 @@ const CERTIFICATES: Program[] = [
         id: "cert-elective",
         name: "Certificate Elective",
         tags: ["at least 3 credits"],
-        courses: [seat("Analytics elective")],
+        courses: [{ code: "DATA 340", name: "Machine Learning for Business" }],
       },
     ],
   },
@@ -748,7 +953,7 @@ const CERTIFICATES: Program[] = [
         id: "pm-elective",
         name: "Certificate Elective",
         tags: ["at least 3 credits"],
-        courses: [seat("Project management elective")],
+        courses: [{ code: "PM 330", name: "Agile Delivery" }],
       },
     ],
   },
@@ -955,6 +1160,15 @@ export function matchPrograms(filters: FilterState, within: Program[] = PROGRAMS
       })
     )
     .sort((a, b) => reusedCredits(b) - reusedCredits(a))
+}
+
+/** What to call a list of programmes. All one kind and it says which kind,
+ *  because that is the question that was asked — "10 programs" is the right
+ *  count and the wrong word when every one of them is a major. */
+export function programNoun(programs: Program[], count = programs.length): string {
+  const kinds = new Set(programs.map((program) => program.kind))
+  const noun = kinds.size === 1 ? [...kinds][0].toLowerCase() : "program"
+  return count === 1 ? noun : `${noun}s`
 }
 
 export function activeFilters(filters: FilterState): { field: FilterField; values: string[] }[] {
