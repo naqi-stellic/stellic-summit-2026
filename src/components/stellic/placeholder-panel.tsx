@@ -203,7 +203,7 @@ export function PlaceholderPanel({
             <p className="text-body-md text-gray-80">
               Satisfies "{seat.name}" in{" "}
               <a href="#" className="underline [text-underline-position:from-font]">
-                BSc in {DEGREE.program.replace(", B.S.", "")}
+                {DEGREE.credential}
               </a>
             </p>
           </Section>

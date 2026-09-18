@@ -1,5 +1,5 @@
 import type { CatalogEntry } from "@/data/catalog"
-import { CREDITS_PER_COURSE, type Meeting } from "@/data/plan"
+import { CREDITS_PER_COURSE, DEGREE, type Meeting } from "@/data/plan"
 
 /* What a course looks like when it is opened on its own: the catalogue entry
  * for it, the classes on offer, and everything the audit knows about where it
@@ -358,7 +358,7 @@ export function courseDetail(entry: CatalogEntry): CourseDetail {
     prerequisites: prerequisites(entry, seed),
     equivalents: [`${entry.code.split(" ")[0]}-${300 + (seed % 90)}`, `GEN-${100 + (seed % 80)}`],
     countsFor: [
-      { name: entry.reason, under: "BSc in Business Administration" },
+      { name: entry.reason, under: DEGREE.credential },
       { name: "120 Total Credits", under: "Degree Checks" },
       { name: "Residency Credit", under: "Degree Checks" },
     ],

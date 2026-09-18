@@ -104,8 +104,12 @@ export const STUDENT = { name: "Scott Abott", username: "sabott" }
 export const DEGREE = {
   program: "Business Administration, B.S.",
   /** What the degree confers. The program is how it is earned; this is the
-   *  thing with a name on the certificate, and an audit reads it first. */
-  credential: "B.S. Business",
+   *  thing with a name on the certificate, and an audit reads it first — so it
+   *  is written the way a certificate writes it rather than abbreviated into
+   *  "B.S. Business", which is neither the credential's name nor the
+   *  programme's. Three surfaces were already assembling this form out of the
+   *  programme name by hand; now there is one of it. */
+  credential: "BSc in Business Administration",
   /** The program on its own, without the credential trailing it — which is how
    *  it reads once the credential is stated above it. */
   major: "Business Administration",

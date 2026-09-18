@@ -299,7 +299,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           openedAs: "Graduation application",
           fields: [
             ["Expected term", "Fall 2026"],
-            ["Credential", "BSc Biology"],
+            ["Credential", "BSc in Biology"],
             ["Credits", "118 of 120, 2 in progress"],
             ["Remaining requirements", "0 unplanned, 1 planned"],
             ["Progress snapshot", "Attached automatically"],
@@ -335,7 +335,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           openedAs: "Graduation application",
           fields: [
             ["Expected term", "Fall 2026"],
-            ["Credential", "BSc Computer Science"],
+            ["Credential", "BSc in Computer Science"],
             ["Credits", "120 of 120"],
             ["Remaining requirements", "0"],
             ["Progress snapshot", "Attached automatically"],

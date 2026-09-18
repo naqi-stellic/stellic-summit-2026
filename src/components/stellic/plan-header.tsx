@@ -274,7 +274,7 @@ export function PlanHeader({
       <PlanFacet
         label="Programs:"
         values={[
-          `BSc in ${DEGREE.program.replace(", B.S.", "")} (concentration: ${DEGREE.concentration})`,
+          `${DEGREE.credential} (concentration: ${DEGREE.concentration})`,
           `Minor in ${DEGREE.minor}`,
         ]}
       />
