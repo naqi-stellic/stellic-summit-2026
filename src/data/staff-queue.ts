@@ -119,7 +119,7 @@ export const PUBLISH_REQUESTS: PublishRequest[] = [
     date: "Jul 31",
     iso: "2026-07-31",
     large: true,
-    vis: ["marcus"],
+    vis: ["mark"],
   },
   {
     id: "ap2",
@@ -129,7 +129,7 @@ export const PUBLISH_REQUESTS: PublishRequest[] = [
     date: "Aug 3",
     iso: "2026-08-03",
     large: false,
-    vis: ["marcus"],
+    vis: ["mark"],
   },
 ]
 
@@ -171,7 +171,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     requestedBy: "Mei-Ling Johansson",
     date: "Aug 3",
     iso: "2026-08-03",
-    vis: ["marcus"],
+    vis: ["mark"],
   },
   {
     id: "ex2",
@@ -188,7 +188,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     requestedBy: "Mei-Ling Johansson",
     date: "Aug 1",
     iso: "2026-08-01",
-    vis: ["marcus"],
+    vis: ["mark"],
   },
   {
     id: "ex3",
@@ -205,7 +205,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     requestedBy: "Selin Yıldız (student)",
     date: "Jul 30",
     iso: "2026-07-30",
-    vis: ["marcus"],
+    vis: ["mark"],
     workflow: {
       name: "Make an Exception: Science Core",
       fields: [
@@ -257,7 +257,7 @@ export const EXCEPTIONS: ExceptionRequest[] = [
     requestedBy: "Camille Beaumont",
     date: "Aug 4",
     iso: "2026-08-04",
-    vis: ["marcus"],
+    vis: ["mark"],
   },
 ]
 
@@ -294,7 +294,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           program: "Biology, B.S.",
           date: "Jul 29",
           iso: "2026-07-29",
-          vis: ["marcus"],
+          vis: ["mark"],
           status: "In Review",
           openedAs: "Graduation application",
           fields: [
@@ -330,7 +330,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           program: "Computer Science, B.S.",
           date: "Jul 31",
           iso: "2026-07-31",
-          vis: ["marcus"],
+          vis: ["mark"],
           status: "In Review",
           openedAs: "Graduation application",
           fields: [
@@ -365,7 +365,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           program: "Political Science, B.A.",
           date: "Aug 2",
           iso: "2026-08-02",
-          vis: ["marcus"],
+          vis: ["mark"],
           status: "In Review",
           openedAs: "Graduation application",
           fields: [

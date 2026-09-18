@@ -7,7 +7,7 @@ import type { PersonaKey } from "@/data/staff-home"
 
 /* The registrar's Home. Transfer Insights is the same page with a different
  * name in `who`. */
-const WHO: PersonaKey = "marcus"
+const WHO: PersonaKey = "mark"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

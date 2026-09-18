@@ -64,7 +64,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 210,
     published: "Sep 2024",
     iso: "2024-09-10",
-    vis: ["marcus"],
+    vis: ["mark"],
     items: [
       {
         severity: "crit",
@@ -159,7 +159,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 142,
     published: "Jan 12",
     iso: "2026-01-12",
-    vis: ["marcus"],
+    vis: ["mark"],
     items: [
       {
         severity: "crit",
@@ -215,7 +215,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 96,
     published: "Mar 3",
     iso: "2026-03-03",
-    vis: ["marcus"],
+    vis: ["mark"],
     items: [
       {
         severity: "crit",
@@ -240,7 +240,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 388,
     published: "Jul 28",
     iso: "2026-07-28",
-    vis: ["marcus"],
+    vis: ["mark"],
     items: [
       {
         severity: "warn",
@@ -289,7 +289,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 41,
     published: "Jun 19",
     iso: "2026-06-19",
-    vis: ["marcus"],
+    vis: ["mark"],
     items: [
       {
         severity: "warn",
@@ -314,7 +314,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 58,
     published: "Jul 2",
     iso: "2026-07-02",
-    vis: ["marcus"],
+    vis: ["mark"],
     items: [
       {
         severity: "opp",
@@ -342,7 +342,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     students: 176,
     published: "May 8",
     iso: "2026-05-08",
-    vis: ["marcus"],
+    vis: ["mark"],
     items: [
       {
         severity: "opp",

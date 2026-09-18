@@ -173,6 +173,7 @@ export function RemainingFilter({
 }) {
   const { type, wait } = useScript()
   const [open, setOpen] = useState(false)
+  const [count, setCount] = useState("")
   const [program, setProgram] = useState("")
   const [programSet, setProgramSet] = useState(false)
   const [requirement, setRequirement] = useState("")
@@ -186,6 +187,12 @@ export function RemainingFilter({
   const run = async () => {
     if (running || programSet) return
     setRunning(true)
+
+    /* From the top of the form, whichever field was clicked into to start it.
+       The count is the first thing the query says — who has anything left on
+       this check — so it is the first thing filled. */
+    if (!(await type(QUERY.remaining, setCount))) return
+    if (!(await wait(300))) return
 
     if (!(await type(QUERY.program, setProgram))) return
     if (!(await wait())) return
@@ -218,6 +225,7 @@ export function RemainingFilter({
   }
 
   const reset = () => {
+    setCount("")
     setProgram("")
     setProgramSet(false)
     setRequirement("")
@@ -255,9 +263,21 @@ export function RemainingFilter({
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[288px] p-4">
         <div className="flex flex-col gap-4">
+          {/* Either of the two fields somebody would start in runs the whole
+              thing — this one because it is first, the program because it is
+              the one the question is really about. */}
           <Field label="Number of requirements remaining">
             <span className="flex gap-2">
-              <Input placeholder="e.g 3-5 or >3" className="min-w-0 flex-1 text-body-md" />
+              <Input
+                value={count}
+                /* Clicked, not focused. The popover puts the caret in its first
+                   field on open, so a fill hung on focus would start itself
+                   before anybody had asked for it. */
+                onClick={run}
+                onChange={(event) => setCount(event.target.value)}
+                placeholder="e.g 3-5 or >3"
+                className="min-w-0 flex-1 text-body-md"
+              />
               <Choose options={["requirements", "credits"]} className="w-[124px]" />
             </span>
           </Field>

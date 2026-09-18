@@ -39,7 +39,7 @@ export const TAB_LABELS: Record<TabKey, string> = {
   transfer: "Transfer",
 }
 
-export type PersonaKey = "marcus" | "jessica"
+export type PersonaKey = "mark" | "jessica"
 
 /** A workflow category whose steps can route to a person. */
 export type WorkflowKey = "grad" | "transfer" | "exc"
@@ -77,10 +77,12 @@ export type Persona = {
 
 export const PERSONAS: Persona[] = [
   {
-    key: "marcus",
-    name: "Marcus",
-    initials: "ML",
-    photo: "/faces/staff-marcus.jpg",
+    key: "mark",
+    name: "Mark",
+    initials: "MS",
+    /* The same face the student's own record shows in Student Success Network.
+       One person, one photograph, wherever the prototypes put him. */
+    photo: "/faces/mstehlik.jpg",
     role: "Registrar",
     perms: {
       auditPublish: true,
@@ -115,7 +117,7 @@ export const personaOf = (key: PersonaKey) => PERSONAS.find((p) => p.key === key
 /** Who is signed in on the staff surfaces that do not name somebody themselves
  *  — Proactive Compliance, Students. The registrar, which makes the walk from
  *  Staff Home to a student's record one person's morning rather than three. */
-export const SIGNED_IN = personaOf("marcus")
+export const SIGNED_IN = personaOf("mark")
 
 /* ============================================================ Jobs */
 

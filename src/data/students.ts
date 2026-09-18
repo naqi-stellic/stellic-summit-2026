@@ -287,6 +287,10 @@ export const ROSTER_VIEWS = [
 */
 
 export const QUERY = {
+  /** How many requirements are still outstanding. "More than none" rather than
+   *  a range: the question is who has anything left on this check at all, and
+   *  a number would be answering a narrower one nobody asked. */
+  remaining: ">0",
   program: "NCAA 2026",
   requirement: "Academic Year Check: Year 2",
   /** What somebody would actually type to find it. Nobody types a requirement's
