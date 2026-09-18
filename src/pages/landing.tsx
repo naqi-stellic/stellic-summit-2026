@@ -25,7 +25,18 @@ const SECTIONS = [
     name: "Team Progress",
     prototypes: [
       { href: "/advanced-what-if.html", name: "Advanced What-If" },
-      { href: "/compliance.html", name: "Proactive Compliance" },
+      {
+        name: "Proactive Compliance",
+        /* Two ways in, because the prototype is a walk rather than a screen.
+           Straight to the record is the compliance question asked of one
+           student; the search is the same question asked of the institution,
+           and the answer is a list you click a name out of. Landing on one of
+           them and never finding the other would be missing half of it. */
+        entries: [
+          { href: "/compliance.html", name: "Student record" },
+          { href: "/students.html", name: "Student search" },
+        ],
+      },
       { href: "/explain.html", name: "Explain Progress" },
       { href: "/staff-home.html", name: "Staff Home" },
     ],
@@ -41,7 +52,11 @@ const SECTIONS = [
 
 const REPO = "https://github.com/naqi-stellic/stellic-summit-2026"
 
-function Prototype({ href, name }: { href: string; name: string }) {
+type Entry = { href: string; name: string }
+
+/** One way into a prototype: the card is the link, and the chevron is a
+ *  signpost rather than a second thing to hit. */
+function Way({ href, name }: Entry) {
   return (
     <a
       href={href}
@@ -60,6 +75,40 @@ function Prototype({ href, name }: { href: string; name: string }) {
       />
     </a>
   )
+}
+
+/** A prototype with more than one door. The card stops being the link — it
+ *  cannot be two of them — so it keeps the name and the ways in sit under it,
+ *  named for where you start rather than for what you will see. */
+function Ways({ name, entries }: { name: string; entries: Entry[] }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-md border border-gray-40 bg-card p-[19px] shadow-sm">
+      <span className="text-h300 font-semibold text-gray-100">{name}</span>
+      <div className="flex flex-wrap gap-2">
+        {entries.map((entry) => (
+          <a
+            key={entry.href}
+            href={entry.href}
+            target="_blank"
+            rel="noreferrer"
+            className="group flex items-center gap-1.5 rounded-md border border-gray-40 bg-card px-[11px] py-[7px] text-body-md text-gray-100 transition-colors hover:border-primary-50 hover:bg-gray-0"
+          >
+            {entry.name}
+            <Icon
+              name="chevron-right"
+              size={14}
+              className="shrink-0 text-gray-60 transition-all group-hover:translate-x-0.5 group-hover:text-primary-50"
+            />
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Prototype({ href, name, entries }: { href?: string; name: string; entries?: Entry[] }) {
+  if (entries) return <Ways name={name} entries={entries} />
+  return <Way href={href!} name={name} />
 }
 
 export function Landing() {
@@ -83,7 +132,7 @@ export function Landing() {
               </h2>
               <div className="flex flex-col gap-3">
                 {section.prototypes.map((prototype) => (
-                  <Prototype key={prototype.href} {...prototype} />
+                  <Prototype key={prototype.name} {...prototype} />
                 ))}
               </div>
             </section>
