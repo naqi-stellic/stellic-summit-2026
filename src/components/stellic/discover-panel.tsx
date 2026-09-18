@@ -32,8 +32,12 @@ const TOTAL_STEPS = 2
 /** How long the whole list takes to finish auditing itself. Nothing is really
  *  computed — the standings are already known — but a result that arrives the
  *  instant you ask for it does not read as having been checked against
- *  anything, and the list is worth reading while it lands. */
-const CHECKING_MS = 5000
+ *  anything, and the list is worth reading while it lands.
+ *
+ *  Short, because it is spread across every card: at twenty-five of them, five
+ *  seconds left the last one filling in long after anybody had stopped
+ *  watching. */
+const CHECKING_MS = 2000
 
 /** What the student is here to do. The answer is what a second question would
  *  narrow, which is why it is asked first. */
@@ -214,11 +218,12 @@ export function DiscoverPanel({
    *  from the moment the check starts; this is only which have filled in. */
   const [loaded, setLoaded] = useState<string[]>([])
 
-  /* Every intent is offered the whole catalogue now. Changing major used to
-     narrow it to majors, which the card says better: a minor shows Add
-     Program and no Switch to, because it cannot take a major's place. The
-     intent decides whether the record can be changed at all, not by what. */
-  const onOffer = PROGRAMS
+  /* Changing your major can only be done with a major, so that intent is
+     offered majors and nothing else — the count at the top of the list is then
+     the answer to the question that was asked. Adding is offered the whole
+     catalogue, because a second major, a minor and a certificate are all
+     things you can add. */
+  const onOffer = intent === "change" ? PROGRAMS.filter((p) => p.kind === "Major") : PROGRAMS
   const programs = matchPrograms(filters, onOffer)
   const isStep = view === 1 || view === 2
 

@@ -7,6 +7,7 @@ import {
   programStanding,
   programTotal,
   reusedCredits,
+  reusedShare,
   type Program,
 } from "@/data/programs"
 
@@ -175,7 +176,7 @@ export function DiscoverResults({
     const known = Number(loaded.includes(b.id)) - Number(loaded.includes(a.id))
     if (known !== 0) return known
     if (!loaded.includes(a.id)) return 0
-    return reusedCredits(b) - reusedCredits(a)
+    return reusedShare(b) - reusedShare(a) || reusedCredits(b) - reusedCredits(a)
   })
 
   return (
@@ -192,7 +193,7 @@ export function DiscoverResults({
               <Ellipsis />
             </>
           ) : (
-            ", sorted by most credits re-used"
+            ", sorted by how much you have already done"
           )}
         </p>
       </div>

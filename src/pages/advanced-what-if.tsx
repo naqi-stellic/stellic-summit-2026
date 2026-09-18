@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { AppShell } from "@/components/layout/app-shell"
 import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
 import { DiscoverPanel } from "@/components/stellic/discover-panel"
 import { DiscoverPrograms } from "@/components/stellic/discover-programs"
+import { Spinner } from "@/components/ui/spinner"
 import {
   AuditControls,
   NetworkRow,
@@ -45,6 +46,16 @@ export function AdvancedWhatIf() {
      degree; `change` puts one in place of it. Nothing is saved anywhere — this
      is the prototype's whole memory of the run. */
   const [applied, setApplied] = useState<{ program: Program; mode: "add" | "change" } | null>(null)
+  /* The beat between asking and being answered. Nothing is computed — the tree
+     is a pure function of the record and the program, and it is ready before
+     the click finishes — but an audit that changes the instant you choose does
+     not read as having been recomputed against anything. It is on the audit
+     card alone: the profile, the terms and the controls above it did not
+     change, and greying them out would say they had. */
+  const [recomputing, setRecomputing] = useState(false)
+  const beat = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(beat.current), [])
 
   const second = applied?.mode === "add" ? auditProgram(applied.program, true) : null
   const primary =
@@ -76,7 +87,15 @@ export function AdvancedWhatIf() {
       panel={
         discovering ? (
           <DiscoverPanel
-            onApply={(program, mode) => setApplied({ program, mode })}
+            onApply={(program, mode) => {
+              /* The panel goes as the answer arrives — it asked its question
+                 and the audit is where the answer is. */
+              setDiscovering(false)
+              setRecomputing(true)
+              setApplied({ program, mode })
+              window.clearTimeout(beat.current)
+              beat.current = window.setTimeout(() => setRecomputing(false), 900)
+            }}
             onClose={() => setDiscovering(false)}
           />
         ) : undefined
@@ -108,6 +127,16 @@ export function AdvancedWhatIf() {
                    separate things in one card, and at 24 they read as one
                    list that changes its mind twice. */
                 className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
+            {recomputing ? (
+              /* The old tree goes rather than sitting there greyed: it is the
+                 answer to a question nobody is asking any more. Same spinner
+                 the rest of the prototypes wait on. */
+              <div className="flex min-h-[320px] flex-col items-center justify-center gap-3">
+                <Spinner className="size-9" />
+                <p className="text-body-md text-gray-80">Recalculating audit</p>
+              </div>
+            ) : (
+              <>
             <AuditTree audit={primary} />
             {/* A second program sits under the degree and above the courses
                 nothing has claimed, which is where it would fall on the
@@ -123,6 +152,8 @@ export function AdvancedWhatIf() {
                 unmatched list do — one edge down each side, whatever is
                 against it. */}
             <DiscoverPrograms onOpen={() => setDiscovering(true)} />
+              </>
+            )}
           </section>
         </div>
       </main>
