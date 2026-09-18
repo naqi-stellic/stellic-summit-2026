@@ -87,6 +87,11 @@ may take — are all fine. Eligibility is not. A student can be ineligible to pl
 and perfectly funded, or the other way round, and neither ruleset can see the
 other.
 
+Year 2 opens folded, like every year but the one you unfold. Both ruleset heads
+fold from their own row, and inside them the whole row is the control — the
+name, the mark and the space around them — because a chevron is a small target
+for the commonest thing anyone does here. The badges keep their own press.
+
 Both are illustrative rather than authoritative. What matters is that they are
 time-boxed, countable, and can fail while the degree audit looks healthy.
 

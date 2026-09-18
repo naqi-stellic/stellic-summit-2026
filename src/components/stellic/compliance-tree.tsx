@@ -69,12 +69,20 @@ function CheckTools({ name, onExplain }: { name: string; onExplain?: () => void 
 
   return (
     <>
-      <button type="button" onClick={onExplain} className={cn(shown, "px-[7px] py-px")}>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation()
+          onExplain()
+        }}
+        className={cn(shown, "px-[7px] py-px")}
+      >
         explain
       </button>
       <button
         type="button"
         aria-label={`Search within ${name}`}
+        onClick={(event) => event.stopPropagation()}
         className={cn(shown, "flex size-5 items-center justify-center")}
       >
         <Icon name="s-search" size={12} />
@@ -105,7 +113,17 @@ function CheckRow({
   return (
     /* The audit's own requirement ground. It had been grey, which made the
        same row read as two different things on two tabs. */
-    <div className="group flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px]">
+    /* The row is the control. A chevron the width of a chevron is a small
+       target for the commonest thing anyone does here, so the name, the mark
+       and the space around them all open it — and the badges inside keep their
+       own press, because they do something else. */
+    <div
+      onClick={hasChildren ? onToggle : undefined}
+      className={cn(
+        "group flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px]",
+        hasChildren && "cursor-pointer"
+      )}
+    >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <CheckMark check={check} />
         <p className="text-body-md font-semibold">{check.name}</p>
@@ -132,7 +150,10 @@ function CheckRow({
           <Badge variant="outline" asChild className="font-normal">
             <button
               type="button"
-              onClick={onToggleRules}
+              onClick={(event) => {
+                event.stopPropagation()
+                onToggleRules()
+              }}
               aria-expanded={rules}
               className="cursor-pointer hover:bg-gray-5"
             >

@@ -114,7 +114,6 @@ export const RULESET: ComplianceCheck = {
       constraints: 3,
       credits: IN_PROGRESS,
       rule: "18 credits in the academic year, and 40% of the degree before year 3",
-      open: true,
       children: [
         {
           kind: "check",

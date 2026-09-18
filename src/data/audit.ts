@@ -56,11 +56,9 @@ export type AuditGroup = {
    *  ground. Everything under them is a `requirement` and sits on one. */
   level: "degree" | "program" | "requirement"
   mark?: AuditMark
-  /** The red counts on the degree row: requirements outstanding, then
-   *  milestones. A flag marks the second. */
-  counts?: { requirements: number; milestones: number }
-  /** The program row's second mark: its milestone, already signed off. */
-  milestoneMark?: AuditMark
+  /** The red count on the credential row: requirements outstanding. A second,
+   *  flagged count for milestones is drawn where there is one to draw. */
+  counts?: { requirements: number; milestones?: number }
   subtitle?: string
   /** The grey tags after the name: "fulfill all", "at least 12 credits". */
   tags?: string[]
@@ -160,8 +158,6 @@ const TREE: AuditGroup = {
       /* Named without the credential, which the row above it states. */
       name: DEGREE.major,
       mark: "remaining",
-      /* Declared when he arrived: the one milestone already signed off. */
-      milestoneMark: "taken",
       subtitle: "Applied Version: Fall 2025 to present · Catalog Term: Fall 2025",
       tags: ["fulfill all"],
       pgpa: "PGPA 3.38",
@@ -402,10 +398,12 @@ export const AUDIT: AuditGroup = {
     claimed: STANDING.claimed,
     total: DEGREE.requirements,
   },
-  counts: {
-    requirements: STANDING.remaining,
-    milestones: DEGREE.milestones - DEGREE.milestonesDone,
-  },
+  /* Requirements outstanding, counted off the tree. There is no milestone
+     count beside it: this audit holds no milestone rows, and a red number
+     pointing at nothing on the page is the one thing the tree is not allowed
+     to say. The profile's own Milestones meter still reports them, because a
+     summary may summarise what it cannot show. */
+  counts: { requirements: STANDING.remaining },
 }
 
 export const OFFICIAL_PROGRESS = {

@@ -285,7 +285,8 @@ function GroupRow({
           {group.counts && (
             <>
               <CountMark count={group.counts.requirements} />
-              {group.counts.milestones > 0 && (
+              {/* Only where there are milestones in the tree to point at. */}
+              {group.counts.milestones !== undefined && (
                 <CountMark count={group.counts.milestones} milestone />
               )}
             </>
@@ -325,7 +326,6 @@ function GroupRow({
             starts where the name does rather than under them. */}
         <div className="flex min-w-0 items-center gap-2">
           {group.mark && <AuditMarkIcon mark={group.mark} />}
-          {group.milestoneMark && <AuditMarkIcon mark={group.milestoneMark} milestone />}
           <div className="flex min-w-0 flex-col justify-center gap-[3px]">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <p className="text-body-md font-semibold">{group.name}</p>
