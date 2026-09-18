@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { useIsStaff } from "@/components/layout/section"
+import { Face } from "@/components/stellic/staff-chrome"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -260,9 +261,13 @@ export function NetworkRow() {
       <ProgressCard className="flex min-w-[280px] flex-1 basis-0 flex-col gap-4">
         <p className="text-body-md font-semibold text-gray-80">Student Success Network</p>
         <div className="flex items-start gap-4">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-5 text-body-md text-gray-80">
-            {advisor.initials}
-          </span>
+          <Face
+            photo={advisor.photo}
+            initials={advisor.initials}
+            color="var(--color-gray-5)"
+            size={32}
+            className="mt-px"
+          />
           <div className="flex flex-col gap-2">
             <p className="text-body-md font-semibold text-gray-100">{advisor.name}</p>
             <div className="flex gap-2">

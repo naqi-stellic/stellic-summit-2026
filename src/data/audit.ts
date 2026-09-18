@@ -116,7 +116,14 @@ export const AUDIT_STUDENT = {
   entry: "2025 Fall",
   level: "Undergrad",
   /** The advisor the plan's review requests go to. */
-  advisor: { name: "Mark Stehlik", initials: "MS", others: 1 },
+  /* A face, like everybody else on these screens. Initials are what a queue of
+     thirty people wears; one named advisor on three prototypes is a person. */
+  advisor: {
+    name: "Mark Stehlik",
+    initials: "MS",
+    photo: "/faces/mstehlik.jpg",
+    others: 1,
+  },
   /* How much of Stellic this student is actually using — not a grade. One
      figure, drawn the same way on the record and in the search that finds it,
      so the two can never disagree. */
