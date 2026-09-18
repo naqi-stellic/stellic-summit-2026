@@ -101,7 +101,7 @@ export function Compliance() {
 
           {tab === "progress" ? (
             <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
-              <AuditTree audit={AUDIT} credential={DEGREE.credential} />
+              <AuditTree audit={AUDIT} />
               <UnmatchedSection
                 count={unmatched.length}
                 blurb={UNMATCHED_BLURB}

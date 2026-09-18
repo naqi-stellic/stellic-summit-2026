@@ -119,8 +119,12 @@ no JSX.
 ## Progress
 
 Both tabs are live and Progress is the real audit — the same `AUDIT` tree
-Advanced What-If renders, headed by the credential the degree confers with the
-program under it. Nobody standing on Progress would have any reason to open
+Advanced What-If renders. The credential heads it and the program hangs off it,
+which is two rows because they are two facts: the credential carries what the
+whole degree asks for and how far along it is, the program carries which
+catalogue it is being read against and what it has earned. `AuditGroup.level`
+is `degree | program | requirement` again, as it was before the concentration
+row was taken out of the middle of it. Nobody standing on Progress would have any reason to open
 Compliance, which is exactly why Compliance has to exist.
 
 **Plans** is not a tab: it is the planner. It opens `/planner.html?from=compliance`,

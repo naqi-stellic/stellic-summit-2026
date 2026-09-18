@@ -37,7 +37,16 @@ const MARK: Record<AuditMark, { ground: string; icon?: IconName; glyph?: number 
   optional: { ground: "border border-gray-80" },
 }
 
-export function AuditMarkIcon({ mark, size = 24 }: { mark: AuditMark; size?: 16 | 24 }) {
+export function AuditMarkIcon({
+  mark,
+  milestone,
+  size = 24,
+}: {
+  mark: AuditMark
+  /** A flag beside the mark: this one is a checkpoint rather than a course. */
+  milestone?: boolean
+  size?: 16 | 24
+}) {
   const { ground, icon, glyph } = MARK[mark]
   /* The mapping list runs at 16, where a 14px tick inside a 16px box leaves no
      box. Everything scales off the box rather than being a second set. */
@@ -45,12 +54,13 @@ export function AuditMarkIcon({ mark, size = 24 }: { mark: AuditMark; size?: 16 
 
   return (
     <span
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, ...(milestone ? { width: "auto", minWidth: size } : {}) }}
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-md p-0.5",
+        "flex shrink-0 items-center justify-center gap-0.5 rounded-md p-0.5",
         ground
       )}
     >
+      {milestone && <Icon name="outlined-flag" size={Math.round(16 * scale)} />}
       {icon && glyph && <Icon name={icon} size={Math.round(glyph * scale)} />}
       {mark === "optional" && <span className="h-px w-2.5 rounded-full bg-gray-80" />}
     </span>
@@ -305,6 +315,40 @@ function GroupRow({
     )
   }
 
+  /* The program under the credential: what is being studied, against which
+     catalogue, and how it is going. It hangs off the credential rather than
+     heading the tree, so it takes a trail and no ground. */
+  if (group.level === "program") {
+    return (
+      <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md pl-2">
+        {/* The marks stand beside the whole block, so the line under the name
+            starts where the name does rather than under them. */}
+        <div className="flex min-w-0 items-center gap-2">
+          {group.mark && <AuditMarkIcon mark={group.mark} />}
+          {group.milestoneMark && <AuditMarkIcon mark={group.milestoneMark} milestone />}
+          <div className="flex min-w-0 flex-col justify-center gap-[3px]">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <p className="text-body-md font-semibold">{group.name}</p>
+              <Icon name="expand-more" size={10} className="shrink-0" />
+              <Icon name="more-horiz" size={14} className="shrink-0" />
+              <Tags tags={group.tags} small />
+            </div>
+            {group.subtitle && (
+              <p className="truncate text-body-md text-gray-80">{group.subtitle}</p>
+            )}
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          {group.pgpa && (
+            <Badge variant="outline" className="text-label-sm font-normal text-gray-80">
+              {group.pgpa}
+            </Badge>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-md border border-gray-40 bg-gray-5 p-[7px]">
       {group.mark && <AuditMarkIcon mark={group.mark} />}
@@ -437,18 +481,7 @@ function initialFold(audit: AuditGroup): Set<string> {
   return folded
 }
 
-export function AuditTree({
-  audit,
-  credential,
-  explain,
-}: {
-  audit: AuditGroup
-  /** What the degree confers, above the program that earns it. A registrar
-   *  reads the credential first — it is the thing with a name on a certificate
-   *  — and the program is how it is being got. */
-  credential?: string
-  explain?: Explain
-}) {
+export function AuditTree({ audit, explain }: { audit: AuditGroup; explain?: Explain }) {
   const [folded, setFolded] = useState(() => initialFold(audit))
 
   const toggle = (id: string) =>
@@ -460,9 +493,6 @@ export function AuditTree({
 
   return (
     <div className="flex flex-col gap-2">
-      {credential && (
-        <p className="pb-1 text-caption-lg font-semibold text-gray-100">{credential}</p>
-      )}
       {/* The degree heads the tree rather than hanging off it, so it is the one
           row with no trail beside it. */}
       <TreeElement trail={[]}>

@@ -35,7 +35,7 @@ export type AuditCourse = {
   name: string
   credits: number
   mark: AuditMark
-  /** "Taken in Fall '25", "In progress · Fall '27" — empty on a line the audit
+  /** "Taken in Fall '25", "In progress · Fall '26" — empty on a line the audit
    *  is only holding a place for. */
   result?: string
   grade?: string
@@ -52,13 +52,15 @@ export type AuditGroup = {
   kind: "group"
   id: string
   name: string
-  /** The degree heads the tree and carries no ground; everything under it is
-   *  a `requirement` and sits on one. */
-  level: "degree" | "requirement"
+  /** The credential heads the tree and the program hangs off it; both carry no
+   *  ground. Everything under them is a `requirement` and sits on one. */
+  level: "degree" | "program" | "requirement"
   mark?: AuditMark
   /** The red counts on the degree row: requirements outstanding, then
    *  milestones. A flag marks the second. */
   counts?: { requirements: number; milestones: number }
+  /** The program row's second mark: its milestone, already signed off. */
+  milestoneMark?: AuditMark
   subtitle?: string
   /** The grey tags after the name: "fulfill all", "at least 12 credits". */
   tags?: string[]
@@ -139,16 +141,31 @@ function course(
   return { kind: "course", id: `c${++seq}`, code, name, credits: 3, mark, result, grade }
 }
 
+/* The credential heads the tree and the program hangs off it — the thing that
+ * gets conferred, then the thing being studied to earn it. They are two rows
+ * because they are two facts: the credential carries what the whole degree
+ * asks for and how far along it is, and the program carries which catalogue it
+ * is being read against and what it has earned so far. */
 const TREE: AuditGroup = {
   kind: "group",
-  id: "bsba",
+  id: "credential",
   level: "degree",
-  /* Named without the credential, which the tree states above it. */
-  name: DEGREE.major,
-  subtitle: "Applied Version: Fall 2025 to present · Catalog Term: Fall 2025",
+  name: DEGREE.credential,
   tags: [`fulfill all | at least ${DEGREE.credits} credits`],
-  pgpa: "PGPA 3.38",
   children: [
+    {
+      kind: "group",
+      id: "bsba",
+      level: "program",
+      /* Named without the credential, which the row above it states. */
+      name: DEGREE.major,
+      mark: "remaining",
+      /* Declared when he arrived: the one milestone already signed off. */
+      milestoneMark: "taken",
+      subtitle: "Applied Version: Fall 2025 to present · Catalog Term: Fall 2025",
+      tags: ["fulfill all"],
+      pgpa: "PGPA 3.38",
+      children: [
     {
       kind: "group",
       id: "general-education",
@@ -180,10 +197,10 @@ const TREE: AuditGroup = {
         course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
         course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '26", "B+"),
         course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '26", "A"),
-        course("ACCT 202", "Managerial Accounting", "in-progress", "In progress · Fall '27"),
-        course("ECON 202", "Principles of Macroeconomics", "in-progress", "In progress · Fall '27"),
-        course("STAT 210", "Business Statistics", "in-progress", "In progress · Fall '27"),
-        course("MKTG 201", "Principles of Marketing", "in-progress", "In progress · Fall '27"),
+        course("ACCT 202", "Managerial Accounting", "in-progress", "In progress · Fall '26"),
+        course("ECON 202", "Principles of Macroeconomics", "in-progress", "In progress · Fall '26"),
+        course("STAT 210", "Business Statistics", "in-progress", "In progress · Fall '26"),
+        course("MKTG 201", "Principles of Marketing", "in-progress", "In progress · Fall '26"),
         course("MGMT 210", "Principles of Management", "remaining"),
         course("ACCT 310", "Intermediate Accounting I", "remaining"),
         course("MIS 250", "Management Information Systems", "remaining"),
@@ -216,12 +233,12 @@ const TREE: AuditGroup = {
               mark: "in-progress",
               tags: ["fulfill all"],
               children: [
-                course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
+                course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '26"),
                 course(
                   "FIN 340",
                   "Investments & Portfolio Management",
                   "registered",
-                  "Registered · Spring '28"
+                  "Registered · Spring '27"
                 ),
                 course("ECON 310", "Money & Banking", "remaining"),
                 course("FIN 350", "Financial Institutions & Markets", "remaining"),
@@ -256,7 +273,7 @@ const TREE: AuditGroup = {
                 /* A seat, not a course: the requirement is settled and
                    which course answers it is not, so the code column is
                    empty until one is chosen. */
-                course("", "Finance elective", "planned", "Planned · Spring '28"),
+                course("", "Finance elective", "planned", "Planned · Spring '27"),
                 course("", "Finance elective", "remaining"),
               ],
             },
@@ -317,7 +334,7 @@ const TREE: AuditGroup = {
         course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
         course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '26", "B+"),
         course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '26", "A"),
-        course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
+        course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '26"),
       ],
     },
     {
@@ -334,8 +351,10 @@ const TREE: AuditGroup = {
         course("ENGL 101", "Composition I", "taken", "Taken in Fall '25", "A-"),
         course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
         course("COMM 230", "Public Speaking", "taken", "Taken in Spring '26", "A-"),
-        course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '27"),
-        course("FIN 340", "Investments & Portfolio Management", "registered", "Registered · Spring '28"),
+        course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '26"),
+        course("FIN 340", "Investments & Portfolio Management", "registered", "Registered · Spring '27"),
+      ],
+    },
       ],
     },
   ],
