@@ -291,6 +291,7 @@ function countedBy(group: AuditGroup): Set<string> {
       if (entry.code && entry.mark !== "remaining") counted.add(entry.code)
       return
     }
+    if (entry.kind === "milestone") return
     entry.children.forEach(walk)
   }
   walk(group)
@@ -301,7 +302,7 @@ function countedBy(group: AuditGroup): Set<string> {
 /* ----------------------------------------------------------------- deriving */
 
 function isComplete(entry: AuditEntry): boolean {
-  if (entry.kind === "course") return entry.mark === "taken"
+  if (entry.kind === "course" || entry.kind === "milestone") return entry.mark === "taken"
   if (entry.mark === "optional") return true
   return entry.children.length > 0 && entry.children.every(isComplete)
 }

@@ -117,8 +117,10 @@ export const DEGREE = {
   minor: "Data Analytics",
   requirements: 40,
   credits: 120,
-  /** Non-course checkpoints: declare major, internship, capstone proposal… */
-  milestones: 13,
+  /** Non-course checkpoints — declare a concentration, the capstone proposal,
+   *  the thesis. The audit holds them as rows and counts them off itself; this
+   *  is the same figure for the surfaces that have no audit to count. */
+  milestones: 3,
   /** How many of those have been signed off: the concentration, declared when
    *  the student arrived. The rest are still ahead. */
   milestonesDone: 1,

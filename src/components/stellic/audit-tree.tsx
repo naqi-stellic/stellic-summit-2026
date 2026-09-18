@@ -4,7 +4,13 @@ import { useState, type ReactNode } from "react"
 import { Icon, type IconName } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import type { AuditCourse, AuditEntry, AuditGroup, AuditMark } from "@/data/audit"
+import type {
+  AuditCourse,
+  AuditEntry,
+  AuditGroup,
+  AuditMark,
+  AuditMilestone,
+} from "@/data/audit"
 
 /** What a row offers beyond reading: the way to ask why it says what it says.
  *  Absent on the prototypes that do not explain anything. */
@@ -194,6 +200,25 @@ function Tags({
         )
       })}
     </>
+  )
+}
+
+/** A milestone, drawn as a course row is but with nothing to say about credits
+ *  or grades — only that it is asked for, and whether it has been done. The
+ *  flag beside the mark is what tells it apart from the courses around it. */
+export function MilestoneRow({ milestone }: { milestone: AuditMilestone }) {
+  return (
+    <div className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-md border border-gray-40 bg-card p-[7px]">
+      <div className="flex min-w-0 items-center gap-2">
+        <AuditMarkIcon mark={milestone.mark} milestone />
+        <p className="min-w-0 max-w-[400px] truncate text-body-md">{milestone.name}</p>
+      </div>
+      {milestone.result && (
+        <p className="shrink-0 text-overline font-medium whitespace-nowrap text-gray-80 uppercase">
+          {milestone.result}
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -407,7 +432,9 @@ function EntryRows({
 
   const row = (
     <TreeElement trail={trail}>
-      {entry.kind === "course" ? (
+      {entry.kind === "milestone" ? (
+        <MilestoneRow milestone={entry} />
+      ) : entry.kind === "course" ? (
         <CourseRow course={entry} />
       ) : (
         <GroupRow
@@ -434,7 +461,7 @@ function EntryRows({
       </TreeElement>
     ) : null
 
-  if (entry.kind === "course" || entry.children.length === 0 || !open) {
+  if (entry.kind === "course" || entry.kind === "milestone" || entry.children.length === 0 || !open) {
     return (
       <>
         {row}
@@ -468,7 +495,7 @@ function initialFold(audit: AuditGroup): Set<string> {
   const folded = new Set<string>()
 
   const walk = (entry: AuditEntry) => {
-    if (entry.kind === "course") return
+    if (entry.kind === "course" || entry.kind === "milestone") return
     if (entry.collapsed) folded.add(entry.id)
     /* A row's rules are shut until someone asks, which is the opposite default
        from the row itself. */

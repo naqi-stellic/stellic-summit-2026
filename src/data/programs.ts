@@ -484,6 +484,8 @@ export function markDoubleCounting(audit: AuditGroup, codes: Set<string>): Audit
     if (entry.kind === "course") {
       return codes.has(entry.code) ? { ...entry, doubleCounts: true } : entry
     }
+    /* A milestone is nobody's course and cannot count twice. */
+    if (entry.kind === "milestone") return entry
     if (entry.restated) return entry
     return { ...entry, children: entry.children.map(mark) }
   }

@@ -76,7 +76,20 @@ export type AuditGroup = {
   children: AuditEntry[]
 }
 
-export type AuditEntry = AuditGroup | AuditCourse
+/** A non-course requirement: something the degree asks you to do rather than
+ *  to take. It has no code, no credits and no grade — only whether it has been
+ *  done — so it carries a flag beside its mark and nothing on the right but
+ *  when it happened. */
+export type AuditMilestone = {
+  kind: "milestone"
+  id: string
+  name: string
+  mark: AuditMark
+  /** When it was signed off, where it has been. */
+  result?: string
+}
+
+export type AuditEntry = AuditGroup | AuditCourse | AuditMilestone
 
 /* ------------------------------------------------------------------ student */
 
@@ -144,6 +157,13 @@ function course(
  * because they are two facts: the credential carries what the whole degree
  * asks for and how far along it is, and the program carries which catalogue it
  * is being read against and what it has earned so far. */
+/** Milestones live where the thing they are about lives, which means down in
+ *  the tree rather than gathered at the top of it. Nobody looks for "declare a
+ *  concentration" anywhere but under the core that asks for it. */
+function milestone(name: string, mark: AuditMark, result?: string): AuditMilestone {
+  return { kind: "milestone", id: `m${++seq}`, name, mark, result }
+}
+
 const TREE: AuditGroup = {
   kind: "group",
   id: "credential",
@@ -193,6 +213,7 @@ const TREE: AuditGroup = {
         course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
         course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '26", "B+"),
         course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '26", "A"),
+        milestone("Declare a concentration", "taken", "Signed off Spring '26"),
         course("ACCT 202", "Managerial Accounting", "in-progress", "In progress · Fall '26"),
         course("ECON 202", "Principles of Macroeconomics", "in-progress", "In progress · Fall '26"),
         course("STAT 210", "Business Statistics", "in-progress", "In progress · Fall '26"),
@@ -316,7 +337,11 @@ const TREE: AuditGroup = {
       name: "Capstone",
       mark: "remaining",
       tags: ["fulfill all · taken last"],
-      children: [course("BUS 495", "Strategic Management", "remaining")],
+      children: [
+        course("BUS 495", "Strategic Management", "remaining"),
+        milestone("Capstone proposal approved", "remaining"),
+        milestone("Complete capstone thesis", "remaining"),
+      ],
     },
     {
       kind: "group",
@@ -330,6 +355,7 @@ const TREE: AuditGroup = {
         course("ACCT 201", "Financial Accounting", "taken", "Taken in Spring '26", "A-"),
         course("ECON 201", "Principles of Microeconomics", "taken", "Taken in Spring '26", "B+"),
         course("MIS 120", "Business Technology Essentials", "taken", "Taken in Spring '26", "A"),
+        milestone("Declare a concentration", "taken", "Signed off Spring '26"),
         course("FIN 301", "Corporate Finance", "in-progress", "In progress · Fall '26"),
       ],
     },
@@ -369,6 +395,9 @@ export function auditStanding(audit: AuditGroup) {
 
   const walk = (entry: AuditEntry) => {
     if (entry.kind === "course") return marks.push(entry.mark)
+    /* A milestone is not a course. The bar measures what the degree wants
+       taken, and counting a thesis among them would make forty forty-three. */
+    if (entry.kind === "milestone") return
     if (entry.restated) return
     entry.children.forEach(walk)
   }
@@ -388,7 +417,30 @@ export function auditStanding(audit: AuditGroup) {
   }
 }
 
+/** The milestones the tree holds, counted off the tree — so the flag on the
+ *  credential row and the meter on the profile card can never disagree with
+ *  what is actually in the audit. */
+export function milestoneStanding(audit: AuditGroup) {
+  let done = 0
+  let total = 0
+
+  const walk = (entry: AuditEntry) => {
+    if (entry.kind === "course") return
+    if (entry.kind === "milestone") {
+      total += 1
+      if (entry.mark === "taken") done += 1
+      return
+    }
+    if (entry.restated) return
+    entry.children.forEach(walk)
+  }
+  walk(audit)
+
+  return { done, total }
+}
+
 const STANDING = auditStanding(TREE)
+const MILESTONES = milestoneStanding(TREE)
 
 export const AUDIT: AuditGroup = {
   ...TREE,
@@ -398,17 +450,14 @@ export const AUDIT: AuditGroup = {
     claimed: STANDING.claimed,
     total: DEGREE.requirements,
   },
-  /* Requirements outstanding, counted off the tree. There is no milestone
-     count beside it: this audit holds no milestone rows, and a red number
-     pointing at nothing on the page is the one thing the tree is not allowed
-     to say. The profile's own Milestones meter still reports them, because a
-     summary may summarise what it cannot show. */
-  counts: { requirements: STANDING.remaining },
+  /* Both counted off the tree, so neither can say anything the audit cannot
+     show: the requirements still wanted, and the milestones still to do. */
+  counts: { requirements: STANDING.remaining, milestones: MILESTONES.total - MILESTONES.done },
 }
 
 export const OFFICIAL_PROGRESS = {
   courses: STANDING,
-  milestones: { done: DEGREE.milestonesDone, total: DEGREE.milestones },
+  milestones: MILESTONES,
 }
 
 /** Both toggles read the same tree — there is no second audit to compute yet —
@@ -472,6 +521,7 @@ export const STUDENT_RECORD: Map<string, AuditCourse> = (() => {
       }
       return
     }
+    if (entry.kind === "milestone") return
     entry.children.forEach(walk)
   }
   walk(TREE)
@@ -493,6 +543,7 @@ export const COUNTING_NOW: Set<string> = (() => {
       if (entry.code && entry.mark !== "remaining") counting.add(entry.code)
       return
     }
+    if (entry.kind === "milestone") return
     /* An additional check never makes a course double count — it consumes
        nothing, which is the point of it. */
     if (entry.restated) return
@@ -519,6 +570,7 @@ export function unmatchedAgainst(trees: AuditGroup[]): AuditCourse[] {
       if (entry.code && entry.mark !== "remaining") claimed.add(entry.code)
       return
     }
+    if (entry.kind === "milestone") return
     if (entry.restated) return
     entry.children.forEach(walk)
   }

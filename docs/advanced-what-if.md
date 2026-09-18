@@ -333,6 +333,23 @@ chevron. After that the fold belongs to whoever is reading, not to the data, so
 Folding hides rows; it does not remove them. `auditStanding()` walks the data,
 so the tallies above the tree are the same whether a group is open or shut.
 
+## Milestones
+
+Non-course requirements — declare a concentration, get the capstone proposal
+approved, complete the thesis — held as rows in the tree rather than gathered
+at the top of it. Nobody looks for "declare a concentration" anywhere but under
+the core that asks for it, so that is where it is, among the courses.
+
+A milestone row is a course row with nothing to say about credits or grades:
+only that it is asked for, whether it has been done, and when. The flag beside
+its mark is what tells it apart from the courses around it.
+
+Everything about them is counted off the tree. `milestoneStanding()` walks it
+for the flagged count on the credential row and the meter on the profile card,
+so the two can never disagree with what the audit actually holds — and
+`auditStanding()` steps over them, because a thesis is not a course and
+counting it among them would make forty forty-three.
+
 ## Shared chrome
 
 Two seams were added to the shell rather than a second copy of it:
