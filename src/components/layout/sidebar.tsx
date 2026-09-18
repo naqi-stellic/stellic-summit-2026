@@ -243,25 +243,12 @@ export function SidebarNav({
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-col items-start justify-end gap-4 p-6">
-        <div className="flex flex-col items-start gap-3">
-          <p className="w-[156px] text-[12px] leading-normal tracking-[-0.1714px]">
-            Last refreshed Tue 2:23am
-          </p>
-          <img
-            src="/brand/stellic-logo.svg"
-            alt="Stellic"
-            className="h-[17.808px] w-[92px]"
-          />
-        </div>
-        <button
-          type="button"
-          aria-label="Message us"
-          className="flex overflow-hidden rounded-full bg-primary-50 p-[10.341px]"
-        >
-          <img src="/brand/message-us.svg" alt="" className="size-[32.317px]" />
-        </button>
-      </div>
+      {/* The foot of the nav — a refresh time, the wordmark and the support
+          button — is not drawn. None of the three is part of anything these
+          prototypes are for: the time is a number that never changes, the
+          wordmark is already at the top of the same column, and the button
+          opens a chat nobody is on the other end of. The column ends where
+          the links do. */}
     </aside>
   )
 }
