@@ -499,6 +499,15 @@ export const CREDIT_GROUP_LABEL = {
 /** Where the student stands against the degree. Everything sitting in the
  *  editable plan counts as planned — registered terms included, since those
  *  credits are not earned yet. */
+/** The requirement tally, said as a sentence with the empty parts left out.
+ *  "0 done, 6 planned, 34 to place" reports a number nobody asked about and
+ *  reads as a failure; a student with nothing finished should be told what
+ *  there is, not what there is not. */
+export function tallyLine(parts: Array<[number, string]>): string {
+  const said = parts.filter(([n]) => n > 0).map(([n, label]) => `${n} ${label}`)
+  return said.join(", ")
+}
+
 export function planStanding(years: Year[]) {
   let doneReqs = 0
   let doneCredits = 0

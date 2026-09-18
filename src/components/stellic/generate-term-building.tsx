@@ -2,7 +2,7 @@ import { cn } from "cn"
 import { useEffect, useRef, useState } from "react"
 
 import { Icon } from "@/components/icon"
-import { PLANNING_RULES, type PlanStanding, type Term } from "@/data/plan"
+import { PLANNING_RULES, tallyLine, type PlanStanding, type Term } from "@/data/plan"
 
 /* The progress state for one term. The same five checks the whole-plan run
  * shows, counted against this term rather than the degree — and shorter,
@@ -69,7 +69,11 @@ export function GenerateTermBuilding({
   const steps: { title: string; detail?: string }[] = [
     {
       title: "Checking program requirements",
-      detail: `${standing.completed.reqs} done, ${standing.planned.reqs} planned, ${standing.remaining.reqs} to place`,
+      detail: tallyLine([
+        [standing.completed.reqs, "done"],
+        [standing.planned.reqs, "planned"],
+        [standing.remaining.reqs, "to place"],
+      ]),
     },
     {
       title: "Checking prerequisites",
