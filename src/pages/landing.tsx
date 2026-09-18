@@ -103,7 +103,7 @@ function Route({ steps }: { steps: string[] }) {
   return (
     /* The last step is the point of the walk, so it is the one drawn at full
        strength. */
-    <p className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-label-md text-gray-80">
+    <p className="flex flex-wrap items-center gap-x-1 gap-y-0.5 pt-1 text-label-md text-gray-80">
       {steps.map((step, i) => (
         <span key={step} className="flex items-center gap-1">
           {i > 0 && <Icon name="chevron-right" size={12} className="shrink-0 text-gray-60" />}
@@ -139,15 +139,16 @@ function Ways({ name, entries }: { name: string; entries: Entry[] }) {
             href={entry.href}
             target="_blank"
             rel="noreferrer"
-            className="group flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-gray-40 bg-card p-[11px] transition-colors hover:border-primary-50 hover:bg-gray-0"
+            className="group flex items-center gap-4 rounded-md border border-gray-40 bg-card p-[11px] transition-colors hover:border-primary-50 hover:bg-gray-0"
           >
-            <span className="flex min-w-[200px] flex-1 flex-col gap-0.5">
+            {/* Three lines: what this way in is called, what it is for, and
+                then the walk. The walk is the last of them because it is what
+                you do after deciding, not what you decide on. */}
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-body-md font-semibold text-gray-100">{entry.name}</span>
               {entry.blurb && <span className="text-label-md text-gray-80">{entry.blurb}</span>}
+              {entry.route && <Route steps={entry.route} />}
             </span>
-            {/* The walk sits at the end of the row, next to the chevron that
-                starts it — the two together are one gesture. */}
-            {entry.route && <Route steps={entry.route} />}
             <Icon
               name="chevron-right"
               size={16}
