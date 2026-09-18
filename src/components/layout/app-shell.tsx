@@ -162,9 +162,12 @@ export function AppShell({
         <button
           type="button"
           aria-label="Ask Stellic AI"
-          className="flex size-[58px] shrink-0 items-center justify-center rounded-full bg-gray-100 text-white shadow-2xl"
+          /* Three quarters of the 58 the design draws. It floats over the
+             page it is offered on, and at full size it was the loudest thing
+             on a screen it is not the subject of. */
+          className="flex size-[44px] shrink-0 items-center justify-center rounded-full bg-gray-100 text-white shadow-2xl"
         >
-          <Icon name="auto-awesome" size={20} />
+          <Icon name="auto-awesome" size={16} />
         </button>
       </div>
       )}
