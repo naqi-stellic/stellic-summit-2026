@@ -92,14 +92,14 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         source: "audit",
         message: "Minimum credits (132) exceed what the listed courses can total (128)",
         requirement: "Degree Total",
-        fix: "Lower the minimum to 128 or add eligible courses — as written, no student can reach it.",
+        fix: "Lower the minimum to 128 or add eligible courses.",
       },
       {
         severity: "crit",
         source: "audit",
         message: "ME 3110 requires ME 3120, which requires ME 3110",
         requirement: "Mechanics Core",
-        fix: "Correct the prerequisite chain — as written, neither course can ever be taken.",
+        fix: "Correct the prerequisite chain.",
       },
       /* Not critical, and the reason is worth reading: an inactive course still
          loads against an audit requirement. The audit is right. What breaks is
@@ -110,7 +110,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         source: "audit",
         message: "ME 4990 is inactive but still required",
         requirement: "Capstone Sequence",
-        fix: "Replace with ME 4995. An inactive course still evaluates on the audit, but students cannot find it when planning.",
+        fix: "Replace with ME 4995.",
       },
       {
         severity: "warn",
@@ -202,7 +202,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         source: "audit",
         message: "“Choose 2” has only 2 active courses",
         requirement: "Systems Electives",
-        fix: "Add CS 4520 and CS 4610 (approved but unlisted).",
+        fix: "Add CS 4520 and CS 4610.",
       },
       {
         severity: "opp",
