@@ -142,16 +142,9 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
       {
         severity: "warn",
         source: "audit",
-        message: "“Choose 1 of 3” lists 2 courses with no offering terms since 2024",
+        message: "2 of the 3 courses listed have no offering terms since 2024",
         requirement: "Advanced Electives",
         fix: "Swap BIOL 3310 and BIOL 3340 for current offerings.",
-      },
-      {
-        severity: "warn",
-        source: "audit",
-        message: "42 students double-count credits toward a minor",
-        requirement: "Life Sciences",
-        fix: "Confirm double counting is intended.",
       },
       {
         severity: "opp",
