@@ -1,3 +1,4 @@
+import { gpaOfGroup, type Gpa } from "@/data/gpa"
 import { DEGREE, STUDENT } from "@/data/plan"
 
 /* The degree audit behind Team Progress: what the degree asks for, and where
@@ -83,7 +84,11 @@ export type AuditGroup = {
   /** The four shares the degree row reads at a glance. Filled in from
    *  `auditStanding()` rather than written down. */
   bar?: { taken: number; inProgress: number; claimed: number; total: number }
-  pgpa?: string
+  /** The programme's own grade point average, and the working behind it.
+   *  Read off the coursework under the row rather than written down, so the
+   *  badge on the row and the sum a reader opens from it are one calculation
+   *  seen twice. */
+  pgpa?: Gpa
   children: AuditEntry[]
 }
 
@@ -202,7 +207,6 @@ const TREE: AuditGroup = {
       mark: "remaining",
       subtitle: "Applied Version: Fall 2025 to present · Catalog Term: Fall 2025",
       tags: ["fulfill all"],
-      pgpa: "PGPA 3.38",
       children: [
     {
       kind: "group",
@@ -485,7 +489,13 @@ function derived<T extends AuditEntry>(entry: T): T {
             leavesOf({ ...entry, children }).flatMap((leaf) => (leaf.mark ? [leaf.mark] : []))
           )
 
-  return { ...entry, children, mark }
+  /* And the programme's average, over the distinct graded coursework beneath
+     it. The programme is the only row that publishes one unasked — a
+     requirement gets an average where somebody has put a constraint on it
+     asking for one, and this row is where "how am I doing" is answered. */
+  const pgpa = entry.level === "program" ? gpaOfGroup({ ...entry, children }) : entry.pgpa
+
+  return { ...entry, children, mark, pgpa }
 }
 
 /** The programme under a credential. The credential row explains itself by

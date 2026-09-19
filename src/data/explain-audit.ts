@@ -6,7 +6,7 @@ import {
   type AuditGroup,
 } from "@/data/audit"
 import type { Constraint } from "@/data/explain"
-import { gpaOf } from "@/data/gpa"
+import { gpaOf, gpaOfGroup } from "@/data/gpa"
 import { CREDITS_PER_COURSE } from "@/data/plan"
 
 /* The audit as Explain Progress shows it.
@@ -140,7 +140,16 @@ const GENERAL_EDUCATION: AuditGroup = {
 function swap(entry: AuditEntry): AuditEntry {
   if (entry.kind !== "group") return entry
   if (entry.id === ID) return GENERAL_EDUCATION
-  return { ...entry, children: entry.children.map(swap) }
+  const children = entry.children.map(swap)
+  /* The programme's average is read off the courses under it, and the courses
+     under it have just changed — five general-education grades have become
+     six. Left alone it would go on publishing the shared tree's number while
+     the rows it is a sum of said otherwise. */
+  if (entry.level === "program") {
+    const swapped = { ...entry, children }
+    return { ...swapped, pgpa: gpaOfGroup(swapped) }
+  }
+  return { ...entry, children }
 }
 
 export const EXPLAIN_AUDIT = swap(AUDIT) as AuditGroup

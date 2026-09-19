@@ -1,4 +1,4 @@
-import type { AuditCourse } from "@/data/audit"
+import type { AuditCourse, AuditEntry, AuditGroup } from "@/data/audit"
 
 /* How a grade point average is arrived at.
  *
@@ -94,4 +94,26 @@ export function gpaOf(courses: AuditCourse[]): Gpa {
     points,
     value: credits ? (points / credits).toFixed(DECIMALS) : "—",
   }
+}
+
+/** The average over everything graded under a group.
+ *
+ *  Distinct courses only. An audit lists the same course in more than one
+ *  place — a restated "30 of the last 36 credits" check re-lists coursework
+ *  counted by the requirements above it — and a GPA that divided by those
+ *  would be dividing by credits the student earned once and was charged for
+ *  twice. The record is what is averaged; the tree is only how it is found. */
+export function gpaOfGroup(group: AuditGroup): Gpa {
+  const seen = new Map<string, AuditCourse>()
+
+  const walk = (entry: AuditEntry) => {
+    if (entry.kind === "milestone") return
+    if (entry.kind === "group") return entry.children.forEach(walk)
+    /* Seats have no code and nothing to weigh: a planned elective is a shape
+       in the audit, not a grade on a transcript. */
+    if (entry.code && !seen.has(entry.code)) seen.set(entry.code, entry)
+  }
+  walk(group)
+
+  return gpaOf([...seen.values()])
 }

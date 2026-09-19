@@ -10,6 +10,7 @@ import {
   GENERAL_EDUCATION_GPA,
 } from "@/data/explain-audit"
 import { computesGpa, constraintsFor } from "@/data/explain"
+import type { Gpa } from "@/data/gpa"
 import {
   AuditControls,
   NetworkRow,
@@ -46,16 +47,24 @@ import {
  * Both hold their space until the row is pointed at, so nothing on the page
  * moves as the pointer travels down it. */
 
+/** Which average a row carries. The programme states its own — every
+ *  programme has one — and a requirement carries one only where a constraint
+ *  asked for it to be computed. One function, so the badge on the row and the
+ *  sum in the panel cannot come from two different places. */
+const gpaOn = (group: AuditGroup): Gpa | undefined =>
+  group.level === "program" ? group.pgpa : computesGpa(group) ? GENERAL_EDUCATION_GPA : undefined
+
 export function ExplainProgress() {
   const [view, setView] = useState("official")
   /* What is open beside the tree. Two panels answer two different questions
      about the same row — why it says what it says, and how its average was
      arrived at — so only one is open at a time and the row says which. */
-  const [beside, setBeside] = useState<
-    { kind: "explain" | "gpa"; group: AuditGroup } | null
-  >(null)
+  const [beside, setBeside] = useState<{ kind: "explain" | "gpa"; group: AuditGroup } | null>(null)
   const explaining = beside?.kind === "explain" ? beside.group : null
-  const calculating = beside?.kind === "gpa" ? beside.group : null
+  /* The row and the average it named, since the panel has to show the sum the
+     badge was a rounding of and not some other one. */
+  const calculating =
+    beside?.kind === "gpa" ? { name: beside.group.name, gpa: gpaOn(beside.group) } : null
 
   const unmatched = unmatchedAgainst([EXPLAIN_AUDIT])
 
@@ -72,10 +81,10 @@ export function ExplainProgress() {
             record={EXPLAIN_RECORD}
             onClose={() => setBeside(null)}
           />
-        ) : calculating ? (
+        ) : calculating?.gpa ? (
           <GpaPanel
             title={calculating.name}
-            gpa={GENERAL_EDUCATION_GPA}
+            gpa={calculating.gpa}
             onClose={() => setBeside(null)}
           />
         ) : undefined
@@ -128,9 +137,9 @@ export function ExplainProgress() {
                 count: (group) => constraintsFor(group).length,
                 /* A requirement wears an average only where it was asked to
                    compute one — the constraint is what puts the badge there,
-                   so the badge is read off the constraint. */
-                gpa: (group) =>
-                  computesGpa(group) ? GENERAL_EDUCATION_GPA.value : undefined,
+                   so the badge is read off the constraint. The programme
+                   publishes its own, and both open the same panel. */
+                gpa: gpaOn,
                 onGpa: (group) => setBeside({ kind: "gpa", group }),
               }}
             />

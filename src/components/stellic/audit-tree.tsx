@@ -12,6 +12,7 @@ import type {
   AuditMilestone,
 } from "@/data/audit"
 import { outstanding } from "@/data/audit"
+import type { Gpa } from "@/data/gpa"
 
 /** What a row offers beyond reading: the way to ask why it says what it says.
  *  Absent on the prototypes that do not explain anything. */
@@ -22,11 +23,11 @@ export type Explain = {
   /** How many rules there are, for the chip that opens them. The tree does not
    *  know how a requirement's constraints are worked out, so it asks. */
   count?: (group: AuditGroup) => number
-  /** The average this requirement computes, where it computes one — a
-   *  requirement carries a GPA only if somebody has put a "Compute GPA for
-   *  this requirement" constraint on it. Given, the row wears it and pressing
-   *  it opens the working. */
-  gpa?: (group: AuditGroup) => string | undefined
+  /** The average this row computes, where it computes one — the programme
+   *  always does, and a requirement does only if somebody has put a "Compute
+   *  GPA for this requirement" constraint on it. Given, the row wears it and
+   *  pressing it opens the working. */
+  gpa?: (group: AuditGroup) => Gpa | undefined
   onGpa?: (group: AuditGroup) => void
 }
 
@@ -336,6 +337,55 @@ function RowTools({
   )
 }
 
+/** What a row's average badge should do, if it has one. An average with no
+ *  panel behind it is still worth showing — it is only not worth pressing. */
+function gpaOn(group: AuditGroup, explain?: Explain) {
+  const gpa = explain?.gpa?.(group)
+  if (!gpa || !explain?.onGpa) return undefined
+  const onGpa = explain.onGpa
+  return { value: gpa.value, onOpen: () => onGpa(group) }
+}
+
+/** The average a row amounts to, worn at the end of it. Pressable wherever
+ *  there is a panel to open, and the same badge either way: a number that can
+ *  be explained and one that cannot should not be two different things on
+ *  screen when only one of them happens to have somewhere to go. */
+function GpaBadge({
+  label,
+  value,
+  name,
+  onOpen,
+}: {
+  label: string
+  value: string
+  /** Whose average it is, for the label a screen reader hears. */
+  name: string
+  onOpen?: () => void
+}) {
+  const text = `${label} ${value}`
+
+  if (!onOpen) {
+    return (
+      <Badge variant="outline" className="text-label-sm font-normal">
+        {text}
+      </Badge>
+    )
+  }
+
+  return (
+    <Badge variant="outline" asChild className="text-label-sm font-normal">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`How the ${name} GPA of ${value} is calculated`}
+        className="cursor-pointer hover:bg-gray-5"
+      >
+        {text}
+      </button>
+    </Badge>
+  )
+}
+
 function GroupRow({
   group,
   open = true,
@@ -350,7 +400,8 @@ function GroupRow({
   tools?: React.ReactNode
   /** Whether the row's own rules can be opened from its first tag, and are. */
   rules?: { open: boolean; onToggle: () => void; count?: number }
-  /** The average the requirement computes, and the way into its working. */
+  /** The average the row carries, and the way into the working behind it. The
+   *  programme states its own on the group; a requirement is told. */
   gpa?: { value: string; onOpen: () => void }
 }) {
   /* The degree heads the tree rather than hanging off it, so it is drawn on
@@ -392,9 +443,12 @@ function GroupRow({
         <div className="flex shrink-0 flex-col items-end gap-2">
           {group.bar && <AuditBar bar={group.bar} />}
           {group.pgpa && (
-            <Badge variant="outline" className="text-label-sm font-normal text-gray-80">
-              {group.pgpa}
-            </Badge>
+            <GpaBadge
+              label="PGPA"
+              value={group.pgpa.value}
+              name={group.name}
+              onOpen={gpa?.onOpen}
+            />
           )}
         </div>
       </div>
@@ -429,9 +483,12 @@ function GroupRow({
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           {group.pgpa && (
-            <Badge variant="outline" className="text-label-sm font-normal text-gray-80">
-              {group.pgpa}
-            </Badge>
+            <GpaBadge
+              label="PGPA"
+              value={group.pgpa.value}
+              name={group.name}
+              onOpen={gpa?.onOpen}
+            />
           )}
         </div>
       </div>
@@ -476,16 +533,9 @@ function GroupRow({
           something it is asking for, so it reads after the name and not with
           the tags. */}
       {gpa && (
-        <Badge variant="outline" asChild className="ml-auto font-normal">
-          <button
-            type="button"
-            onClick={gpa.onOpen}
-            aria-label={`How the ${group.name} GPA of ${gpa.value} is calculated`}
-            className="cursor-pointer hover:bg-gray-5"
-          >
-            GPA {gpa.value}
-          </button>
-        </Badge>
+        <div className="ml-auto">
+          <GpaBadge label="GPA" value={gpa.value} name={group.name} onOpen={gpa.onOpen} />
+        </div>
       )}
     </div>
   )
@@ -539,11 +589,7 @@ function EntryRows({
                 }
               : undefined
           }
-          gpa={
-            explain?.gpa?.(entry) && explain.onGpa
-              ? { value: explain.gpa(entry)!, onOpen: () => explain.onGpa!(entry) }
-              : undefined
-          }
+          gpa={gpaOn(entry, explain)}
         />
       )}
     </TreeElement>
