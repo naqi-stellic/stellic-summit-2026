@@ -7,6 +7,7 @@ import {
   type AuditEntry,
   type AuditGroup,
 } from "@/data/audit"
+import { GENERAL_EDUCATION_RULES } from "@/data/explain-audit"
 import { CREDITS_PER_COURSE, DEGREE } from "@/data/plan"
 
 /* Why a requirement stands where it does, and why a course does or does not
@@ -44,6 +45,9 @@ export type Constraint = {
   notes?: ConstraintNote[]
   limit?: { used: number; cap: number }
   progress?: { met: number; total: number }
+  /** Courses this rule counts, by attribute — the course-set type that names a
+   *  tag and takes whatever carries it. */
+  attributes?: string[]
   /** Courses this rule keeps out, by code. */
   blocks?: string[]
   /** And by attribute, which is how a catalogue actually writes it: the rule
@@ -172,51 +176,9 @@ const PROGRAM_RULES: Constraint[] = [
  *  Worded the way the audit editor words them, because a constraint a student
  *  is shown and a constraint a registrar typed should be the same sentence. */
 const OWN_RULES: Record<string, Constraint[]> = {
-  "general-education": [
-    {
-      id: "gen-ed-subject",
-      text: "Take at most 6 credits from a given course set",
-      limit: { used: 6, cap: 6 },
-      notes: [
-        { text: "Course set: any one subject code" },
-        { text: "Two of the eight must fall outside subject codes ACCT, BUS, ECON, FIN, MIS, MGMT, MKTG" },
-      ],
-    },
-    {
-      id: "gen-ed-grade",
-      text: "Pass with minimum grade C",
-    },
-    {
-      id: "gen-ed-pass",
-      text: "Non-letter grade passed courses can satisfy this requirement",
-      notes: [
-        { text: "For the following courses only:" },
-        { codes: ["ARTP 101", "FILM 150", "MUSC 120", "MUSC 165", "PHIL 120", "UNIV 101"] },
-      ],
-    },
-    {
-      id: "gen-ed-attributes",
-      text: "Take 2 courses from the following attributes:",
-      progress: { met: 1, total: 2 },
-      notes: [
-        { text: "ACE 1 or equivalent; ACE 2 or equivalent" },
-        { text: "Course with an enrollment tag Honors Section" },
-      ],
-    },
-    {
-      id: "gen-ed-exclude",
-      text: "Do not count courses from a given set",
-      notes: [
-        { codes: ["MATH 110", "ENGL 100"] },
-        { text: "Courses with codes between MATH 000 and MATH 109 do not count" },
-      ],
-      blocks: ["MATH 110", "ENGL 100"],
-    },
-    {
-      id: "gen-ed-overlap",
-      text: "Up to 1 course may double count with other requirements",
-    },
-  ],
+  /* Two constraints, and they live with the tree that draws them —
+     `explain-audit.ts` owns the courses they count, so it owns the counting. */
+  "general-education": GENERAL_EDUCATION_RULES,
   "business-core": [
     { id: "core-grade", text: "Pass with minimum grade C" },
     { id: "core-units", text: "Minimum of 3 units for each course counted" },
@@ -379,6 +341,12 @@ function fulfilment(group: AuditGroup): Constraint {
 
 /** Everything the requirement applies: what it wants, its own rules, and — at
  *  the top only — the rules the whole degree runs on. */
+/** Requirements whose own constraints are the whole of what they ask, so the
+ *  generated "fulfill all" line would be a third thing claiming to be one of
+ *  two. General Education on the Explain prototype is the only one: its two
+ *  course-set rules are primary constraints, not filters under one. */
+const OWN_FULFILMENT = new Set(["general-education"])
+
 export function constraintsFor(group: AuditGroup): Constraint[] {
   /* The programme's rules belong to the programme. They had hung off the
      credential, one row above — "at least 120 units in total" is a thing
@@ -388,7 +356,9 @@ export function constraintsFor(group: AuditGroup): Constraint[] {
   if (group.level === "degree" || group.level === "program") {
     return [fulfilment(group), ...PROGRAM_RULES]
   }
-  return [fulfilment(group), ...(OWN_RULES[group.id] ?? [])]
+  const own = OWN_RULES[group.id] ?? []
+  if (OWN_FULFILMENT.has(group.id) && own.length) return own
+  return [fulfilment(group), ...own]
 }
 
 /* ----------------------------------------------------------------- mappings */
@@ -409,7 +379,12 @@ export type CourseMapping = {
  *  The third of those is the commonest and the least interesting, which is why
  *  it is worded as "not considered" rather than as a refusal — the requirement
  *  has no opinion about a course it was never offered. */
-export function courseMappings(group: AuditGroup): CourseMapping[] {
+export function courseMappings(
+  group: AuditGroup,
+  /** Whose transcript to read it against. Every prototype but one is reading
+   *  the same student; the one that is not should not have to pretend. */
+  record: Map<string, AuditCourse> = STUDENT_RECORD
+): CourseMapping[] {
   const constraints = constraintsFor(group)
   const blocked = new Map<string, string>()
 
@@ -426,7 +401,7 @@ export function courseMappings(group: AuditGroup): CourseMapping[] {
        courses will not count" leaves a student asking which part of it they
        fell foul of. */
     if (!constraint.blocksAttributes) return
-    STUDENT_RECORD.forEach((course) => {
+    record.forEach((course) => {
       const caught = course.attributes?.find((attribute) =>
         constraint.blocksAttributes!.includes(attribute)
       )
@@ -434,7 +409,7 @@ export function courseMappings(group: AuditGroup): CourseMapping[] {
     })
   })
 
-  return recordMappings([...countedBy(group)], blocked)
+  return recordMappings([...countedBy(group)], blocked, record)
 }
 
 /** The same reading, for a rule that is not a requirement.
@@ -446,7 +421,8 @@ export function courseMappings(group: AuditGroup): CourseMapping[] {
  *  against the record the same way. */
 export function recordMappings(
   counting: string[],
-  refused: Map<string, string> | { codes: string[]; reason: string }[] = []
+  refused: Map<string, string> | { codes: string[]; reason: string }[] = [],
+  record: Map<string, AuditCourse> = STUDENT_RECORD
 ): CourseMapping[] {
   const counts = new Set(counting)
 
@@ -460,7 +436,7 @@ export function recordMappings(
           return all
         }, new Map<string, string>())
 
-  return [...STUDENT_RECORD.values()].map((course) => {
+  return [...record.values()].map((course) => {
     if (counts.has(course.code)) return { course, verdict: "counting" as const }
 
     const reason = blocked.get(course.code)

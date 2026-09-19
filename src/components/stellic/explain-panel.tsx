@@ -5,7 +5,7 @@ import { Icon } from "@/components/icon"
 import { AuditMarkIcon } from "@/components/stellic/audit-tree"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import type { AuditGroup } from "@/data/audit"
+import type { AuditCourse, AuditGroup } from "@/data/audit"
 import { useScript } from "@/lib/typing"
 import {
   constraintStatus,
@@ -113,6 +113,7 @@ export function ExplainPanel({
   lede,
   constraints: told,
   mappings: mapped,
+  record,
   onClose,
 }: {
   /** A requirement off the audit, which the panel reads for itself. */
@@ -131,6 +132,9 @@ export function ExplainPanel({
    *  same reason the rules are: a check is not a requirement, so nothing here
    *  could work out which courses it counts. */
   mappings?: CourseMapping[]
+  /** Whose transcript the mappings read. Given only where it is not the one
+   *  every other prototype shares. */
+  record?: Map<string, AuditCourse>
   onClose: () => void
 }) {
   const [mappingsOpen, setMappingsOpen] = useState(false)
@@ -151,7 +155,7 @@ export function ExplainPanel({
 
   const constraints = told ?? (group ? constraintsFor(group) : [])
   const standing = group ? explainStanding(group) : null
-  const all = mapped ?? (group ? courseMappings(group) : [])
+  const all = mapped ?? (group ? courseMappings(group, record) : [])
   const shown = find
     ? all.filter((mapping) =>
         `${mapping.course.code} ${mapping.course.name}`.toLowerCase().includes(find.toLowerCase())

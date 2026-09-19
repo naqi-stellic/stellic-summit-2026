@@ -3,6 +3,7 @@ import { useState } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
 import { ConstraintsCard, ExplainPanel } from "@/components/stellic/explain-panel"
+import { EXPLAIN_AUDIT, EXPLAIN_RECORD } from "@/data/explain-audit"
 import { constraintsFor } from "@/data/explain"
 import {
   AuditControls,
@@ -11,13 +12,14 @@ import {
   TermStrip,
 } from "@/components/stellic/student-profile"
 import {
-  AUDIT,
   AUDIT_SCOPES,
   AUDIT_STUDENT,
   AUDIT_TABS,
   AUDIT_VIEWS,
   LAST_COMPUTED,
   UNMATCHED_BLURB,
+  auditStanding,
+  milestoneStanding,
   programUnder,
   unmatchedAgainst,
   type AuditGroup,
@@ -44,7 +46,7 @@ export function ExplainProgress() {
   /** Which requirement the panel is explaining. Null is the panel closed. */
   const [explaining, setExplaining] = useState<AuditGroup | null>(null)
 
-  const unmatched = unmatchedAgainst([AUDIT])
+  const unmatched = unmatchedAgainst([EXPLAIN_AUDIT])
 
   return (
     <AppShell
@@ -54,13 +56,28 @@ export function ExplainProgress() {
       assistLabel="Ask about this requirement"
       panel={
         explaining ? (
-          <ExplainPanel group={explaining} onClose={() => setExplaining(null)} />
+          <ExplainPanel
+            group={explaining}
+            record={EXPLAIN_RECORD}
+            onClose={() => setExplaining(null)}
+          />
         ) : undefined
       }
     >
       <main className="@container min-w-0 flex-1 overflow-y-auto px-6 py-8">
         <div className="mx-auto flex w-full max-w-[1518px] flex-col gap-4">
-          <ProfileCard programs={[AUDIT_STUDENT.program]} />
+          {/* Read off the tree this page draws rather than the shared one.
+              The bar and the requirement under it are the same audit, and this
+              prototype's General Education holds six courses where the others
+              hold five — a header that went on reporting the others would be
+              contradicting the rows directly beneath it. */}
+          <ProfileCard
+            programs={[AUDIT_STUDENT.program]}
+            progress={{
+              courses: auditStanding(EXPLAIN_AUDIT),
+              milestones: milestoneStanding(EXPLAIN_AUDIT),
+            }}
+          />
           <NetworkRow />
           <TermStrip />
 
@@ -78,7 +95,7 @@ export function ExplainProgress() {
 
           <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
             <AuditTree
-              audit={AUDIT}
+              audit={EXPLAIN_AUDIT}
               explain={{
                 /* The credential row explains the programme under it rather
                    than itself: the rules are the programme's, and somebody
