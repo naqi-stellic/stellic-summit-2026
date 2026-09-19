@@ -209,10 +209,10 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
       {
         severity: "opp",
         source: "audit",
-        message: "Requirement note is 500+ characters and truncates on mobile",
-        requirement: "Free Electives",
+        message: "Two requirements share the title “Core”",
+        requirement: "Core",
         impact: "388 students",
-        fix: "Shorten the note.",
+        fix: "Rename one, e.g. “Systems Core”.",
       },
     ],
   },
