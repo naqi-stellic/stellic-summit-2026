@@ -78,6 +78,28 @@ export type InsightProgram = {
  *  means nothing to a reader and can fall out of step with the list. */
 type RawProgram = Omit<InsightProgram, "items"> & { items: Omit<InsightItem, "id">[] }
 
+/** An exception-pattern finding, built from the three numbers it is about.
+ *
+ *  The students it would reach can never be fewer than the requests it is
+ *  counting. Every request came from a student, and a rule that ends the
+ *  requests reaches next year's students too — so a row reading "11 requests,
+ *  9 students" is a row that has miscounted one of them. Stated here rather
+ *  than left to four rows to get right by hand. */
+const pattern = (
+  approved: number,
+  of: number,
+  students: number,
+  about: { message: string; requirement: string; fix: string }
+): Omit<InsightItem, "id"> => ({
+  severity: "opp",
+  source: "exceptions",
+  count: `${approved} of ${of}`,
+  message: about.message,
+  requirement: about.requirement,
+  impact: `${Math.max(students, of)} students`,
+  fix: about.fix,
+})
+
 const withIds = (programs: RawProgram[]): InsightProgram[] =>
   programs.map((program) => ({
     ...program,
@@ -146,15 +168,14 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         requirement: "Advanced Electives",
         fix: "Swap BIOL 3310 and BIOL 3340 for current offerings.",
       },
-      {
-        severity: "opp",
-        source: "exceptions",
-        count: "9 of 11",
-        message: "waive requests approved",
+      /* A waiver pattern has a generic answer — the requirement stops being
+         required — so naming the course somebody would pair it with is both
+         a guess and a smaller fix than the evidence supports. */
+      pattern(9, 11, 16, {
+        message: "waiver requests approved",
         requirement: "Foundation Sciences",
-        impact: "9 students",
-        fix: "Make CHEM 2110 one-of-two with CHEM 2105.",
-      },
+        fix: "Make this requirement optional.",
+      }),
       {
         severity: "opp",
         source: "audit",
@@ -191,15 +212,11 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         requirement: "Choose 2 non-CS courses",
         fix: "Add more courses.",
       },
-      {
-        severity: "opp",
-        source: "exceptions",
-        count: "12 of 14",
+      pattern(12, 14, 35, {
         message: "substitution requests approved",
         requirement: "Math Electives",
-        impact: "35 students",
         fix: "Add MATH 2410 and STAT 2100 as listed alternatives.",
-      },
+      }),
       {
         severity: "opp",
         source: "audit",
@@ -237,15 +254,11 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     iso: "2026-07-02",
     vis: ["mark"],
     items: [
-      {
-        severity: "opp",
-        source: "exceptions",
-        count: "8 of 10",
+      pattern(8, 10, 12, {
         message: "credit-reduction requests approved",
         requirement: "Studio Electives",
-        impact: "7 students",
         fix: "Lower the requirement from 24 to 21 credits to match approvals.",
-      },
+      }),
       /* The other half of the Computer Science row. That requirement is called
          "Choose 2 non-CS courses" because a requirement called "Choose 2" is
          caught by this — a title is a rule to whoever wrote it and a signpost
@@ -270,15 +283,11 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     iso: "2026-05-08",
     vis: ["mark"],
     items: [
-      {
-        severity: "opp",
-        source: "exceptions",
-        count: "10 of 12",
+      pattern(10, 12, 14, {
         message: "substitution requests approved",
         requirement: "Global Electives",
-        impact: "14 students",
         fix: "Add BUSI 3400 and ECON 3210 as listed alternatives.",
-      },
+      }),
     ],
   },
 ])
