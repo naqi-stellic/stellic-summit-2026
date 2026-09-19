@@ -53,18 +53,24 @@ const gen = (
 export const GENERAL = "General Education"
 export const UPPER = "Upper Division"
 
-/* Six taken, eighteen credits, and one of them upper division. The whole of
-   the story this requirement is here to tell: a student who has done six
-   courses and is still short, and short in a particular way. */
+/* Six taken, eighteen credits, five of them upper division. The whole of the
+   story this requirement is here to tell, and it needs both answers in it: a
+   student who has satisfied one of the two constraints outright and is still
+   twelve credits short on the other. A requirement with nothing met reads as
+   a requirement nobody has started — the interesting case, and the one that
+   makes a reader look at which line the number came from, is the requirement
+   that is half answered. */
 const TAKEN: AuditCourse[] = [
   gen("GEN 110", "Writing & Rhetoric", "Taken in Fall '25", "A-", [GENERAL]),
-  gen("GEN 150", "The Ancient World", "Taken in Fall '25", "B+", [GENERAL]),
-  gen("GEN 180", "Mind & Behaviour", "Taken in Fall '25", "A", [GENERAL]),
-  gen("GEN 210", "Visual Culture", "Taken in Spring '26", "B", [GENERAL]),
-  gen("GEN 240", "Public Speaking", "Taken in Spring '26", "A-", [GENERAL]),
-  /* The one that answers the second constraint, and the reason it reads 3/15
-     rather than 0/15 — one course of the five it wants. */
-  gen("GEN 340", "Science, Ethics & Society", "Taken in Spring '26", "B+", [GENERAL, UPPER]),
+  /* The 300s are what carries the attribute, which is the whole of why the
+     second constraint is met and the first is not: fifteen of these eighteen
+     credits are upper division, and the course set the first constraint reads
+     against does not care either way. */
+  gen("GEN 310", "The Ancient World", "Taken in Fall '25", "B+", [GENERAL, UPPER]),
+  gen("GEN 330", "Mind & Behaviour", "Taken in Fall '25", "A", [GENERAL, UPPER]),
+  gen("GEN 340", "Science, Ethics & Society", "Taken in Spring '26", "B", [GENERAL, UPPER]),
+  gen("GEN 360", "Visual Culture", "Taken in Spring '26", "A-", [GENERAL, UPPER]),
+  gen("GEN 380", "Power, Politics & Society", "Taken in Spring '26", "B+", [GENERAL, UPPER]),
 ]
 
 const COURSES = TAKEN
@@ -73,7 +79,9 @@ const CREDITS = (of: AuditCourse[]) => of.reduce((sum, course) => sum + course.c
 
 /** Both of them the same template — "Take at least [x] courses/credits from a
  *  given course set" — so the only thing that differs between the two lines is
- *  the fraction, which is the comparison the requirement exists to make.
+ *  the fraction, which is the comparison the requirement exists to make — and
+ *  one of them is met and the other is not, so the panel shows both answers a
+ *  constraint can give against the same wording and the same student.
  *
  *  Each set is matched rather than described: the courses carry the attributes
  *  and the constraint names them, so the numbers are counted off the rows
