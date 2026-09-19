@@ -347,6 +347,15 @@ function fulfilment(group: AuditGroup): Constraint {
  *  course-set rules are primary constraints, not filters under one. */
 const OWN_FULFILMENT = new Set(["general-education"])
 
+/** Whether this requirement was asked to compute an average. Read off its own
+ *  constraints rather than listed somewhere: put the constraint on another
+ *  requirement and that one wears a badge too. */
+export function computesGpa(group: AuditGroup): boolean {
+  return constraintsFor(group).some((constraint) =>
+    /^Compute GPA for this requirement/.test(constraint.text)
+  )
+}
+
 export function constraintsFor(group: AuditGroup): Constraint[] {
   /* The programme's rules belong to the programme. They had hung off the
      credential, one row above — "at least 120 units in total" is a thing

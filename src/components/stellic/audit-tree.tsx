@@ -22,6 +22,12 @@ export type Explain = {
   /** How many rules there are, for the chip that opens them. The tree does not
    *  know how a requirement's constraints are worked out, so it asks. */
   count?: (group: AuditGroup) => number
+  /** The average this requirement computes, where it computes one — a
+   *  requirement carries a GPA only if somebody has put a "Compute GPA for
+   *  this requirement" constraint on it. Given, the row wears it and pressing
+   *  it opens the working. */
+  gpa?: (group: AuditGroup) => string | undefined
+  onGpa?: (group: AuditGroup) => void
 }
 
 /* The degree audit, drawn as a tree. Every row is the same three parts: the
@@ -336,6 +342,7 @@ function GroupRow({
   onToggle,
   tools,
   rules,
+  gpa,
 }: {
   group: AuditGroup
   open?: boolean
@@ -343,6 +350,8 @@ function GroupRow({
   tools?: React.ReactNode
   /** Whether the row's own rules can be opened from its first tag, and are. */
   rules?: { open: boolean; onToggle: () => void; count?: number }
+  /** The average the requirement computes, and the way into its working. */
+  gpa?: { value: string; onOpen: () => void }
 }) {
   /* The degree heads the tree rather than hanging off it, so it is drawn on
      nothing: no ground, no border, and the counts in place of a mark. What it
@@ -462,6 +471,22 @@ function GroupRow({
       )}
       <Tags tags={group.tags} onToggle={rules?.onToggle} open={rules?.open} count={rules?.count} />
       {tools}
+      {/* The average sits at the far end of the row, where the credits badge
+          does on a check — it is what the requirement amounts to rather than
+          something it is asking for, so it reads after the name and not with
+          the tags. */}
+      {gpa && (
+        <Badge variant="outline" asChild className="ml-auto font-normal">
+          <button
+            type="button"
+            onClick={gpa.onOpen}
+            aria-label={`How the ${group.name} GPA of ${gpa.value} is calculated`}
+            className="cursor-pointer hover:bg-gray-5"
+          >
+            GPA {gpa.value}
+          </button>
+        </Badge>
+      )}
     </div>
   )
 }
@@ -512,6 +537,11 @@ function EntryRows({
                   onToggle: () => onToggle(rulesId),
                   count: explain.count?.(entry),
                 }
+              : undefined
+          }
+          gpa={
+            explain?.gpa?.(entry) && explain.onGpa
+              ? { value: explain.gpa(entry)!, onOpen: () => explain.onGpa!(entry) }
               : undefined
           }
         />

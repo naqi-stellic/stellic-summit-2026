@@ -3,8 +3,13 @@ import { useState } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
 import { ConstraintsCard, ExplainPanel } from "@/components/stellic/explain-panel"
-import { EXPLAIN_AUDIT, EXPLAIN_RECORD } from "@/data/explain-audit"
-import { constraintsFor } from "@/data/explain"
+import { GpaPanel } from "@/components/stellic/gpa-panel"
+import {
+  EXPLAIN_AUDIT,
+  EXPLAIN_RECORD,
+  GENERAL_EDUCATION_GPA,
+} from "@/data/explain-audit"
+import { computesGpa, constraintsFor } from "@/data/explain"
 import {
   AuditControls,
   NetworkRow,
@@ -43,8 +48,14 @@ import {
 
 export function ExplainProgress() {
   const [view, setView] = useState("official")
-  /** Which requirement the panel is explaining. Null is the panel closed. */
-  const [explaining, setExplaining] = useState<AuditGroup | null>(null)
+  /* What is open beside the tree. Two panels answer two different questions
+     about the same row — why it says what it says, and how its average was
+     arrived at — so only one is open at a time and the row says which. */
+  const [beside, setBeside] = useState<
+    { kind: "explain" | "gpa"; group: AuditGroup } | null
+  >(null)
+  const explaining = beside?.kind === "explain" ? beside.group : null
+  const calculating = beside?.kind === "gpa" ? beside.group : null
 
   const unmatched = unmatchedAgainst([EXPLAIN_AUDIT])
 
@@ -59,7 +70,13 @@ export function ExplainProgress() {
           <ExplainPanel
             group={explaining}
             record={EXPLAIN_RECORD}
-            onClose={() => setExplaining(null)}
+            onClose={() => setBeside(null)}
+          />
+        ) : calculating ? (
+          <GpaPanel
+            title={calculating.name}
+            gpa={GENERAL_EDUCATION_GPA}
+            onClose={() => setBeside(null)}
           />
         ) : undefined
       }
@@ -101,11 +118,20 @@ export function ExplainProgress() {
                    than itself: the rules are the programme's, and somebody
                    aiming for one row and hitting the other should still get
                    the answer they came for. */
-                onExplain: (group) => setExplaining(programUnder(group)),
+                onExplain: (group) => setBeside({ kind: "explain", group: programUnder(group) }),
                 constraints: (group) => (
-                  <ConstraintsCard group={group} onExplain={() => setExplaining(group)} />
+                  <ConstraintsCard
+                    group={group}
+                    onExplain={() => setBeside({ kind: "explain", group })}
+                  />
                 ),
                 count: (group) => constraintsFor(group).length,
+                /* A requirement wears an average only where it was asked to
+                   compute one — the constraint is what puts the badge there,
+                   so the badge is read off the constraint. */
+                gpa: (group) =>
+                  computesGpa(group) ? GENERAL_EDUCATION_GPA.value : undefined,
+                onGpa: (group) => setBeside({ kind: "gpa", group }),
               }}
             />
             <UnmatchedSection

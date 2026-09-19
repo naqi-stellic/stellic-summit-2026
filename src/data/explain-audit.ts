@@ -6,6 +6,7 @@ import {
   type AuditGroup,
 } from "@/data/audit"
 import type { Constraint } from "@/data/explain"
+import { gpaOf } from "@/data/gpa"
 import { CREDITS_PER_COURSE } from "@/data/plan"
 
 /* The audit as Explain Progress shows it.
@@ -95,7 +96,19 @@ export const GENERAL_EDUCATION_RULES: Constraint[] = [
     },
     attributes: [UPPER],
   },
+  /* The third is not a bar to clear — it is what makes the requirement carry a
+     GPA at all. Stellic computes one for a requirement only where somebody has
+     asked it to, which is why the badge appears on this row and on no other. */
+  {
+    id: "gen-ed-gpa",
+    text: "Compute GPA for this requirement",
+  },
 ]
+
+/** What those six grades come to. Read off the courses rather than stated, so
+ *  the badge on the row, the sum in the panel and the rows it is a sum of
+ *  cannot disagree. */
+export const GENERAL_EDUCATION_GPA = gpaOf(TAKEN)
 
 /** Six rows and no seats, and still four courses short: the credits the first
  *  constraint wants and has not got, said in the unit the mark counts in.
