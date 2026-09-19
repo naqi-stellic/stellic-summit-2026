@@ -166,24 +166,6 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     ],
   },
   {
-    id: "polsci",
-    program: "Political Science, B.A.",
-    version: "EY2025",
-    students: 96,
-    published: "Mar 3",
-    iso: "2026-03-03",
-    vis: ["mark"],
-    items: [
-      {
-        severity: "warn",
-        source: "audit",
-        message: "Counts a course that moved departments (POLS 2200 → GOVT 2200)",
-        requirement: "Core Politics",
-        fix: "Add GOVT 2200 as an equivalent.",
-      },
-    ],
-  },
-  {
     id: "cs",
     program: "Computer Science, B.S.",
     version: "EY2026",
