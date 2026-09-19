@@ -112,13 +112,6 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         requirement: "Capstone Sequence",
         fix: "Replace with ME 4995.",
       },
-      {
-        severity: "warn",
-        source: "audit",
-        message: "Senior-standing rule blocks the only term ME 4820 is offered",
-        requirement: "Advanced Electives",
-        fix: "Relax the standing rule for ME 4820.",
-      },
     ],
   },
   {
