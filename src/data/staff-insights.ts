@@ -53,7 +53,12 @@ export type InsightItem = {
   requirement: string
   /** Who it reaches, on an opportunity. A problem's impact is its severity. */
   impact?: string
-  /** What to do. Specific enough to act on without opening anything. */
+  /** What to do. Specific enough to act on without opening anything — and no
+   *  more specific than the data supports. Naming the prerequisite an audit is
+   *  missing is reading the catalog back; naming the two courses that ought to
+   *  join an elective pool, or the title a duplicated requirement ought to be
+   *  renamed to, is guessing in a confident voice. The suggestion stops where
+   *  the evidence does: "add more courses", "rename one of them". */
   fix: string
 }
 
@@ -163,7 +168,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         message: "Two requirements share the title “Electives”",
         requirement: "Electives",
         impact: "142 students",
-        fix: "Rename one, e.g. “Biology Electives”.",
+        fix: "Rename one of them.",
       },
     ],
   },
@@ -201,12 +206,15 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         requirement: "Math Electives",
         fix: "Remove the duplicate entry.",
       },
+      /* Named the way a requirement is actually named. "Choose 2" is a rule,
+         not a title, and a requirement literally called that would be caught
+         by a different insight — the one about titles — rather than this. */
       {
         severity: "warn",
         source: "audit",
-        message: "“Choose 2” has only 2 active courses",
-        requirement: "Systems Electives",
-        fix: "Add CS 4520 and CS 4610.",
+        message: "“Choose 2 non-CS courses” has only 2 active courses",
+        requirement: "Choose 2 non-CS courses",
+        fix: "Add more courses.",
       },
       {
         severity: "opp",
@@ -223,7 +231,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         message: "Two requirements share the title “Core”",
         requirement: "Core",
         impact: "388 students",
-        fix: "Rename one, e.g. “Systems Core”.",
+        fix: "Rename one of them.",
       },
     ],
   },
