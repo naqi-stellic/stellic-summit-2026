@@ -54,8 +54,8 @@ const SEVERITY: Record<Severity, { icon: IconName; tone: string; one: string; ma
   crit: {
     icon: "report",
     tone: "bg-alert-5 text-alert-100",
-    one: "critical issue",
-    many: "critical issues",
+    one: "critical",
+    many: "criticals",
   },
   warn: {
     icon: "warning",
