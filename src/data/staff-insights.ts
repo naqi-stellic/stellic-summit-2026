@@ -20,9 +20,14 @@ import type { PersonaKey } from "@/data/staff-home"
 
 /** How bad it is, and the three questions that decide which:
  *
- *  - `crit` — **no student in this program can complete the degree.** A credit
- *    minimum nothing can reach, a prerequisite that refers back to itself.
- *    Somebody has to fix it before anyone graduates.
+ *  - `crit` — **the audit as written cannot be followed to a degree.** A credit
+ *    minimum the listed courses cannot reach; a required course nobody can
+ *    register for. Somebody has to fix it before anyone graduates.
+ *
+ *    Note what this does not cover: a problem the audit editor cannot solve.
+ *    A prerequisite chain that refers back to itself is real and serious and
+ *    belongs to whoever owns the catalog, and putting it on a list whose every
+ *    row opens the audit editor is sending people somewhere they cannot act.
  *  - `warn` — **the audit evaluates correctly and something downstream does
  *    not.** An inactive course still counts on the audit; students just cannot
  *    find it when planning. Nobody is blocked, somebody is inconvenienced.
@@ -85,8 +90,10 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     vis: ["mark"],
     items: [
       /* The two criticals on the page, and the only two. Both of them are the
-         same shape: a rule that cannot be satisfied by anybody, ever, which is
-         the bar the severity is set at. */
+         same shape: follow this audit exactly and you do not graduate, which
+         is the bar the severity is set at. And both are fixable in the editor
+         the row opens — a finding you cannot act on from where it is shown is
+         not a finding, it is news. */
       {
         severity: "crit",
         source: "audit",
@@ -94,12 +101,16 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         requirement: "Degree Total",
         fix: "Lower the minimum to 128 or add eligible courses.",
       },
+      /* The audit asks for the second course and never mentions the first, so
+         a student following it is refused at registration and has to find out
+         why on their own. The catalog is right here; the audit is short a
+         row. */
       {
         severity: "crit",
         source: "audit",
-        message: "ME 3110 requires ME 3120, which requires ME 3110",
+        message: "ME 3120 is required, but its prerequisite ME 3110 is not in the audit",
         requirement: "Mechanics Core",
-        fix: "Correct the prerequisite chain.",
+        fix: "Add ME 3110 to Mechanics Core.",
       },
       /* Not critical, and the reason is worth reading: an inactive course still
          loads against an audit requirement. The audit is right. What breaks is
