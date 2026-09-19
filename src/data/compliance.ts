@@ -1,4 +1,4 @@
-import { AUDIT_STUDENT, DEVELOPMENTAL, STUDENT_RECORD, type AuditCourse } from "@/data/audit"
+import { CUMULATIVE_GPA, DEVELOPMENTAL, STUDENT_RECORD, type AuditCourse } from "@/data/audit"
 import { recordMappings, type Constraint, type CourseMapping } from "@/data/explain"
 import { CREDITS_PER_COURSE, DEGREE } from "@/data/plan"
 
@@ -275,8 +275,8 @@ const PACE_FLOOR = Math.ceil(ATTEMPTED * 0.67)
 /** What a full award asks of a term, against what next term has in it. */
 const FULL_TIME = 12
 const SPRING_PLANNED = 6
-/** The cumulative GPA, as the record already reports it. */
-const CGPA = AUDIT_STUDENT.engage.cgpa
+/** The cumulative GPA, counted off the same transcript the record shows. */
+const CGPA = CUMULATIVE_GPA.value
 
 export const AID: ComplianceCheck = {
   kind: "check",

@@ -50,13 +50,22 @@ export type Gpa = {
   value: string
 }
 
-/** Whether a course has anything to contribute: credits above zero and a grade
- *  the scale can weigh. Both of the conditions the docs give for a course
- *  counting toward a Stellic-calculated GPA that a prototype can honestly
- *  check — the other two are about repeat codes and constraints, and this
- *  student has neither. */
+/** What credit earned somewhere else is tagged with. It arrives with units and
+ *  no grade points — the institution accepts the credit and does not adopt the
+ *  other institution's grading — which is why four dual-enrolment A's do
+ *  nothing to an average. The aid check says as much on screen. */
+export const TRANSFER = "Transfer Credit"
+
+/** Whether a course has anything to contribute: credits above zero, a grade
+ *  the scale can weigh, and earned here. The first two are the conditions the
+ *  docs give for a course counting toward a Stellic-calculated GPA that a
+ *  prototype can honestly check — the other two are about repeat codes and
+ *  constraints, and this student has neither. */
 export const factorable = (course: AuditCourse): boolean =>
-  course.credits > 0 && course.grade !== undefined && course.grade in WEIGHT
+  course.credits > 0 &&
+  course.grade !== undefined &&
+  course.grade in WEIGHT &&
+  !course.attributes?.includes(TRANSFER)
 
 /** The institution's own settings, which decide what the arithmetic rounds to
  *  and which attempts are in it. Named on screen under the sum, because a
@@ -108,7 +117,16 @@ export function gpaOfGroup(group: AuditGroup): Gpa {
 
   const walk = (entry: AuditEntry) => {
     if (entry.kind === "milestone") return
-    if (entry.kind === "group") return entry.children.forEach(walk)
+    if (entry.kind === "group") {
+      /* An additional check re-lists coursework counted by the requirements
+         above it. Walking into one would not change the sum — the codes are
+         already held — but it would pick up courses the audit has placed
+         nowhere else, and the page says underneath that those fulfil no
+         requirement. An average cannot count what the page below it does
+         not. */
+      if (entry.restated) return
+      return entry.children.forEach(walk)
+    }
     /* Seats have no code and nothing to weigh: a planned elective is a shape
        in the audit, not a grade on a transcript. */
     if (entry.code && !seen.has(entry.code)) seen.set(entry.code, entry)

@@ -6,6 +6,7 @@ import { ConstraintsCard, ExplainPanel } from "@/components/stellic/explain-pane
 import { GpaPanel } from "@/components/stellic/gpa-panel"
 import {
   EXPLAIN_AUDIT,
+  EXPLAIN_CGPA,
   EXPLAIN_RECORD,
   GENERAL_EDUCATION_GPA,
 } from "@/data/explain-audit"
@@ -104,7 +105,8 @@ export function ExplainProgress() {
               milestones: milestoneStanding(EXPLAIN_AUDIT),
             }}
           />
-          <NetworkRow />
+          {/* Its own transcript, and its own cumulative average off it. */}
+          <NetworkRow cgpa={EXPLAIN_CGPA.value} />
           <TermStrip />
 
           <AuditControls

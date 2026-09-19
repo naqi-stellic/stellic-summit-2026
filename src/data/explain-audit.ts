@@ -6,7 +6,7 @@ import {
   type AuditGroup,
 } from "@/data/audit"
 import type { Constraint } from "@/data/explain"
-import { gpaOf, gpaOfGroup } from "@/data/gpa"
+import { gpaOf, gpaOfGroup, type Gpa } from "@/data/gpa"
 import { CREDITS_PER_COURSE } from "@/data/plan"
 
 /* The audit as Explain Progress shows it.
@@ -170,3 +170,9 @@ export const EXPLAIN_RECORD: Map<string, AuditCourse> = new Map([
   ...STUDENT_RECORD,
   ...TAKEN.map((course) => [course.code, course] as const),
 ])
+
+/** And what that transcript comes to. The three courses this tree's General
+ *  Education displaced are still on the record — they fulfil nothing here,
+ *  which the unmatched section says, and a cumulative average counts them
+ *  anyway. That is the difference between it and the programme's own. */
+export const EXPLAIN_CGPA: Gpa = gpaOf([...EXPLAIN_RECORD.values()])

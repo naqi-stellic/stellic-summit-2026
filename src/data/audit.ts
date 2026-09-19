@@ -1,4 +1,4 @@
-import { gpaOfGroup, type Gpa } from "@/data/gpa"
+import { TRANSFER, gpaOf, gpaOfGroup, type Gpa } from "@/data/gpa"
 import { DEGREE, STUDENT } from "@/data/plan"
 
 /* The degree audit behind Team Progress: what the degree asks for, and where
@@ -138,7 +138,9 @@ export const AUDIT_STUDENT = {
   /* How much of Stellic this student is actually using — not a grade. One
      figure, drawn the same way on the record and in the search that finds it,
      so the two can never disagree. */
-  engage: { bolts: 5, lit: 3, term: "Fall '26", termGpa: "3.42", cgpa: "3.38" },
+  /* The cumulative average is not here: it is `CUMULATIVE_GPA`, counted off
+     the transcript below rather than stated beside it. */
+  engage: { bolts: 5, lit: 3, term: "Fall '26", termGpa: "3.42" },
   interests: [],
 }
 
@@ -629,11 +631,15 @@ export const DEVELOPMENTAL = {
 }
 
 export const DUAL_ENROLMENT = {
+  /* Tagged rather than listed. The grades are real and the audit shows them,
+     but they were earned at another institution, so they carry units here and
+     no grade points — which is the rule the cumulative average is computed
+     under and the reason four A's leave it where it was. */
   courses: [
-    course("MATH 110", "College Algebra", "taken", "Taken in Fall '24", "A"),
-    course("ENGL 100", "Academic Writing Basics", "taken", "Taken in Fall '24", "A-"),
-    course("HIST 101", "United States History I", "taken", "Taken in Spring '25", "B+"),
-    course("SPAN 101", "Elementary Spanish I", "taken", "Taken in Spring '25", "A"),
+    course("MATH 110", "College Algebra", "taken", "Taken in Fall '24", "A", [TRANSFER]),
+    course("ENGL 100", "Academic Writing Basics", "taken", "Taken in Fall '24", "A-", [TRANSFER]),
+    course("HIST 101", "United States History I", "taken", "Taken in Spring '25", "B+", [TRANSFER]),
+    course("SPAN 101", "Elementary Spanish I", "taken", "Taken in Spring '25", "A", [TRANSFER]),
   ],
 }
 
@@ -668,6 +674,14 @@ export const STUDENT_RECORD: Map<string, AuditCourse> = (() => {
 
   return held
 })()
+
+/** The cumulative grade point average: every graded course on the record,
+ *  whatever it is counting toward and whether it is counting toward anything
+ *  at all. It is the transcript's number rather than the degree's, which is
+ *  what separates it from the programme's own — unmatched coursework and the
+ *  developmental algebra the degree refuses are both in it, and the credit
+ *  carried in from elsewhere is not. */
+export const CUMULATIVE_GPA: Gpa = gpaOf([...STUDENT_RECORD.values()])
 
 /** The codes that are actually counting toward the degree on screen. A course
  *  here that also counts toward a second program is double counting; one of

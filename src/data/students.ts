@@ -1,4 +1,4 @@
-import { AUDIT_STUDENT } from "@/data/audit"
+import { AUDIT_STUDENT, CUMULATIVE_GPA } from "@/data/audit"
 
 /* The student search: the way a staff member finds anybody.
  *
@@ -114,7 +114,7 @@ export const ROSTER: Student[] = [
       { name: "Business Administration, B.S. (Finance)" },
       { name: "Data Analytics [minor]" },
     ],
-    cgpa: "3.38",
+    cgpa: CUMULATIVE_GPA.value,
     courses: { done: 10, inProgress: 5, remaining: 25 },
     milestones: { done: 1, inProgress: 0, remaining: 2 },
     alert: "6 credits short of NCAA progress",

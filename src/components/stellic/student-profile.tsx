@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   AUDIT_STUDENT,
+  CUMULATIVE_GPA,
   CURRENT_TERM,
   OFFICIAL_PROGRESS,
   type AuditStanding,
@@ -251,7 +252,14 @@ export function ProfileCard({
 
 /** The three cards under the profile: who to ask, how it is going, and what
  *  they care about. */
-export function NetworkRow() {
+export function NetworkRow({
+  cgpa = CUMULATIVE_GPA.value,
+}: {
+  /** The cumulative average this page's transcript comes to. Explain Progress
+   *  reads a record of its own, and a card reporting the shared one would be
+   *  contradicting the audit two cards below it. */
+  cgpa?: string
+}) {
   const { advisor, engage } = AUDIT_STUDENT
 
   return (
@@ -308,7 +316,7 @@ export function NetworkRow() {
           {/* Down on the term, which is the one figure here that is a warning
               rather than a fact. */}
           <div className="flex items-center gap-1">
-            <p className="text-caption-lg font-semibold text-gray-80">{engage.cgpa}</p>
+            <p className="text-caption-lg font-semibold text-gray-80">{cgpa}</p>
             <Icon name="arrow-drop-down" size={16} className="text-alert-50" />
           </div>
         </div>

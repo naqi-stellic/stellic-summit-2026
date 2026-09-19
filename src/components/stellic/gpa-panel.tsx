@@ -127,7 +127,7 @@ export function GpaPanel({
         </table>
 
         <div className="flex gap-3 rounded-md bg-gray-0 p-[15px]">
-          <Icon name="calculate" size={16} className="mt-0.5 shrink-0 text-gray-80" />
+          <Icon name="table-view" size={16} className="mt-0.5 shrink-0 text-gray-80" />
           <div className="flex min-w-0 flex-col gap-1">
             <p className="text-body-md font-semibold text-foreground">Setup by your institution</p>
             <ul className="flex list-disc flex-col gap-1 pl-4 text-body-md text-gray-80">
