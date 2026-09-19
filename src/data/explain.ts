@@ -451,6 +451,19 @@ export function recordMappings(
 /** The line the panel opens on. A requirement is best read in the unit it is
  *  written in, and every requirement in this catalogue is written in credits. */
 export function explainStanding(group: AuditGroup) {
+  /* What the requirement says it wants, where it says so. Counting the rows
+     instead would have the sentence agree with the tree and disagree with the
+     constraint underneath it — a requirement holding six finished courses and
+     asking for thirty credits is exactly the case worth being right about. */
+  const asked = constraintsFor(group).find((constraint) => constraint.progress)?.progress
+  if (asked) {
+    return {
+      earned: asked.met,
+      needed: asked.total,
+      toGo: Math.max(0, asked.total - asked.met),
+    }
+  }
+
   const counted = countedBy(group).size
   const total =
     group.level === "degree"

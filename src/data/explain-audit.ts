@@ -22,9 +22,10 @@ import type { Constraint } from "@/data/explain"
  * the courses below.
  *
  * The cost of that is one visible deviation. This page counts eleven courses
- * taken where the others count ten, because six general-education courses have
- * replaced five. That is the price of a prototype-local course set, and it
- * buys a requirement whose two constraints can be read at a glance. */
+ * taken and two fewer outstanding than the others do, because six finished
+ * general-education courses have replaced five and three unfinished ones.
+ * That is the price of a prototype-local course set, and it buys a requirement
+ * whose two constraints can be read at a glance. */
 
 const ID = "general-education"
 
@@ -47,16 +48,6 @@ const gen = (
   attributes,
 })
 
-/** A seat: credit the requirement still wants and no course chosen for it. */
-const seat = (name: string): AuditCourse => ({
-  kind: "course",
-  id: `x${++seq}`,
-  code: "",
-  name,
-  credits: 3,
-  mark: "remaining",
-})
-
 /** The attribute every course here carries, and the one only some do. */
 export const GENERAL = "General Education"
 export const UPPER = "Upper Division"
@@ -75,12 +66,13 @@ const TAKEN: AuditCourse[] = [
   gen("GEN 340", "Science, Ethics & Society", "Taken in Spring '26", "B+", [GENERAL, UPPER]),
 ]
 
-/** What the requirement still wants: twelve credits, drawn as the four seats
- *  they would be filled by. Without them the row would mark itself complete —
- *  every course in it is taken — while its own constraint said 18 of 30. */
-const SEATS = Array.from({ length: 4 }, () => seat("General education elective"))
-
-const COURSES = [...TAKEN, ...SEATS]
+/* Six rows and no seats, so the requirement marks itself complete: every
+   course in it is finished. That is the point of it. The row reads as done at
+   a glance and the explain says 18 of 30 — a student who has taken six courses
+   and is still twelve credits short, twelve of which have to be upper
+   division. A requirement that advertised its own gap would not need
+   explaining. */
+const COURSES = TAKEN
 
 const CREDITS = (of: AuditCourse[]) => of.reduce((sum, course) => sum + course.credits, 0)
 
