@@ -3,7 +3,7 @@ import type { PersonaKey } from "@/data/staff-home"
 /* Insights: the work nobody assigned you.
  *
  * Open Items is what somebody sent you. This is what Stellic noticed on its own
- * in the audits you are allowed to change — a course that retired while a
+ * in the audits you are allowed to change — a course that went inactive while a
  * requirement still asks for it, a rule that contradicts another one, or a
  * pattern in the exceptions people keep approving that the audit should simply
  * say out loud. Every item carries a suggested fix, because a finding without
@@ -11,8 +11,26 @@ import type { PersonaKey } from "@/data/staff-home"
  *
  * Findings bundle under the program they are about rather than arriving as a
  * flat list: a program with ten problems is one decision — open it and work
- * through them — not ten. */
+ * through them — not ten.
+ *
+ * And there are few of them, which took some doing. A list where thirteen
+ * findings are critical is a list where none of them are: the reader stops
+ * reading the badge and starts skimming, which is the opposite of what a
+ * severity is for. Two programs' worth of real problems, said once each. */
 
+/** How bad it is, and the three questions that decide which:
+ *
+ *  - `crit` — **no student in this program can complete the degree.** A credit
+ *    minimum nothing can reach, a prerequisite that refers back to itself.
+ *    Somebody has to fix it before anyone graduates.
+ *  - `warn` — **the audit evaluates correctly and something downstream does
+ *    not.** An inactive course still counts on the audit; students just cannot
+ *    find it when planning. Nobody is blocked, somebody is inconvenienced.
+ *  - `opp` — **nothing is broken.** The audit could do work that staff are
+ *    currently doing by hand, one approved exception at a time.
+ *
+ *  Written down because the alternative is deciding it per row, and a severity
+ *  decided per row is a severity nobody can predict. */
 export type Severity = "crit" | "warn" | "opp"
 
 /** Where the finding came from. The audit's own checker, or the pattern in
@@ -66,89 +84,40 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     iso: "2024-09-10",
     vis: ["mark"],
     items: [
+      /* The two criticals on the page, and the only two. Both of them are the
+         same shape: a rule that cannot be satisfied by anybody, ever, which is
+         the bar the severity is set at. */
       {
         severity: "crit",
         source: "audit",
-        message: "ME 4990 is retired but still required",
-        requirement: "Capstone Sequence",
-        fix: "Replace with ME 4995, its listed successor.",
-      },
-      {
-        severity: "crit",
-        source: "audit",
-        message: "THERMO 3200 is required twice without credit sharing",
-        requirement: "Core Engineering",
-        fix: "Allow credit sharing, or drop one instance.",
+        message: "Minimum credits (132) exceed what the listed courses can total (128)",
+        requirement: "Degree Total",
+        fix: "Lower the minimum to 128 or add eligible courses — as written, no student can reach it.",
       },
       {
         severity: "crit",
         source: "audit",
         message: "ME 3110 requires ME 3120, which requires ME 3110",
         requirement: "Mechanics Core",
-        fix: "Correct the prerequisite chain.",
+        fix: "Correct the prerequisite chain — as written, neither course can ever be taken.",
       },
+      /* Not critical, and the reason is worth reading: an inactive course still
+         loads against an audit requirement. The audit is right. What breaks is
+         further down — the course is not searchable, so a student planning
+         their capstone term cannot find the thing their degree is asking for. */
       {
-        severity: "crit",
+        severity: "warn",
         source: "audit",
-        message: "Minimum credits (132) exceed what the listed courses can total (128)",
-        requirement: "Degree Total",
-        fix: "Lower the minimum or add eligible courses.",
+        message: "ME 4990 is inactive but still required",
+        requirement: "Capstone Sequence",
+        fix: "Replace with ME 4995. An inactive course still evaluates on the audit, but students cannot find it when planning.",
       },
       {
-        severity: "crit",
-        source: "audit",
-        message: "“Choose 2 of 4” lists 2 courses merged in 2023",
-        requirement: "Design Electives",
-        fix: "Update to the merged course, ME 4410.",
-      },
-      {
-        severity: "crit",
-        source: "audit",
-        message: "Lab requirement points at an archived requirement group",
-        requirement: "Laboratory Sequence",
-        fix: "Re-link to the active group.",
-      },
-      {
-        severity: "crit",
-        source: "audit",
-        message: "MATH 2210 is required but excluded by the same requirement's course filter",
-        requirement: "Engineering Math",
-        fix: "Remove the exclusion or the requirement.",
-      },
-      {
-        severity: "crit",
-        source: "audit",
-        message: "Co-op milestone requires a term that no longer exists",
-        requirement: "Co-op",
-        fix: "Map it to the renamed Work Term 3.",
-      },
-      {
-        severity: "crit",
+        severity: "warn",
         source: "audit",
         message: "Senior-standing rule blocks the only term ME 4820 is offered",
         requirement: "Advanced Electives",
         fix: "Relax the standing rule for ME 4820.",
-      },
-      {
-        severity: "crit",
-        source: "audit",
-        message: "Transfer credit cap of 0 contradicts the program's articulation policy",
-        requirement: "Transfer Policy",
-        fix: "Set the cap to 60, per policy.",
-      },
-      {
-        severity: "warn",
-        source: "audit",
-        message: "Requirement note references the 2019 handbook",
-        requirement: "Program Notes",
-        fix: "Update the reference.",
-      },
-      {
-        severity: "warn",
-        source: "audit",
-        message: "14 students double-count credits toward a minor",
-        requirement: "Breadth",
-        fix: "Confirm double counting is intended.",
       },
     ],
   },
@@ -162,23 +131,9 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     vis: ["mark"],
     items: [
       {
-        severity: "crit",
-        source: "audit",
-        message: "BIOL 3120 is retired but still required",
-        requirement: "Physiology",
-        fix: "Replace with BIOL 3125, its listed successor.",
-      },
-      {
-        severity: "crit",
-        source: "audit",
-        message: "BIOL 2200 is required twice without credit sharing",
-        requirement: "Foundation Sciences",
-        fix: "Allow credit sharing, or drop one instance.",
-      },
-      {
         severity: "warn",
         source: "audit",
-        message: "“Choose 1 of 3” lists 2 courses not offered since 2024",
+        message: "“Choose 1 of 3” lists 2 courses with no offering terms since 2024",
         requirement: "Advanced Electives",
         fix: "Swap BIOL 3310 and BIOL 3340 for current offerings.",
       },
@@ -218,13 +173,6 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     vis: ["mark"],
     items: [
       {
-        severity: "crit",
-        source: "audit",
-        message: "Cross-listed POLS 3410 / HIST 3410 makes “3 of 6” unreachable",
-        requirement: "Regional Studies",
-        fix: "De-duplicate the cross-listing.",
-      },
-      {
         severity: "warn",
         source: "audit",
         message: "Counts a course that moved departments (POLS 2200 → GOVT 2200)",
@@ -248,13 +196,6 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         message: "Math Electives lists MATH 3110 twice",
         requirement: "Math Electives",
         fix: "Remove the duplicate entry.",
-      },
-      {
-        severity: "warn",
-        source: "audit",
-        message: "Capstone requires senior standing but no credit floor",
-        requirement: "Capstone",
-        fix: "Add a minimum-credits condition (90+).",
       },
       {
         severity: "warn",
@@ -291,13 +232,6 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
     iso: "2026-06-19",
     vis: ["mark"],
     items: [
-      {
-        severity: "warn",
-        source: "audit",
-        message: "Thesis Track points at an archived approval workflow",
-        requirement: "Thesis Track",
-        fix: "Point the rule at the active “Thesis Approval” workflow.",
-      },
       {
         severity: "warn",
         source: "audit",
