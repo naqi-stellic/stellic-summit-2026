@@ -279,12 +279,6 @@ export function CreateEquivalency({
                   onRemove={() => setSource((all) => all.filter((other) => other !== course))}
                 />
               ))}
-              <AddSlot onClick={() => elsewhere("Opens the course picker.")}>
-                <span className="flex items-center gap-1.5 text-body-md text-gray-80">
-                  <Icon name="add" size={12} />
-                  <span className="underline [text-underline-position:from-font]">Add Course</span>
-                </span>
-              </AddSlot>
               {/* The slow half of the job: what this course actually was at
                   the other institution. The answer opens where the button is,
                   beneath the course it is about. */}
@@ -307,6 +301,12 @@ export function CreateEquivalency({
                   View course details
                 </Button>
               )}
+              <AddSlot onClick={() => elsewhere("Opens the course picker.")}>
+                <span className="flex items-center gap-1.5 text-body-md text-gray-80">
+                  <Icon name="add" size={12} />
+                  <span className="underline [text-underline-position:from-font]">Add Course</span>
+                </span>
+              </AddSlot>
             </div>
           </div>
 
