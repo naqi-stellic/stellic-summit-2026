@@ -436,14 +436,21 @@ export function recordMappings(
           return all
         }, new Map<string, string>())
 
-  return [...record.values()].map((course) => {
-    if (counts.has(course.code)) return { course, verdict: "counting" as const }
+  return [...record.values()]
+    /* By code, always. The record's own order is the order the audit tree
+       happens to mention things in, which is a fact about the tree and not
+       about the transcript — and somebody looking for one course in a list of
+       twenty should be able to guess where it is. Numeric collation, so
+       MATH 100A sorts before MATH 110 rather than after it. */
+    .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+    .map((course) => {
+      if (counts.has(course.code)) return { course, verdict: "counting" as const }
 
-    const reason = blocked.get(course.code)
-    if (reason) return { course, verdict: "not counting" as const, reason }
+      const reason = blocked.get(course.code)
+      if (reason) return { course, verdict: "not counting" as const, reason }
 
-    return { course, verdict: "not considered" as const }
-  })
+      return { course, verdict: "not considered" as const }
+    })
 }
 
 /* ---------------------------------------------------------------- standings */
