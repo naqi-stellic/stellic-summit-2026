@@ -264,13 +264,18 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
         impact: "7 students",
         fix: "Lower the requirement from 24 to 21 credits to match approvals.",
       },
+      /* The other half of the Computer Science row. That requirement is called
+         "Choose 2 non-CS courses" because a requirement called "Choose 2" is
+         caught by this — a title is a rule to whoever wrote it and a signpost
+         to everyone downstream, and planning and pathways show the title with
+         none of the rule around it. */
       {
         severity: "opp",
         source: "audit",
-        message: "No rubric linked",
-        requirement: "Portfolio Review",
+        message: "“Choose 2” is a title that will not work well in planning/pathways",
+        requirement: "Choose 2",
         impact: "58 students",
-        fix: "Attach the rubric so reviewers see the criteria.",
+        fix: "Make it specific and descriptive.",
       },
     ],
   },
