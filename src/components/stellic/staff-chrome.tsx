@@ -22,11 +22,17 @@ import {
 
 export function Section({
   title,
+  link,
   controls,
   children,
 }: {
   title: string
-  /** Search, sort, "View All" — whatever acts on the whole section. */
+  /** A way out of the section, set against its name. "View All" is about the
+   *  thing the heading names rather than about the row underneath it, so it
+   *  belongs beside the word it qualifies and not out on the right with the
+   *  controls that act on what is on screen. */
+  link?: ReactNode
+  /** Search, sort, paging — whatever acts on what is in the section. */
   controls?: ReactNode
   children: ReactNode
 }) {
@@ -50,6 +56,7 @@ export function Section({
           />
           {title}
         </button>
+        {link}
         <span className="flex-1" />
         {controls}
       </div>

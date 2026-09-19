@@ -5,7 +5,13 @@ import { AppShell } from "@/components/layout/app-shell"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { Face, Panel, Section } from "@/components/stellic/staff-chrome"
+import {
+  Face,
+  MenuButton,
+  Panel,
+  SearchField,
+  Section,
+} from "@/components/stellic/staff-chrome"
 import { Customize } from "@/components/stellic/staff-customize"
 import { CreateEquivalency } from "@/components/stellic/staff-equivalency"
 import { Insights } from "@/components/stellic/staff-insights"
@@ -18,7 +24,15 @@ import {
   type PersonaKey,
   type TabKey,
 } from "@/data/staff-home"
-import { EXCEPTIONS, PUBLISH_REQUESTS, REPORTS, TODAY } from "@/data/staff-queue"
+import {
+  EXCEPTIONS,
+  PUBLISH_REQUESTS,
+  REPORTS,
+  REPORT_SORTS,
+  TODAY,
+  matchReports,
+  type ReportSort,
+} from "@/data/staff-queue"
 import type { Articulation } from "@/data/staff-insights"
 
 /* Staff Home.
@@ -73,6 +87,10 @@ function Home({ who, inert, without }: StaffHomeProps) {
   /* Articulations a rule has been written for. Gone rather than hidden — the
      work is done, not put off. */
   const [resolved, setResolved] = useState(() => new Set<string>())
+  /* The Reports row searches and sorts itself, like both panels under it. */
+  const [reportQuery, setReportQuery] = useState("")
+  const [reportSort, setReportSort] = useState<ReportSort>("students")
+  const shownReports = matchReports(REPORTS, reportQuery, reportSort)
 
   const elsewhere = (what: string) => toast(`${what} (Exists in the real app)`)
 
@@ -140,38 +158,68 @@ function Home({ who, inert, without }: StaffHomeProps) {
           {jobs.reports && (
             <Section
               title="Reports"
+              /* Set against the heading. It opens the full reports list, which
+                 is about the section rather than about the four cards the
+                 controls on the right are searching and sorting. */
+              link={
+                <button
+                  type="button"
+                  onClick={() => elsewhere("Opens Analytics, the full reports list.")}
+                  className="cursor-pointer text-label-md text-gray-80 underline [text-underline-position:from-font]"
+                >
+                  View All
+                </button>
+              }
               controls={
                 <>
-                  <button
-                    type="button"
-                    onClick={() => elsewhere("Opens Analytics, the full reports list.")}
-                    className="cursor-pointer text-label-md text-gray-80 underline [text-underline-position:from-font]"
-                  >
-                    View All
-                  </button>
+                  <SearchField
+                    value={reportQuery}
+                    onChange={setReportQuery}
+                    placeholder="Search reports"
+                  />
+                  <MenuButton
+                    icon="sort"
+                    label="Sort reports"
+                    heading="Sort by"
+                    options={REPORT_SORTS}
+                    value={reportSort}
+                    onSelect={setReportSort}
+                    marked={reportSort !== "students"}
+                  />
                   <Pager onNext={() => elsewhere("More pinned reports.")} />
                 </>
               }
             >
-              <Cards>
-                {REPORTS.map((report) => (
-                  <Card key={report.title}>
-                    <CardHead title={report.title} sub={report.count} />
-                    <div className="mt-auto flex flex-wrap items-center gap-2 pt-3 text-label-md text-gray-80">
-                      {report.tracked && (
-                        <span className="flex items-center gap-1.5">
-                          <Icon name="s-notification" size={13} />
-                          Tracked
-                        </span>
-                      )}
-                      {report.tag && <Badge variant="secondary">{report.tag}</Badge>}
-                      <span className="flex-1" />
-                      {report.up !== undefined && <span>▲ {report.up}</span>}
-                      {report.down !== undefined && <span>▼ {report.down}</span>}
-                    </div>
-                  </Card>
-                ))}
-              </Cards>
+              {shownReports.length === 0 ? (
+                /* A card's height rather than a panel's. Four cards missing is
+                   a search that found nothing, and the full empty state made
+                   that read as an outage. */
+                <Panel className="flex min-h-[118px] items-center justify-center px-5 text-center">
+                  <p className="text-label-md text-gray-80">
+                    No pinned report answers to “{reportQuery.trim()}”.
+                  </p>
+                </Panel>
+              ) : (
+                <Cards>
+                  {shownReports.map((report) => (
+                    <Card key={report.title}>
+                      <CardHead title={report.title} sub={report.count} />
+                      <div className="mt-auto flex flex-wrap items-center gap-2 pt-3 text-label-md text-gray-80">
+                        {report.tracked && (
+                          <span className="flex items-center gap-1.5">
+                            <Icon name="s-notification" size={13} />
+                            Tracked
+                          </span>
+                        )}
+                        {report.tag && <Badge variant="secondary">{report.tag}</Badge>}
+                        <span className="flex-1" />
+                        {report.up !== undefined && <span>▲ {report.up}</span>}
+                        {report.down !== undefined && <span>▼ {report.down}</span>}
+                      </div>
+                    </Card>
+                  ))}
+                </Cards>
+              )}
             </Section>
           )}
 

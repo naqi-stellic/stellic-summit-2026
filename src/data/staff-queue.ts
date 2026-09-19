@@ -34,6 +34,35 @@ export type Report = {
   down?: number
 }
 
+export type ReportSort = "students" | "name" | "tracked"
+
+export const REPORT_SORTS: { id: ReportSort; label: string }[] = [
+  { id: "students", label: "Students in report" },
+  { id: "name", label: "Report name" },
+  { id: "tracked", label: "Tracked first" },
+]
+
+/** The head of "33 students". The card states the count in the words it is
+ *  read in; sorting wants it as a number, and parsing it back is cheaper than
+ *  carrying the same figure twice and hoping they agree. */
+const headcount = (count: string) => parseInt(count, 10) || 0
+
+/** What the section's search and sort leave on screen. Ordered largest first
+ *  by default, which is the order the cards were written in — so the control
+ *  arrives agreeing with what is already there rather than shuffling it. */
+export function matchReports(reports: Report[], query: string, sort: ReportSort): Report[] {
+  const wanted = query.trim().toLowerCase()
+  const shown = wanted
+    ? reports.filter((report) => JSON.stringify(report).toLowerCase().includes(wanted))
+    : reports
+
+  if (sort === "name") return [...shown].sort((a, b) => a.title.localeCompare(b.title))
+  /* Sorts are stable, so the tracked ones rise and everything else keeps the
+     order it already had rather than being scrambled by a tie. */
+  if (sort === "tracked") return [...shown].sort((a, b) => Number(!!b.tracked) - Number(!!a.tracked))
+  return [...shown].sort((a, b) => headcount(b.count) - headcount(a.count))
+}
+
 export const REPORTS: Report[] = [
   { title: "Advisees with < 2.0 GPA", count: "33 students", tracked: true, up: 4, down: 0 },
   { title: "Advisees Not Enrolled", count: "33 students", tracked: true, tag: "Auto Notify", up: 4 },
