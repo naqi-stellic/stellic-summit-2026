@@ -70,6 +70,12 @@ export type AuditGroup = {
   /** An additional check rather than a requirement: it re-lists courses that
    *  are counted elsewhere, so the tallies step over it. */
   restated?: boolean
+  /** What the requirement is still short by, where counting the rows would not
+   *  find it: a course-set requirement can hold nothing but finished courses
+   *  and still want twelve more credits, and the rows it is short by are rows
+   *  it does not have. Given, it is what the mark counts, and the mark is a
+   *  remaining one — a green tick says the constraints are met. */
+  short?: number
   /** Folded away when the page opens. A group of seats has nothing to read —
    *  every row says the same thing — so it states how many it wants and keeps
    *  them behind the chevron until someone asks. */
@@ -457,10 +463,10 @@ function leavesOf(group: AuditGroup, milestones?: boolean): AuditEntry[] {
  *  left box counts coursework and the right one milestones, and the right only
  *  appears where there are any. */
 export function outstanding(group: AuditGroup) {
-  const short = (milestones: boolean) =>
+  const counted = (milestones: boolean) =>
     leavesOf(group, milestones).filter((entry) => entry.mark === "remaining").length
 
-  return { courses: short(false), milestones: short(true) }
+  return { courses: group.short ?? counted(false), milestones: counted(true) }
 }
 
 /** The tree with every requirement's mark recomputed from what it holds. */
@@ -470,9 +476,14 @@ function derived<T extends AuditEntry>(entry: T): T {
   const mark =
     entry.mark === "optional"
       ? entry.mark
-      : markFrom(
-          leavesOf({ ...entry, children }).flatMap((leaf) => (leaf.mark ? [leaf.mark] : []))
-        )
+      : /* Every course in it can be finished and the requirement still not be:
+           a green tick says the constraints are met, and on a requirement that
+           states its own shortfall they are not. */
+        entry.short
+        ? "remaining"
+        : markFrom(
+            leavesOf({ ...entry, children }).flatMap((leaf) => (leaf.mark ? [leaf.mark] : []))
+          )
 
   return { ...entry, children, mark }
 }

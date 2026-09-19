@@ -1,12 +1,12 @@
 import {
   AUDIT,
   STUDENT_RECORD,
-  markFrom,
   type AuditCourse,
   type AuditEntry,
   type AuditGroup,
 } from "@/data/audit"
 import type { Constraint } from "@/data/explain"
+import { CREDITS_PER_COURSE } from "@/data/plan"
 
 /* The audit as Explain Progress shows it.
  *
@@ -66,12 +66,6 @@ const TAKEN: AuditCourse[] = [
   gen("GEN 340", "Science, Ethics & Society", "Taken in Spring '26", "B+", [GENERAL, UPPER]),
 ]
 
-/* Six rows and no seats, so the requirement marks itself complete: every
-   course in it is finished. That is the point of it. The row reads as done at
-   a glance and the explain says 18 of 30 — a student who has taken six courses
-   and is still twelve credits short, twelve of which have to be upper
-   division. A requirement that advertised its own gap would not need
-   explaining. */
 const COURSES = TAKEN
 
 const CREDITS = (of: AuditCourse[]) => of.reduce((sum, course) => sum + course.credits, 0)
@@ -103,13 +97,28 @@ export const GENERAL_EDUCATION_RULES: Constraint[] = [
   },
 ]
 
+/** Six rows and no seats, and still four courses short: the credits the first
+ *  constraint wants and has not got, said in the unit the mark counts in.
+ *
+ *  Counting the rows would find nothing missing — every course in this
+ *  requirement is finished — which is exactly the case the requirement is here
+ *  to demonstrate, and exactly the case a green tick would get wrong. */
+const SHORT = Math.ceil(
+  (GENERAL_EDUCATION_RULES[0].progress!.total - GENERAL_EDUCATION_RULES[0].progress!.met) /
+    CREDITS_PER_COURSE
+)
+
 const GENERAL_EDUCATION: AuditGroup = {
   kind: "group",
   id: ID,
   level: "requirement",
   name: "General Education",
-  mark: markFrom(COURSES.map((course) => course.mark)),
-  /* The chip counts the constraints, and there are two of them. */
+  /* Stated rather than derived: this node is swapped into a tree that has
+     already had its marks worked out, so it has to arrive with its own. And
+     it is the remaining mark whatever its rows say — a requirement short of
+     the credits it asks for is not one anybody has finished. */
+  mark: "remaining",
+  short: SHORT,
   tags: ["fulfill all"],
   children: COURSES,
 }

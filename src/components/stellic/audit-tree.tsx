@@ -520,10 +520,13 @@ function EntryRows({
   )
 
   /* The rules open as a row of their own, indented one level past the row they
-     belong to — they are about it, not beside it. */
+     belong to — they are about it, not beside it. The line at that level runs
+     on where courses follow below: the card sits inside the group's run rather
+     than breaking it. */
+  const carriesOn = entry.kind === "group" && open && entry.children.length > 0
   const rules =
     entry.kind === "group" && explain?.constraints && rulesOpen ? (
-      <TreeElement trail={[...stem.map((line) => ({ line })), { line: !last }, { line: false }]}>
+      <TreeElement trail={[...stem.map((line) => ({ line })), { line: !last }, { line: carriesOn }]}>
         {explain.constraints(entry)}
       </TreeElement>
     ) : null
