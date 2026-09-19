@@ -54,8 +54,11 @@ const SEVERITY: Record<Severity, { icon: IconName; tone: string; one: string; ma
   crit: {
     icon: "report",
     tone: "bg-alert-5 text-alert-100",
+    /* "Critical" stays "critical" in the plural. It is the state a row is in
+       rather than a thing there are several of, and "2 criticals" made a noun
+       out of it that nobody says out loud. */
     one: "critical",
-    many: "criticals",
+    many: "critical",
   },
   warn: {
     icon: "warning",
