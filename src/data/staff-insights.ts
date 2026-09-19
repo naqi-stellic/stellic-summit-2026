@@ -239,9 +239,9 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
       {
         severity: "warn",
         source: "audit",
-        message: "Elective pool asks for 4 credits where every option is 3 credits",
+        message: "Technical Electives lists ENVE 5120 twice",
         requirement: "Technical Electives",
-        fix: "Set the requirement to 3 credits or add a 4-credit option.",
+        fix: "Remove the duplicate entry.",
       },
     ],
   },
