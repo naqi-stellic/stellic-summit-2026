@@ -10,6 +10,7 @@ import {
   AUDIT_STUDENT,
   CUMULATIVE_GPA,
   CURRENT_TERM,
+  type AuditBarShares,
   OFFICIAL_PROGRESS,
   type AuditStanding,
   type MilestoneStanding,
@@ -225,10 +226,23 @@ export function ProfileCard({
           <div className="flex min-w-[240px] flex-1 flex-col gap-2">
             <p className="text-body-md text-gray-100">Courses</p>
             <ShareBar
+              /* The same three colours the audit's own bars use, and the
+                 same three groupings: done, claimed but not earned, and
+                 nothing placed against it. Registered sits in the middle band
+                 because the official audit counts it and because the kit gives
+                 it the same amber as a course under way. */
               shares={[
                 { count: courses.taken, colour: "bg-success-50", dot: "bg-success-50" },
-                { count: courses.inProgress, colour: "bg-warning-75", dot: "bg-warning-75" },
-                { count: courses.remaining, colour: "bg-gray-5", dot: "bg-gray-40" },
+                {
+                  count: courses.inProgress + courses.registered,
+                  colour: "bg-warning-25",
+                  dot: "bg-warning-25",
+                },
+                {
+                  count: courses.remaining - courses.registered,
+                  colour: "bg-gray-40",
+                  dot: "bg-gray-40",
+                },
               ]}
             />
           </div>
@@ -240,7 +254,10 @@ export function ProfileCard({
             <ShareBar
               shares={[
                 { count: milestones.done, colour: "bg-success-50", dot: "bg-success-50" },
-                { count: milestones.total - milestones.done, colour: "bg-gray-5" },
+                /* Same grey as the bar beside it. The two sit on one row, and
+                   an emptier-looking milestone bar was a difference in tone
+                   rather than in progress. */
+                { count: milestones.total - milestones.done, colour: "bg-gray-40" },
               ]}
             />
           </div>
@@ -373,13 +390,7 @@ export function AuditControls({
   /** Absent where only one tab leads anywhere, which is every prototype so
    *  far: there is nothing to switch to. */
   onSelectTab?: (id: string) => void
-  views: {
-    id: string
-    label: string
-    /** `total` is what the three shares are a fraction of — the bar's own
-     *  denominator, rather than the sum of the parts it is drawing. */
-    bar: { taken: number; inProgress: number; planned: number; total: number }
-  }[]
+  views: { id: string; label: string; bar: AuditBarShares }[]
   view: string
   onSelectView: (id: string) => void
   /** Omitted where there is nothing to scope: the compliance ruleset is read
@@ -472,25 +483,21 @@ export function AuditControls({
                 {/* A seven-pixel read of what that audit says, under the button
                     that switches to it. */}
                 <div className="w-[121px] px-2">
+                  {/* The kit's three colours, and its own denominator. Both
+                      bands had been drawn against a literal 105, which put an
+                      audit nearly half done at a seventh full. */}
                   <div className="flex h-[7px] w-full overflow-hidden rounded-full">
                     <span
                       className="border-r border-white bg-success-50"
-                      style={{ width: `${(option.bar.taken / 105) * 100}%` }}
+                      style={{ width: `${(option.bar.done / option.bar.total) * 100}%` }}
                     />
                     <span
-                      className="border-r border-white bg-warning-75"
-                      style={{ width: `${(option.bar.inProgress / 105) * 100}%` }}
+                      className="border-r border-white bg-warning-25"
+                      style={{ width: `${(option.bar.claimed / option.bar.total) * 100}%` }}
                     />
-                    {option.bar.planned > 0 && (
-                      <span
-                        className="border-r border-white bg-warning-25"
-                        style={{ width: `${(option.bar.planned / 105) * 100}%` }}
-                      />
-                    )}
                     <span className="flex-1 bg-gray-40" />
                     <span className="sr-only">
-                      {option.bar.taken + option.bar.inProgress + option.bar.planned} of{" "}
-                      {option.bar.total}
+                      {option.bar.done + option.bar.claimed} of {option.bar.total}
                     </span>
                   </div>
                 </div>

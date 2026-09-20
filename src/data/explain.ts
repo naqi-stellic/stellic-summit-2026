@@ -102,6 +102,22 @@ const PASSED: AuditCourse[] = [...STUDENT_RECORD.values()].filter(
 
 const PASS_CREDITS = PASSED.reduce((sum, course) => sum + course.credits, 0)
 
+/** What the military-credit cap is written against: three course-code families
+ *  and an enrolment tag. Named once, so the rule's own wording below and the
+ *  number beside it are reading the same list. */
+const MILITARY = ["AERO", "MLSC", "NAVS", "Military Transfer Credit"]
+
+/** And what this student has spent against it, counted off the record rather
+ *  than stated. It had been the literal 3, which was three credits of a kind
+ *  of course nobody on this transcript has taken. */
+const MILITARY_CREDITS = [...STUDENT_RECORD.values()]
+  .filter(
+    (course) =>
+      course.attributes?.some((tag) => MILITARY.some((kind) => tag.startsWith(kind))) ||
+      MILITARY.some((kind) => course.code.startsWith(`${kind} `))
+  )
+  .reduce((sum, course) => sum + course.credits, 0)
+
 /* ------------------------------------------------------------ the catalogue */
 
 /** Every code the degree is presently counting. The Open Electives rule needs
@@ -161,7 +177,7 @@ const PROGRAM_RULES: Constraint[] = [
   {
     id: "military",
     text: "Take at most 15 credits that match the following",
-    limit: { used: 3, cap: 15 },
+    limit: { used: MILITARY_CREDITS, cap: 15 },
     notes: [
       { text: "Course with one of these attributes: AERO or equivalent; MLSC or equivalent; NAVS or equivalent" },
       { text: "Course with an enrollment tag Military Transfer Credit" },

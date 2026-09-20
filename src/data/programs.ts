@@ -1038,9 +1038,8 @@ export function auditProgram(program: Program, alongside: boolean): AuditGroup {
     tags: [`fulfill all | at least ${programTotal(program) * CREDITS_PER_COURSE} credits`],
     counts: { requirements: standing.remaining, milestones: 0 },
     bar: {
-      taken: standing.taken,
-      inProgress: standing.inProgress,
-      claimed: standing.planned,
+      done: standing.taken,
+      claimed: standing.inProgress + standing.planned,
       total: programTotal(program),
     },
     children,

@@ -83,7 +83,7 @@ export type AuditGroup = {
   collapsed?: boolean
   /** The four shares the degree row reads at a glance. Filled in from
    *  `auditStanding()` rather than written down. */
-  bar?: { taken: number; inProgress: number; claimed: number; total: number }
+  bar?: AuditBarShares
   /** The programme's own grade point average, and the working behind it.
    *  Read off the coursework under the row rather than written down, so the
    *  badge on the row and the sum a reader opens from it are one calculation
@@ -532,6 +532,10 @@ export function auditStanding(audit: AuditGroup) {
     /* Registered and planned are not earned yet, so on a bar about what the
        degree still wants they sit with the rest of what it wants. */
     remaining: count("registered", "planned", "remaining"),
+    /* Enrolled for a term that has not started. The official audit counts it —
+       the registrar has it — while the plan is the only place a planned course
+       exists, which is the whole difference between the two readings. */
+    registered: count("registered"),
     /* What the plan has claimed but not yet earned, which is the whole of the
        difference between the official audit and the planned one. */
     claimed: count("registered", "planned"),
@@ -569,11 +573,14 @@ const MILESTONES = milestoneStanding(DERIVED)
 
 export const AUDIT: AuditGroup = {
   ...DERIVED,
+  /* The official reading, drawn small. Its denominator is the course rows the
+     tree holds — it had been DEGREE.requirements, which counts requirements
+     while the three bands count courses, and got away with it because both
+     numbers are forty. */
   bar: {
-    taken: STANDING.taken,
-    inProgress: STANDING.inProgress,
-    claimed: STANDING.claimed,
-    total: DEGREE.requirements,
+    done: STANDING.taken,
+    claimed: STANDING.inProgress + STANDING.registered,
+    total: STANDING.taken + STANDING.inProgress + STANDING.remaining,
   },
   /* Both counted off the tree, so neither can say anything the audit cannot
      show: the requirements still wanted, and the milestones still to do. */
@@ -588,11 +595,20 @@ export const OFFICIAL_PROGRESS = {
 /** Both toggles read the same tree — there is no second audit to compute yet —
  *  so Planned differs from Official only by counting what the plan has claimed
  *  and the registrar has not yet seen. */
+/** A progress bar, in the three colours the UI Kit gives one: what is done,
+ *  what is claimed but not earned, and what nothing has been placed against.
+ *  Two filled bands and no more — the kit spends one amber on in-progress and
+ *  registered alike and tells them apart by glyph, so a bar cannot separate
+ *  them either. `total` is what the bands are a fraction of, which the
+ *  screen-reader text had been dividing by itself. */
+export type AuditBarShares = { done: number; claimed: number; total: number }
+
 /** The two readings of the same audit, built from one standing so a page
  *  reading a different tree gets bars that agree with its own progress card.
- *  Each bar carries what it is a fraction of, which is the thing the bar's
- *  screen-reader text had been dividing by itself — "15 of 15" on an audit a
- *  quarter done. */
+ *
+ *  Official is what the registrar has: finished, under way, and enrolled for a
+ *  term that has not started. Planned is that plus what only the plan knows
+ *  about. The difference between the two bars is the one course. */
 export function viewsFor(standing: AuditStanding) {
   const total = standing.taken + standing.inProgress + standing.remaining
 
@@ -600,15 +616,18 @@ export function viewsFor(standing: AuditStanding) {
     {
       id: "official",
       label: "Official",
-      bar: { taken: standing.taken, inProgress: standing.inProgress, planned: 0, total },
+      bar: {
+        done: standing.taken,
+        claimed: standing.inProgress + standing.registered,
+        total,
+      },
     },
     {
       id: "planned",
       label: "Planned",
       bar: {
-        taken: standing.taken,
-        inProgress: standing.inProgress,
-        planned: standing.claimed,
+        done: standing.taken,
+        claimed: standing.inProgress + standing.claimed,
         total,
       },
     },

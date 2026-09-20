@@ -190,9 +190,8 @@ const counted = (audit: AuditGroup): AuditGroup => {
        are for. A third stripe on this row is the planned reading wearing the
        official label. */
     bar: {
-      taken: standing.taken,
-      inProgress: standing.inProgress,
-      claimed: 0,
+      done: standing.taken,
+      claimed: standing.inProgress + standing.registered,
       total: standing.taken + standing.inProgress + standing.remaining,
     },
   }

@@ -12,6 +12,7 @@ import type {
   AuditMilestone,
 } from "@/data/audit"
 import { outstanding } from "@/data/audit"
+import type { AuditBarShares } from "@/data/audit"
 import type { Gpa } from "@/data/gpa"
 
 /** What a row offers beyond reading: the way to ask why it says what it says.
@@ -126,21 +127,19 @@ function CountMark({ count, milestone }: { count: number; milestone?: boolean })
 }
 
 /* ============================================================ ProgressBar
-   The four shares of a line's credits: taken, under way, planned, and what is
-   left. Fixed at the design's width — it is a glance, not a measure, and the
-   rows it sits on are different widths. */
+   Fixed at the design's width — it is a glance, not a measure, and the rows it
+   sits on are different widths.
 
-function AuditBar({
-  bar,
-}: {
-  bar: { taken: number; inProgress: number; claimed: number; total: number }
-}) {
+   Three colours, as the UI Kit draws one: what is done, what is claimed but
+   not earned, and what nothing has been placed against. Two filled bands and
+   no more — the kit gives in-progress and registered the same amber and tells
+   them apart by glyph, so a bar seven pixels tall cannot do better. */
+function AuditBar({ bar }: { bar: AuditBarShares }) {
   const share = (n: number) => `${(n / bar.total) * 100}%`
 
   return (
     <span className="flex h-2 w-[101.5px] shrink-0 overflow-hidden rounded-full">
-      <span className="bg-success-50" style={{ width: share(bar.taken) }} />
-      <span className="bg-warning-75" style={{ width: share(bar.inProgress) }} />
+      <span className="bg-success-50" style={{ width: share(bar.done) }} />
       <span className="bg-warning-25" style={{ width: share(bar.claimed) }} />
       <span className="flex-1 bg-gray-40" />
     </span>

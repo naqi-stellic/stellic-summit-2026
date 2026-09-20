@@ -23,9 +23,9 @@ import {
   AUDIT_STUDENT,
   AUDIT_SCOPES,
   AUDIT_TABS,
-  AUDIT_VIEWS,
   LAST_COMPUTED,
   auditStanding,
+  viewsFor,
   milestoneStanding,
   UNMATCHED_BLURB,
   unmatchedAgainst,
@@ -116,6 +116,7 @@ export function AdvancedWhatIf() {
         taken: all.taken + one.taken,
         inProgress: all.inProgress + one.inProgress,
         remaining: all.remaining + one.remaining,
+        registered: all.registered + one.registered,
         claimed: all.claimed + one.claimed,
       })),
     milestones: trees
@@ -173,7 +174,11 @@ export function AdvancedWhatIf() {
             tabs={AUDIT_TABS}
             active="progress"
             live={["progress"]}
-            views={AUDIT_VIEWS}
+            /* The bars follow whatever is on the page, like the progress card
+               above them. Switching a major left them reporting the degree
+               that had just been replaced — legible now that they are drawn
+               against their own total rather than a literal 105, and wrong. */
+            views={viewsFor(progress.courses)}
             view={view}
             onSelectView={setView}
             scopes={AUDIT_SCOPES}
