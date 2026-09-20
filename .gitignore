@@ -28,3 +28,6 @@ dist-ssr
 # feedback is built.
 public/*-feedback.jpg
 public/explain-audit*.jpg
+public/staff-home*.jpg
+public/planner*.jpg
+public/planner*.png
