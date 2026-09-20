@@ -230,12 +230,15 @@ function EntryRows({
     </TreeElement>
   )
 
-  /* The rules, printed under the row they belong to and indented with its
-     children, because that is where they are true. */
+  /* The rules open as a row of their own, indented one level past the row they
+     belong to — they are about it, not beside it. The comment above said
+     "indented with its children" and the trail did not do it: the card was
+     drawn at the check's own depth with an elbow into it, which is the shape
+     of a sibling check rather than of something inside one. Same trail as the
+     audit tree, which is the tree this one borrows every other part from. */
+  const carriesOn = open && entry.children.length > 0
   const card = rules.has(entry.id) && (
-    <TreeElement
-      trail={[...stem.map((line) => ({ line })), { line: true, elbow: true, last: !open }]}
-    >
+    <TreeElement trail={[...stem.map((line) => ({ line })), { line: !last }, { line: carriesOn }]}>
       <ConstraintsCard
         constraints={constraintsForCheck(entry)}
         onExplain={onExplain && EXPLAINABLE.has(entry.id) ? () => onExplain(entry.id) : undefined}
