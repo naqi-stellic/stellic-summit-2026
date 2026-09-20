@@ -436,9 +436,16 @@ export type MilestoneStanding = ReturnType<typeof milestoneStanding>
  * `optional` is the exception and stays declared: "not needed" is a fact about
  * the requirement, not about what is in it. */
 
-/** In the order a requirement reports them: anything under way outranks
- *  anything merely booked, which outranks anything merely intended. */
-const MARK_ORDER: AuditMark[] = ["in-progress", "registered", "planned"]
+/** Least complete first, which is the order Stellic rolls a requirement up in:
+ *  remaining, then planned, then registered, then under way. A parent reports
+ *  the state of its least finished child.
+ *
+ *  It had been the other way round, and it made the audit claim things the
+ *  panel beside it denied: the programme wore the orange clock — everything
+ *  here is under way — over twenty-two courses nobody had started, while its
+ *  own explain panel said six of seven sub-requirements to go. One course in
+ *  progress was outvoting every course that was not. */
+const MARK_ORDER: AuditMark[] = ["remaining", "planned", "registered", "in-progress"]
 
 export function markFrom(marks: AuditMark[]): AuditMark {
   if (marks.length === 0) return "remaining"
@@ -583,8 +590,18 @@ export const AUDIT: AuditGroup = {
     total: STANDING.taken + STANDING.inProgress + STANDING.remaining,
   },
   /* Both counted off the tree, so neither can say anything the audit cannot
-     show: the requirements still wanted, and the milestones still to do. */
-  counts: { requirements: STANDING.remaining, milestones: MILESTONES.total - MILESTONES.done },
+     show: the rows still outstanding, and the milestones still to do.
+  
+     Counted the way every mark under it is counted — `outstanding()`, the same
+     function the requirement rows use. It had been the bar's figure, which
+     folds registered and planned in with what is remaining because a bar about
+     what the degree still wants is right to. A red count is not that: a course
+     you are registered for is not one you have not got, and the credential was
+     saying twenty-two over a programme saying twenty. */
+  counts: {
+    requirements: outstanding(DERIVED).courses,
+    milestones: outstanding(DERIVED).milestones,
+  },
 }
 
 export const OFFICIAL_PROGRESS = {

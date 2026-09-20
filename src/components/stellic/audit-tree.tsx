@@ -463,7 +463,14 @@ function GroupRow({
         {/* The marks stand beside the whole block, so the line under the name
             starts where the name does rather than under them. */}
         <div className="flex min-w-0 items-center gap-2">
-          {group.mark && <AuditMarkIcon mark={group.mark} />}
+          {/* A programme is a requirement like any other, so its mark counts
+              what is outstanding under it. The docs are explicit: a remaining
+              requirement displays as a count, and a programme that shows only
+              a box is a programme not saying how much. */}
+          {group.mark && <AuditMarkIcon mark={group.mark} count={outstanding(group).courses} />}
+          {group.mark === "remaining" && outstanding(group).milestones > 0 && (
+            <AuditMarkIcon mark="remaining" milestone count={outstanding(group).milestones} />
+          )}
           <div className="flex min-w-0 flex-col justify-center gap-[3px]">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <p className="text-body-md font-semibold">{group.name}</p>

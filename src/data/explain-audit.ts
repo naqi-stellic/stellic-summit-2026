@@ -2,7 +2,7 @@ import {
   AUDIT,
   STUDENT_RECORD,
   auditStanding,
-  milestoneStanding,
+  outstanding,
   viewsFor,
   type AuditCourse,
   type AuditEntry,
@@ -170,13 +170,12 @@ function swap(entry: AuditEntry): AuditEntry {
    which reads this tree, said twenty-two. */
 const counted = (audit: AuditGroup): AuditGroup => {
   const standing = auditStanding(audit)
-  const milestones = milestoneStanding(audit)
 
   return {
     ...audit,
     counts: {
-      requirements: standing.remaining,
-      milestones: milestones.total - milestones.done,
+      requirements: outstanding(audit).courses,
+      milestones: outstanding(audit).milestones,
     },
     /* The same reading as the progress card at the head of the page, drawn
        101 pixels wide instead of the full column. It had been three separate
