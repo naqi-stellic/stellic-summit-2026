@@ -39,12 +39,20 @@ export type ConstraintNote = {
   truncated?: boolean
 }
 
+/** What a fraction is counting. A requirement can ask for thirty credits, for
+ *  six courses or for all four of the sub-requirements under it, and the three
+ *  are not interchangeable: "1 of the 7 credits" on a 120-credit degree is a
+ *  sentence that has read a count of sub-requirements and called it money. */
+export type ProgressUnit = "credits" | "courses" | "sub-requirements"
+
 export type Constraint = {
   id: string
   text: string
   notes?: ConstraintNote[]
   limit?: { used: number; cap: number }
-  progress?: { met: number; total: number }
+  /** How far along, in whatever the rule counts. `unit` defaults to credits,
+   *  which is what a constraint written by hand in this file means. */
+  progress?: { met: number; total: number; unit?: ProgressUnit }
   /** Courses this rule counts, by attribute — the course-set type that names a
    *  tag and takes whatever carries it. */
   attributes?: string[]
@@ -104,12 +112,20 @@ const CLAIMED = COUNTING_NOW
 /** Rules the degree applies to everything beneath it. These are the only ones
  *  that travel: a requirement's own rules are its own, and printing the whole
  *  programme's rulebook under each of them would make them all read alike. */
+/** What the degree has banked so far, in credits — counted off the tree the
+ *  page is drawing rather than written down, so the line agrees with the
+ *  progress bar above it. It had been the literal 51, which was seventeen
+ *  courses on a tree this page does not read.
+ *
+ *  Same rule as the bar: everything taken, under way or claimed, and the
+ *  additional checks stepped over, because a course re-listed by the residency
+ *  check has not been earned twice. */
+const bankedBy = (group: AuditGroup) => {
+  const standing = auditStanding(group)
+  return (standing.taken + standing.inProgress + standing.claimed) * CREDITS_PER_COURSE
+}
+
 const PROGRAM_RULES: Constraint[] = [
-  {
-    id: "total-units",
-    text: `At least ${DEGREE.credits} units in total`,
-    progress: { met: 51, total: DEGREE.credits },
-  },
   {
     id: "course-set",
     text: `Take at least ${DEGREE.credits} credits from a given course set`,
@@ -307,11 +323,24 @@ function fulfilment(group: AuditGroup): Constraint {
   const holdsGroups = children.some((child) => child.kind === "group")
   const counting = countedBy(group).size
 
+  /* What is under the requirement, split by what it is. A milestone is not a
+     course — "take at least 16 courses" over fifteen courses and a signature
+     is a count of rows rather than a count of coursework. */
+  const courses = children.filter((child) => child.kind !== "milestone")
+  const wanted = children.filter((child) => !(child.kind === "group" && child.mark === "optional"))
+
   if (tag.includes("fulfill any")) {
     return {
       id: `${group.id}-fulfil`,
       text: "Fulfill any 1 of the following sub-requirements",
-      progress: { met: children.filter(isComplete).length, total: 1 },
+      /* One, at most. A requirement that asks for any one of three cannot be
+         two-thirds past done, and the concentrations nobody declared are
+         optional rather than finished — counting them made this read 2/1. */
+      progress: {
+        met: Math.min(wanted.filter(isComplete).length, 1),
+        total: 1,
+        unit: "sub-requirements",
+      },
     }
   }
 
@@ -328,14 +357,22 @@ function fulfilment(group: AuditGroup): Constraint {
     return {
       id: `${group.id}-fulfil`,
       text: "Fulfill all of the following sub-requirements",
-      progress: { met: children.filter(isComplete).length, total: children.length },
+      progress: {
+        met: children.filter(isComplete).length,
+        total: children.length,
+        unit: "sub-requirements",
+      },
     }
   }
 
   return {
     id: `${group.id}-fulfil`,
-    text: `Take at least ${children.length} courses from a given course set`,
-    progress: { met: children.filter(isComplete).length, total: children.length },
+    text: `Take at least ${courses.length} ${courses.length === 1 ? "course" : "courses"} from a given course set`,
+    progress: {
+      met: courses.filter(isComplete).length,
+      total: courses.length,
+      unit: "courses",
+    },
   }
 }
 
@@ -356,6 +393,12 @@ export function computesGpa(group: AuditGroup): boolean {
   )
 }
 
+/** Whether the generated line is worth printing. A requirement nobody has to
+ *  do — a concentration not declared — holds no rows, and "take at least 0
+ *  courses from a given course set, 0/0" is a rule about nothing. The tag on
+ *  the row already says "not needed". */
+const asksForSomething = (constraint: Constraint) => (constraint.progress?.total ?? 0) > 0
+
 export function constraintsFor(group: AuditGroup): Constraint[] {
   /* The programme's rules belong to the programme. They had hung off the
      credential, one row above — "at least 120 units in total" is a thing
@@ -363,11 +406,20 @@ export function constraintsFor(group: AuditGroup): Constraint[] {
      somebody's name. The credential answers with the same set, because a
      reader who clicks the row above should still get the answer. */
   if (group.level === "degree" || group.level === "program") {
-    return [fulfilment(group), ...PROGRAM_RULES]
+    return [
+      fulfilment(group),
+      {
+        id: "total-units",
+        text: `At least ${DEGREE.credits} units in total`,
+        progress: { met: bankedBy(group), total: DEGREE.credits },
+      },
+      ...PROGRAM_RULES,
+    ]
   }
   const own = OWN_RULES[group.id] ?? []
   if (OWN_FULFILMENT.has(group.id) && own.length) return own
-  return [fulfilment(group), ...own]
+  const asked = fulfilment(group)
+  return asksForSomething(asked) ? [asked, ...own] : own
 }
 
 /* ----------------------------------------------------------------- mappings */
@@ -477,6 +529,7 @@ export function explainStanding(group: AuditGroup) {
       earned: asked.met,
       needed: asked.total,
       toGo: Math.max(0, asked.total - asked.met),
+      unit: asked.unit ?? "credits",
     }
   }
 
@@ -487,12 +540,32 @@ export function explainStanding(group: AuditGroup) {
       : group.children.filter((child) => child.kind === "course").length ||
         group.children.length
 
+  /* A requirement that asks for nothing has no standing to report. The
+     concentrations this student did not declare hold no rows and want no
+     credits, and "you've earned 0 of the 0 credits this requirement needs"
+     is a sentence about nothing pretending to be a measurement. */
+  if (total === 0) return null
+
   return {
     earned: counted * CREDITS_PER_COURSE,
     needed: total * CREDITS_PER_COURSE,
     toGo: Math.max(0, (total - counted) * CREDITS_PER_COURSE),
+    unit: "credits" as ProgressUnit,
   }
 }
+
+/** The verb that goes with the unit. You earn credits, you take courses, and
+ *  you fulfil a sub-requirement — and a sentence that says "earned" about all
+ *  three is the sentence that made a degree look like it wanted 7 credits. */
+export const VERB: Record<ProgressUnit, string> = {
+  credits: "earned",
+  courses: "taken",
+  "sub-requirements": "fulfilled",
+}
+
+/** And its singular, because a Capstone asking for one course should say so. */
+export const unitWord = (unit: ProgressUnit, count: number) =>
+  count === 1 && unit !== "credits" ? unit.replace(/s$/, "") : unit
 
 /** What the degree's own Pass/No Pass and transfer-grade limits have actually
  *  used. Both are zero here — this student has no P/N and no transfer grade

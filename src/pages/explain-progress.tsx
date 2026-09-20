@@ -7,6 +7,7 @@ import { GpaPanel } from "@/components/stellic/gpa-panel"
 import {
   EXPLAIN_AUDIT,
   EXPLAIN_CGPA,
+  EXPLAIN_VIEWS,
   EXPLAIN_RECORD,
   GENERAL_EDUCATION_GPA,
 } from "@/data/explain-audit"
@@ -22,7 +23,6 @@ import {
   AUDIT_SCOPES,
   AUDIT_STUDENT,
   AUDIT_TABS,
-  AUDIT_VIEWS,
   LAST_COMPUTED,
   UNMATCHED_BLURB,
   auditStanding,
@@ -113,7 +113,7 @@ export function ExplainProgress() {
             tabs={AUDIT_TABS}
             active="progress"
             live={["progress"]}
-            views={AUDIT_VIEWS}
+            views={EXPLAIN_VIEWS}
             view={view}
             onSelectView={setView}
             scopes={AUDIT_SCOPES}

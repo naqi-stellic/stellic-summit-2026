@@ -12,6 +12,8 @@ import {
   constraintsFor,
   courseMappings,
   explainStanding,
+  unitWord,
+  VERB,
   type Constraint,
   type ConstraintStatus,
   type CourseMapping,
@@ -178,12 +180,24 @@ export function ExplainPanel({
               else the panel says, this is the thing that was asked. */}
           {lede ? (
             <p className="text-body-md text-gray-80">{lede}</p>
+          ) : !standing ? (
+            /* Nothing is asked, so nothing is reported. A concentration the
+               student did not declare is not a requirement they are behind
+               on — the row already says "not needed", and this says why the
+               rules below have nothing to measure. */
+            <p className="text-body-md text-gray-80">
+              Not needed, so there is nothing outstanding here.
+            </p>
           ) : (
-            standing && (
+            (
               <p className="text-body-md text-gray-80">
-                You've earned{" "}
+                {/* The verb and the noun both follow what the rule counts. A
+                    degree that asks for all seven of its sub-requirements has
+                    not "earned 1 of the 7 credits". */}
+                You've {VERB[standing.unit]}{" "}
                 <span className="font-semibold text-foreground">
-                  {standing.earned} of the {standing.needed} credits
+                  {standing.earned} of the {standing.needed}{" "}
+                  {unitWord(standing.unit, standing.needed)}
                 </span>{" "}
                 this requirement needs. {standing.toGo} to go
               </p>

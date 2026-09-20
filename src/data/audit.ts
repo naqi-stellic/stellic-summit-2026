@@ -588,22 +588,34 @@ export const OFFICIAL_PROGRESS = {
 /** Both toggles read the same tree — there is no second audit to compute yet —
  *  so Planned differs from Official only by counting what the plan has claimed
  *  and the registrar has not yet seen. */
-export const AUDIT_VIEWS = [
-  {
-    id: "official",
-    label: "Official",
-    bar: { taken: STANDING.taken, inProgress: STANDING.inProgress, planned: 0 },
-  },
-  {
-    id: "planned",
-    label: "Planned",
-    bar: {
-      taken: STANDING.taken,
-      inProgress: STANDING.inProgress,
-      planned: STANDING.claimed,
+/** The two readings of the same audit, built from one standing so a page
+ *  reading a different tree gets bars that agree with its own progress card.
+ *  Each bar carries what it is a fraction of, which is the thing the bar's
+ *  screen-reader text had been dividing by itself — "15 of 15" on an audit a
+ *  quarter done. */
+export function viewsFor(standing: AuditStanding) {
+  const total = standing.taken + standing.inProgress + standing.remaining
+
+  return [
+    {
+      id: "official",
+      label: "Official",
+      bar: { taken: standing.taken, inProgress: standing.inProgress, planned: 0, total },
     },
-  },
-]
+    {
+      id: "planned",
+      label: "Planned",
+      bar: {
+        taken: standing.taken,
+        inProgress: standing.inProgress,
+        planned: standing.claimed,
+        total,
+      },
+    },
+  ]
+}
+
+export const AUDIT_VIEWS = viewsFor(STANDING)
 
 export const AUDIT_TOTAL = DEGREE.requirements
 

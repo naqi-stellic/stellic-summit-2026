@@ -1,6 +1,9 @@
 import {
   AUDIT,
   STUDENT_RECORD,
+  auditStanding,
+  milestoneStanding,
+  viewsFor,
   type AuditCourse,
   type AuditEntry,
   type AuditGroup,
@@ -89,14 +92,14 @@ const CREDITS = (of: AuditCourse[]) => of.reduce((sum, course) => sum + course.c
 export const GENERAL_EDUCATION_RULES: Constraint[] = [
   {
     id: "gen-ed-credits",
-    text: "Take at least 30 courses/credits from a given course set",
+    text: "Take at least 30 credits from a given course set",
     notes: [{ text: "Course set: GEN 100 to GEN 599" }],
     progress: { met: CREDITS(TAKEN), total: 30 },
     attributes: [GENERAL],
   },
   {
     id: "gen-ed-upper",
-    text: "Take at least 15 courses/credits from a given course set",
+    text: "Take at least 15 credits from a given course set",
     notes: [{ text: "Course set: courses with attribute Upper Division" }],
     progress: {
       met: CREDITS(TAKEN.filter((course) => course.attributes?.includes(UPPER))),
@@ -160,7 +163,24 @@ function swap(entry: AuditEntry): AuditEntry {
   return { ...entry, children }
 }
 
-export const EXPLAIN_AUDIT = swap(AUDIT) as AuditGroup
+/* The credential row's own counts, recounted off the tree it is now heading.
+   They are stated on the node rather than derived at render, so the swap has
+   to restate them — left alone the degree row went on reporting the shared
+   tree's twenty-five outstanding while the progress card directly above it,
+   which reads this tree, said twenty-two. */
+const counted = (audit: AuditGroup): AuditGroup => ({
+  ...audit,
+  counts: {
+    requirements: auditStanding(audit).remaining,
+    milestones: milestoneStanding(audit).total - milestoneStanding(audit).done,
+  },
+})
+
+export const EXPLAIN_AUDIT = counted(swap(AUDIT) as AuditGroup)
+
+/** The two audit-view bars, read off this tree. The shared ones are a picture
+ *  of a tree with one fewer finished course in it. */
+export const EXPLAIN_VIEWS = viewsFor(auditStanding(EXPLAIN_AUDIT))
 
 /** The transcript this page reads. The shared record plus the six courses only
  *  this tree knows about — course mappings ask "what else is on the record",

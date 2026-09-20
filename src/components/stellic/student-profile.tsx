@@ -373,7 +373,13 @@ export function AuditControls({
   /** Absent where only one tab leads anywhere, which is every prototype so
    *  far: there is nothing to switch to. */
   onSelectTab?: (id: string) => void
-  views: { id: string; label: string; bar: { taken: number; inProgress: number; planned: number } }[]
+  views: {
+    id: string
+    label: string
+    /** `total` is what the three shares are a fraction of — the bar's own
+     *  denominator, rather than the sum of the parts it is drawing. */
+    bar: { taken: number; inProgress: number; planned: number; total: number }
+  }[]
   view: string
   onSelectView: (id: string) => void
   /** Omitted where there is nothing to scope: the compliance ruleset is read
@@ -445,7 +451,6 @@ export function AuditControls({
         <div className="flex">
           {views.map((option, i) => {
             const on = option.id === view
-            const total = option.bar.taken + option.bar.inProgress + option.bar.planned
 
             return (
               <div key={option.id} className="flex flex-col gap-4">
@@ -484,7 +489,8 @@ export function AuditControls({
                     )}
                     <span className="flex-1 bg-gray-40" />
                     <span className="sr-only">
-                      {option.bar.taken + option.bar.inProgress + option.bar.planned} of {total}
+                      {option.bar.taken + option.bar.inProgress + option.bar.planned} of{" "}
+                      {option.bar.total}
                     </span>
                   </div>
                 </div>
