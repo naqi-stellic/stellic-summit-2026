@@ -296,14 +296,17 @@ function Sidebar({
             >
               <span aria-hidden="true" className="w-1 shrink-0 bg-gray-40" />
               <span className="flex min-w-0 flex-1 flex-col gap-1 p-3">
-                <span className="text-body-md text-gray-80">{activity.kind}</span>
                 <span className="text-body-md font-semibold text-gray-100">{activity.name}</span>
                 {activity.meetings && (
-                  <span className="flex items-center gap-1 text-body-md text-gray-100">
-                    <Icon name="calendar-today" size={14} />
+                  <span className="text-body-md text-gray-100">
                     {meetingLines(activity.meetings).join(", ")}
                   </span>
                 )}
+                {/* What kind of thing it is, tagged the way a course tags its
+                    credits and campus. */}
+                <span className="flex flex-wrap items-start gap-1 pt-2">
+                  <Badge variant="secondary">{activity.kind}</Badge>
+                </span>
               </span>
             </div>
           ))

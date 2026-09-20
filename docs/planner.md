@@ -43,7 +43,15 @@ is amber: something to get round to. A seat with no course in it is neither —
 it says what it is itself, and calling it an error only invites the argument
 about whether it is one.
 
-Each one is a line
+Where a course is drawn, the warning goes with it
+([`1865:45317`](https://www.figma.com/design/baNPtCTTnk2E6SMio2xEDz/Plan-2.0-Scheduler?node-id=1865-45317)):
+its glyph sits before the course code on the calendar's card, and opening the
+course puts it as a banner between the term it is in and the plan's own choices
+about it
+([`1865:6212`](https://www.figma.com/design/baNPtCTTnk2E6SMio2xEDz/Plan-2.0-Scheduler?node-id=1865-6212)),
+which is where you would go to do something about it.
+
+On the term itself each one is a line
 ([`1388:27475`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1388-27475)):
 the course's code in bold, its name, what is wrong with it, and a link at the
 end. What is wrong is said in three or four words: which prerequisite, and

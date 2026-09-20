@@ -2,6 +2,8 @@ import { cn } from "cn"
 import { useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
+import { useCourseIssues } from "@/components/stellic/plan-issues"
+import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,6 +29,9 @@ import {
   type PlannedCourse,
   type Term,
 } from "@/data/plan"
+
+/** Stands in where there is no term, so the hook is called either way. */
+const EMPTY_TERM: Term = { id: "", name: "", window: "", reviewed: false, state: "planned", courses: [] }
 
 /* A course opened on its own, before it is anywhere in the plan: what it is,
  * which classes are on offer, and everything the audit knows about where it
@@ -414,6 +419,8 @@ export function CoursePanel({
   const activity = planned ? activityFor(entry.code, planned.term.name, moved) : []
   /* The credits are the student's already, which is what the green says. */
   const earned = planned?.term.state === "completed"
+  /* Anything the plan has against this course sitting where it does. */
+  const issues = useCourseIssues(planned?.term ?? EMPTY_TERM, planned?.course.id ?? "")
   /* A term that is finished or under way has no choice left in it: the class
      the student is in is the only one worth showing, read off the plan rather
      than off the catalogue, because that is where it is true. */
@@ -538,6 +545,26 @@ export function CoursePanel({
         )}
 
         <div className="flex w-full flex-col gap-6 p-6">
+          {/* What the plan has to say about this course being here, above
+              everything the catalogue has to say about the course. */}
+          {issues.map((issue, i) => (
+            <Alert
+              key={`${issue.kind}-${i}`}
+              variant={issue.severity === "error" ? "danger" : "warning"}
+              className="items-start gap-3 p-[15px]"
+            >
+              <Icon
+                name={issue.severity === "error" ? "error-outline" : "warning"}
+                size={16}
+                className={cn(
+                  "mt-0.5 shrink-0",
+                  issue.severity === "error" ? "text-alert-100" : "text-warning-50"
+                )}
+              />
+              <span className="min-w-0 flex-1 text-body-md text-gray-100">{issue.says}</span>
+            </Alert>
+          ))}
+
           {planned ? (
             <Fold icon="settings" title="Planning details">
               {/* What the plan chose about it, each changeable on its own. */}
