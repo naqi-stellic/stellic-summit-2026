@@ -154,12 +154,6 @@ type QueueEntry = CatalogEntry & {
   requirement?: number
 }
 
-/** The outstanding requirements, each knowing where it sits in the list. */
-const OUTSTANDING: QueueEntry[] = REMAINING_REQUIREMENTS.map((entry, requirement) => ({
-  ...entry,
-  requirement,
-}))
-
 let seq = 0
 /* The colours a course is drawn in down the side of a list and across a
  * calendar. Handed out in turn as courses are created, so a generated term
@@ -269,7 +263,13 @@ export function generateDraft(
     }))
   }
 
-  const queue: QueueEntry[] = [...OUTSTANDING]
+  /* What is left to place, rather than everything the degree ever wanted: a
+     requirement already sitting in a term is answered, and putting a second
+     copy of it somewhere else is not a plan. */
+  const queue: QueueEntry[] = unplacedRequirements(base).map(({ entry, index }) => ({
+    ...entry,
+    requirement: index,
+  }))
 
   /* A released course leaves its term the way the generator's own moves do —
    * struck through where it was — and goes to the front of the queue to be

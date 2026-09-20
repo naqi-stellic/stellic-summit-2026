@@ -83,9 +83,12 @@ last of those be a 200-level course. The business core those lead to (micro,
 macro, accounting, statistics, marketing, corporate finance) is on the
 outstanding list rather than in the plan.
 
-Spring 2027 holds one course and one seat: ACCT 201, whose class has been
-chosen and which is ready to register, and a general elective with no course
-against it. So the term reads "1 action required" — the seat — and one of its
+Spring 2027 holds two courses and a seat — ACCT 201 and ECON 201, whose classes
+have been chosen, and a general elective with no course against it — and Fall
+2027 holds two seats and nothing else, which is a student who knows they want
+an elective there and has not picked one. The rest of the plan is empty, which
+is the point of this prototype: 10 requirements placed, 30 to go
+(`src/data/generator-plan.ts`). So the term reads "1 action required" — the seat — and one of its
 two things can go through registration while the other cannot.
 
 Anything visibly derived from that — year filter tabs, the "+ Add Year N"

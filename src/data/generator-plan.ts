@@ -1,0 +1,82 @@
+import { REMAINING_REQUIREMENTS } from "@/data/catalog"
+import { CREDITS_PER_COURSE, INITIAL_YEARS, type PlannedCourse, type Year } from "@/data/plan"
+
+/* Where the generator's prototype starts.
+ *
+ * Almost nothing: the term under way, a spring the student has begun on, and
+ * four years of empty terms for the generator to fill. What little is there is
+ * there to be planned around — a class already chosen, and seats held for
+ * electives whose courses have not been picked. */
+
+/** Which outstanding requirement a seat written in by hand is holding a place
+ *  for. Read by code rather than written as a number, so the list can be
+ *  reordered without the plan quietly answering the wrong thing. */
+function requirementFor(code: string): number {
+  const at = REMAINING_REQUIREMENTS.findIndex((entry) => entry.code === code)
+  if (at === -1) throw new Error(`No outstanding requirement for ${code}`)
+  return at
+}
+
+function seat(id: string, code: string, accent: PlannedCourse["accent"]): PlannedCourse {
+  const entry = REMAINING_REQUIREMENTS[requirementFor(code)]
+  return {
+    id,
+    code: entry.code,
+    name: entry.name,
+    credits: CREDITS_PER_COURSE,
+    requirement: requirementFor(code),
+    placeholder: true,
+    accent,
+    lastActivity: "Added by sabott, 2 Sep 2026",
+  }
+}
+
+/** A second course in the spring the student has started on, and two seats a
+ *  year out: enough that the plan reads as begun rather than blank, and little
+ *  enough that generating one still has four years of work to do. */
+const STARTED: Record<string, PlannedCourse[]> = {
+  "spring-2027": [
+    {
+      id: "c10",
+      code: "ECON 201",
+      name: "Principles of Microeconomics",
+      credits: CREDITS_PER_COURSE,
+      requirement: requirementFor("ECON 201"),
+      section: "Lec-01",
+      classNo: "2471",
+      campus: "Main",
+      modality: "In Person",
+      gradeOption: "Graded",
+      accent: "green",
+      meetings: [
+        { day: 2, from: 11, to: 12.25 },
+        { day: 4, from: 11, to: 12.25 },
+      ],
+      instructor: "Dr. A. Petrov",
+      building: "Braddock Hall",
+      room: "115",
+      subTerm: "Full Term",
+      lastActivity: "Added by sabott, 2 Sep 2026",
+    },
+  ],
+  "fall-2027": [seat("c11", "GEN ELEC", "teal"), seat("c12", "DATA ELEC", "brown")],
+}
+
+export const GENERATOR_YEARS: Year[] = INITIAL_YEARS.map((year) => ({
+  ...year,
+  terms: year.terms.map((term) => {
+    const added = STARTED[term.id]
+    if (!added) return term
+    /* Seats last, the way every other term reads: what has been decided, and
+       then what has not. */
+    return {
+      ...term,
+      courses: [
+        ...term.courses.filter((c) => !c.placeholder),
+        ...added.filter((c) => !c.placeholder),
+        ...term.courses.filter((c) => c.placeholder),
+        ...added.filter((c) => c.placeholder),
+      ],
+    }
+  }),
+}))
