@@ -276,7 +276,7 @@ export const INSIGHT_PROGRAMS: InsightProgram[] = withIds([
   },
   {
     id: "bba",
-    program: "Business Administration, B.B.A.",
+    program: "Business, B.B.A.",
     version: "EY2026",
     students: 176,
     published: "May 8",

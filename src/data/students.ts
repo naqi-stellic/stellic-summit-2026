@@ -1,4 +1,5 @@
 import { AUDIT_STUDENT, CUMULATIVE_GPA } from "@/data/audit"
+import { DEGREE } from "@/data/plan"
 
 /* The student search: the way a staff member finds anybody.
  *
@@ -111,7 +112,7 @@ export const ROSTER: Student[] = [
     entryYear: 2025,
     yearTwo: "3 credits short",
     programs: [
-      { name: "Business Administration, B.S. (Finance)" },
+      { name: `${DEGREE.program} (${DEGREE.concentration})` },
       { name: "Data Analytics [minor]" },
     ],
     cgpa: CUMULATIVE_GPA.value,
@@ -140,7 +141,7 @@ export const ROSTER: Student[] = [
     name: "Marisol Vega",
     standing: "Sophomore",
     engage: 2,
-    programs: [{ name: "Business Administration, B.S." }],
+    programs: [{ name: DEGREE.program }],
     cgpa: "2.88",
     courses: { done: 9, inProgress: 3, remaining: 28 },
     milestones: { done: 1, inProgress: 0, remaining: 2 },
@@ -257,7 +258,7 @@ export const ROSTER: Student[] = [
     engage: 2,
     programs: [
       { name: "Computer Science, B.S." },
-      { name: "Business Administration", declared: false },
+      { name: DEGREE.major, declared: false },
     ],
     cgpa: "3.05",
     courses: { done: 5, inProgress: 5, remaining: 30 },

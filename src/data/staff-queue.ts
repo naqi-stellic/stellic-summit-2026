@@ -1,4 +1,5 @@
 import type { PersonaKey } from "@/data/staff-home"
+import { DEGREE } from "@/data/plan"
 
 /* Open Items: the work that is waiting on a decision from you.
  *
@@ -480,7 +481,7 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
           student: "Scott Abott",
           initials: "SA",
           color: "#087443",
-          program: "Business Administration, B.S. (Finance)",
+          program: `${DEGREE.program} (${DEGREE.concentration})`,
           date: "Aug 4",
           iso: "2026-08-04",
           vis: ["jessica"],

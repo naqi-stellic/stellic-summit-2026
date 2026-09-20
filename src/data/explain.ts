@@ -417,7 +417,7 @@ const asksForSomething = (constraint: Constraint) => (constraint.progress?.total
 export function constraintsFor(group: AuditGroup): Constraint[] {
   /* The programme's rules belong to the programme. They had hung off the
      credential, one row above — "at least 120 units in total" is a thing
-     Business Administration asks for, not a property of the letters after
+     the Business programme asks for, not a property of the letters after
      somebody's name. The credential answers with the same set, because a
      reader who clicks the row above should still get the answer. */
   if (group.level === "degree" || group.level === "program") {
