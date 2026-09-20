@@ -375,6 +375,14 @@ export function courseDetail(entry: CatalogEntry): CourseDetail {
 /** The courses a prerequisite tree names on the route the student is actually
  *  on — the first option. The others are roads not taken: naming their courses
  *  would have the plan warning about requirements nobody is trying to meet. */
+/** Whether the student already has this course behind them — passed before
+ *  they arrived, or sitting in the term under way. Neither is in the plan's
+ *  years, so a prerequisite answered this way is answered nowhere a term can
+ *  see, and something has to say so. */
+export function heldAlready(code: string): boolean {
+  return EARNED[code] != null || IN_PROGRESS.includes(code)
+}
+
 export function prerequisiteCodes(code: string): string[] {
   const tree = prerequisites({ code, name: "", reason: "" }, seedOf(code))
   const out: string[] = []

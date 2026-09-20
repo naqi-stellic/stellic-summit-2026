@@ -2,9 +2,12 @@ import {
   ELECTIVE_COURSES,
   REMAINING_REQUIREMENTS,
   REPLACEMENT_SEAT,
+  offeredIn,
   preferredFirst,
   type CatalogEntry,
 } from "@/data/catalog"
+import { heldAlready, prerequisiteCodes } from "@/data/course-detail"
+import { seasonOf } from "@/data/issues"
 import {
   CREDITS_PER_COURSE,
   PLANNING_RULES,
@@ -528,7 +531,9 @@ export function generateTermDraft(
     terms: year.terms.map((term) => ({ ...term, courses: [...term.courses] })),
   }))
 
-  const queue: QueueEntry[] = termQueue(optionId, base)
+  /* The term the run is filling, so nothing is offered that would arrive with
+     a warning on it. */
+  const queue: QueueEntry[] = termQueue(optionId, base, findTerm(base, termId) ?? undefined)
 
   /* A held seat is the whole point of generating: it is a requirement with no
    * course against it, and the run is what chooses one. The seat becomes that
@@ -551,8 +556,13 @@ export function generateTermDraft(
         if (found !== -1) return found
         return queue.findIndex((entry) => entry.code === e.code && entry.name === e.name)
       }, -1)
-      const at2 = wanted === -1 ? 0 : wanted
-      const [pick] = queue.splice(at2, 1)
+      /* Nothing on its own shelf is ready to be taken this term — every
+         finance elective wants a course the student has not had yet, say. The
+         seat stays a seat: a requirement with no course against it is a thing
+         to decide later, and answering it with the wrong kind of course to
+         avoid an empty row is worse than the empty row. */
+      if (wanted === -1) continue
+      const [pick] = queue.splice(wanted, 1)
       if (!pick) break
       const at = order++
       const seat = course.name
@@ -662,7 +672,32 @@ export const TERM_OPTIONS: DraftOption[] = [
  *  end with a term of real courses, so a seat is something to resolve rather
  *  than something to add. Anything already somewhere in the plan is out too,
  *  or the term would offer a course the student is taking elsewhere. */
-function termQueue(optionId: string, years: Year[]): QueueEntry[] {
+/** Whether putting this course into that term would leave something to warn
+ *  about: a term it does not run in, or a prerequisite that does not happen
+ *  until later. A generated term hands back a term ready to register, so a
+ *  course that would arrive with a warning on it is not offered at all —
+ *  there is always another requirement to take instead, and a run that fills
+ *  a term with work to fix is worse than one that fills it with less. */
+function fits(entry: QueueEntry, term: Term, years: Year[]): boolean {
+  if (entry.placeholder) return true
+  if (!offeredIn(entry.code).includes(seasonOf(term))) return false
+
+  /* Everything it asks for has to be behind it already: passed, under way, or
+     in a term the student has planned before this one. Not "not planned after
+     it" — a run that puts a course and the course it depends on into the same
+     term has answered nothing, and a requirement nobody has placed yet could
+     land anywhere. There is always a lower-level requirement to take instead. */
+  const terms = years.flatMap((year) => year.terms)
+  const at = terms.findIndex((t) => t.id === term.id)
+  const before = terms.slice(0, at === -1 ? terms.length : at)
+  return prerequisiteCodes(entry.code).every(
+    (code) =>
+      heldAlready(code) ||
+      before.some((t) => t.courses.some((c) => !c.placeholder && c.code === code))
+  )
+}
+
+function termQueue(optionId: string, years: Year[], term?: Term): QueueEntry[] {
   const placed = new Set<string>()
   for (const year of years) {
     for (const term of year.terms) {
@@ -689,27 +724,28 @@ function termQueue(optionId: string, years: Year[]): QueueEntry[] {
     ...addableCourses(years).filter((entry) => !entry.placeholder),
     ...rotated,
   ]
+  const offered = term ? all.filter((entry) => fits(entry as QueueEntry, term, years)) : all
   if (optionId === "term-general") {
-    const general = all.filter((e) => /general|elective/i.test(e.reason))
-    return [...general, ...all.filter((e) => !general.includes(e))]
+    const general = offered.filter((e) => /general|elective/i.test(e.reason))
+    return [...general, ...offered.filter((e) => !general.includes(e))]
   }
   if (optionId === "term-mixed") {
     /* Deal them out one from each reason in turn, so a term takes a spread
      * rather than the first five of one kind. */
     const groups = new Map<string, QueueEntry[]>()
-    for (const entry of all) {
+    for (const entry of offered) {
       const list = groups.get(entry.reason) ?? []
       list.push(entry)
       groups.set(entry.reason, list)
     }
     const lists = [...groups.values()]
     const out: QueueEntry[] = []
-    for (let i = 0; out.length < all.length; i += 1) {
+    for (let i = 0; out.length < offered.length; i += 1) {
       for (const list of lists) if (list[i]) out.push(list[i])
     }
     return out
   }
-  return all
+  return offered
 }
 
 /* ------------------------------------------------- changing a draft by hand

@@ -49,11 +49,17 @@ export function useScript() {
 
   const running = () => alive.current && !stopped.current
 
-  const type = async (text: string, set: (value: string) => void) => {
+  /** `pace` scales the rhythm without changing its shape — the jitter, the
+   *  pause after a space and the longer one after a comma are all still
+   *  there, just closer together. A sentence somebody would have typed in
+   *  twelve seconds is twelve seconds nobody on a stage has, and a field that
+   *  fills itself is a stage affordance already. Anything short types at the
+   *  rate a person types. */
+  const type = async (text: string, set: (value: string) => void, pace = 1) => {
     for (let i = 1; i <= text.length; i += 1) {
       if (!running()) return false
       set(text.slice(0, i))
-      await sleep(keystroke(text[i - 1]))
+      await sleep(keystroke(text[i - 1]) * pace)
     }
     return running()
   }

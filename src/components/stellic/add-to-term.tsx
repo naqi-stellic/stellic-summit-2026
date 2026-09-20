@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { cn } from "cn"
+import { useState, type ReactNode } from "react"
 
 import { AddSlot } from "@/components/stellic/primitives"
 import { Button } from "@/components/ui/button"
@@ -23,12 +24,20 @@ export function AddToTerm({
   options,
   onPick,
   onSearch,
+  trigger,
+  fieldClassName,
 }: {
   /** What the term could take, which is what a typed code is looked up in. */
   options: CatalogEntry[]
   onPick: (entry: CatalogEntry) => void
   /** Opens the course search beside the plan. */
   onSearch?: () => void
+  /** What opens the menu, where the full-width slot is not the right shape —
+   *  a term view's header has a plus on the end of a row, not a slot at the
+   *  foot of a list. The menu behind it is the same menu. */
+  trigger?: ReactNode
+  /** Where the field it turns into has to sit in something narrower. */
+  fieldClassName?: string
 }) {
   const [asking, setAsking] = useState<Asking | null>(null)
   const [typed, setTyped] = useState("")
@@ -46,7 +55,7 @@ export function AddToTerm({
     }
 
     return (
-      <div className="flex w-full items-center gap-2">
+      <div className={cn("flex w-full items-center gap-2", fieldClassName)}>
         <Input
           autoFocus
           value={typed}
@@ -76,10 +85,11 @@ export function AddToTerm({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <AddSlot>+ Add to Term</AddSlot>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+      <DropdownMenuTrigger asChild>{trigger ?? <AddSlot>+ Add to Term</AddSlot>}</DropdownMenuTrigger>
+      <DropdownMenuContent
+        align={trigger ? "end" : "start"}
+        className={trigger ? "w-[200px]" : "w-[var(--radix-dropdown-menu-trigger-width)]"}
+      >
         {/* Drawn, and going nowhere: adding an activity is a flow of its own
             and not one this prototype is about. */}
         <DropdownMenuItem className="py-1.5 text-body-md">Add activity</DropdownMenuItem>

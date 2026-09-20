@@ -129,18 +129,40 @@ the numbers being real costs a literal match to the frame.
 
 Expected graduation is the last term the plan reaches, not a stored date.
 
-A term whose classes have all gone through registration says so rather than
-offering to register nothing: the banner becomes a confirmation, and the credit
-group's marker fills in — `pre-registered` is drawn solid where `planned` is an
-outline, because the whole of what registering changes on that screen is the
-mark and the word beside it.
+Which classes go through is asked once, in the dialog that does it. The term
+views carry no ticks: a checkbox on every card asked the same question five
+times over and answered none of them, and a card is a thing to read rather
+than a control.
+
+So the dialog lists everything the term is holding, not only what can go. A
+course with a class is ticked; a course with no class, a course whose
+prerequisites are not met, and a seat with no course in it are each listed
+with their tick off and fixed, saying which of those three it is. Untick one
+and the title counts down with it — "Register 3 Courses" becomes two — and
+Confirm sends exactly what is ticked.
+
+A term whose classes have all gone through registration keeps the same banner:
+the window is still open, the closing date is still worth saying, and a student
+can add a class and come back. What changes is the button — disabled, and
+reading "Register" rather than offering to register none of them. The credit
+group's marker fills in beside it: `pre-registered` is drawn solid where
+`planned` is an outline, because that mark and the word next to it are the
+whole of what registering changes on that screen.
 
 ## An instruction the plan answers
 
-The instructions box opens with a sentence already in it — the student has a
-part-time job and would like a lighter spring, if it does not cost them
-graduation. It can be edited or cleared like anything else, and the summary
-reads it back under "Anything else".
+The instructions box starts empty, the way a box does. Clicking into it types
+the sentence out — the student has a part-time job and would like a lighter
+spring, if it does not cost them graduation — and the summary reads it back
+under "Anything else". It is `useScript` from `src/lib/typing.ts`, the same
+rhythm every prototype types at, at four tenths the pace: a hundred and twenty
+characters at somebody's real rate is twelve seconds of a room watching a
+cursor, and this way it lands in four and a half. Typing into the box yourself
+stops the script and hands it back. See README, "Fields that fill themselves
+in".
+
+The seat's own box does the same with "Philosophy", at the ordinary rate,
+because ten characters need no hurrying.
 
 The first option answers it. `ease` on a `DraftOption` names one term and how
 light to keep it, and that term is filled to four courses rather than the pace's
@@ -150,11 +172,22 @@ waiting on it. Graduation does not move, and the option says so. The other two
 options hold to their own pace: the point of three options is that they differ.
 
 The same is true a step further in. A held seat asks what kind of course should
-fill it, and that box opens saying "Philosophy" — so the general elective comes
-back as Logic & Critical Thinking rather than whichever course the shelf
-happened to offer first. `preferredFirst` in `catalog.ts` is what reads it: a
+fill it, and clicking into that box writes "Philosophy" — so the general
+elective comes back as Logic & Critical Thinking rather than whichever course
+the shelf happened to offer first. `preferredFirst` in `catalog.ts` is what reads it: a
 subject's own words are kept beside its shelf, because "Philosophy" is written
 on none of the courses that answer it.
+
+## Four ways into a term
+
+The plus at the head of a term view's course list opens the same menu the
+canvas cards open — add an activity, add by course number, add by section
+number, or search courses — because there is one question being asked and it
+should have one answer whichever screen it is asked from. Two of those turn
+the row into a field; the search opens beside the plan.
+
+"+ Add Year" adds the year after the last one the plan reaches, which is the
+same thing a generated plan does for itself when a light pace will not fit.
 
 ## Two kinds of instructions
 
@@ -477,6 +510,19 @@ timetabled shows no ghosts at all.
 
 No slot is shorter than an hour and a quarter — eighty pixels — which is what a
 block needs for its code, its name and its section.
+
+A generated term hands back a term ready to register, which is a rule about
+what it is allowed to offer rather than something checked afterwards. A course
+only joins the queue if it runs in that season and everything it asks for is
+already behind it — passed, under way, or in a term planned before this one.
+Not merely "not planned after it": a run that puts a course and the course it
+depends on into the same term has answered nothing. There is always a
+lower-level requirement to take instead, so the term fills either way.
+
+A seat holds to the same rule from its own shelf. Where nothing on it is ready
+— every finance elective wanting a course the student has not had — the seat
+stays a seat rather than being answered with the wrong kind of course, and a
+seat is not something to warn about.
 
 Which of the three weeks comes out on top is `scoreSchedule`, and a day the
 student took off the list is not scored at all: it disqualifies. Four days out

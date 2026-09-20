@@ -3,7 +3,7 @@ import { cn } from "cn"
 import { useState } from "react"
 
 import { Icon } from "@/components/icon"
-import { AddCourseMenu } from "@/components/stellic/add-course-menu"
+import { AddToTerm } from "@/components/stellic/add-to-term"
 import type { CatalogEntry } from "@/data/catalog"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon } from "@/components/stellic/primitives"
@@ -11,7 +11,6 @@ import { useCourseIssues } from "@/components/stellic/plan-issues"
 import { meetingLines } from "@/data/course-detail"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,13 +60,11 @@ function hourLabel(hour: number): string {
 function CourseCard({
   course,
   term,
-  selectable,
   onOpen,
   onOpenSeat,
 }: {
   course: PlannedCourse
   term: Term
-  selectable: boolean
   onOpen?: () => void
   /** Opens the seat this course was put into, from the band that names it. */
   onOpenSeat?: () => void
@@ -105,18 +102,12 @@ function CourseCard({
           className={cn("w-1 shrink-0", course.accent ? ACCENT[course.accent] : "bg-gray-40")}
         />
         <label onClick={onOpen} className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 p-3">
-          {/* A proposed class carries its mark; one you can still choose to
-              register carries a tick. A term that is neither — already under way —
-              has nothing to offer here. */}
+          {/* A proposed class carries its mark. Which classes go through
+              registration is asked once, in the dialog that does it — a tick
+              on every card asks the same question five times and answers
+              none of them. */}
           {mark ? (
             <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
-          ) : course.registered ? null : selectable ? (
-            <Checkbox
-              defaultChecked={!stopped}
-              disabled={stopped}
-              className="mt-0.5"
-              aria-label={`Register ${course.name}`}
-            />
           ) : null}
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="flex items-center gap-1.5 text-body-md text-gray-80">
@@ -200,18 +191,20 @@ function Sidebar({
   term,
   addable,
   onAddCourse,
+  onSearchCourses,
   onOpenCourse,
   onOpenSeat,
 }: {
   term: Term
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  /** Opens the course search beside the term. */
+  onSearchCourses?: () => void
   onOpenCourse?: (courseId: string) => void
   onOpenSeat?: (courseId: string) => void
 }) {
   const credits = termCredits(term)
   const activities = term.activities ?? []
-  const selectable = term.alert != null
 
   return (
     <div className="flex w-full shrink-0 flex-col gap-6 p-6 @3xl/term:w-[280px] @6xl/term:w-[350px]">
@@ -221,11 +214,14 @@ function Sidebar({
           <h4 className="min-w-0 flex-1 truncate text-body-md font-semibold text-gray-100">
             My Courses ({term.courses.length})
           </h4>
-          {/* The same menu the planner's cards open, behind the same plus. */}
+          {/* The same menu the planner's cards open, behind the same plus —
+              the same four ways in, whichever screen you are on. */}
           {addable && onAddCourse ? (
-            <AddCourseMenu
+            <AddToTerm
               options={addable}
               onPick={onAddCourse}
+              onSearch={onSearchCourses}
+              fieldClassName="min-w-0 flex-1"
               trigger={
                 <Button size="icon" aria-label="Add a course">
                   <Icon name="plus" size={16} />
@@ -261,7 +257,6 @@ function Sidebar({
               key={course.id}
               course={course}
               term={term}
-              selectable={selectable}
               onOpen={onOpenCourse && (() => onOpenCourse(course.id))}
               onOpenSeat={onOpenSeat && (() => onOpenSeat(course.id))}
             />
@@ -596,6 +591,7 @@ export function TermCalendar({
   preview,
   addable,
   onAddCourse,
+  onSearchCourses,
   onOpenCourse,
   onOpenSeat,
 }: {
@@ -606,6 +602,8 @@ export function TermCalendar({
   /** What the plus offers, and what a requirement dropped here becomes. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  /** Opens the course search beside the term. */
+  onSearchCourses?: () => void
   /** Opens one of the term's courses on its own. */
   onOpenCourse?: (courseId: string) => void
   /** Opens a seat: one still held, or the one a course was put into. */
@@ -631,6 +629,7 @@ export function TermCalendar({
           term={term}
           addable={addable}
           onAddCourse={onAddCourse}
+          onSearchCourses={onSearchCourses}
           onOpenCourse={onOpenCourse}
           onOpenSeat={onOpenSeat}
         />

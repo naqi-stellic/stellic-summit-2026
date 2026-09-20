@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { offeredIn, type CatalogEntry, type TermName } from "@/data/catalog"
 import { PREREQ_LABEL, prereqsMet } from "@/data/course-detail"
-import { DEGREE, planStanding, type Year } from "@/data/plan"
+import { incomingTotals } from "@/data/incoming"
+import { planStanding, type Year } from "@/data/plan"
 
 /* Everything the degree still wants, with nowhere to be yet. The plan is not
  * finished until this list is empty, so each row is picked up from here and
@@ -164,12 +165,12 @@ const TERM_GROUP_ORDER = [
   "Any term",
 ]
 
-/** One of the three shares of the degree, drawn as a length of the bar and
- *  read back underneath it. */
+/** One of the shares of the degree, drawn as a length of the bar and read
+ *  back underneath it. */
 type Share = {
   label: string
   count: number
-  icon: "check" | "watch-later" | "crop-square"
+  icon: "check" | "watch-later" | "calendar-month" | "crop-square"
   bar: string
   tone: string
 }
@@ -230,14 +231,18 @@ export function RequirementsPanel({
   const setFilters = (next: FilterState) => onNarrow({ ...narrowing, filters: next })
   const setGrouping = (next: Grouping) => onNarrow({ ...narrowing, grouping: next })
 
-  const placed = years.reduce(
-    (sum, year) => sum + year.terms.reduce((n, term) => n + term.courses.length, 0),
-    0
-  )
-  /* Taken, planned, and still to place. They are three counts of the same
-     forty, so each is read from where it actually lives rather than inferred
-     from the other two. */
-  const done = planStanding(years).completed.reqs
+  /* Where the student stands, in the four states they are in at once: the
+     credit they arrived with, the term they are sitting in, the terms they
+     have planned, and the requirements with no term yet. Each is read from
+     where it actually lives rather than inferred from the others — which is
+     also why the bar is the sum of its own shares rather than the degree's
+     forty: the credit that came in with them is credit the degree did not ask
+     for, and a bar drawn against forty would run past its end. */
+  const standing = planStanding(years, incomingTotals())
+  const done = standing.completed.reqs
+  const going = standing.inProgress.reqs
+  const placed = standing.planned.reqs
+  const total = done + going + placed + entries.length
 
   /* Only what the filters leave. They narrow the list rather than the degree,
      so the meters above go on describing the whole of it. */
@@ -277,7 +282,7 @@ export function RequirementsPanel({
       <div className="flex w-full flex-col gap-2">
         <span className="text-body-md font-semibold text-foreground">Courses</span>
         <Meter
-          total={DEGREE.requirements}
+          total={total}
           shares={[
             {
               label: "Complete",
@@ -287,12 +292,19 @@ export function RequirementsPanel({
               tone: "text-success-50",
             },
             {
+              label: "In progress",
+              /* Under way rather than bought: the clock, not the trolley. */
+              count: going,
+              icon: "watch-later",
+              bar: "bg-warning-50",
+              tone: "text-warning-50",
+            },
+            {
               label: "Planned",
               count: placed,
-              /* Under way rather than bought: the clock, not the trolley. */
-              icon: "watch-later",
+              icon: "calendar-month",
               bar: "bg-warning-25",
-              tone: "text-warning-50",
+              tone: "text-warning-25",
             },
             {
               label: "Still to place",

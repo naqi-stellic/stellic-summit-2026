@@ -38,9 +38,10 @@ rather than written down as warnings.
 They are not equally bad. A prerequisite that is not met is a course the
 student cannot take, so it is red wherever it appears — the banner, the status
 in the list, the card on the calendar — it says "Pre-requisites not met", and
-registration will not put it through however chosen its class is: no tick
-beside it, and not counted in what the button offers to register. Not likely to be offered
-is amber: something to get round to. A seat with no course in it is neither —
+registration will not put it through however chosen its class is: its tick in
+the registration dialog is off and cannot be put on, and it is not counted in
+what the button offers to register. Not likely to be offered is amber:
+something to get round to. A seat with no course in it is neither —
 it says what it is itself, and calling it an error only invites the argument
 about whether it is one.
 

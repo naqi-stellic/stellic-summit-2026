@@ -91,6 +91,7 @@ import {
 } from "@/data/draft"
 import {
   addTerm,
+  addYear,
   INITIAL_YEARS,
   METADATA_DEFAULT,
   METADATA_FIELDS,
@@ -102,7 +103,6 @@ import {
   planCampuses,
   planStanding,
   chooseSection,
-  creditGroup,
   setSection,
   registerCourses,
   registrableCourses,
@@ -230,32 +230,10 @@ function RegistrationAlert({
   )
 }
 
-/** The other side of the registration banner: this term is done with. */
-function RegisteredAlert() {
-  return (
-    <Alert className="min-h-[92px] border-success-50 bg-success-5">
-      <AlertBody>
-        <AlertHeader>
-          <AlertTitle>
-            <Icon name="check-circle" size={16} className="mt-0.5 shrink-0 text-success-100" />
-            You're registered for this term
-          </AlertTitle>
-          <AlertDescription className="@max-[400px]/term:whitespace-normal">
-            Your classes are held
-          </AlertDescription>
-        </AlertHeader>
-      </AlertBody>
-    </Alert>
-  )
-}
-
 /** A term's banner: the registration deadline when it has one, and — while a
  *  draft is on the canvas — the reassurance that it needs nothing otherwise. */
 function termBanner(term: Term, drafting: boolean, onRegister: (term: Term) => void) {
   if (term.alert) {
-    /* Everything that could go through has, so the card says so rather than
-       holding out a button that would do nothing. */
-    if (!drafting && creditGroup(term) === "pre-registered") return <RegisteredAlert />
     return (
       <RegistrationAlert
         closes={term.alert.closes}
@@ -1045,6 +1023,13 @@ export function PlanYourPath({
             sidebar={{ open: reqsOpen, onToggle: openRequirements }}
             addable={addable}
             onAddCourse={(entry) => handleAddCourse(openTerm.id, entry)}
+            onSearchCourses={() => {
+              setSearching(openTerm.id)
+              setOpenCourse(null)
+              setOpenPlanned(null)
+              setOpenSeat(null)
+              setReqsOpen(false)
+            }}
             onOpenCourse={openPlannedPanel}
             onOpenSeat={(courseId) => openSeatPanel(courseId, "detail")}
             compare={compare}
@@ -1133,7 +1118,12 @@ export function PlanYourPath({
             <div className="flex w-6 shrink-0 flex-col items-center justify-center self-stretch">
               <Icon name="fiber-manual-record" size={24} className="text-gray-40" />
             </div>
-            <AddSlot tone="year">+ Add Year {nextYearNumber(shown)}</AddSlot>
+            <AddSlot
+              tone="year"
+              onClick={() => setYears((current) => addYear(current))}
+            >
+              + Add Year {nextYearNumber(shown)}
+            </AddSlot>
           </section>
           </main>
         )}

@@ -58,6 +58,10 @@ const STARTED: Record<string, PlannedCourse[]> = {
       credits: CREDITS_PER_COURSE,
       requirement: requirementFor("ECON 201"),
       section: "Lec-01",
+      /* Chosen by the student, the same as the accounting class beside it — so
+         a generated schedule builds around it rather than timetabling it
+         afresh and drawing a ghost where it used to be. */
+      settled: true,
       classNo: "2471",
       campus: "Main",
       modality: "In Person",

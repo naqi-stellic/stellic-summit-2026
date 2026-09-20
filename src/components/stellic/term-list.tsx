@@ -3,12 +3,11 @@ import { cn } from "cn"
 import { useDroppable } from "@dnd-kit/core"
 
 import { Icon, type IconName } from "@/components/icon"
-import { AddCourseMenu } from "@/components/stellic/add-course-menu"
+import { AddToTerm } from "@/components/stellic/add-to-term"
 import type { CatalogEntry } from "@/data/catalog"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { useCourseIssues } from "@/components/stellic/plan-issues"
 import { meetingLines } from "@/data/course-detail"
 import {
@@ -45,6 +44,7 @@ function CardHeader({
   count,
   addable,
   onAddCourse,
+  onSearchCourses,
 }: {
   icon: IconName
   title: string
@@ -52,6 +52,7 @@ function CardHeader({
   /** Given, the plus opens the same menu the planner's cards open. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  onSearchCourses?: () => void
 }) {
   const plus = (
     <Button size="icon" aria-label={`Add to ${title}`}>
@@ -66,7 +67,13 @@ function CardHeader({
         {title} ({count})
       </h4>
       {addable && onAddCourse ? (
-        <AddCourseMenu options={addable} onPick={onAddCourse} trigger={plus} />
+        <AddToTerm
+          options={addable}
+          onPick={onAddCourse}
+          onSearch={onSearchCourses}
+          fieldClassName="min-w-0 flex-1"
+          trigger={plus}
+        />
       ) : (
         plus
       )}
@@ -90,13 +97,11 @@ function Accent({ course }: { course?: PlannedCourse }) {
 function CourseRow({
   course,
   term,
-  selectable,
   onOpen,
   onOpenSeat,
 }: {
   course: PlannedCourse
   term: Term
-  selectable: boolean
   /** Opens the course on its own. */
   onOpen?: () => void
   /** Opens the seat: the one it is held in, or the one it was put into. */
@@ -151,23 +156,6 @@ function CourseRow({
           )}
         >
           <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-80" />
-          {/* Registration is what the ticks are for: choosing which of these
-              classes to put through. A term not open for it has nothing to
-              tick. */}
-          {/* A tick is for choosing what to put through registration. A class
-              already through has no choice left to offer, so it has none. */}
-          {/* A course whose prerequisites are not met is not going to
-              registration, so its tick is there and off, and cannot be put
-              on: the row still lines up with every other row. */}
-          {selectable && !course.registered && (
-            <Checkbox
-              defaultChecked={missing?.severity !== "error"}
-              disabled={missing?.severity === "error"}
-              aria-label={`Register ${course.name}`}
-              className="shrink-0"
-            />
-          )}
-
           <div className="flex w-[223px] shrink-0 flex-col gap-1 px-2 py-3">
             <span className="text-label-md text-gray-80">
               {held ? "Placeholder" : course.code}
@@ -258,6 +246,7 @@ export function TermList({
   term,
   addable,
   onAddCourse,
+  onSearchCourses,
   onOpenCourse,
   onOpenSeat,
 }: {
@@ -265,6 +254,8 @@ export function TermList({
   /** What the plus can offer, and what a requirement dropped here becomes. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  /** Opens the course search beside the term. */
+  onSearchCourses?: () => void
   /** Opens one of the term's courses on its own. */
   onOpenCourse?: (courseId: string) => void
   /** Opens a seat — held, or filled and opened from its band. */
@@ -272,7 +263,6 @@ export function TermList({
 }) {
   const credits = termCredits(term)
   const activities = term.activities ?? []
-  const selectable = term.alert != null
   /* The same droppable the planner's card registers, under the same id: a
      requirement dragged out of the panel lands in the term being read. */
   const { setNodeRef, isOver, active } = useDroppable({ id: term.id, disabled: term.locked })
@@ -294,6 +284,7 @@ export function TermList({
           count={term.courses.length}
           addable={addable}
           onAddCourse={onAddCourse}
+          onSearchCourses={onSearchCourses}
         />
 
         {/* A term nobody has planned into has no columns worth heading. */}
@@ -307,7 +298,6 @@ export function TermList({
             <div className="flex w-full items-stretch pr-4 pl-6 text-body-md font-semibold text-gray-100">
               <span aria-hidden="true" className="w-1 shrink-0" />
               <span className="w-4 shrink-0 self-center" />
-              {selectable && <span aria-hidden="true" className="ml-4 w-4 shrink-0" />}
               <span className="ml-4 w-[223px] shrink-0 self-center px-2 py-3">Course</span>
               <span className="ml-4 w-[121px] shrink-0 self-center">Status</span>
               <span aria-hidden="true" className="ml-4 w-px shrink-0 self-stretch" />
@@ -330,7 +320,6 @@ export function TermList({
                 key={course.id}
                 course={course}
                 term={term}
-                selectable={selectable}
                 /* A seat has no course to open: it opens as what it is. */
                 onOpen={
                   course.placeholder

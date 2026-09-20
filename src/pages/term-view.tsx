@@ -28,24 +28,6 @@ function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () =
      it has been applied, so the invitation is there but not open. */
   const drafting = term.courses.some((c) => c.draft)
   const ready = useRegistrable(term).length
-  /* Everything that could go through has. The window is still open and the
-     date is still worth saying — a student can add a class and come back — but
-     an invitation to register nothing is not an invitation. */
-  const through = ready === 0 && !drafting && term.courses.some((c) => c.registered)
-
-  if (through) {
-    return (
-      <Alert className="border-success-50 bg-success-5 px-[23px] py-[15px]">
-        <Icon name="check-circle" size={16} className="shrink-0 text-success-100" />
-        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2">
-          <span className="font-semibold">You're registered for this term</span>
-          <span className="whitespace-nowrap">
-            Changes allowed until {term.alert?.closes}
-          </span>
-        </span>
-      </Alert>
-    )
-  }
 
   return (
     <Alert className="border-gray-40 px-[23px] py-[15px]">
@@ -64,7 +46,10 @@ function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () =
         disabled={drafting || ready === 0}
         onClick={onRegister}
       >
-        Register {ready} course{ready === 1 ? "" : "s"}
+        {/* The window stays open and the banner stays where it is; what
+            changes is that there is nothing left to press it for. A button
+            offering to register none of them is not an offer. */}
+        {ready === 0 ? "Register" : `Register ${ready} course${ready === 1 ? "" : "s"}`}
       </Button>
     </Alert>
   )
@@ -131,6 +116,7 @@ export function TermView({
   sidebar,
   addable,
   onAddCourse,
+  onSearchCourses,
   onOpenCourse,
   onOpenSeat,
   compare = true,
@@ -160,6 +146,8 @@ export function TermView({
   /** What can be planned into this term, and what to do when one is. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
+  /** Opens the course search beside the term. */
+  onSearchCourses?: () => void
   /** Opens one of the term's courses on its own, beside the term. */
   onOpenCourse?: (courseId: string) => void
   /** Opens a seat in the term, held or filled. */
@@ -271,6 +259,7 @@ export function TermView({
           preview={preview}
           addable={addable}
           onAddCourse={onAddCourse}
+          onSearchCourses={onSearchCourses}
           onOpenCourse={onOpenCourse}
           onOpenSeat={onOpenSeat}
         />
@@ -278,6 +267,7 @@ export function TermView({
         <TermList
           term={term}
           addable={addable}
+          onSearchCourses={onSearchCourses}
           onAddCourse={onAddCourse}
           onOpenCourse={onOpenCourse}
           onOpenSeat={onOpenSeat}

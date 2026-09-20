@@ -209,6 +209,14 @@ export function addTerm(years: Year[], yearLabel: string): Year[] {
   )
 }
 
+/** Adds the year after the last one the plan reaches — the same thing the
+ *  generator does for itself when a light pace will not fit, done by hand. */
+export function addYear(years: Year[]): Year[] {
+  const last = years.at(-1)
+  if (!last) return years
+  return [...years, emptyYear(Number(last.label.split("-")[0]) + 1)]
+}
+
 export function emptyYear(start: number): Year {
   return {
     label: `${start}-${start + 1}`,
@@ -393,7 +401,11 @@ export const INITIAL_YEARS: Year[] = [
             id: "g3",
             name: "Investment Society",
             kind: "Student organisation",
-            meetings: [{ day: 5, from: 15, to: 16.5 }],
+            /* Thursday rather than Friday. A student who has just asked for a
+               week with no Friday classes, and got one, should not be looking
+               at a Friday with something in it — the block is an activity and
+               not a class, which is a distinction nobody makes at a glance. */
+            meetings: [{ day: 4, from: 17, to: 18.5 }],
           },
         ],
         courses: [

@@ -1,7 +1,10 @@
+import { useRef } from "react"
+
 import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { eligibleCourses, type PlannedCourse } from "@/data/plan"
+import { useScript } from "@/lib/typing"
 
 /* Step 2: what the generator cannot work out for itself. Free text about the
  * term, and — only where the term is holding a seat — what should fill it. */
@@ -15,15 +18,16 @@ export type SeatNote = { filters: string[]; prefer: string }
 /** The filters a seat carries before anybody narrows it. */
 export const DEFAULT_FILTERS = ["Main campus", "Undergraduate", "In person"]
 
-/** What the seat's box opens holding, for the same reason the plan's does: the
- *  run answers it, and a general elective that comes back as a philosophy
- *  course is only worth watching if you can see what was asked for. */
+/** What the seat's box fills itself in with, for the same reason the plan's
+ *  does: the run answers it, and a general elective that comes back as a
+ *  philosophy course is only worth watching if you saw what was asked for.
+ *  Short enough to type at the rate a person types. */
 export const SEAT_INTEREST = "Philosophy"
 
 /** A seat nobody has said anything about yet. */
 export const defaultSeatNote = (): SeatNote => ({
   filters: DEFAULT_FILTERS,
-  prefer: SEAT_INTEREST,
+  prefer: "",
 })
 
 function SeatBlock({
@@ -35,6 +39,17 @@ function SeatBlock({
   note: SeatNote
   onChange: (next: SeatNote) => void
 }) {
+  const script = useScript()
+  const filled = useRef(false)
+
+  /* The same stage affordance as the plan's own instruction box: click into
+     it and the interest writes itself, once, and only into an empty box. */
+  const autofill = () => {
+    if (filled.current || note.prefer.trim()) return
+    filled.current = true
+    void script.type(SEAT_INTEREST, (prefer) => onChange({ ...note, prefer }))
+  }
+
   return (
     <div className="flex w-full flex-col gap-2 rounded-md border border-gray-40 bg-gray-0 p-[11px]">
       <div className="flex w-full items-start gap-2">
@@ -73,7 +88,11 @@ function SeatBlock({
         </span>
         <Textarea
           value={note.prefer}
-          onChange={(event) => onChange({ ...note, prefer: event.target.value })}
+          onFocus={autofill}
+          onChange={(event) => {
+            script.stop()
+            onChange({ ...note, prefer: event.target.value })
+          }}
           placeholder="Preferences on courses?"
           className="h-[72px] resize-none bg-card px-3 py-2 text-body-md placeholder:text-gray-80"
         />
