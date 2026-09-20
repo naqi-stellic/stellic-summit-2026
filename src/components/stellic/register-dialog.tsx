@@ -11,7 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { registrableCourses, type PlannedCourse, type Term } from "@/data/plan"
+import { useRegistrable } from "@/components/stellic/plan-issues"
+import { type PlannedCourse, type Term } from "@/data/plan"
 
 /* Putting a term's classes through registration: what is about to go, the wait
  * while it does, and what came back. One dialog in three states, because it is
@@ -79,7 +80,8 @@ export function RegisterDialog({
 
   if (!term) return null
 
-  const going = stage === "confirm" ? registrableCourses(term) : sent
+  const ready = useRegistrable(term)
+  const going = stage === "confirm" ? ready : sent
   const count = going.length
 
   return (

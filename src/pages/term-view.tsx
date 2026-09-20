@@ -5,7 +5,8 @@ import { PlanHeader, type PlanAction, type YearTab } from "@/components/stellic/
 import { TermCalendar } from "@/components/stellic/term-calendar"
 import { TermList } from "@/components/stellic/term-list"
 import { ActionLines } from "@/components/stellic/term-actions"
-import { useTermIssues } from "@/components/stellic/plan-issues"
+import { useRegistrable, useTermIssues } from "@/components/stellic/plan-issues"
+import { worstOf } from "@/data/issues"
 import { StatusPill } from "@/components/stellic/primitives"
 import { usePendingReview } from "@/components/stellic/review-state"
 import { Alert } from "@/components/ui/alert"
@@ -14,7 +15,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { CatalogEntry } from "@/data/catalog"
 import {
   METADATA_FIELDS,
-  registrableCourses,
   type MetadataField,
   type Term,
 } from "@/data/plan"
@@ -27,7 +27,7 @@ function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () =
   /* A draft is a proposal. Nothing in it can be put through registration until
      it has been applied, so the invitation is there but not open. */
   const drafting = term.courses.some((c) => c.draft)
-  const ready = registrableCourses(term).length
+  const ready = useRegistrable(term).length
 
   return (
     <Alert className="border-gray-40 px-[23px] py-[15px]">
@@ -79,9 +79,13 @@ function ActionsAlert({
   compare?: boolean
 }) {
   const actions = useTermIssues(term)
+  const worst = worstOf(actions)
 
   return (
-    <Alert variant="warning" className="flex-col items-start gap-2 p-[15px]">
+    <Alert
+      variant={worst === "error" ? "danger" : "warning"}
+      className="flex-col items-start gap-2 p-[15px]"
+    >
       <p className="text-body-md font-semibold text-gray-100">
         {actions.length} action{actions.length === 1 ? "" : "s"} required
       </p>

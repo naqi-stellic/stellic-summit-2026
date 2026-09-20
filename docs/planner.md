@@ -27,13 +27,25 @@ held as seats rather than settled on courses. Two seats earlier in the plan
 have been filled, and say so: Cultural Anthropology under a General elective,
 Predictive Modelling under the minor's. Four requirements have no term at all.
 
-Fall 2028 is the term with something wrong in it, and each of its two problems
-is a different kind: Derivatives sits a year before Investments, which it asks
-for, and Operations only runs in Spring. Both are read off data the plan
-already holds — the prerequisite trees and the offerings behind the Offered
-filter — rather than written down as warnings. A seat with no course in it is
-not one of them: it says what it is itself, and calling it an error only
-invites the argument about whether it is one.
+Two kinds of thing can be wrong with a term, which is what the product itself
+warns about: you are [missing a
+prerequisite](https://learn.stellic.com/stellic-quickstart), or the course is
+not likely to be offered that term. Both are read off data the plan already
+holds — the prerequisite trees, and the offerings behind the Offered filter —
+rather than written down as warnings.
+
+They are not equally bad. A prerequisite that is not met is a course the
+student cannot take, so it is red, it says "Prereqs not met", and registration
+will not put it through however chosen its class is. Not likely to be offered
+is amber: something to get round to. A seat with no course in it is neither —
+it says what it is itself, and calling it an error only invites the argument
+about whether it is one.
+
+Spring 2027 has the red one, in the term registration is open for: a
+fourth-year finance course whose prerequisite is three years away, which is the
+mistake a planner exists to catch before the window closes. Fall 2028 has one
+of each: Derivatives sits a year before Investments, which it asks for, and
+Operations only runs in Spring.
 
 Terms also hold what is not a course. An activity keeps hours the way a class
 does, so it is listed under My Activities and laid out on the week beside the

@@ -33,7 +33,10 @@ type Filling = {
 }
 
 const PLANNED_TERMS: Filling[] = [
-  { id: "spring-2027", codes: ["ECON 201", "MKTG 201", "SOC 101"] },
+  /* Registration is open on this one, and there is a 400-level finance course
+     in it whose prerequisite is three years away — the mistake a planner is
+     for catching before the window closes. */
+  { id: "spring-2027", codes: ["ECON 201", "MKTG 201", "FIN 415"] },
   { id: "fall-2027", codes: ["ECON 202", "ACCT 202", "STAT 210", "MGMT 210", "MIS 250"] },
   {
     id: "spring-2028",

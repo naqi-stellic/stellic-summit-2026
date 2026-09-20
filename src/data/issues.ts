@@ -11,9 +11,19 @@ import type { PlannedCourse, Term, Year } from "@/data/plan"
 export type TermIssue = {
   course: PlannedCourse
   kind: "section" | "prereq" | "offering"
+  /** A prerequisite that is not met is a course the student cannot take: it
+   *  has to be settled before the term, not during it. The rest are things to
+   *  get round to. */
+  severity: "error" | "warning"
   says: string
   /** Offered only where there is something to press. */
   action?: string
+}
+
+/** The worst of them, which is what a term is as a whole. */
+export function worstOf(issues: TermIssue[]): "error" | "warning" | null {
+  if (issues.some((issue) => issue.severity === "error")) return "error"
+  return issues.length > 0 ? "warning" : null
 }
 
 /** Which of the year's terms this is, by its id. */
@@ -49,6 +59,7 @@ export function termIssues(term: Term, years: Year[]): TermIssue[] {
       issues.push({
         course,
         kind: "section",
+        severity: "warning",
         says: "No section selected.",
         action: "Search sections",
       })
@@ -66,10 +77,11 @@ export function termIssues(term: Term, years: Year[]): TermIssue[] {
       issues.push({
         course,
         kind: "prereq",
+        severity: "error",
         says:
           late.i === at
-            ? `${held.code} is its prerequisite and is in the same term.`
-            : `${held.code} is its prerequisite and comes later, in ${late.t.name}.`,
+            ? `Prereqs not met — ${held.code} is in the same term.`
+            : `Prereqs not met — ${held.code} is not planned until ${late.t.name}.`,
       })
       continue
     }
@@ -80,7 +92,8 @@ export function termIssues(term: Term, years: Year[]): TermIssue[] {
       issues.push({
         course,
         kind: "offering",
-        says: `Not offered in ${season} — runs in ${runs.join(" and ")}.`,
+        severity: "warning",
+        says: `Not likely to be offered in ${season} — runs in ${runs.join(" and ")}.`,
       })
     }
   }

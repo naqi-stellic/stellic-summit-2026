@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Icon } from "@/components/icon"
 import { Alert } from "@/components/ui/alert"
 import { useTermIssues } from "@/components/stellic/plan-issues"
+import { worstOf } from "@/data/issues"
 import type { Term } from "@/data/plan"
 
 /* What a term is waiting on. The term view states it outright above the
@@ -25,7 +26,16 @@ export function ActionLines({
     <>
       {issues.map((issue, i) => (
         <p key={`${issue.course.id}-${i}`} className="flex w-full flex-wrap items-center gap-2 text-body-md">
-          <Icon name="warning" size={16} className="shrink-0 text-warning-50" />
+          {/* A prerequisite that is not met is the one thing here that stops a
+              term happening, so it is the one thing drawn in red. */}
+          <Icon
+            name={issue.severity === "error" ? "error-outline" : "warning"}
+            size={16}
+            className={cn(
+              "shrink-0",
+              issue.severity === "error" ? "text-alert-100" : "text-warning-50"
+            )}
+          />
           <span className="font-semibold">{issue.course.name}</span>
           <span>{issue.says}</span>
           {issue.action && (
@@ -55,6 +65,7 @@ export function TermActions({
 }) {
   const [open, setOpen] = useState(false)
   const actions = useTermIssues(term)
+  const worst = worstOf(actions)
   if (actions.length === 0) return null
 
   return (
@@ -68,16 +79,23 @@ export function TermActions({
         onClick={() => setOpen((shown) => !shown)}
         className={cn(
           "flex cursor-pointer items-center gap-1 self-start text-body-md font-semibold",
-          "text-warning-50"
+          worst === "error" ? "text-alert-100" : "text-warning-50"
         )}
       >
-        <Icon name="warning" size={16} className="shrink-0" />
+        <Icon
+          name={worst === "error" ? "error-outline" : "warning"}
+          size={16}
+          className="shrink-0"
+        />
         {actions.length} action{actions.length === 1 ? "" : "s"} required
         <Icon name={open ? "expand-more" : "chevron-right"} size={16} className="shrink-0" />
       </button>
 
       {open && (
-        <Alert variant="warning" className="flex-col items-start gap-2 p-[15px]">
+        <Alert
+          variant={worst === "error" ? "danger" : "warning"}
+          className="flex-col items-start gap-2 p-[15px]"
+        >
           <ActionLines term={term} onPickSection={onPickSection} />
         </Alert>
       )}

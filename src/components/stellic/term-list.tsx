@@ -224,7 +224,14 @@ function CourseRow({
         <div className={cn("flex w-full items-stretch", held ? "bg-gray-0" : "bg-card")}>
           <Accent course={course} />
           <p className="flex min-w-0 flex-1 items-center gap-1 px-4 py-[9px] text-body-md text-gray-100">
-            <Icon name="error-outline" size={12} className="shrink-0 text-alert-50" />
+            <Icon
+              name={missing.severity === "error" ? "error-outline" : "warning"}
+              size={12}
+              className={cn(
+                "shrink-0",
+                missing.severity === "error" ? "text-alert-100" : "text-warning-50"
+              )}
+            />
             {missing.says}{" "}
             {missing.action && (
               <button
