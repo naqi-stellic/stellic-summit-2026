@@ -35,8 +35,8 @@ holds — the prerequisite trees, and the offerings behind the Offered filter �
 rather than written down as warnings.
 
 They are not equally bad. A prerequisite that is not met is a course the
-student cannot take, so it is red, it says "Prereqs not met", and registration
-will not put it through however chosen its class is. Not likely to be offered
+student cannot take, so it is red, it says "Pre-requisites not met", and
+registration will not put it through however chosen its class is. Not likely to be offered
 is amber: something to get round to. A seat with no course in it is neither —
 it says what it is itself, and calling it an error only invites the argument
 about whether it is one.
@@ -44,8 +44,9 @@ about whether it is one.
 Each one is a line
 ([`1388:27475`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1388-27475)):
 the course's code in bold, its name, what is wrong with it, and a link at the
-end — wrapping rather than truncating, because what is wrong with a course does
-not fit in a column. Where a class is what is missing the link searches for
+end. What is wrong is said in three or four words: which prerequisite, and
+where it has got to, is the course's own business, and the link is how you get
+there. Where a class is what is missing the link searches for
 one; otherwise it opens the course, which is where the rest of the answer is.
 
 Spring 2027 has the red one, in the term registration is open for: a

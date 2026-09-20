@@ -61,7 +61,7 @@ export function termIssues(term: Term, years: Year[]): TermIssue[] {
         course,
         kind: "section",
         severity: "warning",
-        says: "No section selected.",
+        says: "No section selected",
         action: "Search sections",
       })
       continue
@@ -73,16 +73,15 @@ export function termIssues(term: Term, years: Year[]): TermIssue[] {
     const late = terms
       .map((t, i) => ({ t, i }))
       .find(({ t, i }) => i >= at && t.courses.some((c) => !c.placeholder && needs.includes(c.code)))
-    if (late && late.i >= at) {
-      const held = late.t.courses.find((c) => !c.placeholder && needs.includes(c.code))!
+    if (late) {
       issues.push({
         course,
         kind: "prereq",
         severity: "error",
-        says:
-          late.i === at
-            ? `Prereqs not met — ${held.code} is in the same term.`
-            : `Prereqs not met — ${held.code} is not planned until ${late.t.name}.`,
+        /* Short enough to read at a glance. Which prerequisite, and where it
+           has got to, is what the course itself is for saying — which is where
+           the line's link goes. */
+        says: "Pre-requisites not met",
         action: "View details",
       })
       continue
@@ -90,12 +89,11 @@ export function termIssues(term: Term, years: Year[]): TermIssue[] {
 
     /* And whether it runs at all in the term it has been put in. */
     if (!offeredIn(course.code).includes(season)) {
-      const runs = offeredIn(course.code)
       issues.push({
         course,
         kind: "offering",
         severity: "warning",
-        says: `Not likely to be offered in ${season} — runs in ${runs.join(" and ")}.`,
+        says: `Not likely to be offered in ${season}`,
         action: "View details",
       })
     }
