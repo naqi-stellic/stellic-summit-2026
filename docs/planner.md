@@ -41,6 +41,13 @@ is amber: something to get round to. A seat with no course in it is neither —
 it says what it is itself, and calling it an error only invites the argument
 about whether it is one.
 
+Each one is a line
+([`1388:27475`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1388-27475)):
+the course's code in bold, its name, what is wrong with it, and a link at the
+end — wrapping rather than truncating, because what is wrong with a course does
+not fit in a column. Where a class is what is missing the link searches for
+one; otherwise it opens the course, which is where the rest of the answer is.
+
 Spring 2027 has the red one, in the term registration is open for: a
 fourth-year finance course whose prerequisite is three years away, which is the
 mistake a planner exists to catch before the window closes. Fall 2028 has one

@@ -55,6 +55,7 @@ function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () =
 function ActionsAlert({
   term,
   onPickSection,
+  onOpenCourse,
 }: {
   term: Term
   onPickSection?: (termId: string, courseId: string) => void
@@ -89,7 +90,11 @@ function ActionsAlert({
       <p className="text-body-md font-semibold text-gray-100">
         {actions.length} action{actions.length === 1 ? "" : "s"} required
       </p>
-      <ActionLines term={term} onPickSection={onPickSection} />
+      <ActionLines
+        term={term}
+        onPickSection={onPickSection}
+        onOpenCourse={onOpenCourse}
+      />
     </Alert>
   )
 }
@@ -206,7 +211,13 @@ export function TermView({
       {term.scheduled && term.alert && (
         <RegistrationAlert term={term} onRegister={onRegister} />
       )}
-      {actions.length > 0 && <ActionsAlert term={term} onPickSection={onPickSection} />}
+      {actions.length > 0 && (
+        <ActionsAlert
+          term={term}
+          onPickSection={onPickSection}
+          onOpenCourse={onOpenCourse}
+        />
+      )}
 
       <div className="flex w-full flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">

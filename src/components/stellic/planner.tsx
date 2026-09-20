@@ -524,7 +524,11 @@ export function SemesterCard({
 
         {/* Under the invitation to register, the same way the term itself reads:
             here is the window, and here is what is stopping you using it. */}
-        <TermActions term={term} onPickSection={onPickSection} />
+        <TermActions
+          term={term}
+          onPickSection={onPickSection}
+          onOpenCourse={onOpenCourse}
+        />
 
         {term.courses.length > 0 && (
           <CreditGroup term={term} settling={settling} revealed={revealed} />

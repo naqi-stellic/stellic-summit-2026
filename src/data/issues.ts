@@ -16,8 +16,9 @@ export type TermIssue = {
    *  get round to. */
   severity: "error" | "warning"
   says: string
-  /** Offered only where there is something to press. */
-  action?: string
+  /** What the line ends in. A class can be searched for from here; anything
+   *  else is a question about the course, so the line opens the course. */
+  action: string
 }
 
 /** The worst of them, which is what a term is as a whole. */
@@ -82,6 +83,7 @@ export function termIssues(term: Term, years: Year[]): TermIssue[] {
           late.i === at
             ? `Prereqs not met — ${held.code} is in the same term.`
             : `Prereqs not met — ${held.code} is not planned until ${late.t.name}.`,
+        action: "View details",
       })
       continue
     }
@@ -94,6 +96,7 @@ export function termIssues(term: Term, years: Year[]): TermIssue[] {
         kind: "offering",
         severity: "warning",
         says: `Not likely to be offered in ${season} — runs in ${runs.join(" and ")}.`,
+        action: "View details",
       })
     }
   }
