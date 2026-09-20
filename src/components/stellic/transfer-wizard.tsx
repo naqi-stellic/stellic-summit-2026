@@ -73,22 +73,27 @@ export function ChoiceCard({
   title,
   description,
   disabled,
+  drawn,
   className,
   ...props
 }: ComponentProps<"button"> & {
   icon: IconName
   title: string
   description: string
+  /** Part of the design and not of this prototype: it reads as an offer like
+   *  the one beside it — full strength, no dimming — and does nothing when it
+   *  is pressed. Dimming it would say the flow is unavailable, which is a
+   *  claim about the product rather than about what was built. */
+  drawn?: boolean
 }) {
   return (
     <button
       type="button"
-      disabled={disabled}
+      disabled={disabled || drawn}
       className={cn(
         "flex min-w-0 flex-1 flex-col items-start gap-1 rounded-md border border-gray-40 p-[15px] text-left transition-all",
-        disabled
-          ? "cursor-not-allowed opacity-60"
-          : "hover:border-primary-50 hover:bg-primary-0",
+        disabled && !drawn && "cursor-not-allowed opacity-60",
+        !disabled && !drawn && "hover:border-primary-50 hover:bg-primary-0",
         className
       )}
       {...props}

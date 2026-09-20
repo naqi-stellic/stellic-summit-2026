@@ -148,6 +148,10 @@ Small, deliberate, and each one for a reason:
 
 The linked section is one path through a much larger flow
 ([`2362:4462`](https://www.figma.com/design/8OuDzmowzaVkdMBm0SbQCr/Prostu-Transfer-Experience?node-id=2362-4462)).
+"Manually enter your courses" stands beside Upload at full strength and does
+nothing when pressed. Dimming it would say the flow is unavailable, which is a
+claim about the product; it is available, and this build simply stops there.
+
 Not built: the landing and sign-in screen, the examination entry screens, manual
 course entry, the emailed summary, the returning-user OTP path, the
 post-results editing and re-articulation screens, and the Stellic admin panel

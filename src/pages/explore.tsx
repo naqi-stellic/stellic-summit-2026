@@ -465,12 +465,13 @@ function TranscriptStep({
               />
               {/* The master flow types courses into a table by hand. Out of
                   this prototype's scope, and drawn rather than dropped so the
-                  step still reports what the design offers. */}
+                  step still reports what the design offers — at full strength,
+                  because the flow is real even where this build stops. */}
               <ChoiceCard
                 icon="keyboard"
                 title="Manually enter your courses"
                 description="Enter the courses you've taken and your grades"
-                disabled
+                drawn
               />
             </ChoiceRow>
           </div>
