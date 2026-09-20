@@ -35,27 +35,34 @@ type Filling = {
 const PLANNED_TERMS: Filling[] = [
   /* Registration is open on this one, and there is a 400-level finance course
      in it whose prerequisite is three years away — the mistake a planner is
-     for catching before the window closes. */
-  { id: "spring-2027", codes: ["ECON 201", "MKTG 201", "FIN 415"] },
-  { id: "fall-2027", codes: ["ECON 202", "ACCT 202", "STAT 210", "MGMT 210", "MIS 250"] },
+     for catching before the window closes. The two electives beside it were
+     chosen for seats, and go on saying which seat. */
+  {
+    id: "spring-2027",
+    codes: ["FIN 415", "STAT 210"],
+    fills: [
+      { code: "PHIL 120", name: "Logic & Critical Thinking", seat: "GEN ELEC" },
+      { code: "MUSC 120", name: "Music & Society", seat: "GEN ELEC" },
+    ],
+  },
+  /* Operations only runs in Spring, and it has been planned into a Fall. */
+  { id: "fall-2027", codes: ["ECON 202", "ACCT 202", "MGMT 210", "MIS 250", "OPS 320"] },
   {
     id: "spring-2028",
     codes: ["FIN 301", "BIO 105", "DATA 210", "PHIL 240"],
     fills: [{ code: "ANTH 210", name: "Cultural Anthropology", seat: "GEN ELEC" }],
   },
-  /* The term worth opening, and the only one with anything wrong in it:
-     Derivatives sits a year before Investments, which it asks for, and
-     Operations only ever runs in Spring. */
-  { id: "fall-2028", codes: ["FIN 420", "OPS 320", "BLAW 301", "BUS 390", "ECON 310"] },
+  /* Derivatives sits a year before Investments, which it asks for. */
+  { id: "fall-2028", codes: ["FIN 420", "STAT 320", "BLAW 301", "BUS 390", "ECON 310"] },
   {
     id: "spring-2029",
-    codes: ["FIN 340", "ACCT 310", "FIN 430", "STAT 320"],
+    codes: ["FIN 340", "ACCT 310", "FIN 430", "SOC 101"],
     fills: [{ code: "DATA 330", name: "Predictive Modelling", seat: "DATA ELEC" }],
   },
   /* The last year is where the choosing is still to be done: the electives are
      held as seats rather than settled on courses. */
   { id: "fall-2029", codes: ["MGMT 340"], seats: ["FIN ELEC", "GEN ELEC"] },
-  { id: "spring-2030", codes: ["BUS 495"], seats: ["FIN ELEC", "FIN ELEC"] },
+  { id: "spring-2030", codes: ["BUS 495"], seats: ["FIN ELEC"] },
 ]
 
 /** Terms whose classes are published. Past those a course is planned but has

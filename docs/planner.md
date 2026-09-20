@@ -23,9 +23,9 @@ year two of the three the concentration asks for rather than the same one drawn
 twice.
 
 The last year is where the choosing is still to be done, so its electives are
-held as seats rather than settled on courses. Two seats earlier in the plan
-have been filled, and say so: Cultural Anthropology under a General elective,
-Predictive Modelling under the minor's. Four requirements have no term at all.
+held as seats rather than settled on courses. Four seats earlier in the plan
+have been filled, and say so — two of them side by side in Spring 2027, above
+the seat that has not been. Four requirements have no term at all.
 
 Two kinds of thing can be wrong with a term, which is what the product itself
 warns about: you are [missing a
@@ -51,9 +51,9 @@ one; otherwise it opens the course, which is where the rest of the answer is.
 
 Spring 2027 has the red one, in the term registration is open for: a
 fourth-year finance course whose prerequisite is three years away, which is the
-mistake a planner exists to catch before the window closes. Fall 2028 has one
-of each: Derivatives sits a year before Investments, which it asks for, and
-Operations only runs in Spring.
+mistake a planner exists to catch before the window closes. Fall 2027 and Fall
+2028 have the other two — Operations planned into a Fall it does not run in,
+and Derivatives sitting a year before Investments, which it asks for.
 
 Terms also hold what is not a course. An activity keeps hours the way a class
 does, so it is listed under My Activities and laid out on the week beside the

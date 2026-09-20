@@ -71,7 +71,7 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "DATA 210", name: "Foundations of Data Analytics", reason: "Data Analytics minor" },
   { code: "SOC 101", name: "Introduction to Sociology", reason: "General education" },
   { code: "BIO 105", name: "Human Biology", reason: "General education" },
-  { code: "ARTS 110", name: "Visual Culture", reason: "General education" },
+  { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "PHIL 240", name: "Business Ethics", reason: "General education" },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
