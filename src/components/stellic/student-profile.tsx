@@ -146,8 +146,13 @@ export function ProfileCard({
   progressLabel = "Official Progress",
   actions = ["Request to Review Plan", "Actions"],
   progress = OFFICIAL_PROGRESS,
+  tags = [],
 }: {
   programs: string[]
+  /** What else the registrar has tagged this student as, beside their level.
+   *  Drawn the same way — a tag is a tag — and given per page, because the
+   *  one that matters here is the reason this page is checking him at all. */
+  tags?: string[]
   /** What the bars are a reading of. The record's own standing by default;
    *  a what-if hands over the standing of whatever is on the page, because a
    *  bar that still counts the degree you just replaced is measuring a tree
@@ -204,6 +209,11 @@ export function ProfileCard({
               <span>{AUDIT_STUDENT.entry}</span>
             </Fact>
             <Fact icon="sell">{AUDIT_STUDENT.level}</Fact>
+            {tags.map((tag) => (
+              <Fact key={tag} icon="sell">
+                {tag}
+              </Fact>
+            ))}
           </div>
         </div>
 

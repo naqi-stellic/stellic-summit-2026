@@ -34,6 +34,11 @@ export type ComplianceCheck = {
   constraints: number
   /** Credits banked against it so far. */
   credits: number
+  /** Staff see this ruleset and the student does not. Said on the row rather
+   *  than assumed from the tab, because somebody reading a screenshot of it
+   *  has no tab to read — and because the whole point of a proactive check is
+   *  that it runs before anybody has been told. */
+  hiddenFromStudents?: boolean
   /** What the plan would put against it, where the plan reaches it. Read only
    *  by the Planned view; the Official one does not know the plan exists. */
   planned?: number
@@ -96,6 +101,10 @@ export const RULESET: ComplianceCheck = {
   kind: "check",
   id: "ncaa-2026",
   name: "NCAA 2026",
+  /* Eligibility is the compliance office's business, and a student who read
+     it would be reading a verdict nobody has reviewed yet. Federal Financial
+     Aid carries no such flag: SAP status is a thing students are told. */
+  hiddenFromStudents: true,
   state: "pending",
   constraints: 15,
   credits: EARNED,

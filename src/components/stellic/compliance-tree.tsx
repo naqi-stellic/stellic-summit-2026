@@ -344,6 +344,15 @@ export function ComplianceTree({
         <Badge variant="outline" className="font-normal">
           {ruleset.constraints} constraints
         </Badge>
+        {ruleset.hiddenFromStudents && (
+          <>
+            <span className="flex-1" />
+            <Badge variant="secondary">
+              <Icon name="visibility-off" />
+              Not visible to student
+            </Badge>
+          </>
+        )}
       </div>
 
       {open &&

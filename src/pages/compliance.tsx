@@ -88,6 +88,12 @@ export function Compliance() {
             programs={[AUDIT_STUDENT.program]}
             progressLabel="Planned Progress"
             actions={["Request to Review Plan", "Mark Changes as Reviewed", "Actions"]}
+            /* Why this page is checking him against an eligibility ruleset at
+               all. It belongs beside Undergrad because it is the same kind of
+               fact — something the registrar has tagged him as — and it is
+               given here rather than on the record because this is the screen
+               that acts on it. */
+            tags={["NCAA Athlete"]}
           />
           <NetworkRow />
           <TermStrip />
