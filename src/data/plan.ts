@@ -586,10 +586,10 @@ export function expectedGraduation(years: Year[]): string {
   return lastYear?.terms.at(-1)?.name ?? "—"
 }
 
-/** Academic year number of the next year to add. The year behind the student
- *  counts: the plan starts at their second. */
+/** Academic year number of the next year to add. The plan opens on the
+ *  student's first year, so a plan of four offers a fifth. */
 export function nextYearNumber(years: Year[]): number {
-  return 1 + years.length + 1
+  return years.length + 1
 }
 
 /** Every term the pacing step can include or exclude: the plan's own terms plus
