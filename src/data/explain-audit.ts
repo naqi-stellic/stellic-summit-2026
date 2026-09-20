@@ -168,13 +168,35 @@ function swap(entry: AuditEntry): AuditEntry {
    to restate them — left alone the degree row went on reporting the shared
    tree's twenty-five outstanding while the progress card directly above it,
    which reads this tree, said twenty-two. */
-const counted = (audit: AuditGroup): AuditGroup => ({
-  ...audit,
-  counts: {
-    requirements: auditStanding(audit).remaining,
-    milestones: milestoneStanding(audit).total - milestoneStanding(audit).done,
-  },
-})
+const counted = (audit: AuditGroup): AuditGroup => {
+  const standing = auditStanding(audit)
+  const milestones = milestoneStanding(audit)
+
+  return {
+    ...audit,
+    counts: {
+      requirements: standing.remaining,
+      milestones: milestones.total - milestones.done,
+    },
+    /* The same reading as the progress card at the head of the page, drawn
+       101 pixels wide instead of the full column. It had been three separate
+       disagreements with the card it sits above: the shared tree's numbers,
+       a denominator counting requirements while the numerator counted
+       courses, and a third band the card does not draw.
+    
+       No claimed band here. The audit is showing its Official version, and
+       officially a course you have registered for is not one you have taken —
+       which is exactly what the Official and Planned bars beside the toggle
+       are for. A third stripe on this row is the planned reading wearing the
+       official label. */
+    bar: {
+      taken: standing.taken,
+      inProgress: standing.inProgress,
+      claimed: 0,
+      total: standing.taken + standing.inProgress + standing.remaining,
+    },
+  }
+}
 
 export const EXPLAIN_AUDIT = counted(swap(AUDIT) as AuditGroup)
 
