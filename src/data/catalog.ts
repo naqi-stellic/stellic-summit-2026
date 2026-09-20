@@ -47,8 +47,18 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "FIN 420", name: "Derivatives & Risk Management", reason: "Finance concentration" },
   { code: "FIN 430", name: "International Finance", reason: "Finance concentration" },
   { code: "FIN 445", name: "Real Estate Finance", reason: "Finance concentration" },
-  { code: "FIN 460", name: "Mergers & Acquisitions", reason: "Finance concentration" },
-  { code: "FIN 470", name: "Fixed Income Analysis", reason: "Finance concentration" },
+  {
+    code: "FIN ELEC",
+    name: "Finance elective",
+    reason: "Concentration elective",
+    placeholder: true,
+  },
+  {
+    code: "FIN ELEC",
+    name: "Finance elective",
+    reason: "Concentration elective",
+    placeholder: true,
+  },
   { code: "FIN 415", name: "Financial Modeling & Valuation", reason: "Finance concentration" },
   { code: "STAT 320", name: "Econometrics for Business", reason: "Data Analytics minor" },
   /* The concentration's own seat, which nothing in the plan holds yet. */
@@ -63,7 +73,7 @@ export const REMAINING_REQUIREMENTS: CatalogEntry[] = [
   { code: "BIO 105", name: "Human Biology", reason: "General education" },
   { code: "ARTS 110", name: "Visual Culture", reason: "General education" },
   { code: "PHIL 240", name: "Business Ethics", reason: "General education" },
-  { code: "HIST 205", name: "Modern World History", reason: "General education" },
+  { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   { code: "GEN ELEC", name: "General elective", reason: "Open elective", placeholder: true },
   /* The minor's own elective, held like any other seat but filled from the

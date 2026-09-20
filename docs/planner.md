@@ -11,13 +11,21 @@ already been made.
 The two prototypes open on different plans, because they are demonstrating
 different things. The generator opens on a plan with almost nothing in it, so
 that generating one has work to do. This one opens on a plan already made
-(`src/data/planned-plan.ts`): four years of it, classes chosen for the four
-terms nearest to hand, and a last year still to fill.
+(`src/data/planned-plan.ts`): four years of it, classes chosen as far ahead as
+the school publishes them — the term under way and the one after it — and a
+last year held as seats.
 
 It is built from the same forty requirements rather than written out again, so
-the two prototypes can never disagree about what the degree wants. Twenty-five
-of them are placed here that the generator leaves outstanding; eight are still
-to place, which is what keeps the remaining sidebar worth opening.
+the two prototypes can never disagree about what the degree wants. Each one is
+claimed once: a term asks for a requirement by its code and gets the first
+nothing has taken, which is what makes two finance elective seats in the same
+year two of the three the concentration asks for rather than the same one drawn
+twice.
+
+The last year is where the choosing is still to be done, so its electives are
+held as seats rather than settled on courses. Two seats earlier in the plan
+have been filled, and say so: Cultural Anthropology under a General elective,
+Predictive Modelling under the minor's. Four requirements have no term at all.
 
 Fall 2028 is the term with something wrong in it, and each of its two problems
 is a different kind: Derivatives sits a year before Investments, which it asks

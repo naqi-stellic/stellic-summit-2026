@@ -21,21 +21,43 @@ const ACCENTS = ["purple", "green", "amber", "teal", "brown", "rose"] as const
  * It is built from the same forty requirements rather than written out again,
  * so the two can never disagree about what the degree wants. */
 
-const PLANNED_TERMS: { id: string; codes: string[] }[] = [
+/** What each term holds beyond what the plan already had in it: requirements
+ *  by their code, seats standing for a requirement nobody has chosen a course
+ *  for yet, and courses that were chosen for such a seat — which go on saying
+ *  which requirement they are answering. */
+type Filling = {
+  id: string
+  codes?: string[]
+  seats?: string[]
+  fills?: { code: string; name: string; seat: string }[]
+}
+
+const PLANNED_TERMS: Filling[] = [
   { id: "spring-2027", codes: ["ECON 201", "MKTG 201", "SOC 101"] },
   { id: "fall-2027", codes: ["ECON 202", "ACCT 202", "STAT 210", "MGMT 210", "MIS 250"] },
-  { id: "spring-2028", codes: ["FIN 301", "BIO 105", "ARTS 110", "DATA 210", "PHIL 240"] },
+  {
+    id: "spring-2028",
+    codes: ["FIN 301", "BIO 105", "DATA 210", "PHIL 240"],
+    fills: [{ code: "ANTH 210", name: "Cultural Anthropology", seat: "GEN ELEC" }],
+  },
   /* The term worth opening, and the only one with anything wrong in it:
      Derivatives sits a year before Investments, which it asks for, and
      Operations only ever runs in Spring. */
   { id: "fall-2028", codes: ["FIN 420", "OPS 320", "BLAW 301", "BUS 390", "ECON 310"] },
-  { id: "spring-2029", codes: ["FIN 340", "ACCT 310", "HIST 205", "FIN 430", "STAT 320"] },
-  { id: "fall-2029", codes: ["MGMT 340", "FIN 445"] },
+  {
+    id: "spring-2029",
+    codes: ["FIN 340", "ACCT 310", "FIN 430", "STAT 320"],
+    fills: [{ code: "DATA 330", name: "Predictive Modelling", seat: "DATA ELEC" }],
+  },
+  /* The last year is where the choosing is still to be done: the electives are
+     held as seats rather than settled on courses. */
+  { id: "fall-2029", codes: ["MGMT 340"], seats: ["FIN ELEC", "GEN ELEC"] },
+  { id: "spring-2030", codes: ["BUS 495"], seats: ["FIN ELEC", "FIN ELEC"] },
 ]
 
-/** Terms whose classes are published, which is as far ahead as this school
- *  publishes them. Past that a course is planned but has no sitting yet. */
-const PLANNED_SCHEDULED = ["fall-2026", "spring-2027", "fall-2027", "spring-2028"]
+/** Terms whose classes are published. Past those a course is planned but has
+ *  no sitting yet, which is why they are lists rather than weeks. */
+const PLANNED_SCHEDULED = ["fall-2026", "spring-2027"]
 
 const ACTIVITIES: Record<string, Activity[]> = {
   "fall-2026": [
@@ -47,36 +69,82 @@ const ACTIVITIES: Record<string, Activity[]> = {
     { id: "a4", name: "Investment Society", kind: "Student organisation", meetings: [{ day: 5, from: 15, to: 16.5 }] },
   ],
   "fall-2027": [
-    { id: "a5", name: "Finance Club", kind: "Student organisation", meetings: [{ day: 3, from: 17, to: 18 }] },
-    { id: "a6", name: "Wilson & Reed internship", kind: "Internship", meetings: [{ day: 5, from: 9, to: 13 }] },
+    { id: "a5", name: "Finance Club", kind: "Student organisation" },
+    { id: "a6", name: "Wilson & Reed internship", kind: "Internship" },
   ],
-  "spring-2028": [
-    { id: "a7", name: "Investment Society", kind: "Student organisation", meetings: [{ day: 5, from: 15, to: 16.5 }] },
-  ],
+  "spring-2028": [{ id: "a7", name: "Investment Society", kind: "Student organisation" }],
 }
 
 let planned = 0
 
-/** One of the outstanding requirements, as a course in a term. */
-function plannedCourse(code: string): PlannedCourse {
-  const entry = REMAINING_REQUIREMENTS.find((r) => r.code === code)
-  if (!entry) throw new Error(`No outstanding requirement for ${code}`)
-  planned += 1
+/* Each requirement is answered once. A term asks for one by its code and gets
+ * the first that nothing has claimed, so two finance elective seats in the
+ * same year are two of the three the concentration asks for rather than the
+ * same one drawn twice. */
+const claimed = new Set<number>()
 
+function claim(code: string): number {
+  const at = REMAINING_REQUIREMENTS.findIndex((r, i) => r.code === code && !claimed.has(i))
+  if (at === -1) throw new Error(`No outstanding requirement left for ${code}`)
+  claimed.add(at)
+  return at
+}
+
+function planItem(fields: Partial<PlannedCourse> & { code: string; name: string }): PlannedCourse {
+  planned += 1
   return {
     id: `n${planned}`,
+    credits: CREDITS_PER_COURSE,
+    accent: ACCENTS[planned % ACCENTS.length],
+    lastActivity: "Added by pathway, 3 Apr 2026",
+    ...fields,
+  }
+}
+
+/** One of the outstanding requirements, as a course in a term. */
+function plannedCourse(code: string): PlannedCourse {
+  const at = claim(code)
+  const entry = REMAINING_REQUIREMENTS[at]
+  return planItem({
     code: entry.code,
     name: entry.name,
-    credits: CREDITS_PER_COURSE,
-    requirement: REMAINING_REQUIREMENTS.indexOf(entry),
-    accent: ACCENTS[planned % ACCENTS.length],
+    requirement: at,
     classNo: String(3100 + planned * 13),
     campus: "Main",
     modality: "In Person",
     gradeOption: "Graded",
     subTerm: "Full Term",
-    lastActivity: "Added by pathway, 3 Apr 2026",
-  }
+  })
+}
+
+/** A requirement with no course against it yet. */
+function plannedSeat(code: string): PlannedCourse {
+  const at = claim(code)
+  const entry = REMAINING_REQUIREMENTS[at]
+  return planItem({
+    code: entry.code,
+    name: entry.name,
+    requirement: at,
+    placeholder: true,
+  })
+}
+
+/** A seat that has been filled: the course stands where the seat did, under
+ *  the name of the requirement it is answering. */
+function plannedFill(fill: { code: string; name: string; seat: string }): PlannedCourse {
+  const at = claim(fill.seat)
+  const entry = REMAINING_REQUIREMENTS[at]
+  return planItem({
+    code: fill.code,
+    name: fill.name,
+    requirement: at,
+    seat: { code: entry.code, name: entry.name },
+    classNo: String(3100 + planned * 13),
+    campus: "Main",
+    modality: "In Person",
+    gradeOption: "Graded",
+    subTerm: "Full Term",
+  })
 }
 
 export const PLANNED_YEARS: Year[] = INITIAL_YEARS.map((year) => ({
@@ -84,11 +152,23 @@ export const PLANNED_YEARS: Year[] = INITIAL_YEARS.map((year) => ({
   terms: year.terms.map((term) => {
     const filling = PLANNED_TERMS.find((t) => t.id === term.id)
     const scheduled = PLANNED_SCHEDULED.includes(term.id)
+    const added = [
+      ...(filling?.codes ?? []).map(plannedCourse),
+      ...(filling?.fills ?? []).map(plannedFill),
+      ...(filling?.seats ?? []).map(plannedSeat),
+    ]
     const held: Term = {
       ...term,
-      scheduled: term.scheduled || scheduled,
+      scheduled: term.locked || scheduled,
       activities: ACTIVITIES[term.id],
-      courses: filling ? [...term.courses, ...filling.codes.map(plannedCourse)] : term.courses,
+      /* Seats last, whatever order they arrived in: a term reads as what has
+         been decided, and then what has not. */
+      courses: [
+        ...term.courses.filter((c) => !c.placeholder),
+        ...added.filter((c) => !c.placeholder),
+        ...term.courses.filter((c) => c.placeholder),
+        ...added.filter((c) => c.placeholder),
+      ],
     }
     /* A term whose classes are out has them all: a course put into it by the
        pathway arrives with a sitting, the same as one chosen by hand. */
