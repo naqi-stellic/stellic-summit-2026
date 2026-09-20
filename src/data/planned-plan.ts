@@ -1,5 +1,8 @@
 import { REMAINING_REQUIREMENTS } from "@/data/catalog"
 import {
+  BY_ADVISOR,
+  BY_PATHWAY,
+  BY_STUDENT,
   CREDITS_PER_COURSE,
   INITIAL_YEARS,
   scheduleTerm,
@@ -35,28 +38,27 @@ type Filling = {
 const PLANNED_TERMS: Filling[] = [
   /* Registration is open on this one, and there is a 400-level finance course
      in it whose prerequisite is three years away — the mistake a planner is
-     for catching before the window closes. The two electives beside it were
-     chosen for seats, and go on saying which seat. */
-  {
-    id: "spring-2027",
-    codes: ["FIN 415", "STAT 210"],
-    fills: [
-      { code: "PHIL 120", name: "Logic & Critical Thinking", seat: "GEN ELEC" },
-      { code: "MUSC 120", name: "Music & Society", seat: "GEN ELEC" },
-    ],
-  },
-  /* Operations only runs in Spring, and it has been planned into a Fall. */
-  { id: "fall-2027", codes: ["ECON 202", "ACCT 202", "MGMT 210", "MIS 250", "OPS 320"] },
+     for catching before the window closes. Three courses and the seat the
+     plan already held: twelve credits, which leaves the term legible at a
+     glance and the one thing wrong with it the only thing to look at. */
+  { id: "spring-2027", codes: ["FIN 415", "STAT 210"] },
+  /* Operations only runs in Spring, and it has been planned into a Fall —
+     which is the amber kind of problem: worth knowing, not worth stopping
+     for. Investments sits here so that everything asking for it comes after
+     it. */
+  { id: "fall-2027", codes: ["ECON 202", "ACCT 202", "FIN 340", "MIS 250", "OPS 320"] },
   {
     id: "spring-2028",
     codes: ["FIN 301", "BIO 105", "DATA 210", "PHIL 240"],
     fills: [{ code: "ANTH 210", name: "Cultural Anthropology", seat: "GEN ELEC" }],
   },
-  /* Derivatives sits a year before Investments, which it asks for. */
-  { id: "fall-2028", codes: ["FIN 420", "STAT 320", "BLAW 301", "BUS 390", "ECON 310"] },
+  /* Nothing wrong with this one: every course in it runs in the Fall and
+     everything they ask for is behind them. A plan where every term has
+     something to fix is a plan nobody believes. */
+  { id: "fall-2028", codes: ["ACCT 310", "STAT 320", "BLAW 301", "BUS 390", "ECON 310"] },
   {
     id: "spring-2029",
-    codes: ["FIN 340", "ACCT 310", "FIN 430", "SOC 101"],
+    codes: ["FIN 420", "FIN 430", "SOC 101", "MGMT 210"],
     fills: [{ code: "DATA 330", name: "Predictive Modelling", seat: "DATA ELEC" }],
   },
   /* The last year is where the choosing is still to be done: the electives are
@@ -99,6 +101,18 @@ const ACTIVITIES: Record<string, Activity[]> = {
   "spring-2029": [{ id: "a5", name: "Investment Society", kind: "Student organisation" }],
 }
 
+/* Who put each of these here. Most of the plan is the pathway's — that is
+ * what a pathway is for — but a plan nobody has touched since is not a plan
+ * anybody is using. The advisor's two are the ones worth a conversation: the
+ * course planned into a term it does not run in, and a late elective. The
+ * student's two are the ones somebody browsing would have added themselves. */
+const HANDS: Record<string, string> = {
+  "OPS 320": BY_ADVISOR,
+  "FIN 430": BY_ADVISOR,
+  "STAT 210": BY_STUDENT,
+  "SOC 101": BY_STUDENT,
+}
+
 let planned = 0
 
 /* Each requirement is answered once. A term asks for one by its code and gets
@@ -120,7 +134,7 @@ function planItem(fields: Partial<PlannedCourse> & { code: string; name: string 
     id: `n${planned}`,
     credits: CREDITS_PER_COURSE,
     accent: ACCENTS[planned % ACCENTS.length],
-    lastActivity: "Added by pathway, 3 Apr 2026",
+    lastActivity: HANDS[fields.code] ?? BY_PATHWAY,
     ...fields,
   }
 }

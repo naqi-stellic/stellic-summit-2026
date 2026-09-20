@@ -117,7 +117,12 @@ export function scoreSchedule(term: Term, prefs: SchedulePrefs) {
   const dayNames = shape.days.map((d) => DAYS[d - 1])
   const asked = wanted.get("days") ?? DAYS
   const onAskedDays = dayNames.filter((d) => asked.includes(d)).length
-  const days = dayNames.length === 0 ? 1 : score(onAskedDays / dayNames.length)
+  /* A day the student took off the list is not a preference they would like
+     met — it is a day they cannot come in. A week that uses one has failed at
+     the thing they actually said, however well it reads otherwise: four days
+     out of five is not four fifths of an answer. */
+  const intrudes = dayNames.some((day) => !asked.includes(day))
+  const days = intrudes ? 1 : dayNames.length === 0 ? 1 : score(onAskedDays / dayNames.length)
 
   const time = (() => {
     const when = (wanted.get("time") ?? ["Any"])[0]
@@ -142,11 +147,15 @@ export function scoreSchedule(term: Term, prefs: SchedulePrefs) {
   /* The ranking is the point: the first nice to have counts for most, so
    * reordering them can change which option comes out on top. */
   const weights = [3, 2, 1]
-  const total = prefs.nice.reduce(
+  const sum = prefs.nice.reduce(
     (n, pref, i) => n + (scores[pref.id as keyof typeof scores] ?? 0) * weights[i],
     0
   )
-  return { ...shape, dayNames, scores, total }
+  /* And ranked below every week that did not, rather than losing a point and
+     winning on tidiness. Far enough below that no amount of the rest makes up
+     for it: the most the weighted sum can come to is eighteen. */
+  const total = intrudes ? sum - 100 : sum
+  return { ...shape, dayNames, scores, total, intrudes }
 }
 
 function score(ratio: number): 1 | 2 | 3 {

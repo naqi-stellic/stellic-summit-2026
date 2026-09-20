@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { PlanHeader, type PlanAction, type YearTab } from "@/components/stellic/plan-header"
-import { TermCalendar } from "@/components/stellic/term-calendar"
+import { TermCalendar, type Preview } from "@/components/stellic/term-calendar"
 import { TermList } from "@/components/stellic/term-list"
 import { ActionLines } from "@/components/stellic/term-actions"
 import { useRegistrable, useTermIssues } from "@/components/stellic/plan-issues"
@@ -28,6 +28,24 @@ function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () =
      it has been applied, so the invitation is there but not open. */
   const drafting = term.courses.some((c) => c.draft)
   const ready = useRegistrable(term).length
+  /* Everything that could go through has. The window is still open and the
+     date is still worth saying — a student can add a class and come back — but
+     an invitation to register nothing is not an invitation. */
+  const through = ready === 0 && !drafting && term.courses.some((c) => c.registered)
+
+  if (through) {
+    return (
+      <Alert className="border-success-50 bg-success-5 px-[23px] py-[15px]">
+        <Icon name="check-circle" size={16} className="shrink-0 text-success-100" />
+        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2">
+          <span className="font-semibold">You're registered for this term</span>
+          <span className="whitespace-nowrap">
+            Changes allowed until {term.alert?.closes}
+          </span>
+        </span>
+      </Alert>
+    )
+  }
 
   return (
     <Alert className="border-gray-40 px-[23px] py-[15px]">
@@ -106,6 +124,7 @@ export function TermView({
   onToggleField,
   onRegister,
   onPickSection,
+  preview,
   onGenerateTerm,
   onRequestReview,
   generators = true,
@@ -126,6 +145,9 @@ export function TermView({
   onToggleField: (id: string) => void
   onRegister?: () => void
   onPickSection?: (termId: string, courseId: string) => void
+  /** A class the course panel beside this term is hovering over, drawn on the
+   *  week in place of the one the student is in. */
+  preview?: Preview
   /** Opens the panel that fills this term to a credit target. */
   onGenerateTerm?: () => void
   /** Asks for a review of this term alone — the plan-wide first step is
@@ -246,6 +268,7 @@ export function TermView({
         <TermCalendar
           term={term}
           compare={compare}
+          preview={preview}
           addable={addable}
           onAddCourse={onAddCourse}
           onOpenCourse={onOpenCourse}

@@ -26,6 +26,7 @@ import {
 import {
   CREDIT_GROUP_LABEL,
   creditGroup,
+  type Meeting,
   type PlannedCourse,
   type Term,
 } from "@/data/plan"
@@ -388,6 +389,8 @@ export function CoursePanel({
   backLabel,
   onOpenCode,
   onAdd,
+  onPickSection,
+  onPreviewSection,
   onRemove,
   onBack,
   onClose,
@@ -406,6 +409,12 @@ export function CoursePanel({
   /** Opens a course the prerequisite tree names, where the plan can find it. */
   onOpenCode?: (code: string) => void
   onAdd: (termId: string) => void
+  /** Settles this course — where the plan holds it — on one of the classes
+   *  listed here, at the hours that class keeps. */
+  onPickSection?: (section: string, meetings: Meeting[]) => void
+  /** The class the cursor is over, for the week beside the panel to draw. Null
+   *  when it leaves. */
+  onPreviewSection?: (section: { section: string; meetings: Meeting[] } | null) => void
   onRemove?: () => void
   onBack: () => void
   onClose: () => void
@@ -458,7 +467,41 @@ export function CoursePanel({
           seats: "",
         }
       : null
-  const sections = settled ? (attending ? [attending] : []) : detail.sections
+  /* The class the student is in, as the plan has it. A term's schedule was
+     drawn before anybody opened this panel, so the section it handed out is
+     not always one of the ones the catalogue lists here — and a list of
+     classes that leaves out the one you are in is the wrong list. */
+  const mine: CourseSection | null =
+    planned?.course.section && !detail.sections.some((s) => s.code === planned.course.section)
+      ? {
+          code: planned.course.section,
+          when: meetingLines(planned.course.meetings),
+          meetings: planned.course.meetings,
+          who: planned.course.instructor ?? "",
+          seats: "",
+        }
+      : null
+  const sections = settled
+    ? attending
+      ? [attending]
+      : []
+    : mine
+      ? [mine, ...detail.sections]
+      : detail.sections
+  /* Choosing one is only a thing to do where the plan holds the course and the
+     term still takes changes. */
+  const choosing = onPickSection != null && planned != null && !planned.term.locked
+  /* The hours the rest of the term already keeps, so a class that cannot be
+     attended is listed rather than offered. */
+  const busy = new Map<string, string>()
+  for (const other of planned?.term.courses ?? []) {
+    if (other.id === planned?.course.id) continue
+    for (const meeting of other.meetings ?? []) {
+      busy.set(`${meeting.day}-${meeting.from}`, other.code)
+    }
+  }
+  const clashOf = (section: CourseSection) =>
+    (section.meetings ?? []).map((m) => busy.get(`${m.day}-${m.from}`)).find(Boolean) ?? null
 
   const [campus, setCampus] = useState(detail.campus)
   const [termId, setTermId] = useState(terms[0]?.id ?? "")
@@ -633,22 +676,48 @@ export function CoursePanel({
               {sections.map((section) => {
                 /* The one the student is in is marked rather than offered. */
                 const chosen = planned?.course.section === section.code
+                const clash = chosen ? null : clashOf(section)
+                /* Their own class is drawn at the hours they keep, which is
+                   the plan's answer rather than the catalogue's. */
+                const when =
+                  chosen && planned?.course.meetings
+                    ? meetingLines(planned.course.meetings)
+                    : section.when
                 return (
                 <div
                   key={section.code}
+                  /* The whole row answers the cursor: the week beside it draws
+                     this class where it would go, which is the question
+                     somebody reading a list of times is actually asking. */
+                  onMouseEnter={() =>
+                    onPreviewSection?.(
+                      section.meetings
+                        ? { section: section.code, meetings: section.meetings }
+                        : null
+                    )
+                  }
+                  onMouseLeave={() => onPreviewSection?.(null)}
                   className={cn(
-                    "flex w-full items-stretch rounded-md border bg-card",
-                    chosen ? "border-primary-50 bg-primary-0/40" : "border-gray-40"
+                    "flex w-full items-stretch rounded-md border bg-card transition-colors",
+                    chosen ? "border-primary-50 bg-primary-0/40" : "border-gray-40 hover:bg-gray-0"
                   )}
                 >
                   <button
                     type="button"
+                    disabled={!choosing || chosen || clash != null}
+                    onClick={() => onPickSection?.(section.code, section.meetings ?? [])}
                     aria-label={
                       chosen ? `${section.code} is your class` : `Add ${section.code} to plan`
                     }
                     className={cn(
-                      "flex cursor-pointer items-center border-r px-3 hover:bg-gray-5",
-                      chosen ? "border-primary-50 text-primary-50" : "border-gray-40 text-gray-100"
+                      "flex items-center border-r px-3",
+                      chosen
+                        ? "border-primary-50 text-primary-50"
+                        : "border-gray-40 text-gray-100",
+                      choosing && !chosen && clash == null
+                        ? "cursor-pointer hover:bg-gray-5"
+                        : "cursor-default",
+                      clash != null && "text-gray-60"
                     )}
                   >
                     <Icon name={chosen ? "check" : "add"} size={16} />
@@ -658,7 +727,7 @@ export function CoursePanel({
                       {section.code}
                     </span>
                     <span className="min-w-0 flex-1 text-body-md text-gray-100">
-                      {section.when.map((line) => (
+                      {when.map((line) => (
                         <span key={line} className="block">
                           {line}
                         </span>
@@ -666,9 +735,18 @@ export function CoursePanel({
                     </span>
                     <span className="shrink-0 text-body-md text-gray-80">{section.who}</span>
                     {/* A class you are already in has no seat count worth
-                        reading: you have one. */}
-                    {section.seats && (
-                      <span className="shrink-0 text-body-md text-success-100">{section.seats}</span>
+                        reading: you have one. What clashes has seats and is
+                        still no use, so it says what it clashes with. */}
+                    {clash != null ? (
+                      <span className="shrink-0 text-body-md text-gray-80">
+                        Clashes with {clash}
+                      </span>
+                    ) : (
+                      section.seats && (
+                        <span className="shrink-0 text-body-md text-success-100">
+                          {section.seats}
+                        </span>
+                      )
                     )}
                   </div>
                 </div>

@@ -23,9 +23,10 @@ year two of the three the concentration asks for rather than the same one drawn
 twice.
 
 The last year is where the choosing is still to be done, so its electives are
-held as seats rather than settled on courses. Four seats earlier in the plan
-have been filled, and say so — two of them side by side in Spring 2027, above
-the seat that has not been. Four requirements have no term at all.
+held as seats rather than settled on courses. Two seats earlier in the plan have
+been filled and say so, under the name of the requirement they answer. Spring
+2027 holds three courses and a seat — twelve credits, which leaves the term
+legible at a glance and the one thing wrong with it the only thing to look at.
 
 Two kinds of thing can be wrong with a term, which is what the product itself
 warns about: you are [missing a
@@ -65,10 +66,29 @@ there. Where a class is what is missing the link searches for
 one; otherwise it opens the course, which is where the rest of the answer is.
 
 Spring 2027 has the red one, in the term registration is open for: a
-fourth-year finance course whose prerequisite is three years away, which is the
-mistake a planner exists to catch before the window closes. Fall 2027 and Fall
-2028 have the other two — Operations planned into a Fall it does not run in,
-and Derivatives sitting a year before Investments, which it asks for.
+fourth-year finance course whose prerequisite is two years away, which is the
+mistake a planner exists to catch before the window closes. Fall 2027 has the
+amber one — Operations planned into a Fall it does not run in, which the
+advisor put there, and the card says so.
+
+Two, and no more. Every other term is clean: a plan where each term has
+something to fix is a plan nobody believes, and the two that are wrong are only
+worth looking at because the rest are not.
+
+A class is chosen from the course itself. Its sections are hours out of the
+same list the week is drawn from, so hovering one draws it on the calendar
+where it would go — in the course's own accent, dashed, in place of the class
+the student is in — and the plus beside it settles the course on that class. A
+section sitting on an hour the term already keeps says which course it clashes
+with instead of offering itself, and the list opens with the class they are in,
+whether or not the catalogue lists it.
+
+So no card carries a search of its own. A seat still does: there the thing to
+find is a course, not a sitting of one.
+
+A course dragged out of a term whose classes are published into one whose are
+not arrives without its class — a sitting that does not exist yet is not a
+sitting to keep.
 
 Terms also hold what is not a course. An activity keeps hours the way a class
 does, so it is laid out on the week beside the classes and listed under My
@@ -80,6 +100,21 @@ section and no status either, which it has none of.
 The term under way carries two of them; Spring 2027, Fall 2028 and Spring 2029
 carry one each, far enough apart to say that a plan holds more than courses
 without saying it on every card.
+
+## Where each course came from
+
+Every card can say who put it there, under Plan details. There are four
+answers, and the plan holds all four: the term under way was **synced from
+SIS**, because registration for it already happened in the registrar's system;
+most of what follows was **added by Pathway**, which is what a pathway is for;
+three courses were **added by Mark**, the advisor — including the one planned
+into a term it does not run in, so the mistake has a person behind it; and two
+were **added by you**, along with anything moved or added while the prototype
+is open.
+
+First names, never usernames. The student reads as "you" because they are the
+one reading it — except on the staff side, where the planner is opened from a
+student's record and the reader is not Scott, so it says his name.
 
 ## What differs
 

@@ -71,10 +71,15 @@ const AUDIT = {
     icon: "check",
     glyph: 9.333,
   },
-  /* Put through registration but not yet under way: the same outline as
-     planned, with a calendar that has the class in it. */
+  /* Put through registration but not yet under way. Filled rather than
+     outlined: the whole of what registering changes on this screen is this
+     mark and the word beside it, and an outline that stays an outline reads as
+     nothing having happened. The same orange as a term under way, because it
+     is the same family of state — what tells them apart is the glyph: a clock
+     for a term you are sitting in, a calendar with the class in it for one
+     you hold a seat in. */
   "pre-registered": {
-    ground: "border-[0.667px] border-warning-50 bg-warning-5 text-warning-50",
+    ground: "bg-warning-50 text-white",
     icon: "event-available",
     glyph: 10.667,
   },

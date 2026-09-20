@@ -106,10 +106,20 @@ you got there. Adjust `DEGREE` and `INITIAL_YEARS` in
 Every figure on screen derives from the plan rather than being written down
 twice. Courses carry `credits`; a term's credit heading and its "Sep - Dec ·
 12 credits" line sum their own courses; and the Generate Plan panel's standing
-comes from `planStanding()` — completed from the plan's own finished terms,
-planned from everything else sitting in it (the term under way included, since
-those credits are not earned yet), remaining as the balance against `DEGREE`. Requirements are one per course, which is what makes
-"6 reqs · 18 credits" read consistently.
+comes from `planStanding()`, which sorts the degree into four states rather
+than two: completed is the credit the student arrived with plus any finished
+term, under way is the term they are sitting in, planned is everything else in
+the plan, and remaining is the balance against `DEGREE`. Requirements are one
+per course, which is what makes "6 reqs · 18 credits" read consistently.
+
+Four rather than two because the student is in four of them at once, and each
+answers a different question the wizard asks. The term under way is not up for
+planning — "keep everything already planned?" offers the five courses that
+could move, not the ten courses there are — and the credit they walked in with
+is credit, so "Existing credit" reads four courses and twelve rather than
+nothing at all. Incoming credit sits in no term, which is what makes it
+incoming, so it is handed to `planStanding` by the page that renders it rather
+than found in the years.
 
 So the panel tracks edits: drop a 3-credit course and Planned falls from 18 to
 15 credits, Remaining rises to 81, the term heading and its meta line drop by
@@ -118,6 +128,33 @@ degree's credits rather than the design's fixed pixel widths — the one place
 the numbers being real costs a literal match to the frame.
 
 Expected graduation is the last term the plan reaches, not a stored date.
+
+A term whose classes have all gone through registration says so rather than
+offering to register nothing: the banner becomes a confirmation, and the credit
+group's marker fills in — `pre-registered` is drawn solid where `planned` is an
+outline, because the whole of what registering changes on that screen is the
+mark and the word beside it.
+
+## An instruction the plan answers
+
+The instructions box opens with a sentence already in it — the student has a
+part-time job and would like a lighter spring, if it does not cost them
+graduation. It can be edited or cleared like anything else, and the summary
+reads it back under "Anything else".
+
+The first option answers it. `ease` on a `DraftOption` names one term and how
+light to keep it, and that term is filled to four courses rather than the pace's
+five, holding a general elective seat rather than the concentration elective it
+opened with — which is the card that moves to Fall 2027, since nothing is
+waiting on it. Graduation does not move, and the option says so. The other two
+options hold to their own pace: the point of three options is that they differ.
+
+The same is true a step further in. A held seat asks what kind of course should
+fill it, and that box opens saying "Philosophy" — so the general elective comes
+back as Logic & Critical Thinking rather than whichever course the shelf
+happened to offer first. `preferredFirst` in `catalog.ts` is what reads it: a
+subject's own words are kept beside its shelf, because "Philosophy" is written
+on none of the courses that answer it.
 
 ## Two kinds of instructions
 
@@ -440,6 +477,15 @@ timetabled shows no ghosts at all.
 
 No slot is shorter than an hour and a quarter — eighty pixels — which is what a
 block needs for its code, its name and its section.
+
+Which of the three weeks comes out on top is `scoreSchedule`, and a day the
+student took off the list is not scored at all: it disqualifies. Four days out
+of five is not four fifths of an answer — somebody who says they cannot come in
+on Friday means it — so a week that uses an excluded day ranks below every week
+that does not, however tidy it is otherwise, and its Days of Week dots say one
+rather than three. Without that, a Friday-free week and a five-day week both
+scored full marks on days and the tidier one won on density, which is how the
+option that answered the question came second.
 
 ## Responsive
 

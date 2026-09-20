@@ -15,6 +15,17 @@ export type SeatNote = { filters: string[]; prefer: string }
 /** The filters a seat carries before anybody narrows it. */
 export const DEFAULT_FILTERS = ["Main campus", "Undergraduate", "In person"]
 
+/** What the seat's box opens holding, for the same reason the plan's does: the
+ *  run answers it, and a general elective that comes back as a philosophy
+ *  course is only worth watching if you can see what was asked for. */
+export const SEAT_INTEREST = "Philosophy"
+
+/** A seat nobody has said anything about yet. */
+export const defaultSeatNote = (): SeatNote => ({
+  filters: DEFAULT_FILTERS,
+  prefer: SEAT_INTEREST,
+})
+
 function SeatBlock({
   course,
   note,
@@ -116,7 +127,7 @@ export function GenerateTermNotes({
             <SeatBlock
               key={course.id}
               course={course}
-              note={seatNotes[course.id] ?? { filters: DEFAULT_FILTERS, prefer: "" }}
+              note={seatNotes[course.id] ?? defaultSeatNote()}
               onChange={(next) => onSeatNoteChange(course.id, next)}
             />
           ))}

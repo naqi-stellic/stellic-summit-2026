@@ -66,7 +66,8 @@ import {
   REMAINING_REQUIREMENTS,
   type CatalogEntry,
 } from "@/data/catalog"
-import { INCOMING_CREDITS } from "@/data/incoming"
+import { INCOMING_CREDITS, incomingTotals } from "@/data/incoming"
+import type { Preview } from "@/components/stellic/term-calendar"
 import { INITIAL_REVIEWS, planSignature, requestedLine, type Review } from "@/data/review"
 import { releasableTerms } from "@/components/stellic/keep-picker"
 import {
@@ -101,6 +102,8 @@ import {
   planCampuses,
   planStanding,
   chooseSection,
+  creditGroup,
+  setSection,
   registerCourses,
   registrableCourses,
   removeCourse,
@@ -227,10 +230,32 @@ function RegistrationAlert({
   )
 }
 
+/** The other side of the registration banner: this term is done with. */
+function RegisteredAlert() {
+  return (
+    <Alert className="min-h-[92px] border-success-50 bg-success-5">
+      <AlertBody>
+        <AlertHeader>
+          <AlertTitle>
+            <Icon name="check-circle" size={16} className="mt-0.5 shrink-0 text-success-100" />
+            You're registered for this term
+          </AlertTitle>
+          <AlertDescription className="@max-[400px]/term:whitespace-normal">
+            Your classes are held
+          </AlertDescription>
+        </AlertHeader>
+      </AlertBody>
+    </Alert>
+  )
+}
+
 /** A term's banner: the registration deadline when it has one, and — while a
  *  draft is on the canvas — the reassurance that it needs nothing otherwise. */
 function termBanner(term: Term, drafting: boolean, onRegister: (term: Term) => void) {
   if (term.alert) {
+    /* Everything that could go through has, so the card says so rather than
+       holding out a button that would do nothing. */
+    if (!drafting && creditGroup(term) === "pre-registered") return <RegisteredAlert />
     return (
       <RegistrationAlert
         closes={term.alert.closes}
@@ -387,12 +412,18 @@ export function PlanYourPath({
         0
       )
     : 0
-  const standing = planStanding(years)
+  /* The plan against the degree, with the credit the student arrived with
+     counted as the credit it is. */
+  const standing = planStanding(years, incomingTotals(incoming))
   /* The course opened on its own, from the remaining list or from the courses
      that could fill a seat. */
   const course = openCourse
   /* Or one already planned, which brings its term with it. */
   const plannedOpen = openPlanned ? findCourse(shown, openPlanned) : null
+  /* The class the cursor is over in the course panel. It belongs to the page
+     rather than to either side: the panel knows which class, the week knows
+     how to draw it, and neither is inside the other. */
+  const [preview, setPreview] = useState<Preview | null>(null)
   /* Where a course opened like that could be put: every term that takes one. */
   const plannableTerms = shown.flatMap((year) => year.terms.filter((term) => !term.locked))
   /* The whole plan, which is what a course panel reads to say where a course
@@ -622,7 +653,11 @@ export function PlanYourPath({
     setYears((current) => chooseSection(current, termId, courseId))
   }
 
-  function startTermDraft(targetCredits: number, released: string[]) {
+  function startTermDraft(
+    targetCredits: number,
+    released: string[],
+    prefer: Record<string, string> = {}
+  ) {
     if (!generatingTerm) return
     /* Three ways to fill the same term, the way the plan generator offers
        three ways to fill the whole degree. */
@@ -634,7 +669,8 @@ export function PlanYourPath({
         targetCredits,
         released,
         option.id,
-        term?.scheduled === true
+        term?.scheduled === true,
+        prefer
       )
     )
     setDrafts({ options: TERM_OPTIONS, made })
@@ -704,6 +740,7 @@ export function PlanYourPath({
 
   /* A course already in the plan, opened beside it. */
   function openPlannedPanel(courseId: string) {
+    setPreview(null)
     setOpenPlanned(courseId)
     setOpenSeat(null)
     setOpenCourse(null)
@@ -864,6 +901,17 @@ export function PlanYourPath({
               })
             }
             onAdd={() => setOpenPlanned(null)}
+            /* Picked by name, so the week draws that class and not whichever
+               hour happened to be free. */
+            onPickSection={(section, meetings) => {
+              setPreview(null)
+              setYears((current) =>
+                setSection(current, plannedOpen.term.id, plannedOpen.course.id, section, meetings)
+              )
+            }}
+            onPreviewSection={(hovered) =>
+              setPreview(hovered ? { courseId: plannedOpen.course.id, ...hovered } : null)
+            }
             onRemove={
               plannedOpen.term.locked
                 ? undefined
@@ -990,6 +1038,7 @@ export function PlanYourPath({
             onToggleField={toggleMetadata}
             onRegister={() => setRegistering(openTerm)}
             onPickSection={pickSection}
+            preview={preview ?? undefined}
             onGenerateTerm={() => setGeneratingTerm(openTerm.id)}
             onRequestReview={() => setRequesting({ term: openTerm })}
             generators={generators}

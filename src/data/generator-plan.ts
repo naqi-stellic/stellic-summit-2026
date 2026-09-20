@@ -1,5 +1,13 @@
 import { REMAINING_REQUIREMENTS } from "@/data/catalog"
-import { CREDITS_PER_COURSE, INITIAL_YEARS, type PlannedCourse, type Year } from "@/data/plan"
+import {
+  BY_PATHWAY,
+  BY_STUDENT,
+  CREDITS_PER_COURSE,
+  INITIAL_YEARS,
+  type PlannedCourse,
+  type Term,
+  type Year,
+} from "@/data/plan"
 
 /* Where the generator's prototype starts.
  *
@@ -27,9 +35,16 @@ function seat(id: string, code: string, accent: PlannedCourse["accent"]): Planne
     requirement: requirementFor(code),
     placeholder: true,
     accent,
-    lastActivity: "Added by sabott, 2 Sep 2026",
+    lastActivity: BY_PATHWAY,
   }
 }
+
+/** The seat Spring 2027 opens holding. The plan the two prototypes share has
+ *  a general elective there; this one holds a finance elective instead, which
+ *  is what makes the generated plan worth watching: a concentration elective
+ *  in the term the student has just said they want lighter is the thing that
+ *  has somewhere else to go. */
+const SPRING_SEAT = "FIN ELEC"
 
 /** A second course in the spring the student has started on, and two seats a
  *  year out: enough that the plan reads as begun rather than blank, and little
@@ -56,7 +71,7 @@ const STARTED: Record<string, PlannedCourse[]> = {
       building: "Braddock Hall",
       room: "115",
       subTerm: "Full Term",
-      lastActivity: "Added by sabott, 2 Sep 2026",
+      lastActivity: BY_STUDENT,
     },
   ],
   "fall-2027": [seat("c11", "GEN ELEC", "teal"), seat("c12", "DATA ELEC", "brown")],
@@ -64,7 +79,26 @@ const STARTED: Record<string, PlannedCourse[]> = {
 
 export const GENERATOR_YEARS: Year[] = INITIAL_YEARS.map((year) => ({
   ...year,
-  terms: year.terms.map((term) => {
+  terms: year.terms.map((rawTerm) => {
+    /* The shared plan's spring seat, re-cut as the kind this prototype needs.
+       It keeps its id and its place: it is the same seat, held for something
+       else. */
+    const term: Term =
+      rawTerm.id !== "spring-2027"
+        ? rawTerm
+        : {
+            ...rawTerm,
+            courses: rawTerm.courses.map((course) => {
+              if (!course.placeholder) return course
+              const entry = REMAINING_REQUIREMENTS[requirementFor(SPRING_SEAT)]
+              return {
+                ...course,
+                code: entry.code,
+                name: entry.name,
+                requirement: requirementFor(SPRING_SEAT),
+              }
+            }),
+          }
     const added = STARTED[term.id]
     if (!added) return term
     /* Seats last, the way every other term reads: what has been decided, and

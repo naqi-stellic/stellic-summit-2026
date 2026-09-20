@@ -1,7 +1,7 @@
 import { DUAL_ENROLMENT } from "@/data/audit"
 import type { CatalogEntry } from "@/data/catalog"
 import { INCOMING_CREDITS, TRANSFER_COLLEGE } from "@/data/incoming"
-import { CREDITS_PER_COURSE, DEGREE, type Meeting } from "@/data/plan"
+import { CREDITS_PER_COURSE, DEGREE, SECTION_SLOTS, type Meeting } from "@/data/plan"
 
 /* What a course looks like when it is opened on its own: the catalogue entry
  * for it, the classes on offer, and everything the audit knows about where it
@@ -54,6 +54,9 @@ export type Section = {
   when: string[]
   who: string
   seats: string
+  /** The hours themselves, not only the words for them: a class can be drawn
+   *  on the week from this, which is what makes hovering one worth doing. */
+  meetings?: Meeting[]
 }
 
 export type CourseDetail = {
@@ -81,13 +84,6 @@ const INSTRUCTORS = [
   "M. Stehlik",
   "Dr. J. Alvarez",
   "Dr. N. Haddad",
-]
-
-const TIMES = [
-  ["MWF 9:00am - 10:15am"],
-  ["TR 11:00am - 12:15pm"],
-  ["MW 1:00pm - 2:15pm", "F 10:00am - 10:50am"],
-  ["TR 2:30pm - 3:45pm"],
 ]
 
 const ATTRIBUTES = ["Business core", "Writing intensive", "Quantitative", "Global perspective"]
@@ -332,12 +328,19 @@ export function courseDetail(entry: CatalogEntry): CourseDetail {
   return {
     credits: CREDITS_PER_COURSE,
     campus: "Main",
-    sections: Array.from({ length: count }, (_, i) => ({
-      code: `Lec-0${i + 1}`,
-      when: TIMES[(seed + i) % TIMES.length],
-      who: INSTRUCTORS[(seed + i) % INSTRUCTORS.length],
-      seats: `${18 + ((seed + i * 7) % 20)}/40`,
-    })),
+    /* The classes on offer are hours out of the same list the week is drawn
+       from, so a class named here and a class drawn on the calendar are the
+       same class rather than two descriptions that happen to agree. */
+    sections: Array.from({ length: count }, (_, i) => {
+      const meetings = SECTION_SLOTS[(seed + i * 3) % SECTION_SLOTS.length]
+      return {
+        code: `Lec-0${i + 1}`,
+        when: meetingLines(meetings),
+        meetings,
+        who: INSTRUCTORS[(seed + i) % INSTRUCTORS.length],
+        seats: `${18 + ((seed + i * 7) % 20)}/40`,
+      }
+    }),
     hidden: 1 + (seed % 3),
     /* The requirement it answers is an attribute like any other; the rest come
        off the shelf, and never the same one twice. */
@@ -396,10 +399,13 @@ export type Activity = {
  * newest first. */
 export function activityFor(code: string, term: string, moved?: string): Activity[] {
   const seed = seedOf(code)
-  const student = "Scott Abott"
+  /* The student is reading their own plan, so they are "you" — the same way
+     the last-activity line says it. The advisor is named, by the name anybody
+     would use for him. */
+  const student = "you"
   /* An advisor moves a course out of a term now and then; the student puts it
      back. Which of them it was is the seed's business. */
-  const remover = seed % 3 === 0 ? "Mark Stehlik" : student
+  const remover = seed % 3 === 0 ? "Mark" : student
 
   if (!moved || seed % 3 === 0) {
     return [{ kind: "add", term, when: "2 months ago", who: student }]

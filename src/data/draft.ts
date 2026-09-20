@@ -2,11 +2,13 @@ import {
   ELECTIVE_COURSES,
   REMAINING_REQUIREMENTS,
   REPLACEMENT_SEAT,
+  preferredFirst,
   type CatalogEntry,
 } from "@/data/catalog"
 import {
   CREDITS_PER_COURSE,
   PLANNING_RULES,
+  asPlannedIn,
   chooseSection,
   emptyYear,
   findCourse,
@@ -33,6 +35,18 @@ export type DraftOption = {
   move?: { courseId: string; toTermId: string; reason: string }
   /** A course the option drops; its requirement comes back as a held seat. */
   drop?: { courseId: string; reason: string }
+  /** A term the student asked to keep light, and how light. The rest of the
+   *  plan holds to the pace; this one term answers what they said about it,
+   *  which is the whole use of having asked. */
+  ease?: {
+    termId: string
+    coursesPerTerm: number
+    /** How many of that term's places are left as seats to choose later, and
+     *  which kind — an eased term is a poor place to spend the student's one
+     *  remaining concentration elective. */
+    seats: number
+    seatKind?: string
+  }
 }
 
 /** The most a term can hold, from the institution's credit ceiling. */
@@ -55,11 +69,26 @@ export function planOptions(coursesPerTerm: number): DraftOption[] {
       id: "steady",
       label: "Steady pace",
       blurb:
-        `${steady} courses a term, the pace you asked for, no summers. Investments runs before ` +
-        "Financial Modeling so the prerequisite is met, and the capstone lands in your final term.",
+        `${steady} courses a term, the pace you asked for, no summers — except this spring, ` +
+        `which is held to ${steady - 1} while you are working. Graduation does not move: ` +
+        "Investments still runs before Financial Modeling, and the capstone still lands in your " +
+        "final term.",
       coursesPerTerm: steady,
       summers: false,
-      move: { courseId: "c6", toTermId: "fall-2027", reason: "the term is full at five" },
+      /* The concentration elective is the one thing in that term with
+         somewhere else to be: nothing is waiting on it, and a year later it is
+         still a year before it is needed. */
+      move: {
+        courseId: "c6",
+        toTermId: "fall-2027",
+        reason: "nothing is waiting on it and your spring is lighter without it",
+      },
+      ease: {
+        termId: "spring-2027",
+        coursesPerTerm: steady - 1,
+        seats: 1,
+        seatKind: "GEN ELEC",
+      },
     },
     {
       id: "sooner",
@@ -207,7 +236,7 @@ function draftCourse(entry: QueueEntry, order: number, note?: string): PlannedCo
           modality: "In Person",
           gradeOption: "Graded",
         }),
-    lastActivity: `Added by pathway, ${GENERATED_ON}`,
+    lastActivity: `Added by Pathway, ${GENERATED_ON}`,
     draft: { mark: "added", note: note ?? entry.reason, order },
   }
 }
@@ -357,7 +386,10 @@ export function generateDraft(
 
   const fillTerm = (term: Term): Term => {
     if (term.locked) return term
-    const hold = SEATS_BY_TERM[reached] ?? 0
+    /* The term the student asked about answers to what they said rather than
+       to the pace. */
+    const eased = option.ease?.termId === term.id ? option.ease : null
+    const hold = eased ? eased.seats : (SEATS_BY_TERM[reached] ?? 0)
     reached += 1
 
     const incoming: PlannedCourse[] = []
@@ -373,11 +405,18 @@ export function generateDraft(
       })
     }
 
-    let room = option.coursesPerTerm - keptCourses(term).length - incoming.length
+    let room = (eased?.coursesPerTerm ?? option.coursesPerTerm) - keptCourses(term).length -
+      incoming.length
 
     if (hold > 0) {
       for (let held = 0; held < hold && room > 0; held += 1) {
-        const seat = queue.findIndex((entry) => entry.placeholder && entry.avoid !== term.id)
+        const free = (entry: QueueEntry) => entry.placeholder && entry.avoid !== term.id
+        /* The kind the term asked for, where it asked for one and the queue
+           still holds it; otherwise whichever seat is next. */
+        const wanted = eased?.seatKind
+          ? queue.findIndex((entry) => free(entry) && entry.code === eased.seatKind)
+          : -1
+        const seat = wanted === -1 ? queue.findIndex(free) : wanted
         if (seat === -1) break
         const [entry] = queue.splice(seat, 1)
         incoming.push(draftCourse(entry, order++))
@@ -475,7 +514,11 @@ export function generateTermDraft(
   optionId: string = TERM_OPTIONS[0].id,
   /** The term's schedule is published, so the run picks class times too and
    *  what comes out is a timetable rather than a list. */
-  withSchedule = false
+  withSchedule = false,
+  /** What the student said about each held seat, by the seat's id. A seat is
+   *  a requirement with several hundred courses behind it; this is the one
+   *  thing that says which of them they actually want. */
+  prefer: Record<string, string> = {}
 ): Draft {
   seq = 0
   let order = 0
@@ -500,10 +543,14 @@ export function generateTermDraft(
          finance course, a general one takes a general course. Falling back to
          whatever is next would answer the requirement with the wrong kind of
          course, which is the one thing a seat is specific about. */
-      const shelf = ELECTIVE_COURSES[course.code] ?? []
-      const wanted = queue.findIndex((entry) =>
-        shelf.some((e) => e.code === entry.code && e.name === entry.name)
-      )
+      /* Read in the order the student asked for: "Philosophy" moves the
+         philosophy course to the front of its own shelf, and the queue is
+         searched in that order rather than in the option's. */
+      const shelf = preferredFirst(ELECTIVE_COURSES[course.code] ?? [], prefer[course.id])
+      const wanted = shelf.reduce((found, e) => {
+        if (found !== -1) return found
+        return queue.findIndex((entry) => entry.code === e.code && entry.name === e.name)
+      }, -1)
       const at2 = wanted === -1 ? 0 : wanted
       const [pick] = queue.splice(at2, 1)
       if (!pick) break
@@ -701,7 +748,8 @@ export function moveInDraft(
   }
 
   const moved: PlannedCourse = {
-    ...from.course,
+    /* A term whose classes are not out cannot hold a class. */
+    ...asPlannedIn(from.course, to),
     draft: {
       mark: "added",
       note: `You moved this here from ${from.term.name}`,

@@ -113,6 +113,18 @@ export const CREDITS_PER_COURSE = 3
  *  plan themselves says so by their username. */
 export const STUDENT = { name: "Scott Abott", username: "sabott" }
 
+/* Where a course in the plan came from, said the way somebody reading their
+ * own plan would say it: the registrar's system, the pathway the programme
+ * publishes, the advisor by their first name, or the student themselves — who
+ * is reading this, and so is "you".
+ *
+ * A plan whose every line says the same thing tells you nothing about how it
+ * was made. These are the four hands that touched it. */
+export const SYNCED = "Synced from SIS, 18 Aug 2026"
+export const BY_PATHWAY = "Added by Pathway, 3 Apr 2026"
+export const BY_ADVISOR = "Added by Mark, 11 Apr 2026"
+export const BY_STUDENT = "Added by you, 2 Sep 2026"
+
 /** The degree the plan is working towards. Requirements are one per course,
  *  which is what makes "5 reqs · 15 credits" read consistently. */
 export const DEGREE = {
@@ -273,7 +285,7 @@ export const INITIAL_YEARS: Year[] = [
             building: "Braddock Hall",
             room: "220",
             subTerm: "Full Term",
-            lastActivity: "Added by pathway, 3 Apr 2026",
+            lastActivity: SYNCED,
           },
           {
             id: "c2",
@@ -294,7 +306,7 @@ export const INITIAL_YEARS: Year[] = [
             building: "Braddock Hall",
             room: "301",
             subTerm: "Full Term",
-            lastActivity: "Added by pathway, 3 Apr 2026",
+            lastActivity: SYNCED,
           },
           {
             id: "c3",
@@ -315,7 +327,7 @@ export const INITIAL_YEARS: Year[] = [
             building: "Braddock Hall",
             room: "115",
             subTerm: "Full Term",
-            lastActivity: "Added by pathway, 3 Apr 2026",
+            lastActivity: SYNCED,
           },
           {
             id: "c4",
@@ -338,7 +350,7 @@ export const INITIAL_YEARS: Year[] = [
             building: "Science Center",
             room: "Lab 1",
             subTerm: "Full Term",
-            lastActivity: "Added by mjs, 11 Apr 2026",
+            lastActivity: SYNCED,
           },
           {
             id: "c7",
@@ -360,7 +372,7 @@ export const INITIAL_YEARS: Year[] = [
             room: "118",
             attributes: "Writing Intensive",
             subTerm: "Full Term",
-            lastActivity: "Added by pathway, 3 Apr 2026",
+            lastActivity: SYNCED,
           },
         ],
       },
@@ -411,7 +423,7 @@ export const INITIAL_YEARS: Year[] = [
             building: "Braddock Hall",
             room: "118",
             subTerm: "Full Term",
-            lastActivity: "Added by sabott, 2 Sep 2026",
+            lastActivity: BY_ADVISOR,
           },
           {
             /* A requirement with no course against it yet. A seat has no class
@@ -422,7 +434,7 @@ export const INITIAL_YEARS: Year[] = [
             credits: 3,
             placeholder: true,
             accent: "amber",
-            lastActivity: "Added by sabott, 2 Sep 2026",
+            lastActivity: BY_PATHWAY,
           },
         ],
       },
@@ -457,6 +469,28 @@ export function findTerm(years: Year[], termId: string) {
 
 /** Moves a course to `toTermId`, at `toIndex` when given, otherwise appending.
  *  Returns the input untouched if either end is locked. */
+/** A course as it arrives in the term it was dropped into.
+ *
+ *  A class belongs to the term whose schedule it was picked from. Carried into
+ *  a term whose classes are not published yet, it is a sitting that does not
+ *  exist — so the course arrives as a course and nothing more, and the card
+ *  stops naming a lecture nobody could register for. Dropped back into a term
+ *  that does have a schedule, it asks for a class again, which is what the
+ *  term's own line already says about it. */
+export function asPlannedIn(course: PlannedCourse, term: Term): PlannedCourse {
+  if (term.scheduled || course.placeholder || course.section == null) return course
+  return {
+    ...course,
+    section: undefined,
+    meetings: undefined,
+    instructor: undefined,
+    building: undefined,
+    room: undefined,
+    /* Nothing was settled by hand here: there was nothing to settle. */
+    settled: undefined,
+  }
+}
+
 export function moveCourse(
   years: Year[],
   courseId: string,
@@ -479,7 +513,8 @@ export function moveCourse(
       if (term.id === from.term.id) courses = courses.filter((c) => c.id !== courseId)
       if (term.id === to.id) {
         const at = toIndex ?? courses.length
-        courses = [...courses.slice(0, at), from.course, ...courses.slice(at)]
+        const landing = sameTerm ? from.course : asPlannedIn(from.course, to)
+        courses = [...courses.slice(0, at), landing, ...courses.slice(at)]
       }
       return { ...term, courses }
     }),
@@ -541,21 +576,35 @@ export function tallyLine(parts: Array<[number, string]>): string {
   return said.join(", ")
 }
 
-export function planStanding(years: Year[]) {
-  let doneReqs = 0
-  let doneCredits = 0
+export function planStanding(
+  years: Year[],
+  /** Credit the student arrived with. It sits in no term — that is what makes
+   *  it incoming — but it is credit all the same, so a degree that ignored it
+   *  would report a student as having done nothing when they walked in with
+   *  four courses. */
+  carried: { items: number; credits: number } = { items: 0, credits: 0 }
+) {
+  let doneReqs = carried.items
+  let doneCredits = carried.credits
+  let goingReqs = 0
+  let goingCredits = 0
   let plannedReqs = 0
   let plannedCredits = 0
   let lockedCourses = 0
   for (const year of years) {
     for (const term of year.terms) {
-      /* Only a finished term has earned anything. A term under way is still
-         planned: those credits are not the student's yet. */
+      /* Three states, not two. A finished term is earned. A term under way is
+         neither earned nor up for planning — those credits are not the
+         student's yet, and the generator cannot move them either. Everything
+         else is the plan proper: what there is still to decide about. */
       const done = term.state === "completed"
       for (const course of term.courses) {
         if (done) {
           doneReqs += 1
           doneCredits += course.credits
+        } else if (term.locked) {
+          goingReqs += 1
+          goingCredits += course.credits
         } else {
           plannedReqs += 1
           plannedCredits += course.credits
@@ -567,10 +616,12 @@ export function planStanding(years: Year[]) {
 
   return {
     completed: { reqs: doneReqs, credits: doneCredits },
+    /** Under way: the term the student is sitting in as they plan. */
+    inProgress: { reqs: goingReqs, credits: goingCredits },
     planned: { reqs: plannedReqs, credits: plannedCredits },
     remaining: {
-      reqs: Math.max(0, DEGREE.requirements - doneReqs - plannedReqs),
-      credits: Math.max(0, DEGREE.credits - doneCredits - plannedCredits),
+      reqs: Math.max(0, DEGREE.requirements - doneReqs - goingReqs - plannedReqs),
+      credits: Math.max(0, DEGREE.credits - doneCredits - goingCredits - plannedCredits),
     },
     total: { reqs: DEGREE.requirements, credits: DEGREE.credits },
     /** Courses the generator has to plan around rather than move. */
@@ -735,7 +786,7 @@ export function registerCourses(years: Year[], termId: string, courseIds: string
  * would always end up using every slot — three schedules that differ in which
  * course sits where and not at all in what the week looks like. With slack in
  * the list, starting later means a different set of hours and days. */
-const SECTION_SLOTS: Meeting[][] = [
+export const SECTION_SLOTS: Meeting[][] = [
   /* 0 */ [
     { day: 1, from: 9, to: 10.25 },
     { day: 3, from: 9, to: 10.25 },
@@ -890,6 +941,42 @@ export function chooseSection(
                 ...(byHand ? { settled: true } : {}),
                 classNo: c.classNo ?? String(3000 + used * 17 + 41),
                 meetings: slot,
+              }
+        ),
+      }
+    }),
+  }))
+}
+
+/** Settles a course on the class the student picked by name, rather than on
+ *  whatever hour happened to be free. The hours come with it, so the week
+ *  draws the sitting they chose and not another one.
+ *
+ *  A class chosen this way is theirs: a generated schedule leaves it alone,
+ *  the same as one settled through the term's own search. */
+export function setSection(
+  years: Year[],
+  termId: string,
+  courseId: string,
+  section: string,
+  meetings: Meeting[]
+): Year[] {
+  return years.map((year) => ({
+    ...year,
+    terms: year.terms.map((term) => {
+      if (term.id !== termId) return term
+      const used = term.courses.filter((c) => c.classNo).length
+      return {
+        ...term,
+        courses: term.courses.map((c) =>
+          c.id !== courseId || c.placeholder
+            ? c
+            : {
+                ...c,
+                section,
+                settled: true,
+                classNo: c.classNo ?? String(3000 + used * 17 + 41),
+                meetings,
               }
         ),
       }

@@ -74,6 +74,7 @@ export function GeneratePlanBuilding({
       title: "Checking program requirements",
       detail: tallyLine([
         [standing.completed.reqs, "done"],
+        [standing.inProgress.reqs, "under way"],
         [standing.planned.reqs, "planned"],
         [standing.remaining.reqs, "to place"],
       ]),

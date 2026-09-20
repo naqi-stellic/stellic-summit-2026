@@ -1,6 +1,6 @@
 import { AUDIT, CURRENT_TERM, DUAL_ENROLMENT, type AuditEntry, type AuditMark } from "@/data/audit"
 import { TRANSFER_COLLEGE, type IncomingGroup } from "@/data/incoming"
-import { emptyYear, type PlannedCourse, type Year } from "@/data/plan"
+import { STUDENT, SYNCED, emptyYear, type PlannedCourse, type Year } from "@/data/plan"
 
 /* The plan as this student's record has it.
  *
@@ -71,8 +71,15 @@ const card = (found: Found, i: number, settled: boolean): PlannedCourse => ({
   campus: "Main",
   modality: "In Person",
   gradeOption: "Graded",
-  lastActivity: "Added by pathway, 3 Apr 2025",
+  /* A class already through registration is the registrar's record of it; one
+     still only planned is the student's own doing — and this is the one view
+     where the reader is not the student, so it says whose. */
+  lastActivity: settled ? SYNCED : BY_SCOTT,
 })
+
+/** Named rather than "you": a staff member reading a student's plan is not
+ *  the student, and "added by you" would be telling them they did it. */
+const BY_SCOTT = `Added by ${STUDENT.name.split(" ")[0]}, 2 Sep 2026`
 
 /** The year the student is in, then the years ahead of them. The term under way
  *  takes its name from the record, so the plan and the term strip above it are

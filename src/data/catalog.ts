@@ -117,6 +117,44 @@ export const ELECTIVE_COURSES: Record<string, CatalogEntry[]> = {
   ],
 }
 
+/* What a student means when they name a subject. A seat is filled from a shelf
+ * of courses whose codes say what they are, and "Philosophy" is not written on
+ * any of them — so the words that would send somebody to that shelf are kept
+ * here, beside the shelf itself. */
+const SUBJECT_WORDS: Record<string, string[]> = {
+  PHIL: ["philosophy", "philosophical", "logic", "ethics", "reasoning"],
+  ANTH: ["anthropology", "culture", "cultural", "society"],
+  MUSC: ["music", "musical"],
+  GEOG: ["geography", "cities", "urban"],
+  ASTR: ["astronomy", "space", "physics"],
+  FILM: ["film", "cinema", "visual", "media"],
+  DATA: ["data", "analytics", "machine learning", "modelling", "modeling"],
+  FIN: ["finance", "financial", "markets", "investing", "risk"],
+}
+
+/** The shelf, read in the order somebody asking for a subject would want it.
+ *  Nothing is taken away: a preference moves what matches to the front, so a
+ *  seat is still filled even where nothing does. */
+export function preferredFirst(shelf: CatalogEntry[], prefer?: string): CatalogEntry[] {
+  const said = (prefer ?? "").toLowerCase().trim()
+  if (!said) return shelf
+
+  const matches = (entry: CatalogEntry) => {
+    const subject = entry.code.split(" ")[0]
+    const words = SUBJECT_WORDS[subject] ?? []
+    /* The subject's own words, and the course's name — somebody may as well
+       have named the course itself. */
+    return (
+      words.some((word) => said.includes(word)) ||
+      said.includes(entry.name.toLowerCase()) ||
+      said.includes(entry.code.toLowerCase())
+    )
+  }
+
+  const liked = shelf.filter(matches)
+  return liked.length === 0 ? shelf : [...liked, ...shelf.filter((e) => !liked.includes(e))]
+}
+
 /** Everything an elective seat could be filled with, whichever kind it is. */
 export const ALL_ELECTIVES: CatalogEntry[] = Object.values(ELECTIVE_COURSES).flat()
 

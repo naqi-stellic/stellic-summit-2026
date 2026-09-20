@@ -89,17 +89,22 @@ export function GeneratePlanScope({
       <div className="flex w-full flex-col gap-6">
         <div className="flex w-full flex-col gap-2">
           <p className="text-body-md font-semibold text-gray-100">Courses</p>
+          {/* Four states, because the student is in four of them at once: the
+              credit they arrived with, the term they are sitting in, the terms
+              they have planned, and everything still to place. */}
           <ProgressBar
             segments={[
               { share: standing.completed.reqs / courses, className: "bg-success-50" },
-              { share: standing.planned.reqs / courses, className: "bg-warning-75" },
+              { share: standing.inProgress.reqs / courses, className: "bg-warning-50" },
+              { share: standing.planned.reqs / courses, className: "bg-warning-25" },
               { share: 0, className: "bg-gray-5" },
             ]}
           />
           <Tally
             items={[
               { icon: "check", tone: "text-success-50", value: standing.completed.reqs },
-              { icon: "watch-later", tone: "text-warning-25", value: standing.planned.reqs },
+              { icon: "watch-later", tone: "text-warning-50", value: standing.inProgress.reqs },
+              { icon: "calendar-month", tone: "text-warning-25", value: standing.planned.reqs },
               { icon: "crop-square", tone: "text-alert-50", value: standing.remaining.reqs },
             ]}
           />

@@ -5,6 +5,13 @@ import { Textarea } from "@/components/ui/textarea"
 const PLACEHOLDER =
   "e.g. I work 20 hours a week — keep spring terms light and finish the finance core early."
 
+/** What the box opens holding. The generator answers it — the spring it names
+ *  comes back a course lighter — so it is written here, beside the box that
+ *  asks for it, rather than somewhere the answer cannot see. */
+export const PLAN_INSTRUCTION =
+  "I have a part-time job through the end of the year, so let's make this spring lighter if it " +
+  "won't affect graduation timing"
+
 export function GeneratePlanNotes({
   value,
   onChange,

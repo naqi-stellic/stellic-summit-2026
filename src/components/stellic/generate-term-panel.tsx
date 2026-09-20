@@ -12,7 +12,7 @@ import {
   type SchedulePrefs,
 } from "@/components/stellic/generate-schedule-prefs"
 import {
-  DEFAULT_FILTERS,
+  defaultSeatNote,
   GenerateTermNotes,
   type SeatNote,
 } from "@/components/stellic/generate-term-notes"
@@ -122,8 +122,13 @@ export function GenerateTermPanel({
   /** The run has reached its last check: frame the playground before the term
    *  arrives to fill it. */
   onFraming: () => void
-  /** Fill this term to the target, keeping everything but the released. */
-  onGenerate: (targetCredits: number, released: string[]) => void
+  /** Fill this term to the target, keeping everything but the released, and
+   *  filling each held seat with what the student said they wanted in it. */
+  onGenerate: (
+    targetCredits: number,
+    released: string[],
+    prefer: Record<string, string>
+  ) => void
   onClose: () => void
 }) {
   const [view, setView] = useState<View>(1)
@@ -188,7 +193,7 @@ export function GenerateTermPanel({
             label: "Placeholder instructions",
             value: seats
               .map((seat) => {
-                const note = seatNotes[seat.id] ?? { filters: DEFAULT_FILTERS, prefer: "" }
+                const note = seatNotes[seat.id] ?? defaultSeatNote()
                 const parts = [...note.filters, note.prefer].filter(Boolean)
                 return `${seat.name}: ${parts.join(", ") || "No preferences"}`
               })
@@ -524,7 +529,16 @@ export function GenerateTermPanel({
                  means that if the draft ever goes away — applied, or thrown
                  out — this would mount again and run a second time. */
               setView(1)
-              onGenerate(target, released)
+              /* Every seat in the term, whether or not the student touched the
+                 box: one that was left alone still carries what it opened
+                 with, and the run should read what was on screen. */
+              onGenerate(
+                target,
+                released,
+                Object.fromEntries(
+                  seats.map((seat) => [seat.id, (seatNotes[seat.id] ?? defaultSeatNote()).prefer])
+                )
+              )
             }}
           />
         )}

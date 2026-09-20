@@ -152,16 +152,13 @@ function CourseCard({
             <DraftNote course={course} className="pt-1" />
           </span>
         </label>
-        {/* Nothing of this class can be drawn until a section is chosen, so the
-            way to choose one sits on the card. Where a class is not what is
-            missing, searching for one would answer nothing. */}
-        {issue?.kind === "section" && !mark && (
-          <span className="flex items-center py-3">
-            <Button size="icon" aria-label={`Search sections for ${course.name}`}>
-              <Icon name="s-search" size={16} />
-            </Button>
-          </span>
-        )}
+        {/* No search on a course. A class is chosen from the course itself, or
+            from the line above the list that says which course is missing one
+            — two ways is already one more than the question needs, and a third
+            sitting on every card says the card is the place to answer it. The
+            triangle beside the code is what says there is something to answer.
+            A seat keeps its own search: there the thing to find is a course,
+            not a sitting of one. */}
       </div>
     </div>
   )
@@ -345,7 +342,15 @@ function intoLanes<T extends { meeting: Meeting }>(items: T[]): { item: T; lane:
     })
 }
 
-function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
+function Week({
+  term,
+  compare = true,
+  preview,
+}: {
+  term: Term
+  compare?: boolean
+  preview?: Preview
+}) {
   const [span, setSpan] = useState(SPANS[0])
   const days = termWeek(term).slice(0, span.days)
   const { from, to } = termHours(term)
@@ -354,8 +359,22 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
   /* The week is not only classes. An activity keeps hours like a class does,
      so it is laid out like one — without a code, a section or a status, which
      it has none of. */
+  /* A class the cursor is hovering over in the course panel is drawn where it
+     would go, in place of the one the student is in — so the week answers
+     "what would this do to my Tuesdays?" while they are still deciding.
+     Hovering the row they are already in is not a preview of anything. */
+  const previewing =
+    preview &&
+    term.courses.some((c) => c.id === preview.courseId && c.section !== preview.section)
+      ? preview.courseId
+      : null
+
   const week: PlannedCourse[] = [
-    ...term.courses,
+    ...term.courses.map((course) =>
+      previewing === course.id && preview
+        ? { ...course, section: preview.section, meetings: preview.meetings }
+        : course
+    ),
     ...(term.activities ?? []).map((activity) => ({
       id: activity.id,
       code: activity.kind,
@@ -513,8 +532,16 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
                          faded, dashed blocks mean "this is where the class used
                          to be", and a proposed class drawn the same way reads
                          as a ghost of a schedule that never existed. What the
-                         draft is offering is what you would get. */
-                      className="absolute flex items-stretch overflow-hidden rounded-md border-y border-r border-gray-40 bg-card"
+                         draft is offering is what you would get.
+                         A class under the cursor is the exception: it is not
+                         yours until you press the plus, and the dashes say so
+                         while the colour says whose class it is. */
+                      className={cn(
+                        "absolute flex items-stretch overflow-hidden rounded-md bg-card",
+                        previewing === course.id
+                          ? "border border-dashed border-gray-80"
+                          : "border-y border-r border-gray-40"
+                      )}
                     >
                       <span
                         aria-hidden="true"
@@ -559,9 +586,14 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
   )
 }
 
+/** A class the cursor is over in the course panel: whose it would be, which
+ *  class it is, and the hours it keeps. */
+export type Preview = { courseId: string; section: string; meetings: Meeting[] }
+
 export function TermCalendar({
   term,
   compare = true,
+  preview,
   addable,
   onAddCourse,
   onOpenCourse,
@@ -569,6 +601,8 @@ export function TermCalendar({
 }: {
   term: Term
   compare?: boolean
+  /** Drawn in place of that course's own class while it lasts. */
+  preview?: Preview
   /** What the plus offers, and what a requirement dropped here becomes. */
   addable?: CatalogEntry[]
   onAddCourse?: (entry: CatalogEntry) => void
@@ -604,7 +638,7 @@ export function TermCalendar({
           aria-hidden="true"
           className="shrink-0 bg-gray-40 max-@3xl/term:h-px @3xl/term:w-px"
         />
-        <Week term={term} compare={compare} />
+        <Week term={term} compare={compare} preview={preview} />
       </div>
     </div>
   )

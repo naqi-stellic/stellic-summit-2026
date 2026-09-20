@@ -3,7 +3,7 @@ import { useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { GeneratePlanBuilding } from "@/components/stellic/generate-plan-building"
-import { GeneratePlanNotes } from "@/components/stellic/generate-plan-notes"
+import { GeneratePlanNotes, PLAN_INSTRUCTION } from "@/components/stellic/generate-plan-notes"
 import {
   GeneratePlanPace,
   INITIAL_PACE,
@@ -103,7 +103,12 @@ export function GeneratePlanPanel({
    * and so Back never loses anything. */
   const [keepPlanned, setKeepPlanned] = useState("yes")
   const [pace, setPace] = useState<PaceState>(INITIAL_PACE)
-  const [notes, setNotes] = useState("")
+  /* What the student would have typed, already typed. The instruction is the
+     hinge of the whole run — it is what makes one term lighter than the pace
+     asks for — and a wizard that opens with it filled in says so before
+     anybody reads a word of the plan. It can be edited or cleared like
+     anything else. */
+  const [notes, setNotes] = useState(PLAN_INSTRUCTION)
   /* Courses the student has taken off the "keep" list, so the generator may
    * move them. Empty while the answer is yes. */
   const [released, setReleased] = useState<string[]>([])
