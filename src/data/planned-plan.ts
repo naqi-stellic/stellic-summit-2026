@@ -69,20 +69,34 @@ const PLANNED_TERMS: Filling[] = [
  *  no sitting yet, which is why they are lists rather than weeks. */
 const PLANNED_SCHEDULED = ["fall-2026", "spring-2027"]
 
+/* What the student does besides classes. The term under way keeps two, which
+ * is what a real week looks like; the rest carry one, in the terms far enough
+ * out to be worth showing that a plan holds more than courses. */
 const ACTIVITIES: Record<string, Activity[]> = {
   "fall-2026": [
-    { id: "a1", name: "Finance Club", kind: "Student organisation", meetings: [{ day: 3, from: 17, to: 18 }] },
-    { id: "a2", name: "Peer tutoring — Calculus", kind: "Campus job", meetings: [{ day: 2, from: 16, to: 17.5 }] },
+    {
+      id: "a1",
+      name: "Finance Club",
+      kind: "Student organisation",
+      meetings: [{ day: 3, from: 17, to: 18 }],
+    },
+    {
+      id: "a2",
+      name: "Peer tutoring — Calculus",
+      kind: "Campus job",
+      meetings: [{ day: 2, from: 16, to: 17.5 }],
+    },
   ],
   "spring-2027": [
-    { id: "a3", name: "Finance Club", kind: "Student organisation", meetings: [{ day: 3, from: 17, to: 18 }] },
-    { id: "a4", name: "Investment Society", kind: "Student organisation", meetings: [{ day: 5, from: 15, to: 16.5 }] },
+    {
+      id: "a3",
+      name: "Finance Club",
+      kind: "Student organisation",
+      meetings: [{ day: 3, from: 17, to: 18 }],
+    },
   ],
-  "fall-2027": [
-    { id: "a5", name: "Finance Club", kind: "Student organisation" },
-    { id: "a6", name: "Wilson & Reed internship", kind: "Internship" },
-  ],
-  "spring-2028": [{ id: "a7", name: "Investment Society", kind: "Student organisation" }],
+  "fall-2028": [{ id: "a4", name: "Wilson & Reed internship", kind: "Internship" }],
+  "spring-2029": [{ id: "a5", name: "Investment Society", kind: "Student organisation" }],
 }
 
 let planned = 0

@@ -376,6 +376,14 @@ export const INITIAL_YEARS: Year[] = [
         /* Registration is open for this term, so its classes have times. */
         scheduled: true,
         state: "planned",
+        activities: [
+          {
+            id: "g3",
+            name: "Investment Society",
+            kind: "Student organisation",
+            meetings: [{ day: 5, from: 15, to: 16.5 }],
+          },
+        ],
         courses: [
           {
             /* Registration is open, the schedule is out, and this class has

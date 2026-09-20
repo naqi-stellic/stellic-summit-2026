@@ -447,6 +447,7 @@ export function SemesterCard({
 
   /* Infinity means the draft has finished arriving. */
   const streaming = revealed !== Infinity
+  const activities = term.activities ?? []
 
   const rows: ReactNode[] = term.courses.map((course) => {
     const struck = course.draft?.mark === "moved" || course.draft?.mark === "removed"
@@ -546,6 +547,29 @@ export function SemesterCard({
                   <DropSlot key="drop" height={dropHeight} />,
                   ...rows.slice(dropAt),
                 ]}
+            {activities.length > 0 && (
+              /* What the term holds that is not a course. It takes no credits
+                 and answers no requirement, so it is grouped under its own
+                 heading rather than counted with them. */
+              <>
+                <p className="flex items-center gap-2 pt-4 text-body-md font-semibold text-gray-80">
+                  <Icon name="sports-basketball" size={16} className="text-gray-100" />
+                  Activities
+                </p>
+                {activities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex w-full flex-col rounded-md border border-gray-40 bg-card p-[7px]"
+                  >
+                    <span className="text-body-md text-gray-80">{activity.kind}</span>
+                    <span className="text-body-md font-semibold text-foreground">
+                      {activity.name}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
+
             {!term.locked && <AddCourseMenu options={addable} onPick={onAddCourse} />}
           </div>
         </SortableContext>

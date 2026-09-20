@@ -66,8 +66,15 @@ mistake a planner exists to catch before the window closes. Fall 2027 and Fall
 and Derivatives sitting a year before Investments, which it asks for.
 
 Terms also hold what is not a course. An activity keeps hours the way a class
-does, so it is listed under My Activities and laid out on the week beside the
-classes — without a code, a section or a status, which it has none of.
+does, so it is laid out on the week beside the classes and listed under My
+Activities — and on the canvas it has a group of its own under the credits
+([`1017:192386`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-192386)),
+because it takes no credits and answers no requirement. It has no code, no
+section and no status either, which it has none of.
+
+The term under way carries two of them; Spring 2027, Fall 2028 and Spring 2029
+carry one each, far enough apart to say that a plan holds more than courses
+without saying it on every card.
 
 ## What differs
 
