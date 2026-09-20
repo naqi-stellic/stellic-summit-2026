@@ -271,13 +271,18 @@ export function ProfileCard({
  *  they care about. */
 export function NetworkRow({
   cgpa = CUMULATIVE_GPA.value,
+  term,
 }: {
   /** The cumulative average this page's transcript comes to. Explain Progress
    *  reads a record of its own, and a card reporting the shared one would be
    *  contradicting the audit two cards below it. */
   cgpa?: string
+  /** Which term the average beside it is for, and what it was. Given where the
+   *  page can count one off its own record. */
+  term?: { name: string; gpa: string }
 }) {
   const { advisor, engage } = AUDIT_STUDENT
+  const reading = term ?? { name: engage.term, gpa: engage.termGpa }
 
   return (
     <div className="flex flex-wrap items-stretch gap-4">
@@ -322,8 +327,8 @@ export function NetworkRow({
           <EngageBolts lit={engage.lit} of={engage.bolts} size={16} />
         </div>
         <div className="flex flex-col gap-4 text-body-md font-semibold text-gray-80">
-          <p>{engage.term}</p>
-          <p className="text-center text-caption-lg">{engage.termGpa}</p>
+          <p>{reading.name}</p>
+          <p className="text-center text-caption-lg">{reading.gpa}</p>
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-1">

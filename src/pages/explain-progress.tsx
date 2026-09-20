@@ -7,6 +7,7 @@ import { GpaPanel } from "@/components/stellic/gpa-panel"
 import {
   EXPLAIN_AUDIT,
   EXPLAIN_CGPA,
+  EXPLAIN_TERM,
   EXPLAIN_VIEWS,
   EXPLAIN_RECORD,
   GENERAL_EDUCATION_GPA,
@@ -106,7 +107,10 @@ export function ExplainProgress() {
             }}
           />
           {/* Its own transcript, and its own cumulative average off it. */}
-          <NetworkRow cgpa={EXPLAIN_CGPA.value} />
+          <NetworkRow
+            cgpa={EXPLAIN_CGPA.value}
+            term={{ name: EXPLAIN_TERM.name, gpa: EXPLAIN_TERM.gpa.value }}
+          />
           <TermStrip />
 
           <AuditControls

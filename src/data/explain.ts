@@ -129,17 +129,16 @@ const CLAIMED = COUNTING_NOW
  *  that travel: a requirement's own rules are its own, and printing the whole
  *  programme's rulebook under each of them would make them all read alike. */
 /** What the degree has banked so far, in credits — counted off the tree the
- *  page is drawing rather than written down, so the line agrees with the
- *  progress bar above it. It had been the literal 51, which was seventeen
- *  courses on a tree this page does not read.
+ *  page is drawing rather than written down. It had been the literal 51,
+ *  which was seventeen courses on a tree this page does not read.
  *
- *  Same rule as the bar: everything taken, under way or claimed, and the
- *  additional checks stepped over, because a course re-listed by the residency
- *  check has not been earned twice. */
-const bankedBy = (group: AuditGroup) => {
-  const standing = auditStanding(group)
-  return (standing.taken + standing.inProgress + standing.claimed) * CREDITS_PER_COURSE
-}
+ *  Distinct coursework, by code, and the additional checks walked into rather
+ *  than stepped over. That is deliberate: the check that states the degree
+ *  total is where the courses live that count toward the 120 and toward no
+ *  requirement, and a total that skipped them would be smaller than the check
+ *  sitting inside it. A seat with no course chosen has banked nothing and has
+ *  no code, so it is not here either. */
+const bankedBy = (group: AuditGroup) => countedBy(group).size * CREDITS_PER_COURSE
 
 const PROGRAM_RULES: Constraint[] = [
   {

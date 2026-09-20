@@ -2,6 +2,7 @@ import {
   AUDIT,
   STUDENT_RECORD,
   auditStanding,
+  markFrom,
   outstanding,
   viewsFor,
   type AuditCourse,
@@ -9,7 +10,7 @@ import {
   type AuditGroup,
 } from "@/data/audit"
 import type { Constraint } from "@/data/explain"
-import { gpaOf, gpaOfGroup, type Gpa } from "@/data/gpa"
+import { TRANSFER, gpaOf, gpaOfGroup, type Gpa } from "@/data/gpa"
 import { CREDITS_PER_COURSE } from "@/data/plan"
 
 /* The audit as Explain Progress shows it.
@@ -71,7 +72,11 @@ const TAKEN: AuditCourse[] = [
      against does not care either way. */
   gen("GEN 310", "The Ancient World", "Taken in Fall '25", "B+", [GENERAL, UPPER]),
   gen("GEN 330", "Mind & Behaviour", "Taken in Fall '25", "A", [GENERAL, UPPER]),
-  gen("GEN 340", "Science, Ethics & Society", "Taken in Spring '26", "B", [GENERAL, UPPER]),
+  /* An A− rather than a B, which is a demo decision as much as a data one:
+     at a B the requirement averaged exactly 3.50 and so did the programme,
+     and two badges one row apart reading the same number look like a bug
+     whatever the arithmetic says. */
+  gen("GEN 340", "Science, Ethics & Society", "Taken in Spring '26", "A-", [GENERAL, UPPER]),
   gen("GEN 360", "Visual Culture", "Taken in Spring '26", "A-", [GENERAL, UPPER]),
   gen("GEN 380", "Power, Politics & Society", "Taken in Spring '26", "B+", [GENERAL, UPPER]),
 ]
@@ -148,9 +153,57 @@ const GENERAL_EDUCATION: AuditGroup = {
 }
 
 /** The shared tree with that one requirement standing in for its own. */
+/** The transcript this page reads. The shared record plus the six courses only
+ *  this tree knows about — course mappings ask "what else is on the record",
+ *  and a course sitting in the requirement would otherwise come back as one
+ *  the requirement had never been offered. */
+export const EXPLAIN_RECORD: Map<string, AuditCourse> = new Map([
+  ...STUDENT_RECORD,
+  ...TAKEN.map((course) => [course.code, course] as const),
+])
+
+/** The id of the additional check that states the degree total. */
+const TOTAL = "total-credits"
+
+/** Everything on the record the degree will count toward its 120.
+ *
+ *  Which is not the same as everything on the record: credit carried in from
+ *  another institution arrives with units the degree accepts and grades it
+ *  does not, and the developmental algebra is refused by the programme's own
+ *  "following courses will not count" rule. Both are named by attribute here
+ *  rather than by code, for the same reason that rule is.
+ *
+ *  Five of these fulfil no requirement at all, and that is the point of the
+ *  check: they count toward the total and toward nothing else, which is
+ *  exactly what the unmatched section underneath says about them. */
+const TOWARD_TOTAL: AuditCourse[] = [...EXPLAIN_RECORD.values()]
+  .filter(
+    (course) =>
+      course.code &&
+      !course.attributes?.includes(TRANSFER) &&
+      !course.attributes?.some((tag) => tag.startsWith("Developmental"))
+  )
+  .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+
 function swap(entry: AuditEntry): AuditEntry {
   if (entry.kind !== "group") return entry
   if (entry.id === ID) return GENERAL_EDUCATION
+  /* The additional check lists what it counts, rather than a sample of it. It
+     had held seven of the twenty-two courses that count toward the degree
+     total and reported the fraction those seven came to — twenty-one credits
+     of a hundred and twenty, two rows under a programme saying fifty-four.
+     Both numbers are read off this list now, because the check sits inside
+     the programme and the programme counts what is under it. */
+  if (entry.id === TOTAL) {
+    return {
+      ...entry,
+      mark: markFrom(TOWARD_TOTAL.map((course) => course.mark)),
+      /* Twenty-two rows of coursework already read once higher up the tree.
+         It states what it holds and keeps them behind the chevron. */
+      collapsed: true,
+      children: TOWARD_TOTAL,
+    }
+  }
   const children = entry.children.map(swap)
   /* The programme's average is read off the courses under it, and the courses
      under it have just changed — five general-education grades have become
@@ -202,14 +255,20 @@ export const EXPLAIN_AUDIT = counted(swap(AUDIT) as AuditGroup)
  *  of a tree with one fewer finished course in it. */
 export const EXPLAIN_VIEWS = viewsFor(auditStanding(EXPLAIN_AUDIT))
 
-/** The transcript this page reads. The shared record plus the six courses only
- *  this tree knows about — course mappings ask "what else is on the record",
- *  and a course sitting in the requirement would otherwise come back as one
- *  the requirement had never been offered. */
-export const EXPLAIN_RECORD: Map<string, AuditCourse> = new Map([
-  ...STUDENT_RECORD,
-  ...TAKEN.map((course) => [course.code, course] as const),
-])
+/** The last term that has grades in it, and what they come to.
+ *
+ *  The card had reported Fall '26 at 3.42, and Fall '26 is five courses that
+ *  are all still running — a term average for a term nobody has graded. The
+ *  term a GPA can be quoted for is the last one that finished, and the figure
+ *  is counted off the same rows the audit draws. */
+const LAST_GRADED = "Spring '26"
+
+export const EXPLAIN_TERM = {
+  name: LAST_GRADED,
+  gpa: gpaOf(
+    [...EXPLAIN_RECORD.values()].filter((course) => course.result?.includes(LAST_GRADED))
+  ),
+}
 
 /** And what that transcript comes to. The three courses this tree's General
  *  Education displaced are still on the record — they fulfil nothing here,
