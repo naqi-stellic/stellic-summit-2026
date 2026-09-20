@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* This is a light interface and only a light one: every token below is a light
+ * value and there is no dark set of them. Tailwind's `dark:` variant answers
+ * the operating system by default, so on a machine set to dark the shadcn
+ * primitives that carry `dark:bg-input/30` — inputs, textareas, switches —
+ * filled themselves grey on our white cards. Tying the variant to a class
+ * nothing puts on turns them off, and `color-scheme` tells the browser the
+ * same thing about the controls it draws itself. */
+@custom-variant dark (&:is(.dark *));
+
 /* ==========================================================================
    Stellic design tokens — mirrored 1:1 from the Figma variable collections,
    then mapped onto the shadcn semantic layer so every shadcn primitive picks
@@ -7,6 +16,8 @@
    ========================================================================== */
 
 :root {
+  color-scheme: light;
+
   /* ---- Palette: stellic colors ---- */
   --stellic-white: #ffffff;
   --stellic-gray-0: #f9f9f9;

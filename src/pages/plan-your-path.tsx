@@ -22,6 +22,7 @@ import { GenerateTermPanel } from "@/components/stellic/generate-term-panel"
 import { IncomingCredits, INCOMING_LABEL } from "@/components/stellic/incoming-credits"
 import type { IncomingGroup } from "@/data/incoming"
 import { CoursePanel } from "@/components/stellic/course-panel"
+import { CourseSearchPanel } from "@/components/stellic/course-search"
 import { PlaceholderPanel } from "@/components/stellic/placeholder-panel"
 import { RegisterDialog } from "@/components/stellic/register-dialog"
 import {
@@ -331,6 +332,8 @@ export function PlanYourPath({
   } | null>(null)
   /* A course already in the plan, opened on its own. */
   const [openPlanned, setOpenPlanned] = useState<string | null>(null)
+  /* The course search, opened from a term's own "+ Add to Term". */
+  const [searching, setSearching] = useState<string | null>(null)
   /* The held seat opened on its own, and whether it opened on the courses that
      could fill it. */
   const [openSeat, setOpenSeat] = useState<{ id: string; view: "detail" | "search" } | null>(null)
@@ -401,6 +404,8 @@ export function PlanYourPath({
   const scheduleTerms = allTerms
     .filter((term) => term.scheduled)
     .map((term) => ({ name: term.name, inProgress: term.state === "registered" }))
+  /* The term whose course search is open. */
+  const searchTerm = searching ? findTerm(shown, searching) : null
   /* The seat whose panel is open, if it is still in the plan. */
   const seat = openSeat ? findCourse(shown, openSeat.id) : null
   /* Terms a request is still out on. Every card that draws one of them marks
@@ -907,6 +912,16 @@ export function PlanYourPath({
             }}
           />
         )) ||
+        (searchTerm && (
+          <CourseSearchPanel
+            key={searchTerm.id}
+            entries={addable}
+            backLabel={searchTerm.name}
+            onOpenCourse={(entry) => setOpenCourse({ entry, from: "course search" })}
+            onBack={() => setSearching(null)}
+            onClose={() => setSearching(null)}
+          />
+        )) ||
         (reqsOpen && (
           <RequirementsPanel
             entries={requirements}
@@ -1047,6 +1062,13 @@ export function PlanYourPath({
                 renderAlert={(term) => termBanner(term, draft != null, setRegistering)}
                 onRemoveCourse={handleRemoveCourse}
                 onAddCourse={handleAddCourse}
+                onSearchCourses={(termId) => {
+                  setSearching(termId)
+                  setOpenCourse(null)
+                  setOpenPlanned(null)
+                  setOpenSeat(null)
+                  setReqsOpen(false)
+                }}
                 onOpenTerm={openTermView}
                 onOpenSeat={openSeatPanel}
                 onOpenCourse={openPlannedPanel}

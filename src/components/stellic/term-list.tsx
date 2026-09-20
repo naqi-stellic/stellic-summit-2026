@@ -156,11 +156,13 @@ function CourseRow({
               tick. */}
           {/* A tick is for choosing what to put through registration. A class
               already through has no choice left to offer, so it has none. */}
-          {/* Nothing to tick where nothing can go through: a course whose
-              prerequisites are not met is not going to registration. */}
-          {selectable && !course.registered && missing?.severity !== "error" && (
+          {/* A course whose prerequisites are not met is not going to
+              registration, so its tick is there and off, and cannot be put
+              on: the row still lines up with every other row. */}
+          {selectable && !course.registered && (
             <Checkbox
-              defaultChecked
+              defaultChecked={missing?.severity !== "error"}
+              disabled={missing?.severity === "error"}
               aria-label={`Register ${course.name}`}
               className="shrink-0"
             />

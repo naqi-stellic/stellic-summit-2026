@@ -1,11 +1,10 @@
-import { cn } from "cn"
 import { useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CourseSearch } from "@/components/stellic/course-search"
 import { ELECTIVE_COURSES, ALL_ELECTIVES, type CatalogEntry } from "@/data/catalog"
 import {
   CREDIT_GROUP_LABEL,
@@ -24,36 +23,6 @@ function Section({ label, children }: { label: string; children: React.ReactNode
     <div className="flex w-full flex-col gap-1">
       <span className="text-body-md font-semibold text-foreground">{label}</span>
       {children}
-    </div>
-  )
-}
-
-/* A course as the search lists it: the handle it would be dragged by, its code
-   and its name. The name wraps rather than truncating — the frame's rows grow
-   to two lines and several of them do. */
-function CourseRow({
-  code,
-  name,
-  onOpen,
-}: {
-  code: string
-  name: string
-  /** Opens the course on its own — none of these are in the plan yet. */
-  onOpen?: () => void
-}) {
-  return (
-    <div
-      onClick={onOpen}
-      className={cn(
-        "flex w-full cursor-grab items-center gap-2 rounded-md border border-gray-40 bg-card p-[7px]",
-        onOpen && "cursor-pointer transition-colors hover:bg-gray-0"
-      )}
-    >
-      <Icon name="drag-indicator" size={16} className="shrink-0 text-gray-100" />
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-body-md text-gray-80">{code}</span>
-        <span className="text-body-md font-semibold text-foreground">{name}</span>
-      </span>
     </div>
   )
 }
@@ -113,48 +82,7 @@ export function PlaceholderPanel({
           </button>
         </div>
 
-        {/* The search that produced this. In a working planner the count is the
-            filters it was run with and the chevron folds them open; here it is
-            what it says it is. */}
-        <div className="flex w-full shrink-0 items-center gap-2 rounded-md bg-card p-6 shadow-sm">
-          <h2 className="text-caption-lg font-semibold text-foreground">Course Search</h2>
-          <Badge variant="secondary">3</Badge>
-          <Icon name="expand-less" size={16} className="text-gray-100" />
-        </div>
-
-        <div className="flex w-full flex-col gap-2 rounded-md bg-card p-6 shadow-sm">
-          <div className="flex h-9 w-full items-center justify-between gap-2">
-            <h3 className="min-w-0 truncate text-h300 font-semibold text-gray-100">
-              {eligible.length} Course{eligible.length === 1 ? "" : "s"}
-            </h3>
-            <span className="flex shrink-0 items-center gap-2">
-              <Button size="icon" aria-label="Sort">
-                <Icon name="unfold-more" size={16} />
-              </Button>
-              {/* Cards or a plain list, the way the term view switches between
-                  its own two. Only the one is drawn. */}
-              <Tabs value="cards">
-                <TabsList>
-                  <TabsTrigger value="cards" aria-label="Cards">
-                    <Icon name="grid-view" size={16} />
-                  </TabsTrigger>
-                  <TabsTrigger value="list" aria-label="List">
-                    <Icon name="list" size={16} />
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </span>
-          </div>
-
-          {eligible.map((entry) => (
-            <CourseRow
-              key={entry.code}
-              code={entry.code}
-              name={entry.name}
-              onOpen={onOpenCourse && (() => onOpenCourse(entry))}
-            />
-          ))}
-        </div>
+        <CourseSearch entries={eligible} onOpenCourse={onOpenCourse} />
       </aside>
     )
   }

@@ -5,7 +5,7 @@ import { cn } from "cn"
 import type { ReactNode } from "react"
 
 import { Icon } from "@/components/icon"
-import { AddCourseMenu } from "@/components/stellic/add-course-menu"
+import { AddToTerm } from "@/components/stellic/add-to-term"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { CourseActivity, CourseTags } from "@/components/stellic/course-metadata"
 import { TermActions } from "@/components/stellic/term-actions"
@@ -402,6 +402,7 @@ export function SemesterCard({
   addable,
   onRemoveCourse,
   onAddCourse,
+  onSearchCourses,
   onOpen,
   onOpenSeat,
   onOpenCourse,
@@ -421,6 +422,8 @@ export function SemesterCard({
   addable: CatalogEntry[]
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (entry: CatalogEntry) => void
+  /** Opens the course search beside the plan, for this term. */
+  onSearchCourses?: () => void
   /** Opens the term on its own, with its classes and — when the schedule is
    *  out — its calendar. */
   onOpen?: () => void
@@ -570,7 +573,9 @@ export function SemesterCard({
               </>
             )}
 
-            {!term.locked && <AddCourseMenu options={addable} onPick={onAddCourse} />}
+            {!term.locked && (
+              <AddToTerm options={addable} onPick={onAddCourse} onSearch={onSearchCourses} />
+            )}
           </div>
         </SortableContext>
       </div>
@@ -646,6 +651,7 @@ export function YearSection({
   onAddTerm,
   onRemoveCourse,
   onAddCourse,
+  onSearchCourses,
   onOpenTerm,
   onOpenSeat,
   onOpenCourse,
@@ -673,6 +679,8 @@ export function YearSection({
   onToggleCollapse?: () => void
   onRemoveCourse: (courseId: string) => void
   onAddCourse: (termId: string, entry: CatalogEntry) => void
+  /** Opens the course search for one of the year's terms. */
+  onSearchCourses?: (termId: string) => void
   onOpenTerm?: (termId: string) => void
   onPickSection?: (termId: string, courseId: string) => void
 }) {
@@ -744,6 +752,7 @@ export function YearSection({
               addable={addable}
               onRemoveCourse={onRemoveCourse}
               onAddCourse={(entry) => onAddCourse(term.id, entry)}
+              onSearchCourses={onSearchCourses && (() => onSearchCourses(term.id))}
               onOpen={onOpenTerm && (() => onOpenTerm(term.id))}
               onOpenSeat={onOpenSeat}
               onOpenCourse={onOpenCourse}

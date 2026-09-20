@@ -405,6 +405,17 @@ What the list is narrowed to is held by the page rather than by the panel:
 opening one of these courses closes the panel to make room for it, and coming
 back finds the list as it was left.
 
+"+ Add to Term" opens four ways of putting something in
+([`1017:187868`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-187868)).
+Two of them turn the slot itself into a field
+([`1017:191036`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-191036)):
+type a course number the term could take and it lands. Search courses opens the
+same search a seat opens
+([`1017:194366`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-194366)),
+listing what the plan still wants rather than what one seat could take, with
+the filters drawn and not wired. Add activity is drawn and goes nowhere: it is
+a flow of its own and not one these prototypes are about.
+
 A requirement leaves the list once it has a term. A course is recognised by its
 name wherever it was placed from; a seat cannot be — every seat reads alike —
 so a placed seat remembers which outstanding requirement it answers, and the

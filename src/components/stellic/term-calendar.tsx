@@ -110,9 +110,10 @@ function CourseCard({
               has nothing to offer here. */}
           {mark ? (
             <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
-          ) : course.registered || stopped ? null : selectable ? (
+          ) : course.registered ? null : selectable ? (
             <Checkbox
-              defaultChecked
+              defaultChecked={!stopped}
+              disabled={stopped}
               className="mt-0.5"
               aria-label={`Register ${course.name}`}
             />
