@@ -105,8 +105,10 @@ function CourseRow({
   const held = course.placeholder
   const missing = useCourseIssues(term, course.id)[0] ?? null
   /* Anything the plan is warning about is something to look at, whatever the
-     registration state of it says. */
+     registration state of it says — and the kind that stops the course
+     happening says so in red. */
   const status = missing ? "needs review" : courseStatus(course, term)
+  const pill = missing?.severity === "error" ? "blocked" : status
   /* A draft on the canvas marks its terms here as well. */
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
   const struck = isStruck(course)
@@ -154,7 +156,9 @@ function CourseRow({
               tick. */}
           {/* A tick is for choosing what to put through registration. A class
               already through has no choice left to offer, so it has none. */}
-          {selectable && !course.registered && (
+          {/* Nothing to tick where nothing can go through: a course whose
+              prerequisites are not met is not going to registration. */}
+          {selectable && !course.registered && missing?.severity !== "error" && (
             <Checkbox
               defaultChecked
               aria-label={`Register ${course.name}`}
@@ -182,7 +186,7 @@ function CourseRow({
                 registered, because there the word is about the plan. */}
             {/* A seat has nothing to register, so it has no state to be in. */}
             {!held && (
-              <StatusPill status={status}>
+              <StatusPill status={pill}>
                 {status === "registered" ? "Complete" : status}
               </StatusPill>
             )}

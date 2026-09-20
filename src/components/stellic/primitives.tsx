@@ -22,6 +22,9 @@ const statusPillVariants = cva(
         ready: "bg-primary-0 text-primary-100",
         registered: "bg-success-5 text-success-100",
         "needs review": "bg-warning-5 text-warning-50",
+        /* The same state, but the kind that stops the course happening: a
+           prerequisite that is not met is not a thing to get round to. */
+        blocked: "bg-alert-5 text-alert-100",
         /* Out with an advisor and not back yet. */
         "pending review": "bg-warning-5 text-warning-50",
       },
@@ -36,6 +39,7 @@ const STATUS_ICON: Record<string, IconName> = {
   ready: "thumb-up",
   registered: "check-circle",
   "needs review": "warning",
+  blocked: "error-outline",
   "pending review": "timelapse",
 }
 

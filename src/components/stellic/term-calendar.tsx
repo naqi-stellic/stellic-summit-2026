@@ -7,6 +7,7 @@ import { AddCourseMenu } from "@/components/stellic/add-course-menu"
 import type { CatalogEntry } from "@/data/catalog"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon } from "@/components/stellic/primitives"
+import { useCourseIssues } from "@/components/stellic/plan-issues"
 import { meetingLines } from "@/data/course-detail"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -71,7 +72,9 @@ function CourseCard({
   /** Opens the seat this course was put into, from the band that names it. */
   onOpenSeat?: () => void
 }) {
-  const needsReview = courseStatus(course, term) === "needs review"
+  const issue = useCourseIssues(term, course.id)[0] ?? null
+  const needsReview = issue != null || courseStatus(course, term) === "needs review"
+  const stopped = issue?.severity === "error"
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
   /* A seat that was filled: the requirement it was held for heads the card,
      the way it heads the row on the canvas. */
@@ -107,7 +110,7 @@ function CourseCard({
               has nothing to offer here. */}
           {mark ? (
             <Icon name="add" size={16} className={cn("mt-0.5 shrink-0", mark.note)} />
-          ) : course.registered ? null : selectable ? (
+          ) : course.registered || stopped ? null : selectable ? (
             <Checkbox
               defaultChecked
               className="mt-0.5"
@@ -117,7 +120,11 @@ function CourseCard({
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="flex items-center gap-1.5 text-body-md text-gray-80">
               {needsReview && (
-                <Icon name="warning" size={14} className="shrink-0 text-warning-100" />
+                <Icon
+                  name={stopped ? "error-outline" : "warning"}
+                  size={14}
+                  className={cn("shrink-0", stopped ? "text-alert-100" : "text-warning-100")}
+                />
               )}
               {course.code}
             </span>
@@ -145,8 +152,9 @@ function CourseCard({
           </span>
         </label>
         {/* Nothing of this class can be drawn until a section is chosen, so the
-            way to choose one sits on the card. */}
-        {needsReview && !mark && (
+            way to choose one sits on the card. Where a class is not what is
+            missing, searching for one would answer nothing. */}
+        {issue?.kind === "section" && !mark && (
           <span className="flex items-center py-3">
             <Button size="icon" aria-label={`Search sections for ${course.name}`}>
               <Icon name="s-search" size={16} />
