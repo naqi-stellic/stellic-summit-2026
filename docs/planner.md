@@ -6,6 +6,31 @@ The plan generator's prototype with nothing on offer to generate: the planner,
 the term views, the calendar, registration and plan review, on a plan that has
 already been made.
 
+## A plan that already exists
+
+The two prototypes open on different plans, because they are demonstrating
+different things. The generator opens on a plan with almost nothing in it, so
+that generating one has work to do. This one opens on a plan already made
+(`src/data/planned-plan.ts`): four years of it, classes chosen for the four
+terms nearest to hand, and a last year still to fill.
+
+It is built from the same forty requirements rather than written out again, so
+the two prototypes can never disagree about what the degree wants. Twenty-five
+of them are placed here that the generator leaves outstanding; eight are still
+to place, which is what keeps the remaining sidebar worth opening.
+
+Fall 2028 is the term with something wrong in it, and each of its two problems
+is a different kind: Derivatives sits a year before Investments, which it asks
+for, and Operations only runs in Spring. Both are read off data the plan
+already holds — the prerequisite trees and the offerings behind the Offered
+filter — rather than written down as warnings. A seat with no course in it is
+not one of them: it says what it is itself, and calling it an error only
+invites the argument about whether it is one.
+
+Terms also hold what is not a course. An activity keeps hours the way a class
+does, so it is listed under My Activities and laid out on the week beside the
+classes — without a code, a section or a status, which it has none of.
+
 ## What differs
 
 One thing, passed to `PlanYourPath`: `generators={false}`, which takes Generate

@@ -8,6 +8,18 @@ export type DraftMark = "added" | "moved" | "removed"
  *  as decimal hours so the calendar can lay it out arithmetically. */
 export type Meeting = { day: number; from: number; to: number }
 
+/** Something in a term that is not a course: a club, a job, a commitment the
+ *  week has to make room for. It takes no credits and answers no requirement,
+ *  but it is on the calendar and it is part of why a term is as full as it
+ *  is. */
+export type Activity = {
+  id: string
+  name: string
+  /** What kind of thing it is, said the way the student would say it. */
+  kind: string
+  meetings?: Meeting[]
+}
+
 export type PlannedCourse = {
   /** Stable across moves — drag and drop identifies courses by this. */
   id: string
@@ -83,6 +95,8 @@ export type Term = {
   /** The class schedule is published, so this term can be seen on a calendar
    *  rather than only as a list. */
   scheduled?: boolean
+  /** What else the term holds. */
+  activities?: Activity[]
 }
 
 export type Year = {
@@ -102,17 +116,17 @@ export const STUDENT = { name: "Scott Abott", username: "sabott" }
 /** The degree the plan is working towards. Requirements are one per course,
  *  which is what makes "5 reqs · 15 credits" read consistently. */
 export const DEGREE = {
-  program: "Business Administration, B.S.",
+  program: "Business, B.S.",
   /** What the degree confers. The program is how it is earned; this is the
    *  thing with a name on the certificate, and an audit reads it first — so it
    *  is written the way a certificate writes it rather than abbreviated into
    *  "B.S. Business", which is neither the credential's name nor the
    *  programme's. Three surfaces were already assembling this form out of the
    *  programme name by hand; now there is one of it. */
-  credential: "BSc in Business Administration",
+  credential: "BS in Business",
   /** The program on its own, without the credential trailing it — which is how
    *  it reads once the credential is stated above it. */
-  major: "Business Administration",
+  major: "Business",
   concentration: "Finance",
   /** Declared alongside the concentration. Three of the degree's requirements
    *  answer to it rather than to the major, which is what makes the pair worth
@@ -121,13 +135,6 @@ export const DEGREE = {
   minor: "Data Analytics",
   requirements: 40,
   credits: 120,
-  /** Non-course checkpoints — declare a concentration, the capstone proposal,
-   *  the thesis. The audit holds them as rows and counts them off itself; this
-   *  is the same figure for the surfaces that have no audit to count. */
-  milestones: 3,
-  /** How many of those have been signed off: the concentration, declared when
-   *  the student arrived. The rest are still ahead. */
-  milestonesDone: 1,
 }
 
 /** Institution settings the generator always honours. These are facts about
@@ -232,6 +239,20 @@ export const INITIAL_YEARS: Year[] = [
         /* Under way, so every class has been chosen and sits somewhere real. */
         scheduled: true,
         state: "registered",
+        activities: [
+          {
+            id: "g1",
+            name: "Finance Club",
+            kind: "Student organisation",
+            meetings: [{ day: 3, from: 17, to: 18 }],
+          },
+          {
+            id: "g2",
+            name: "Peer tutoring — Calculus",
+            kind: "Campus job",
+            meetings: [{ day: 2, from: 16, to: 17.5 }],
+          },
+        ],
         courses: [
           {
             id: "c1",
@@ -546,11 +567,6 @@ export function planStanding(years: Year[]) {
     total: { reqs: DEGREE.requirements, credits: DEGREE.credits },
     /** Courses the generator has to plan around rather than move. */
     lockedCourses,
-    milestones: {
-      completed: DEGREE.milestonesDone,
-      remaining: Math.max(0, DEGREE.milestones - DEGREE.milestonesDone),
-      total: DEGREE.milestones,
-    },
   }
 }
 
@@ -884,7 +900,10 @@ export function courseNeeds(course: PlannedCourse, term: Term): "course" | "sect
    * waiting on anybody — it is simply further out than the catalogue reaches.
    * What such a term is holding is already plain on the planner. */
   if (!term.scheduled) return null
-  if (course.placeholder) return "course"
+  /* A seat is a requirement with no course against it. The plan is waiting on
+     it, but the seat says so itself — calling it an error only invites the
+     argument about whether it is one. */
+  if (course.placeholder) return null
   /* The section is what is missing, so the section is what to ask about. A
    * class number, campus, modality and grading are known from the course
    * itself long before anybody picks which sitting of it to attend. */
@@ -899,22 +918,7 @@ export function courseStatus(
   return courseNeeds(course, term) ? "needs review" : "ready"
 }
 
-/** What the term is waiting on before it can be registered. */
-export function termActions(term: Term): PlannedCourse[] {
-  /* A draft on the canvas is a proposal, not the plan. What it is striking out
-   * of this term is on its way elsewhere and no longer this term's problem,
-   * and what it is offering has not been accepted yet — so neither is counted
-   * until the draft is. */
-  return term.courses.filter((c) => c.draft == null && courseNeeds(c, term) !== null)
-}
-
 /** The line a course shows when something is missing, and what to press. */
-export function missingLine(course: PlannedCourse, term: Term): { says: string; action: string } {
-  return courseNeeds(course, term) === "course"
-    ? { says: "No course selected for placeholder.", action: "Search courses" }
-    : { says: "No section selected.", action: "Search sections" }
-}
-
 /** The week a term's calendar opens on: a real Monday inside the term, so the
  *  days line up with the weekdays the classes actually meet. */
 export function termWeek(term: Term): Date[] {

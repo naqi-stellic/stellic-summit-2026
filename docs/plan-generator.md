@@ -42,8 +42,8 @@ it appears in the year filter's menu.
 
 Figma is the source for layout, not content — its placeholder data contradicts
 itself — so the sample plan is invented to hold together. The story: a student
-starting a 120-credit, 40-requirement Business Administration
-B.S. with a Finance concentration and a Data Analytics minor — the pair being
+starting a 120-credit, 40-requirement Business B.S. with a Finance
+concentration and a Data Analytics minor — the pair being
 the point: no pathway is built for every programme, concentration and minor
 there could be. Three of the outstanding requirements answer to the minor
 rather than the major (MIS 250, STAT 320 and a data elective seat), so it is
@@ -364,9 +364,8 @@ its heading is the design's.
 Figma: [`1017:189481`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1017-189481).
 
 The sidebar button in the toolbar opens what the degree still wants: the shares
-of the forty requirements — taken, planned, still to place — the milestones
-beside them, and then the outstanding requirements grouped the way the degree
-asks for them. Each row is dragged out of the panel and dropped into the term
+of the forty requirements — taken, planned, still to place — and then the
+outstanding requirements grouped the way the degree asks for them. Each row is dragged out of the panel and dropped into the term
 it is going to be taken in, which is the same move as "+ Add to Term" and lands
 the same card.
 

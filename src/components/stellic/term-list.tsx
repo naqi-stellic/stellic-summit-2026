@@ -9,12 +9,12 @@ import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mar
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useCourseIssues } from "@/components/stellic/plan-issues"
+import { meetingLines } from "@/data/course-detail"
 import {
   CREDIT_GROUP_LABEL,
   creditGroup,
-  courseNeeds,
   courseStatus,
-  missingLine,
   termCredits,
   type PlannedCourse,
   type Term,
@@ -102,9 +102,11 @@ function CourseRow({
   /** Opens the seat: the one it is held in, or the one it was put into. */
   onOpenSeat?: () => void
 }) {
-  const status = courseStatus(course, term)
   const held = course.placeholder
-  const missing = courseNeeds(course, term) ? missingLine(course, term) : null
+  const missing = useCourseIssues(term, course.id)[0] ?? null
+  /* Anything the plan is warning about is something to look at, whatever the
+     registration state of it says. */
+  const status = missing ? "needs review" : courseStatus(course, term)
   /* A draft on the canvas marks its terms here as well. */
   const mark = course.draft ? DRAFT_STYLE[course.draft.mark] : null
   const struck = isStruck(course)
@@ -178,9 +180,12 @@ function CourseRow({
             {/* A class that has gone through registration is done with, which
                 is what the list calls it: the planner's cards still say
                 registered, because there the word is about the plan. */}
-            <StatusPill status={status}>
-              {status === "registered" ? "Complete" : status}
-            </StatusPill>
+            {/* A seat has nothing to register, so it has no state to be in. */}
+            {!held && (
+              <StatusPill status={status}>
+                {status === "registered" ? "Complete" : status}
+              </StatusPill>
+            )}
           </div>
 
           {/* Where a rule used to divide the two halves of the row. A band
@@ -221,12 +226,14 @@ function CourseRow({
           <p className="flex min-w-0 flex-1 items-center gap-1 px-4 py-[9px] text-body-md text-gray-100">
             <Icon name="error-outline" size={12} className="shrink-0 text-alert-50" />
             {missing.says}{" "}
-            <button
-              type="button"
-              className="cursor-pointer underline [text-underline-position:from-font]"
-            >
-              {missing.action}
-            </button>
+            {missing.action && (
+              <button
+                type="button"
+                className="cursor-pointer underline [text-underline-position:from-font]"
+              >
+                {missing.action}
+              </button>
+            )}
           </p>
         </div>
       )}
@@ -251,6 +258,7 @@ export function TermList({
   onOpenSeat?: (courseId: string) => void
 }) {
   const credits = termCredits(term)
+  const activities = term.activities ?? []
   const selectable = term.alert != null
   /* The same droppable the planner's card registers, under the same id: a
      requirement dragged out of the panel lands in the term being read. */
@@ -325,8 +333,27 @@ export function TermList({
       </section>
 
       <section className="w-full overflow-hidden rounded-md border border-gray-40 bg-card">
-        <CardHeader icon="sports-basketball" title="My Activities" count={0} />
-        <Empty>No activities added to plan yet</Empty>
+        <CardHeader icon="sports-basketball" title="My Activities" count={activities.length} />
+        {activities.length === 0 ? (
+          <Empty>No activities added to plan yet</Empty>
+        ) : (
+          activities.map((activity) => (
+            <div
+              key={activity.id}
+              className="flex w-full items-center gap-4 border-t border-gray-40 px-6 py-3"
+            >
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-label-md text-gray-80">{activity.kind}</span>
+                <span className="text-body-md font-semibold text-gray-100">{activity.name}</span>
+              </span>
+              {activity.meetings && (
+                <span className="shrink-0 text-body-md text-gray-80">
+                  {meetingLines(activity.meetings).join(", ")}
+                </span>
+              )}
+            </div>
+          ))
+        )}
       </section>
     </div>
   )

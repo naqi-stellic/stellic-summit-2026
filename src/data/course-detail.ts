@@ -368,8 +368,9 @@ export function courseDetail(entry: CatalogEntry): CourseDetail {
 
 /* ------------------------------------------------- what the plan makes of it */
 
-/** Every course a prerequisite tree names, which is how the plan finds out
- *  what a course is holding up. */
+/** The courses a prerequisite tree names on the route the student is actually
+ *  on — the first option. The others are roads not taken: naming their courses
+ *  would have the plan warning about requirements nobody is trying to meet. */
 export function prerequisiteCodes(code: string): string[] {
   const tree = prerequisites({ code, name: "", reason: "" }, seedOf(code))
   const out: string[] = []
@@ -378,7 +379,7 @@ export function prerequisiteCodes(code: string): string[] {
       if (node.code) out.push(node.code)
       if (node.children) walk(node.children)
     })
-  tree.options.forEach((option) => walk(option.children))
+  if (tree.options[0]) walk(tree.options[0].children)
   return [...new Set(out)]
 }
 

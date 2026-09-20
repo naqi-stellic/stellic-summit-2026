@@ -1,4 +1,5 @@
 import { cameFrom } from "@/components/stellic/plan-header"
+import { PLANNED_YEARS } from "@/data/planned-plan"
 import { recordIncoming, recordPlan } from "@/data/record-plan"
 import { PlanYourPath } from "@/pages/plan-your-path"
 
@@ -19,7 +20,10 @@ export function Planner() {
   return (
     <PlanYourPath
       generators={false}
-      initialYears={fromRecord ? recordPlan() : undefined}
+      /* Opened on its own it is Team Plan's own plan — and a made one: this
+         prototype is about working with a plan that exists, so it opens on
+         four years of one rather than on the blank the generator starts from. */
+      initialYears={fromRecord ? recordPlan() : PLANNED_YEARS}
       incoming={fromRecord ? recordIncoming() : undefined}
     />
   )

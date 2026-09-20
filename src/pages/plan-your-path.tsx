@@ -33,6 +33,7 @@ import {
 } from "@/components/stellic/requirements-panel"
 import { ReviewDialog } from "@/components/stellic/review-dialog"
 import { ReviewPanel } from "@/components/stellic/review-panel"
+import { PlanIssuesProvider } from "@/components/stellic/plan-issues"
 import { PendingReviewProvider } from "@/components/stellic/review-state"
 import {
   cameFrom,
@@ -705,6 +706,7 @@ export function PlanYourPath({
         setDrop(null)
       }}
     >
+    <PlanIssuesProvider years={shown}>
     <AppShell
       /* Opened from a student's record, the planner is still a staff member
          looking at somebody else's plan, so the nav stays the institution's
@@ -1035,6 +1037,7 @@ export function PlanYourPath({
       </PendingReviewProvider>
       </MetadataProvider>
     </AppShell>
+    </PlanIssuesProvider>
 
     <DragOverlay>
       {dragging && <AuditRow course={dragging.course} overlay />}

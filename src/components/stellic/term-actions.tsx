@@ -3,7 +3,8 @@ import { useState } from "react"
 
 import { Icon } from "@/components/icon"
 import { Alert } from "@/components/ui/alert"
-import { missingLine, termActions, type Term } from "@/data/plan"
+import { useTermIssues } from "@/components/stellic/plan-issues"
+import type { Term } from "@/data/plan"
 
 /* What a term is waiting on. The term view states it outright above the
  * schedule; the planner, where every term is on screen at once, states the
@@ -18,25 +19,26 @@ export function ActionLines({
   /** Settles a course on a section. Stands in for a section search. */
   onPickSection?: (termId: string, courseId: string) => void
 }) {
+  const issues = useTermIssues(term)
+
   return (
     <>
-      {termActions(term).map((course) => {
-        const missing = missingLine(course, term)
-        return (
-          <p key={course.id} className="flex w-full flex-wrap items-center gap-2 text-body-md">
-            <Icon name="warning" size={16} className="shrink-0 text-warning-50" />
-            <span className="font-semibold">{course.name}</span>
-            <span>{missing.says}</span>
+      {issues.map((issue, i) => (
+        <p key={`${issue.course.id}-${i}`} className="flex w-full flex-wrap items-center gap-2 text-body-md">
+          <Icon name="warning" size={16} className="shrink-0 text-warning-50" />
+          <span className="font-semibold">{issue.course.name}</span>
+          <span>{issue.says}</span>
+          {issue.action && (
             <button
               type="button"
-              onClick={() => onPickSection?.(term.id, course.id)}
+              onClick={() => onPickSection?.(term.id, issue.course.id)}
               className="cursor-pointer underline [text-underline-position:from-font]"
             >
-              {missing.action}
+              {issue.action}
             </button>
-          </p>
-        )
-      })}
+          )}
+        </p>
+      ))}
     </>
   )
 }
@@ -52,7 +54,7 @@ export function TermActions({
   onPickSection?: (termId: string, courseId: string) => void
 }) {
   const [open, setOpen] = useState(false)
-  const actions = termActions(term)
+  const actions = useTermIssues(term)
   if (actions.length === 0) return null
 
   return (

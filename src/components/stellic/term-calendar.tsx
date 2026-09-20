@@ -7,6 +7,7 @@ import { AddCourseMenu } from "@/components/stellic/add-course-menu"
 import type { CatalogEntry } from "@/data/catalog"
 import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mark"
 import { AuditIcon } from "@/components/stellic/primitives"
+import { meetingLines } from "@/data/course-detail"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -203,6 +204,7 @@ function Sidebar({
   onOpenSeat?: (courseId: string) => void
 }) {
   const credits = termCredits(term)
+  const activities = term.activities ?? []
   const selectable = term.alert != null
 
   return (
@@ -265,18 +267,39 @@ function Sidebar({
         <div className="flex w-full items-center gap-2">
           <Icon name="sports-basketball" size={24} className="shrink-0 text-gray-100" />
           <h4 className="min-w-0 flex-1 truncate text-body-md font-semibold text-gray-100">
-            My Activities (0)
+            My Activities ({activities.length})
           </h4>
           <Button size="icon" aria-label="Add an activity">
             <Icon name="plus" size={16} />
           </Button>
         </div>
-        <button
-          type="button"
-          className="w-full cursor-pointer rounded-md border border-dashed border-gray-40 bg-card p-3 text-left text-body-md text-gray-80"
-        >
-          + Add first activity
-        </button>
+        {activities.length === 0 ? (
+          <button
+            type="button"
+            className="w-full cursor-pointer rounded-md border border-dashed border-gray-40 bg-card p-3 text-left text-body-md text-gray-80"
+          >
+            + Add first activity
+          </button>
+        ) : (
+          activities.map((activity) => (
+            <div
+              key={activity.id}
+              className="flex w-full items-stretch overflow-hidden rounded-md border border-gray-40 bg-card"
+            >
+              <span aria-hidden="true" className="w-1 shrink-0 bg-gray-40" />
+              <span className="flex min-w-0 flex-1 flex-col gap-1 p-3">
+                <span className="text-body-md text-gray-80">{activity.kind}</span>
+                <span className="text-body-md font-semibold text-gray-100">{activity.name}</span>
+                {activity.meetings && (
+                  <span className="flex items-center gap-1 text-body-md text-gray-100">
+                    <Icon name="calendar-today" size={14} />
+                    {meetingLines(activity.meetings).join(", ")}
+                  </span>
+                )}
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   )
@@ -315,6 +338,20 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
   const days = termWeek(term).slice(0, span.days)
   const { from, to } = termHours(term)
   const hours = Array.from({ length: to - from }, (_, i) => from + i)
+
+  /* The week is not only classes. An activity keeps hours like a class does,
+     so it is laid out like one — without a code, a section or a status, which
+     it has none of. */
+  const week: PlannedCourse[] = [
+    ...term.courses,
+    ...(term.activities ?? []).map((activity) => ({
+      id: activity.id,
+      code: activity.kind,
+      name: activity.name,
+      credits: 0,
+      meetings: activity.meetings,
+    })),
+  ]
 
   const month = days[0].toLocaleDateString("en-US", {
     month: "long",
@@ -386,7 +423,7 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
           </div>
 
           {days.map((day, i) => {
-            const meetings = term.courses.flatMap((course) =>
+            const meetings = week.flatMap((course) =>
               (course.meetings ?? [])
                 .filter((m) => m.day === i + 1)
                 .map((m) => ({ course, meeting: m }))
@@ -476,9 +513,16 @@ function Week({ term, compare = true }: { term: Term; compare?: boolean }) {
                       />
                       <span className="flex min-w-0 flex-1 flex-col gap-1 p-2">
                         <span className="flex items-center gap-1 truncate text-body-md text-gray-80">
-                          {courseStatus(course, term) === "needs review" && (
-                            <Icon name="warning" size={14} className="shrink-0 text-warning-100" />
-                          )}
+                          {/* An activity is not a class and has no class to
+                              choose, so nothing about it is outstanding. */}
+                          {term.courses.includes(course) &&
+                            courseStatus(course, term) === "needs review" && (
+                              <Icon
+                                name="warning"
+                                size={14}
+                                className="shrink-0 text-warning-100"
+                              />
+                            )}
                           {course.code}
                         </span>
                         <span className="truncate text-body-md font-semibold text-gray-100">

@@ -5,6 +5,7 @@ import { PlanHeader, type PlanAction, type YearTab } from "@/components/stellic/
 import { TermCalendar } from "@/components/stellic/term-calendar"
 import { TermList } from "@/components/stellic/term-list"
 import { ActionLines } from "@/components/stellic/term-actions"
+import { useTermIssues } from "@/components/stellic/plan-issues"
 import { StatusPill } from "@/components/stellic/primitives"
 import { usePendingReview } from "@/components/stellic/review-state"
 import { Alert } from "@/components/ui/alert"
@@ -14,7 +15,6 @@ import type { CatalogEntry } from "@/data/catalog"
 import {
   METADATA_FIELDS,
   registrableCourses,
-  termActions,
   type MetadataField,
   type Term,
 } from "@/data/plan"
@@ -78,7 +78,7 @@ function ActionsAlert({
    *  proposed, rather than the proposal on its own. */
   compare?: boolean
 }) {
-  const actions = termActions(term)
+  const actions = useTermIssues(term)
 
   return (
     <Alert variant="warning" className="flex-col items-start gap-2 p-[15px]">
@@ -151,7 +151,7 @@ export function TermView({
   useEffect(() => {
     if (proposing) setMode("calendar")
   }, [proposing])
-  const actions = termActions(term)
+  const actions = useTermIssues(term)
   const pending = usePendingReview(term.id)
 
   const plannerActions: PlanAction[] = [

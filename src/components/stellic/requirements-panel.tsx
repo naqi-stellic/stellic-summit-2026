@@ -305,31 +305,6 @@ export function RequirementsPanel({
         />
       </div>
 
-      <div className="flex w-full flex-col gap-2">
-        <span className="flex items-center gap-1 text-body-md font-semibold text-foreground">
-          <Icon name="outlined-flag" size={16} className="text-gray-100" />
-          Milestones
-        </span>
-        <Meter
-          total={DEGREE.milestones}
-          shares={[
-            {
-              label: "Complete",
-              count: DEGREE.milestonesDone,
-              icon: "check",
-              bar: "bg-success-50",
-              tone: "text-success-50",
-            },
-            {
-              label: "Still ahead",
-              count: DEGREE.milestones - DEGREE.milestonesDone,
-              icon: "crop-square",
-              bar: "bg-gray-40",
-              tone: "text-gray-80",
-            },
-          ]}
-        />
-      </div>
       </div>
 
       <div className="flex w-full flex-col gap-2">

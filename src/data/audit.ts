@@ -5,7 +5,7 @@ import { DEGREE, STUDENT } from "@/data/plan"
  * the student stands against every line of it.
  *
  * This is the same student and the same degree as the Team Plan prototypes —
- * Scott Abott on the 120-credit Business Administration B.S. with a Finance
+ * Scott Abott on the 120-credit Business B.S. with a Finance
  * concentration — read from the other end. Team Plan asks "which term does
  * this go in"; the audit asks "does the degree accept it". `DEGREE` and
  * `STUDENT` come from `src/data/plan.ts`, every course below is one the plan
@@ -121,7 +121,7 @@ export const AUDIT_STUDENT = {
   /** Started Fall 2025 and partway through his second year. */
   standing: "Sophomore",
   program: `${DEGREE.program} (${DEGREE.concentration})`,
-  pathway: "Business Administration: Fall Start 2025",
+  pathway: `${DEGREE.major}: Fall Start 2026`,
   campus: "Main campus",
   /** Entry year, written the way the registrar writes it: EY 2025 Fall. */
   entry: "2025 Fall",

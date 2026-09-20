@@ -29,7 +29,7 @@ other end. Team Plan asks "which term does this go in"; the audit asks "does
 the degree accept it".
 
 `DEGREE` and `STUDENT` are imported from `src/data/plan.ts` rather than copied,
-so the program name, the credit total, the requirement count and the milestones
+so the program name, the credit total and the requirement count
 cannot drift between the two products. Every course in the tree is one the plan
 holds or still owes, and the forty requirements split exactly as the planner
 has them:
@@ -63,8 +63,6 @@ courses counted elsewhere and walking into them would count those twice. And
 registered and planned sit with the remainder rather than with what is earned,
 because on a bar about what the degree still wants, a seat you have booked is
 still a seat you owe.
-
-Milestones are `DEGREE.milestonesDone` of `DEGREE.milestones` — 3 of 13.
 
 ## The tree
 

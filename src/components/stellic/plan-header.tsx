@@ -274,11 +274,11 @@ export function PlanHeader({
       <PlanFacet
         label="Programs:"
         values={[
-          `${DEGREE.credential} (concentration: ${DEGREE.concentration})`,
+          `${DEGREE.credential} (${DEGREE.concentration})`,
           `Minor in ${DEGREE.minor}`,
         ]}
       />
-      <PlanFacet label="Pathway:" values={["Business Administration: Fall Start 2025 [BSc]"]} />
+      <PlanFacet label="Pathway:" values={[`${DEGREE.major}: Fall Start 2026`]} />
 
     </section>
 

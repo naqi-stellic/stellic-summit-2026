@@ -64,7 +64,6 @@ export function GeneratePlanScope({
   graduation: string
 }) {
   const courses = standing.total.reqs
-  const milestones = standing.milestones
 
   /* What the plan is for, which is more than one thing: the degree and the
      minor are both programmes with requirements to place, so they are both
@@ -106,24 +105,6 @@ export function GeneratePlanScope({
           />
         </div>
 
-        <div className="flex w-full flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <Icon name="outlined-flag" size={16} className="text-gray-100" />
-            <p className="text-body-md font-semibold text-gray-100">Milestones</p>
-          </div>
-          <ProgressBar
-            segments={[
-              { share: milestones.completed / milestones.total, className: "bg-success-50" },
-              { share: 0, className: "bg-gray-5" },
-            ]}
-          />
-          <Tally
-            items={[
-              { icon: "check", tone: "text-success-50", value: milestones.completed },
-              { icon: "crop-square", tone: "text-alert-50", value: milestones.remaining },
-            ]}
-          />
-        </div>
       </div>
 
       <div className="flex w-full flex-col gap-2">
