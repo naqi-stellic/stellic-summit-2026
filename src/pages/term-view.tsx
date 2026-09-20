@@ -1,3 +1,4 @@
+import { cn } from "cn"
 import { useEffect, useState } from "react"
 
 import { Icon } from "@/components/icon"
@@ -23,15 +24,44 @@ import {
  * schedule is published: until it is, there are no times to put on a calendar,
  * so the list is all there is. */
 
-function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () => void }) {
+function RegistrationAlert({
+  term,
+  onRegister,
+  stuck,
+}: {
+  term: Term
+  onRegister?: () => void
+  /** Whether it is holding at the top of the pane rather than sitting in the
+   *  page. Held, it is a strip across the top; at rest it is a card among the
+   *  cards, the same as the line about what is wrong with the term below it. */
+  stuck?: boolean
+}) {
   /* A draft is a proposal. Nothing in it can be put through registration until
      it has been applied, so the invitation is there but not open. */
   const drafting = term.courses.some((c) => c.draft)
   const ready = useRegistrable(term).length
 
   return (
-    <Alert className="border-gray-40 px-[23px] py-[15px]">
-      <Icon name="shopping-cart" size={16} className="shrink-0 text-gray-100" />
+    /* Pinned, it is a strip across the top of the pane: square, edge to edge,
+       and quieter than an alert in the flow — something that is always there
+       cannot also be something that shouts. At rest it is the card it always
+       was, lined up with everything else on the page. */
+    /* The header block's negative margin eats the gap the page would put
+       after it, so a banner at rest carries its own clearance from whatever
+       is under it. */
+    <div className={cn("w-full", stuck ? "" : "px-6 pb-6")}>
+    <div
+      className={cn(
+        "flex w-full flex-wrap items-center gap-2 text-body-md",
+        stuck
+          /* The rule the toolbar carries when it holds moves down to whatever
+             is last in the stack, so the block ends on one line rather than
+             two — and the plan scrolling under it has an edge to pass. */
+          ? "border-y border-gray-40 bg-primary-0 px-6 py-3"
+          : "rounded-md border border-gray-40 bg-primary-0 px-[23px] py-[15px]"
+      )}
+    >
+      <Icon name="shopping-cart" size={16} className="shrink-0 text-primary-100" />
       <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2">
         <span className="font-semibold">Registration is now open!</span>
         <span className="whitespace-nowrap">Closes: {term.alert?.closes}</span>
@@ -51,7 +81,8 @@ function RegistrationAlert({ term, onRegister }: { term: Term; onRegister?: () =
             offering to register none of them is not an offer. */}
         {ready === 0 ? "Register" : `Register ${ready} course${ready === 1 ? "" : "s"}`}
       </Button>
-    </Alert>
+    </div>
+    </div>
   )
 }
 
@@ -206,6 +237,14 @@ export function TermView({
       <PlanHeader
         actions={plannerActions}
         tabs={tabs}
+        /* The registration window holds at the top with the toolbar. Only
+           this one: a warning is about a course you can scroll to, and it
+           belongs beside the term it is about. */
+        banner={
+          term.scheduled && term.alert
+            ? (stuck) => <RegistrationAlert term={term} onRegister={onRegister} stuck={stuck} />
+            : undefined
+        }
         sidebar={sidebar}
         onToggleField={onToggleField}
         onAction={(action) => {
@@ -214,13 +253,9 @@ export function TermView({
         }}
       />
 
-      {/* These are not alternatives. A term can have registration open and still
-          have courses that cannot go through it yet, which is exactly where
-          Spring 2028 stands: the window is open, and neither course has a
-          section to register. The warning sits under the invitation. */}
-      {term.scheduled && term.alert && (
-        <RegistrationAlert term={term} onRegister={onRegister} />
-      )}
+      {/* The invitation is up in the toolbar; this is what stands in its way.
+          A term can have registration open and still hold courses that cannot
+          go through it yet. */}
       {actions.length > 0 && (
         <ActionsAlert
           term={term}

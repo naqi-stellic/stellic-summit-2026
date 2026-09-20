@@ -76,6 +76,14 @@ Two, and no more. Every other term is clean: a plan where each term has
 something to fix is a plan nobody believes, and the two that are wrong are only
 worth looking at because the rest are not.
 
+Every card in a term wears its own colour. The accent down the side is how
+you tell one from another at a glance — on the week, on the list, on the
+canvas — and two cards in the same colour is the one thing it must not do, so
+a term is passed through `distinctAccents` wherever it is built or moved into.
+A course keeps what it came with unless something in that term already has it;
+only a clash is given a free colour, so a plan does not repaint itself every
+time something moves.
+
 A class is chosen from the course itself. Its sections are hours out of the
 same list the week is drawn from, so hovering one draws it on the calendar
 where it would go — in the course's own accent, dashed, in place of the class

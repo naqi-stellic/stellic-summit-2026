@@ -1,5 +1,6 @@
 import { REMAINING_REQUIREMENTS } from "@/data/catalog"
 import {
+  distinctAccents,
   BY_PATHWAY,
   BY_STUDENT,
   CREDITS_PER_COURSE,
@@ -107,7 +108,7 @@ export const GENERATOR_YEARS: Year[] = INITIAL_YEARS.map((year) => ({
     if (!added) return term
     /* Seats last, the way every other term reads: what has been decided, and
        then what has not. */
-    return {
+    return distinctAccents({
       ...term,
       courses: [
         ...term.courses.filter((c) => !c.placeholder),
@@ -115,6 +116,6 @@ export const GENERATOR_YEARS: Year[] = INITIAL_YEARS.map((year) => ({
         ...term.courses.filter((c) => c.placeholder),
         ...added.filter((c) => c.placeholder),
       ],
-    }
+    })
   }),
 }))

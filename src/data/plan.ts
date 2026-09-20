@@ -481,6 +481,37 @@ export function findTerm(years: Year[], termId: string) {
 
 /** Moves a course to `toTermId`, at `toIndex` when given, otherwise appending.
  *  Returns the input untouched if either end is locked. */
+/** The colours a term's cards are marked by, in the order they are handed out.
+ *  Six, which is what the credit ceiling allows a term to hold. */
+export const ACCENTS = ["purple", "green", "amber", "teal", "brown", "rose"] as const
+
+/** Every card in a term wearing its own colour.
+ *
+ *  The accent is how you tell one card from another at a glance — on the week,
+ *  on the list, down the side of a row — and two cards in the same colour is
+ *  the one thing it must not do. A course keeps the colour it came with where
+ *  nothing else in the term has taken it, so a plan does not reshuffle itself
+ *  every time something moves; only a clash is given a free colour instead.
+ *
+ *  Past six there are no colours left and the rest keep what they have, which
+ *  is a term already over the credit ceiling. */
+export function distinctAccents(term: Term): Term {
+  const taken = new Set<PlannedCourse["accent"]>()
+  return {
+    ...term,
+    courses: term.courses.map((course) => {
+      if (course.accent && !taken.has(course.accent)) {
+        taken.add(course.accent)
+        return course
+      }
+      const free = ACCENTS.find((accent) => !taken.has(accent))
+      if (!free) return course
+      taken.add(free)
+      return { ...course, accent: free }
+    }),
+  }
+}
+
 /** A course as it arrives in the term it was dropped into.
  *
  *  A class belongs to the term whose schedule it was picked from. Carried into
@@ -527,6 +558,8 @@ export function moveCourse(
         const at = toIndex ?? courses.length
         const landing = sameTerm ? from.course : asPlannedIn(from.course, to)
         courses = [...courses.slice(0, at), landing, ...courses.slice(at)]
+        /* It may have arrived wearing a colour this term already uses. */
+        return sameTerm ? { ...term, courses } : distinctAccents({ ...term, courses })
       }
       return { ...term, courses }
     }),

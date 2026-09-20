@@ -239,7 +239,11 @@ function draftCourse(entry: QueueEntry, order: number, note?: string): PlannedCo
           modality: "In Person",
           gradeOption: "Graded",
         }),
-    lastActivity: `Added by Pathway, ${GENERATED_ON}`,
+    /* The student pressed Generate and then kept what came back, so it is
+       theirs: a pathway proposed it, but nothing is in the plan until they
+       accept it. What the pathway did on its own, months ago, is the plan
+       they started from — those cards still say so. */
+    lastActivity: `Added by you, ${GENERATED_ON}`,
     draft: { mark: "added", note: note ?? entry.reason, order },
   }
 }
@@ -582,6 +586,9 @@ export function generateTermDraft(
                 campus: "Main",
                 modality: "In Person",
                 gradeOption: "Graded",
+                /* The seat was the pathway's; the course in it is this run's,
+                   and the run is the student's. */
+                lastActivity: `Added by you, ${GENERATED_ON}`,
                 draft: { mark: "added" as const, note: `Fills your ${seat}`, order: at },
               }
         ),

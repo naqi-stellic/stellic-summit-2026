@@ -153,9 +153,15 @@ function CameFrom() {
   )
 }
 
+/** How far back up the pane has to come before the toolbar lets go again.
+ *  Wider than the height the bar loses when a banner under it turns from a
+ *  card into a strip, so sticking can never unstick itself. */
+const SLACK = 64
+
 export function PlanHeader({
   actions,
   tabs,
+  banner,
   pressed,
   onAction,
   onToggleField,
@@ -163,6 +169,15 @@ export function PlanHeader({
 }: {
   actions: PlanAction[]
   tabs: YearTab[]
+  /** A banner that holds at the top with the toolbar rather than scrolling
+   *  away under it. The registration window is the one thing worth keeping in
+   *  reach the whole way down a term: everything on the page is something you
+   *  might register, and the button that does it should not be a scroll away.
+   *
+   *  It is given whether the toolbar is holding, because a banner sitting in
+   *  the page and a banner pinned to the top of it are not the same shape: one
+   *  is a card among cards, the other is a strip across the top. */
+  banner?: (stuck: boolean) => ReactNode
   /** Whether the toggling action is currently showing its panel. */
   pressed?: boolean
   onAction?: (action: PlanAction) => void
@@ -172,18 +187,35 @@ export function PlanHeader({
   sidebar?: { open: boolean; onToggle: () => void }
 }) {
   /* The last stretch of header above the toolbar. Once all of it is out of the
-     pane the toolbar has reached the top and is holding there — a band rather
-     than a hairline, because a box sitting exactly on the clip edge is
-     reported as still visible. */
+     pane the toolbar has reached the top and is holding there. */
   const sentinel = useRef<HTMLSpanElement>(null)
   const [stuck, setStuck] = useState(false)
 
+  /* Read off the scroll position rather than watched for, and with a dead band
+   * between sticking and letting go.
+   *
+   * Holding changes what the bar is: a banner under it becomes a strip, which
+   * is shorter than the card it was. On a page with barely anything to scroll
+   * that is a loop — sticking shortens the plan, the shorter plan scrolls back
+   * up, the bar lets go, the card returns, and it sticks again, several times
+   * a second. The band is wider than the height the bar can lose, so what
+   * sticking does to the page cannot undo the sticking. */
   useEffect(() => {
     const mark = sentinel.current
-    if (!mark) return
-    const watcher = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting))
-    watcher.observe(mark)
-    return () => watcher.disconnect()
+    const pane = mark?.closest("main")
+    if (!mark || !pane) return
+
+    /* How far down the pane's own content the toolbar sits. Fixed: everything
+       above it is the plan's name and what it is for, which do not move. */
+    const at =
+      mark.getBoundingClientRect().top - pane.getBoundingClientRect().top + pane.scrollTop
+
+    const read = () =>
+      setStuck((held) => (held ? pane.scrollTop > at - SLACK : pane.scrollTop >= at))
+
+    read()
+    pane.addEventListener("scroll", read, { passive: true })
+    return () => pane.removeEventListener("scroll", read)
   }, [])
 
   const actionButtons = (
@@ -293,9 +325,21 @@ export function PlanHeader({
         /* -top-6 rather than top-0: the bar's margin box is pulled out by the
            pane's padding, so it has to be pinned that much higher to come to
            rest flush against the top of the pane rather than 24px inside it. */
-        "sticky -top-6 z-20 -m-6 flex flex-wrap items-center justify-between gap-x-4",
-        "gap-y-2 border-b p-6 transition-colors",
-        stuck ? "border-gray-40 bg-card" : "border-transparent"
+        "sticky -top-6 z-20 -m-6 flex flex-col"
+      )}
+    >
+    {/* The ground and the rule under it belong to the state, not the shape: at
+        rest the toolbar sits on the page like everything else, and only once
+        it is holding at the top does it need a band to hold the plan off it. A
+        banner below it is its own strip either way. */}
+    <div
+      className={cn(
+        "flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b p-6",
+        "transition-colors",
+        /* The edge belongs to the bottom of the block, not to this row: where
+           a banner is held under it, the banner carries it. */
+        stuck && !banner ? "border-gray-40 bg-card" : "border-transparent",
+        stuck && "bg-card"
       )}
     >
       <div className="flex flex-wrap items-center gap-2">
@@ -342,6 +386,8 @@ export function PlanHeader({
       </div>
 
       {stuck && actionButtons}
+    </div>
+    {banner?.(stuck)}
     </div>
     </>
   )

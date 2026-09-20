@@ -141,6 +141,15 @@ with their tick off and fixed, saying which of those three it is. Untick one
 and the title counts down with it — "Register 3 Courses" becomes two — and
 Confirm sends exactly what is ticked.
 
+In a term view the registration banner holds at the top with the toolbar
+rather than scrolling away under it: everything on that page is something you
+might register, and the button that does it should not be a scroll away. It
+is drawn as a strip rather than a card — square, edge to edge, quieter than an
+alert in the flow, because something that is always there cannot also be
+something that shouts. Only this one: a warning is about a course you can
+scroll to, and it belongs beside the term it is about. On the canvas, where
+there are several terms at once, each keeps its own banner on its own card.
+
 A term whose classes have all gone through registration keeps the same banner:
 the window is still open, the closing date is still worth saying, and a student
 can add a class and come back. What changes is the button — disabled, and
@@ -148,6 +157,17 @@ reading "Register" rather than offering to register none of them. The credit
 group's marker fills in beside it: `pre-registered` is drawn solid where
 `planned` is an outline, because that mark and the word next to it are the
 whole of what registering changes on that screen.
+
+## Where a generated course says it came from
+
+The cards a run puts down say **"Added by you"**, not "Added by Pathway". A
+pathway proposed them, but nothing is in the plan until the student accepts
+the option — pressing Generate and keeping what came back is a thing they did,
+and the plan they started from already records what the pathway did on its own
+months earlier. So the seats Fall 2027 opens holding still read "Added by
+Pathway, 3 Apr 2026", and everything the run adds beside them reads "Added by
+you, 15 Sep 2026". A seat the run fills reads the same way: the seat was the
+pathway's, the course in it is this run's.
 
 ## An instruction the plan answers
 

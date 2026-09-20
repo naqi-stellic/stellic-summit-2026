@@ -1,5 +1,6 @@
 import { REMAINING_REQUIREMENTS } from "@/data/catalog"
 import {
+  distinctAccents,
   BY_ADVISOR,
   BY_PATHWAY,
   BY_STUDENT,
@@ -209,7 +210,9 @@ export const PLANNED_YEARS: Year[] = INITIAL_YEARS.map((year) => ({
       ],
     }
     /* A term whose classes are out has them all: a course put into it by the
-       pathway arrives with a sitting, the same as one chosen by hand. */
-    return scheduled && !term.locked ? scheduleTerm(held) : held
+       pathway arrives with a sitting, the same as one chosen by hand. And
+       every card in it wears its own colour, whichever list it came from. */
+    const settled = scheduled && !term.locked ? scheduleTerm(held) : held
+    return distinctAccents(settled)
   }),
 }))
