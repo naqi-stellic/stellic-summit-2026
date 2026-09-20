@@ -1,5 +1,5 @@
 import { cn } from "cn"
-import { useState } from "react"
+import { createContext, useContext, useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { useCourseIssues } from "@/components/stellic/plan-issues"
@@ -29,6 +29,12 @@ import {
   type PlannedCourse,
   type Term,
 } from "@/data/plan"
+
+/* The way out of a prerequisite tree. A course named in one is a course like
+ * any other, so it opens like one — but the tree is drawn several components
+ * deep, and threading a handler through every row of it would be its own
+ * small mess. */
+const OpenCode = createContext<((code: string) => void) | undefined>(undefined)
 
 /** Stands in where there is no term, so the hook is called either way. */
 const EMPTY_TERM: Term = { id: "", name: "", window: "", reviewed: false, state: "planned", courses: [] }
@@ -116,6 +122,8 @@ function flattenSole(node: PrereqNode, out: Row[]) {
 function PrereqRow({ row }: { row: Row }) {
   const { node } = row
   const group = node.children != null
+  /* Only where the page can find the course behind the code. */
+  const open = useContext(OpenCode)
 
   return (
     <div className="flex items-stretch">
@@ -124,7 +132,20 @@ function PrereqRow({ row }: { row: Row }) {
         {!group && <Mark state={node.state} />}
         {node.code ? (
           <>
-            <span className="shrink-0 text-body-md text-gray-100">{node.code}</span>
+            {open ? (
+              <button
+                type="button"
+                onClick={() => open(node.code!)}
+                className={cn(
+                  "shrink-0 cursor-pointer text-body-md text-gray-100",
+                  "hover:underline hover:[text-underline-position:from-font]"
+                )}
+              >
+                {node.code}
+              </button>
+            ) : (
+              <span className="shrink-0 text-body-md text-gray-100">{node.code}</span>
+            )}
             {node.note && <span className="text-label-md text-gray-80">{node.note}</span>}
           </>
         ) : (
@@ -365,6 +386,7 @@ export function CoursePanel({
   planned,
   plan,
   backLabel,
+  onOpenCode,
   onAdd,
   onRemove,
   onBack,
@@ -381,6 +403,8 @@ export function CoursePanel({
   plan?: Term[]
   /** What the way back is to, where it is not a term. */
   backLabel?: string
+  /** Opens a course the prerequisite tree names, where the plan can find it. */
+  onOpenCode?: (code: string) => void
   onAdd: (termId: string) => void
   onRemove?: () => void
   onBack: () => void
@@ -444,6 +468,7 @@ export function CoursePanel({
   const term = planned?.term ?? terms.find((t) => t.id === termId)
 
   return (
+    <OpenCode.Provider value={onOpenCode}>
     <aside className="flex h-full w-full flex-col gap-4 overflow-x-clip overflow-y-auto bg-background p-6 pb-28">
       <div className="flex w-full shrink-0 items-center gap-2">
         <button
@@ -886,5 +911,6 @@ export function CoursePanel({
         </div>
       )}
     </aside>
+    </OpenCode.Provider>
   )
 }

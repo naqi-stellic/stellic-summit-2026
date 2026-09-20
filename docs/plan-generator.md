@@ -293,7 +293,7 @@ started") or a grade already in and under what the option asks for (red,
 "Can't be met" — MIS 120 was passed at B and cannot be repeated). What each
 option comes to is read off what is inside it rather than written by hand,
 against the record the plan already holds: the ten courses passed in
-the fifteen credits they arrived with and the five courses under way. So
+the credits they arrived with and the five courses under way. So
 a tree never claims a course was passed that the plan says is still to come,
 and a group where one child is enough counts as one thing rather than as a
 shortfall for the options the student did not take.

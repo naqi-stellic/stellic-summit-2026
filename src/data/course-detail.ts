@@ -1,4 +1,6 @@
+import { DUAL_ENROLMENT } from "@/data/audit"
 import type { CatalogEntry } from "@/data/catalog"
+import { INCOMING_CREDITS, TRANSFER_COLLEGE } from "@/data/incoming"
 import { CREDITS_PER_COURSE, DEGREE, type Meeting } from "@/data/plan"
 
 /* What a course looks like when it is opened on its own: the catalogue entry
@@ -99,13 +101,10 @@ function seedOf(code: string): number {
 
 /* What the student has, which is what the audit reads a prerequisite against.
  * They are at the start of the degree, so the only credits already theirs are
- * the ones they arrived with — the transfer work and the course taken here
- * before the first year. */
-const EARNED: Record<string, string> = {
-  "ENG 101": "Transfer credit, Mesa Community College",
-  "MAT 151": "Transfer credit, Mesa Community College",
-  "SPAN 101": "Taken before Year 1",
-}
+ * the ones they arrived with: the transfer work on the record next door. */
+const EARNED: Record<string, string> = Object.fromEntries(
+  DUAL_ENROLMENT.courses.map((course) => [course.code, `Transfer credit, ${TRANSFER_COLLEGE}`])
+)
 
 const IN_PROGRESS = ["BUS 101", "MATH 140", "MIS 120", "PSYC 101", "ENGL 210"]
 
@@ -137,7 +136,7 @@ const CONDITIONS: Record<string, PrereqNode> = {
   credits: {
     label: "12 total credits",
     state: "earned",
-    meta: "15 completed",
+    meta: `${INCOMING_CREDITS.flatMap((g) => g.items).reduce((n, i) => n + i.credits, 0)} completed`,
   },
   standing: {
     label: "Good academic standing",
@@ -209,24 +208,26 @@ function summarise(children: PrereqNode[]): Body {
 
 /* The routes that are closed: a grade already in and under what the option
  * asks, on a course that cannot be repeated. */
-const CLOSED = [
-  { code: "ENG 101", minimum: "B" },
-  { code: "MAT 151", minimum: "B+" },
-]
+const MINIMUMS = ["B", "B+", "A−"]
 
 function closed(seed: number): Body {
-  const shut = CLOSED[seed % CLOSED.length]
+  const codes = Object.keys(EARNED)
+  const shut = codes[seed % codes.length]
+  const minimum = MINIMUMS[seed % MINIMUMS.length]
   return {
     state: "blocked",
     meta: "Can't be met",
     tone: "bad",
-    summary: `${shut.code} transferred without a grade, so the ${shut.minimum} minimum this option asks for cannot be met`,
+    /* Transfer credit carries units and no grade points, which is the rule
+       the record next door is kept under — so a minimum grade is a bar this
+       route can never clear. */
+    summary: `${shut} carries no grade points, so the ${minimum} minimum this option asks for cannot be met`,
     children: [
       {
-        code: shut.code,
-        note: `minimum grade ${shut.minimum}`,
+        code: shut,
+        note: `minimum grade ${minimum}`,
         state: "blocked",
-        meta: "Transfer credit, no grade",
+        meta: "Transfer credit, no grade points",
         tone: "bad",
       },
       CONDITIONS.standing,
@@ -275,7 +276,7 @@ function prerequisites(entry: CatalogEntry, seed: number): CourseDetail["prerequ
     const rest = from.filter((code) => code !== entry.code)
     return rest[seed % rest.length]
   }
-  const gate = pick(["MAT 151", "ENG 101"])
+  const gate = pick(Object.keys(EARNED))
   const second = pick(["MATH 140", "MIS 120", "BUS 101", "ENGL 210"])
   /* Only what comes below it in its own subject: a course cannot be asked for
      by something the student takes before it. */

@@ -43,6 +43,11 @@ is amber: something to get round to. A seat with no course in it is neither —
 it says what it is itself, and calling it an error only invites the argument
 about whether it is one.
 
+A course named in a prerequisite tree is a course like any other, so it opens
+like one: hover it and it underlines, click it and it takes the panel's place —
+in its term where the plan holds it, as a catalogue entry where it does not,
+and the way back leads to the course you came from rather than out.
+
 Where a course is drawn, the warning goes with it
 ([`1865:45317`](https://www.figma.com/design/baNPtCTTnk2E6SMio2xEDz/Plan-2.0-Scheduler?node-id=1865-45317)):
 its glyph sits before the course code on the calendar's card, and opening the

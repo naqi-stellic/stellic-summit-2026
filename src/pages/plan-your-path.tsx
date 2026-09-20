@@ -60,7 +60,12 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import type { CatalogEntry } from "@/data/catalog"
+import {
+  ALL_ELECTIVES,
+  REMAINING_REQUIREMENTS,
+  type CatalogEntry,
+} from "@/data/catalog"
+import { INCOMING_CREDITS } from "@/data/incoming"
 import { INITIAL_REVIEWS, planSignature, requestedLine, type Review } from "@/data/review"
 import { releasableTerms } from "@/components/stellic/keep-picker"
 import {
@@ -237,6 +242,9 @@ function termBanner(term: Term, drafting: boolean, onRegister: (term: Term) => v
   return drafting && !term.locked ? <NoActionsAlert /> : null
 }
 
+/** Where a course panel's way back leads, where it is another course. */
+type OpenBack = { planned: string } | { entry: CatalogEntry; from: string }
+
 export function PlanYourPath({
   generators = true,
   initialYears = INITIAL_YEARS,
@@ -317,6 +325,9 @@ export function PlanYourPath({
     requirement?: number
     /** What the way back says, which depends on where it was opened from. */
     from: string
+    /** Where the way back goes, where it is another course rather than a list:
+     *  a prerequisite tree can be walked, so it can be walked back. */
+    back?: OpenBack
   } | null>(null)
   /* A course already in the plan, opened on its own. */
   const [openPlanned, setOpenPlanned] = useState<string | null>(null)
@@ -658,6 +669,34 @@ export function PlanYourPath({
     setReviewPanel(false)
   }
 
+  /* A course named in a prerequisite tree, opened like any other. The name
+     comes from wherever the plan already knows it: a term, the outstanding
+     list, the elective shelves, or the credits the student came in with. */
+  function findEntry(code: string): CatalogEntry | null {
+    const outstanding = REMAINING_REQUIREMENTS.find((entry) => entry.code === code)
+    if (outstanding) return outstanding
+    const elective = ALL_ELECTIVES.find((entry) => entry.code === code)
+    if (elective) return elective
+    const brought = INCOMING_CREDITS.flatMap((group) => group.items).find((i) => i.code === code)
+    return brought ? { code, name: brought.name, reason: "Incoming credit" } : null
+  }
+
+  /* Opening a course a prerequisite tree names. One already in the plan opens
+     as what it is — in its term, with what the plan chose about it — rather
+     than as a catalogue entry offering to be added a second time. */
+  function openCode(code: string, from: { name: string; back: OpenBack }) {
+    const inPlan = allTerms.flatMap((t) => t.courses).find((c) => !c.placeholder && c.code === code)
+    if (inPlan) {
+      openPlannedPanel(inPlan.id)
+      return
+    }
+    const entry = findEntry(code)
+    if (entry) {
+      setOpenPlanned(null)
+      setOpenCourse({ entry, from: from.name, back: from.back })
+    }
+  }
+
   /* A course already in the plan, opened beside it. */
   function openPlannedPanel(courseId: string) {
     setOpenPlanned(courseId)
@@ -813,6 +852,12 @@ export function PlanYourPath({
             terms={plannableTerms}
             plan={allTerms}
             planned={{ course: plannedOpen.course, term: plannedOpen.term }}
+            onOpenCode={(code) =>
+              openCode(code, {
+                name: plannedOpen.course.name,
+                back: { planned: plannedOpen.course.id },
+              })
+            }
             onAdd={() => setOpenPlanned(null)}
             onRemove={
               plannedOpen.term.locked
@@ -833,6 +878,12 @@ export function PlanYourPath({
             terms={plannableTerms}
             plan={allTerms}
             backLabel={course.from}
+            onOpenCode={(code) =>
+              openCode(code, {
+                name: course.entry.name,
+                back: { entry: course.entry, from: course.from },
+              })
+            }
             onAdd={(termId) => {
               /* Opened from a seat and put back in that seat's own term, this
                  fills the seat rather than landing beside it — which is what
@@ -842,7 +893,13 @@ export function PlanYourPath({
               setOpenCourse(null)
               setOpenSeat(null)
             }}
-            onBack={() => setOpenCourse(null)}
+            onBack={() => {
+              /* Walked here from another course, the way back is that course
+                 rather than the way out. */
+              const back = course.back
+              setOpenCourse(back && "entry" in back ? { entry: back.entry, from: back.from } : null)
+              if (back && "planned" in back) setOpenPlanned(back.planned)
+            }}
             onClose={() => {
               setOpenCourse(null)
               setOpenSeat(null)
