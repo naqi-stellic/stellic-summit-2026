@@ -88,7 +88,12 @@ export const PERSONAS: Persona[] = [
       auditPublish: true,
       auditEdit: true,
       makeException: true,
-      articulations: false,
+      /* He does not work the transfer queue — that is Jessica's desk, and his
+         workflows say so — but the articulations Stellic has noticed are the
+         registrar's business too: a rule written once clears a pile nobody
+         has to touch again. Insights is work nobody sent you, and this is
+         some of it. */
+      articulations: true,
       wf: ["grad", "exc"],
     },
   },
@@ -135,6 +140,10 @@ export type Job = {
   name: string
   /** What turning it on brings, in the words of the person turning it on. */
   detail: string
+  /** The same, for somebody who gets the insights and not the queue. A line
+   *  promising credit reviews to a registrar who does not work that desk is a
+   *  promise the page cannot keep. */
+  withoutQueue?: string
   /** The Open Items tab it owns, where it owns one. */
   tab: TabKey | null
   /** Whether it brings insights as well as a queue. */
@@ -199,6 +208,8 @@ export const JOBS: Job[] = [
     name: "Transfer",
     detail:
       "Credit reviews waiting on your decision, plus incoming courses articulated by hand often enough to deserve a rule.",
+    withoutQueue:
+      "Incoming courses articulated by hand often enough to deserve a rule, so one rule clears the pile.",
     tab: "transfer",
     insights: true,
   },
@@ -239,7 +250,13 @@ export function jobAllowed(job: Job, perms: Perms): boolean {
  *  is not listed either, because a switch for something the page will not draw
  *  is a promise it cannot keep. */
 export const jobsFor = (perms: Perms, without: JobKey[] = []) =>
-  JOBS.filter((job) => jobAllowed(job, perms) && !without.includes(job.key))
+  JOBS.filter((job) => jobAllowed(job, perms) && !without.includes(job.key)).map((job) =>
+    /* A job whose queue this person does not work describes what they will
+       actually get. */
+    job.withoutQueue && job.tab && !tabAllowed(job.tab, perms)
+      ? { ...job, detail: job.withoutQueue }
+      : job
+  )
 
 /** Every allowed job starts on. What a role should arrive with is an admin
  *  setting in the real product; here it is simply everything they may have. */

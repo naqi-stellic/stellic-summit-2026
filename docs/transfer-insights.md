@@ -27,8 +27,10 @@ page will not draw is a promise it cannot keep.
 
 Because the page is not one page. Staff Home is a registrar's morning: publish
 requests to approve, exceptions to decide, graduation clearances sitting with
-him, and twenty-six things wrong with the audits he can edit. Nothing on it is
-Jessica's.
+him, and twenty-six things wrong with the audits he can edit. None of that work
+is Jessica's, and none of her queue is his — the credit reviews waiting on a
+decision are hers alone. The articulations Stellic has noticed are the one
+thing they share, because a rule written once takes the work off both desks.
 
 Hers is two panels and the line between them:
 
@@ -49,14 +51,14 @@ Figma: [`16:13521`](https://www.figma.com/design/gcskEkzwNusd12TOommFW0/Staff-Ho
 
 The one place in either prototype where an insight belongs to no program. The
 row is an incoming course, so it leads with that course and the institution it
-comes from, and the body leads with the size of the pile a rule would clear —
-"38 pending articulations".
+comes from, and the body is the size of the pile a rule would clear — "38
+pending articulations", and nothing else. That number is the whole decision:
+whether the rule is worth writing.
 
-Its second line is the only thing on Home that Stellic is guessing at: it has
-matched an incoming course to a home one. So it is the only line that carries
-the assistant's mark, and the only one that says **Suggestion** where every
-other finding says **Suggested**. Those findings are a fact with a fix; this is
-a proposal, and the wording keeps them apart.
+Stellic has also matched the incoming course to a home one, but that match is
+not on the row. Everything else on Home is a fact with a fix; a match is a
+guess, and a guess is only worth anything where somebody can check it and change
+it. So it waits in the equivalency form, which opens holding it.
 
 ## Create new equivalency
 
@@ -84,12 +86,12 @@ The row Jessica pressed decides everything the form shows: the institution, the
 incoming course, which suggestion leads, and how many students the rule would
 catch. Nothing is invented between the two screens.
 
-### Course details
+### Course description
 
 The other half of writing an equivalency is knowing what the incoming course
 actually was, and nobody in a registrar's office has Seneca's catalogue. The
 slow part of the job is opening a tab, finding a college's site and reading a
-paragraph — so **View course details** sends the assistant to read it.
+paragraph — so **Course description lookup** sends the assistant to read it.
 
 `src/components/stellic/staff-course-details.tsx`. It opens **where the button
 was**, in the column the course is in, rather than over the page: what it says

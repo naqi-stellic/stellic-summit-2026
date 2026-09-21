@@ -66,7 +66,7 @@ graduation clearance steps route to him.
 | --- | --- |
 | Permissions | `auditPublish`, `auditEdit`, `makeException`, the `grad` and `exc` workflows |
 | Tabs | Audits, Exceptions, Graduation Clearance |
-| Insight tabs | Audits, Exceptions |
+| Insight tabs | Exceptions, Audits, Transfers |
 
 He is named once, in `src/main-staff-home.tsx`, and passed to `StaffHome` as
 `who`. Nothing switches: the account circle is the plain grey disc every other
@@ -155,8 +155,11 @@ either way.
 
 There is a third kind of insight that belongs to no program — an incoming course
 articulated by hand often enough to deserve a rule. It has its own tab and its
-own row, and it is on [Transfer Insights](transfer-insights.md), because it
-needs articulation rights that Marcus does not have.
+own row, and it is on both prototypes: the registrar does not work the transfer
+queue, so no Transfer tab appears in Open Items, but a rule written once clears
+a pile nobody then has to touch, which is the registrar's business as much as
+the transfer office's. That is the line the permission model draws — a queue is
+work sent to you, an insight is work nobody sent.
 
 ### Hiding
 

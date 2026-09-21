@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { lookupSteps, type CatalogMatch } from "@/data/staff-insights"
 
-/* Course Details.
+/* Course Description.
  *
  * Writing an equivalency means knowing what the incoming course actually was,
  * and nobody here has Berkshire's catalogue. The slow half of the job is opening a
@@ -189,11 +189,11 @@ export function CourseDetails({
           outside the edge, where it belongs. */}
       <div className="flex items-center gap-2 rounded-t-md border-b border-gray-40 bg-card py-1.5 pr-2 pl-4">
         <Icon name="auto-awesome" size={16} className="text-gray-100" />
-        <p className="flex-1 text-body-md font-semibold text-gray-100">Course Details</p>
+        <p className="flex-1 text-body-md font-semibold text-gray-100">Course Description</p>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close course details"
+          aria-label="Close course description"
           className="flex size-8 cursor-pointer items-center justify-center rounded-md text-gray-100 hover:bg-gray-5"
         >
           <Icon name="close" size={14} />

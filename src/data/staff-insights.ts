@@ -338,9 +338,9 @@ export type Articulation = {
   /** The incoming course, which is what the row is about. */
   from: Course
   institution: string
-  /** The one home course Stellic proposes it maps onto. The insight row names
-   *  it and the equivalency form opens holding it — one suggestion, said once,
-   *  in both places. */
+  /** The one home course Stellic proposes it maps onto. It is not on the insight
+   *  row — a guess is only useful where it can be checked — so it is said once,
+   *  in the equivalency form, which opens holding it. */
   suggestion: Suggestion
   /** How much work the rule would take off the desk. */
   impact: string
@@ -366,7 +366,7 @@ export const ARTICULATIONS: Articulation[] = [
     impact: "38 pending articulations",
     pending: 38,
     iso: "2026-08-04",
-    vis: ["jessica"],
+    vis: ["jessica", "mark"],
     details: {
       title: "21-1200: Calculus I",
       school: "Berkshire Community College",
@@ -388,7 +388,7 @@ export const ARTICULATIONS: Articulation[] = [
     impact: "24 pending articulations",
     pending: 24,
     iso: "2026-08-03",
-    vis: ["jessica"],
+    vis: ["jessica", "mark"],
     details: {
       title: "21-2445: Biology I",
       school: "Berkshire Community College",
@@ -410,7 +410,7 @@ export const ARTICULATIONS: Articulation[] = [
     impact: "17 pending articulations",
     pending: 17,
     iso: "2026-08-01",
-    vis: ["jessica"],
+    vis: ["jessica", "mark"],
     details: {
       title: "PSY-837: Intro to Psychology",
       school: "Conestoga College",

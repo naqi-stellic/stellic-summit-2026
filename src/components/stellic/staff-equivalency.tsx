@@ -234,8 +234,9 @@ export function CreateEquivalency({
      than reopening onto the last answer. */
   const [run, setRun] = useState(0)
 
-  /* One suggestion, the one the insight row named. It is offered until it is
-     taken or put away, and then the column is whatever is on the rule. */
+  /* One suggestion, the one the insight carries but does not show. It is offered
+     until it is taken or put away, and then the column is whatever is on the
+     rule. */
   /* The suggestion stands until it is taken. There had been a way to dismiss
      it, which only ever emptied the one part of the form that had an answer
      in it. */
@@ -298,7 +299,7 @@ export function CreateEquivalency({
                   }}
                 >
                   <Icon name="auto-awesome" size={14} />
-                  View course details
+                  Course description lookup
                 </Button>
               )}
               <AddSlot onClick={() => elsewhere("Opens the course picker.")}>

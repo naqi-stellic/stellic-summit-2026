@@ -35,10 +35,12 @@ import {
 
 /* Insights: what Stellic found on its own.
  *
- * The tabs are the Open Items tabs — same topics, same order, no "All" — so the
- * two panels read as one page and a person learns the page once. What differs
- * is that nothing here was sent to anyone: these are findings, and the only
- * thing you can do with one other than fix it is put it away. */
+ * The tabs carry the Open Items topics, minus the "All" — so the two panels read
+ * as one page and a person learns the page once. The order is its own, because
+ * the two panels are ordered by different things: a queue by what is owed, a
+ * findings panel by what there is most to find in. What differs otherwise is
+ * that nothing here was sent to anyone: these are findings, and the only thing
+ * you can do with one other than fix it is put it away. */
 
 const LAST_UPDATED = "Last updated 2:00am"
 
@@ -280,14 +282,13 @@ function ProgramRow({
 }
 
 /** A catalogue-level finding: the row is the incoming course that wants a rule,
- *  so it leads with that and the institution it comes from, and the body leads
- *  with the size of the pile the rule would clear.
+ *  so it leads with that and the institution it comes from, and the body is the
+ *  size of the pile the rule would clear — the one number that decides whether
+ *  the rule is worth writing.
  *
- *  The second line is the only thing on the page Stellic is guessing at — it has
- *  matched an incoming course to a home one — so it is the only line that
- *  carries the assistant's mark and the only one that says "Suggestion" rather
- *  than "Suggested". A finding elsewhere on this page is a fact with a fix;
- *  this is a proposal. */
+ *  The home course Stellic proposes is not on the row. It is a guess, and a
+ *  guess belongs where it can be checked and changed: the equivalency form
+ *  opens holding it. The row stays a fact. */
 function ArticulationRow({
   row,
   hidden,
@@ -300,7 +301,11 @@ function ArticulationRow({
   onRule: () => void
 }) {
   return (
-    <div className="flex items-start gap-3.5 border-b border-divider p-4 transition-colors last:border-b-0 hover:bg-gray-0">
+    /* Centred, where every other row on the page is top-aligned: those rows have
+       a finding and a fix stacked in the middle column, and a top edge to line
+       up to. This one is a severity and a number, one line each, so the only
+       thing to line up to is the row. */
+    <div className="flex items-center gap-3.5 border-b border-divider p-4 transition-colors last:border-b-0 hover:bg-gray-0">
       <span className="w-[13px] shrink-0" />
       <div className={COL_SUBJECT}>
         <p className="text-body-md font-semibold text-foreground">
@@ -313,13 +318,6 @@ function ArticulationRow({
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-body-md font-semibold text-foreground">{row.impact}</p>
-        <p className="mt-2 flex items-start gap-2 text-label-md text-gray-80">
-          <Icon name="auto-awesome" size={14} className="mt-px shrink-0" />
-          Suggestion:{" "}
-          <span className="min-w-0 text-gray-100">
-            {row.suggestion.code}: {row.suggestion.name}
-          </span>
-        </p>
       </div>
       <div className={COL_ACTIONS}>
         <Button size="sm" onClick={onRule}>
@@ -360,7 +358,10 @@ export function Insights({
   onCleared: (n: number) => void
 }) {
   const toast = useToast()
-  const [tab, setTab] = useState<InsightTab>("audit")
+  /* Nothing chosen yet lands on the first tab there is, whichever that turns
+     out to be for this person — naming one here would mean picking a tab that
+     somebody's permissions may not even draw. */
+  const [tab, setTab] = useState<InsightTab | null>(null)
   const [tier, setTier] = useState<Tier>("all")
   const [sort, setSort] = useState<InsightSort>("urgency")
   const [query, setQuery] = useState("")
@@ -372,14 +373,14 @@ export function Insights({
   /* Only the sources this person can see anything in. A tab that would always
      be empty is worse than no tab. */
   const sources: InsightTab[] = [
-    ...(canEdit && jobs.audits ? (["audit"] as const) : []),
     ...(canEdit && jobs.exc ? (["exceptions"] as const) : []),
+    ...(canEdit && jobs.audits ? (["audit"] as const) : []),
     ...(perms.articulations && jobs.transfer ? (["transfer"] as const) : []),
   ]
 
   if (!sources.length) return null
 
-  const here = sources.includes(tab) ? tab : sources[0]
+  const here = tab && sources.includes(tab) ? tab : sources[0]
 
   const programs = canEdit ? INSIGHT_PROGRAMS.filter((p) => p.vis.includes(persona.key)) : []
   const articulations = perms.articulations
