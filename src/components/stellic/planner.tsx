@@ -10,6 +10,7 @@ import { DRAFT_STYLE, DraftNote, isStruck } from "@/components/stellic/draft-mar
 import { CourseActivity, CourseTags } from "@/components/stellic/course-metadata"
 import { TermActions } from "@/components/stellic/term-actions"
 import { AuditIcon, StatusPill } from "@/components/stellic/primitives"
+import { useCourseIssues } from "@/components/stellic/plan-issues"
 import { usePendingReview } from "@/components/stellic/review-state"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -31,6 +32,17 @@ import {
 /* ============================================================ AuditRow
    One course inside a semester card. Padding subtracts the border width
    (see button.tsx for why). */
+
+/** Stands in where a row is drawn outside a term — the card riding the drag
+ *  overlay — so the hook is called either way. */
+const NO_TERM: Term = {
+  id: "",
+  name: "",
+  window: "",
+  reviewed: false,
+  state: "planned",
+  courses: [],
+}
 
 /** How far apart the cards of a landing draft arrive. The tallies count in
  *  step with it, so the same value drives both. */
@@ -54,6 +66,9 @@ function settleDelay(order: number): string {
 
 type AuditRowProps = {
   course: PlannedCourse
+  /** The term holding it, which is what says whether anything is wrong with
+   *  it: a course is only late or out of season against the plan around it. */
+  term?: Term
   /** Registered courses are fixed in place: no handle, no hover affordance. */
   locked?: boolean
   /** The row left behind while its course rides the drag overlay. */
@@ -80,6 +95,7 @@ type AuditRowProps = {
 
 export function AuditRow({
   course,
+  term,
   locked,
   ghosted,
   overlay,
@@ -93,6 +109,9 @@ export function AuditRow({
   const draft = course.draft
   const style = draft ? DRAFT_STYLE[draft.mark] : null
   const struck = isStruck(course)
+  /* What the plan has against this course sitting where it does. A seat is
+     never one of them: it says what it is itself. */
+  const issue = useCourseIssues(term ?? NO_TERM, course.id)[0] ?? null
   /* A seat held against a requirement, with no course chosen for it: there is
    * no code to show and nothing to register, so it is drawn as an outline
    * waiting to be filled rather than as a course. */
@@ -165,7 +184,21 @@ export function AuditRow({
         ) : (
           <>
             <div>
-              <p className="text-body-md text-gray-80">{course.code}</p>
+              {/* The code carries the mark, so a card says something is wrong
+                  with it before anybody opens the term's line about it. */}
+              <p className="flex items-center gap-1.5 text-body-md text-gray-80">
+                {issue && (
+                  <Icon
+                    name={issue.severity === "error" ? "error-outline" : "warning"}
+                    size={14}
+                    className={cn(
+                      "shrink-0",
+                      issue.severity === "error" ? "text-alert-100" : "text-warning-100"
+                    )}
+                  />
+                )}
+                {course.code}
+              </p>
               <p
                 className={cn(
                   "text-body-md font-semibold text-foreground",
@@ -282,6 +315,7 @@ export function AuditRow({
 
 function SortableAuditRow({
   course,
+  term,
   settling,
   streaming,
   onRemove,
@@ -290,6 +324,7 @@ function SortableAuditRow({
   selected,
 }: {
   course: PlannedCourse
+  term?: Term
   settling?: boolean
   streaming?: boolean
   onRemove: () => void
@@ -312,6 +347,7 @@ function SortableAuditRow({
     >
       <AuditRow
         course={course}
+        term={term}
         ghosted={isDragging}
         settling={settling}
         streaming={streaming}
@@ -460,6 +496,7 @@ export function SemesterCard({
       <AuditRow
         key={course.id}
         course={course}
+        term={term}
         locked={term.locked}
         settling={settling}
         streaming={streaming}
@@ -471,6 +508,7 @@ export function SemesterCard({
       <SortableAuditRow
         key={course.id}
         course={course}
+        term={term}
         settling={settling}
         streaming={streaming}
         onRemove={() => onRemoveCourse(course.id)}

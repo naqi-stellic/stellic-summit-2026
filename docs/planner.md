@@ -58,6 +58,11 @@ about it
 ([`1865:6212`](https://www.figma.com/design/baNPtCTTnk2E6SMio2xEDz/Plan-2.0-Scheduler?node-id=1865-6212)),
 which is where you would go to do something about it.
 
+A course carrying one says so on its own card, in the four-year view as well
+as the term: the mark sits beside the code, red for the kind that stops the
+course happening and amber for the kind to get round to. A seat never carries
+one — it says what it is itself.
+
 On the term itself each one is a line
 ([`1388:27475`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1388-27475)):
 the course's code in bold, its name, what is wrong with it, and a link at the
