@@ -2,7 +2,7 @@ import { cn } from "cn"
 import { useEffect, useRef, useState } from "react"
 
 import { AppShell } from "@/components/layout/app-shell"
-import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
+import { AuditCard, AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
 import { DiscoverPanel } from "@/components/stellic/discover-panel"
 import { DiscoverPrograms } from "@/components/stellic/discover-programs"
 import { Spinner } from "@/components/ui/spinner"
@@ -13,9 +13,9 @@ import {
   TermStrip,
 } from "@/components/stellic/student-profile"
 import {
-  auditProgram,
   countedBy,
   markDoubleCounting,
+  withProgram,
   type Program,
 } from "@/data/programs"
 import {
@@ -48,6 +48,12 @@ export function AdvancedWhatIf() {
   /* What the what-if did to the record. `add` puts a second program under the
      degree; `change` puts one in place of it. Nothing is saved anywhere — this
      is the prototype's whole memory of the run. */
+  /* What the what-if has been asked, which accumulates: a minor added and then
+     a major changed is two questions about the same record, and answering the
+     second by forgetting the first would be a worse answer than either. */
+  const [added, setAdded] = useState<Program[]>([])
+  const [changed, setChanged] = useState<Program | null>(null)
+  /* The last of them, which is the one to land on. */
   const [applied, setApplied] = useState<{ program: Program; mode: "add" | "change" } | null>(null)
   /* The beat between asking and being answered. Nothing is computed — the tree
      is a pure function of the record and the program, and it is ready before
@@ -62,7 +68,6 @@ export function AdvancedWhatIf() {
      rows down, and an answer you have to go looking for does not read as an
      answer. */
   const auditRef = useRef<HTMLElement>(null)
-  const addedRef = useRef<HTMLDivElement>(null)
   /* Held on the thing that changed for a moment after it arrives. A scroll on
      a page of trees that look alike can be missed entirely; a ring that fades
      says which one of them is the answer. */
@@ -77,31 +82,45 @@ export function AdvancedWhatIf() {
   useEffect(() => {
     if (recomputing || !applied) return
 
-    /* Changing a major rewrites the tree at the top of the card; adding a
-       programme hangs a second one underneath, forty rows down. Either way,
-       land on the one that changed rather than on the card that holds it. */
-    const landing = applied.mode === "add" ? addedRef.current : auditRef.current
-    landing?.scrollIntoView({ behavior: "smooth", block: "start" })
+    /* Changing a major rewrites the branch at the top of the card, so the card
+       is the answer. Adding a programme hangs a branch off the credential
+       forty rows down, and a card top would land on the part that did not
+       change — so the row itself says where it is. */
+    const landing =
+      applied.mode === "add"
+        ? (auditRef.current?.querySelector("[data-landmark]") ?? auditRef.current)
+        : auditRef.current
+    landing?.scrollIntoView({
+      behavior: "smooth",
+      block: applied.mode === "add" ? "center" : "start",
+    })
 
     setLanded(true)
     const fade = window.setTimeout(() => setLanded(false), 1600)
     return () => window.clearTimeout(fade)
   }, [recomputing, applied])
 
-  const second = applied?.mode === "add" ? auditProgram(applied.program, true) : null
-  const primary =
-    applied?.mode === "change"
-      ? auditProgram(applied.program, false)
-      : /* Double counting is a fact about a course rather than about one tree,
-           so the degree's own copies say so too. */
-        second
-        ? markDoubleCounting(AUDIT, countedBy(applied!.program))
-        : AUDIT
+  /* Either answer hangs off the credential rather than replacing it: adding a
+     programme grows a second branch beside Business, changing a major swaps
+     that branch. The degree is the degree — what is being read against it is
+     the question. */
+  /* The change first, because it is what the degree is now read against, then
+     every programme added beside it. Double counting is a fact about a course
+     rather than about one branch, so the tree it is grafted onto is marked as
+     each one arrives — but only for programmes beside the degree, never for
+     one in place of it. */
+  const primary = [changed ? withProgram(AUDIT, changed, "change") : AUDIT]
+    .map((base) =>
+      added.reduce(
+        (tree, program) => withProgram(markDoubleCounting(tree, countedBy(program)), program, "add"),
+        base
+      )
+    )[0]
 
   /* Asked again of whatever is on screen: a program that takes up a course
      the degree ignored has matched it, and one that drops a course the degree
      wanted has unmatched it. */
-  const trees = second ? [primary, second] : [primary]
+  const trees = [primary]
   const unmatched = unmatchedAgainst(trees)
 
   /* And the bars at the top are read off the same trees. They had been the
@@ -125,12 +144,10 @@ export function AdvancedWhatIf() {
   }
 
   /* The profile says what the student is on, so it has to say this as well. */
-  const programs =
-    applied?.mode === "change"
-      ? [`${applied.program.name}`]
-      : applied
-        ? [AUDIT_STUDENT.program, `${applied.program.name} (${applied.program.kind})`]
-        : [AUDIT_STUDENT.program]
+  const programs = [
+    changed ? changed.name : AUDIT_STUDENT.program,
+    ...added.map((program) => `${program.name} (${program.kind})`),
+  ]
 
   return (
     <AppShell
@@ -148,6 +165,9 @@ export function AdvancedWhatIf() {
               setDiscovering(false)
               setRecomputing(true)
               setApplied({ program, mode })
+              if (mode === "change") setChanged(program)
+              /* Asked for twice, kept once. */
+              else setAdded((current) => (current.some((p) => p.id === program.id) ? current : [...current, program]))
               window.clearTimeout(beat.current)
               beat.current = window.setTimeout(() => setRecomputing(false), 900)
             }}
@@ -165,7 +185,7 @@ export function AdvancedWhatIf() {
             progress={progress}
             /* The record's own label is "Official Progress", and this is not
                the record once something has been applied to it. */
-            progressLabel={applied ? "Planned Progress" : undefined}
+            progressLabel={changed || added.length > 0 ? "Planned Progress" : undefined}
           />
           <NetworkRow />
           <TermStrip />
@@ -188,56 +208,52 @@ export function AdvancedWhatIf() {
 
           {/* Only Progress has a design; the other four tabs are named and
               nothing more, which is what the frame shows of them. */}
-          <section
-            ref={auditRef}
-            /* 40 between the tree, the unmatched list and the banner: three
-               separate things in one card, and at 24 they read as one list
-               that changes its mind twice. */
-            className={cn(
-              "scroll-mt-4 flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card",
-              "ring-primary-50 transition-shadow duration-500",
-              landed && applied?.mode === "change" && "ring-2"
-            )}
-          >
-            {recomputing ? (
-              /* The old tree goes rather than sitting there greyed: it is the
-                 answer to a question nobody is asking any more. Same spinner
-                 the rest of the prototypes wait on. */
+          {recomputing ? (
+            /* The old tree goes rather than sitting there greyed: it is the
+               answer to a question nobody is asking any more. Same spinner the
+               rest of the prototypes wait on. */
+            <AuditCard>
               <div className="flex min-h-[320px] flex-col items-center justify-center gap-3">
                 <Spinner className="size-9" />
                 <p className="text-body-md text-gray-80">Recalculating audit</p>
               </div>
-            ) : (
-              <>
-            <AuditTree audit={primary} />
-            {/* A second program sits under the degree and above the courses
-                nothing has claimed, which is where it would fall on the
-                record: another thing the transcript is being read against. */}
-            {second && (
-              <div
-                ref={addedRef}
+            </AuditCard>
+          ) : (
+            <>
+              <AuditCard
+                ref={auditRef}
                 className={cn(
-                  "scroll-mt-4 rounded-md ring-primary-50 transition-shadow duration-500",
-                  /* The ring needs room to sit outside the rows it is around. */
-                  landed && "ring-2 ring-offset-8 ring-offset-card"
+                  "scroll-mt-4 ring-primary-50 transition-shadow duration-500",
+                  landed && applied?.mode === "change" && "ring-2"
                 )}
               >
-                <AuditTree audit={second} />
-              </div>
-            )}
-            <UnmatchedSection
-              count={unmatched.length}
-              blurb={UNMATCHED_BLURB}
-              courses={unmatched}
-            />
-            {/* The foot of the audit, and the way into the what-if. It
-                stands on the card's own padding, as the tree and the
-                unmatched list do — one edge down each side, whatever is
-                against it. */}
-            <DiscoverPrograms onOpen={() => setDiscovering(true)} />
-              </>
-            )}
-          </section>
+                <AuditTree
+                  audit={primary}
+                  /* The branch that arrived, for the scroll to land on and the
+                     ring to sit around. Changing a major has none: the whole
+                     card is the answer. */
+                  landmark={
+                    applied?.mode === "add"
+                      ? { id: applied.program.id, ring: landed }
+                      : undefined
+                  }
+                />
+              </AuditCard>
+
+              <AuditCard>
+                <UnmatchedSection
+                  count={unmatched.length}
+                  blurb={UNMATCHED_BLURB}
+                  courses={unmatched}
+                />
+              </AuditCard>
+
+              {/* The foot of the audit, and the way into the what-if. It is
+                  already a card — the same hairline the others carry — so it
+                  stands on its own rather than inside another. */}
+              <DiscoverPrograms onOpen={() => setDiscovering(true)} />
+            </>
+          )}
         </div>
       </main>
     </AppShell>

@@ -60,20 +60,15 @@ function Filters({
 }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3">
-      <p className="flex items-center gap-1.5 text-body-md text-gray-100">
-        <Icon name="filter-alt" size={14} className="text-gray-80" />
-        Filters
-      </p>
+      <p className="text-caption-md font-medium text-gray-100">Filters</p>
       <div className="flex flex-wrap gap-2">
-        {/* The assistant is a filter like the rest, and first because it is the
-            one you reach for when you cannot name the filter you want. */}
+        {/* First, and set apart by the rule after it: the way in when you
+            cannot name the filter you want, rather than one of the twenty
+            that name themselves. */}
         <Button size="sm">
-          <Icon name="auto-awesome-outline" size={14} />
-          Filter Assistant
+          <Icon name="filter-list" size={14} />
+          Advanced
         </Button>
-        {/* The assistant is a filter and it is not one of the twenty: it is how
-            you reach them when you cannot name the one you want. The rule says
-            so without a second heading. */}
         <span className="mx-1 h-8 w-px shrink-0 self-center bg-gray-40" />
         {FILTERS.map((filter) =>
           /* Eighteen are named and inert. These two ask the question the
@@ -171,7 +166,7 @@ export function SearchPanel({
     <div className={CARD}>
       <div className="flex flex-wrap gap-8 p-6">
         <div className="flex w-[300px] shrink-0 flex-col gap-3 max-md:w-full">
-          <label htmlFor="keywords" className="text-body-md text-gray-100">
+          <label htmlFor="keywords" className="text-caption-md font-medium text-gray-100">
             Keywords
           </label>
           <div className="relative flex items-center">

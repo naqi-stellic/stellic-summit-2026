@@ -69,14 +69,24 @@ still a seat you owe.
 Every row is the same three parts — the trail that says where it sits, the mark
 that says how it stands, and the row.
 
-The audit card pads itself by 24 and nothing inside it adds a second inset: the
-degree row, the unmatched heading and the Discover banner all stand on the same
-left edge, and every row runs to the same right one. A `TreeElement` has no
-indent of its own — depth is the trail's business.
+Each block is a card of its own: the degree, the courses nothing claimed, and
+the Discover banner — three things rather than three parts of one thing, and
+`AuditCard` in `audit-tree.tsx` is the one shape they take.
 
-The three blocks are 40 apart, which is the same 40 whichever pair you measure.
-They are three separate things sharing a card, and at the rows' own 8 they read
-as one list that changes its mind twice.
+A programme the what-if applies is not one of them. It hangs off the
+credential: adding one grows a second branch beside Business, changing a major
+swaps that branch, and either way the row above is untouched, because neither
+answer changes what the degree is. `withProgram` does the grafting and
+recomputes the credential's own counts and bar from what now hangs under
+it — the branch arrives as a programme row, with its own mark read off its
+requirements and its own PGPA, which is what the row beside it already has.
+
+A card pads itself by 24 and nothing inside it adds a second inset: the degree
+row, the unmatched heading and the banner all stand on the same left edge, and
+every row runs to the same right one. A `TreeElement` has no indent of its own
+— depth is the trail's business. The cards sit 16 apart, the column's own gap;
+inside one, blocks are 40 apart, and at the rows' own 8 they would read as one
+list that changes its mind.
 
 **The trail** is one 40px cell per level above the row, with a 1px line down
 each cell's middle (`--stellic-divider`, `#e4e7ec`). The line overruns its row

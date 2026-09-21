@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import { AppShell } from "@/components/layout/app-shell"
-import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
+import { AuditCard, AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
 import { ConstraintsCard, ExplainPanel } from "@/components/stellic/explain-panel"
 import { GpaPanel } from "@/components/stellic/gpa-panel"
 import {
@@ -125,7 +125,8 @@ export function ExplainProgress() {
             lastComputed={LAST_COMPUTED}
           />
 
-          <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
+          {/* One card for the degree, one for what nothing claimed. */}
+          <AuditCard>
             <AuditTree
               audit={EXPLAIN_AUDIT}
               explain={{
@@ -149,12 +150,15 @@ export function ExplainProgress() {
                 onGpa: (group) => setBeside({ kind: "gpa", group }),
               }}
             />
+          </AuditCard>
+
+          <AuditCard>
             <UnmatchedSection
               count={unmatched.length}
               blurb={UNMATCHED_BLURB}
               courses={unmatched}
             />
-          </section>
+          </AuditCard>
         </div>
       </main>
     </AppShell>

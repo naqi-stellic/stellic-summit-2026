@@ -1,12 +1,15 @@
 import {
   COUNTING_NOW,
   STUDENT_RECORD,
+  auditStanding,
   markFrom,
+  outstanding,
   type AuditCourse,
   type AuditEntry,
   type AuditGroup,
   type AuditMark,
 } from "@/data/audit"
+import { gpaOfGroup } from "@/data/gpa"
 import { CREDITS_PER_COURSE } from "@/data/plan"
 
 /* What else this transcript could be worth.
@@ -1191,6 +1194,65 @@ export function countedBy(program: Program): Set<string> {
       .flatMap((requirement) => requirement.courses.map((want) => want.code))
       .filter((code) => code && STUDENT_RECORD.has(code))
   )
+}
+
+/** The credential with a programme put under it: beside the one it already
+ *  carries, or in place of it.
+ *
+ *  Adding a programme does not change what the degree is — the row above stays
+ *  exactly as it was, and the tree grows a second branch beside Business.
+ *  Changing a major swaps that branch and leaves the row above untouched for
+ *  the same reason: the student is still reading themselves against the same
+ *  credential.
+ *
+ *  What does change is the credential's own counts and bar, because those are
+ *  read off what hangs beneath it rather than stated. */
+export function withProgram(
+  audit: AuditGroup,
+  program: Program,
+  mode: "add" | "change"
+): AuditGroup {
+  /* A programme under the credential is a programme row, not a second degree:
+     the same level the one already there is drawn at. Alongside only where it
+     is alongside — an added programme shares courses with the degree, a
+     replacement is the degree's own reading. */
+  const built = auditProgram(program, mode === "add")
+  const branch: AuditGroup = {
+    ...built,
+    level: "program",
+    /* A programme row draws its count off its own mark, which the standalone
+       tree never needed — it headed the tree, and a head has counts of its
+       own. Under the credential it is a requirement like any other, and reads
+       like one: the worst of what hangs beneath it. */
+    mark: markFrom(built.children.flatMap((child) => (child.mark ? [child.mark] : []))),
+  }
+  const withGpa: AuditGroup = { ...branch, pgpa: gpaOfGroup(branch) }
+
+  const children =
+    mode === "add"
+      ? [...audit.children, withGpa]
+      : audit.children.map((child) =>
+          child.kind === "group" && child.level === "program" ? withGpa : child
+        )
+
+  const next: AuditGroup = { ...audit, children }
+  const standing = auditStanding(next)
+  const short = outstanding(next)
+
+  return {
+    ...next,
+    /* A flag reading nought is not a flag: where the programme under it asks
+       for no milestones, the credential has none to count. */
+    counts: {
+      requirements: short.courses,
+      ...(short.milestones > 0 ? { milestones: short.milestones } : {}),
+    },
+    bar: {
+      done: standing.taken,
+      claimed: standing.inProgress + standing.registered,
+      total: standing.taken + standing.inProgress + standing.remaining,
+    },
+  }
 }
 
 /** Mark the degree's own copies of the courses a second program has taken up.

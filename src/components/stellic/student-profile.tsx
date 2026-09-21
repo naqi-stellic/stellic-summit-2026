@@ -29,7 +29,9 @@ export function ProgressCard({
   children: ReactNode
 }) {
   return (
-    <section className={cn("rounded-md bg-card p-6 shadow-card", className)}>{children}</section>
+    <section className={cn("rounded-md border border-gray-40 bg-card p-6 shadow-xs", className)}>
+      {children}
+    </section>
   )
 }
 
@@ -415,7 +417,7 @@ export function AuditControls({
   lastComputed: string
 }) {
   return (
-    <section className="flex flex-col gap-6 rounded-md border border-gray-5 bg-card py-6 shadow-card">
+    <section className="flex flex-col gap-6 rounded-md border border-gray-40 bg-card py-6 shadow-xs">
       <div className="flex flex-wrap items-end justify-center border-b border-gray-40">
         {tabs.map((tab) => {
           const on = tab.id === active

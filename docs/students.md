@@ -19,8 +19,9 @@ choosing happens.
 the product actually has — Demographics, Programs, Performance, Advisors,
 Graduation, Remaining, Planned, Taken, Unmatched, Plan Reviews, Canvas, Status,
 Notes, Campaigns, Pathways, Appointments, Requests, Interests, Enrollment,
-Transfers — with the Filter Assistant first, because it is the one you reach for
-when you cannot name the filter you want.
+Transfers — with Advanced first and a rule after it, because it is the way in
+when you cannot name the filter you want rather than one of the twenty that
+name themselves.
 
 They are drawn, named, and none of them opens. How many ways in there are is the
 information on this screen; what is behind any one of them is a different

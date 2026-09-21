@@ -1,5 +1,6 @@
 import { cn } from "cn"
-import { useState, type ReactNode } from "react"
+import * as React from "react"
+import { useState } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
@@ -187,13 +188,14 @@ export function Trail({ cells }: { cells: { line: boolean; elbow?: boolean; last
 
 export function TreeElement({
   trail,
+  className,
   children,
+  ...props
 }: {
   trail: { line: boolean; elbow?: boolean; last?: boolean }[]
-  children: ReactNode
-}) {
+} & React.ComponentProps<"div">) {
   return (
-    <div className="group flex items-stretch gap-1 bg-card">
+    <div className={cn("group flex items-stretch gap-1 bg-card", className)} {...props}>
       <Trail cells={trail} />
       {children}
     </div>
@@ -560,6 +562,7 @@ function EntryRows({
   folded,
   onToggle,
   explain,
+  landmark,
 }: {
   entry: AuditEntry
   /** One per level above this row: does that level's line continue past it? */
@@ -568,14 +571,23 @@ function EntryRows({
   folded: Set<string>
   onToggle: (id: string) => void
   explain?: Explain
+  landmark?: Landmark
 }) {
   const trail = [...stem.map((line) => ({ line })), { line: true, elbow: true, last }]
   const open = entry.kind === "group" && !folded.has(entry.id)
   const rulesId = `${entry.id}-rules`
   const rulesOpen = !folded.has(rulesId)
 
+  const marked = landmark?.id === entry.id
   const row = (
-    <TreeElement trail={trail}>
+    <TreeElement
+      trail={trail}
+      {...(marked ? { "data-landmark": "" } : {})}
+      className={cn(
+        marked && "scroll-mt-6 rounded-md ring-primary-50 transition-shadow duration-500",
+        marked && landmark?.ring && "ring-2"
+      )}
+    >
       {entry.kind === "milestone" ? (
         <MilestoneRow milestone={entry} />
       ) : entry.kind === "course" ? (
@@ -635,6 +647,7 @@ function EntryRows({
           folded={folded}
           onToggle={onToggle}
           explain={explain}
+          landmark={landmark}
         />
       ))}
     </>
@@ -660,7 +673,44 @@ function initialFold(audit: AuditGroup): Set<string> {
   return folded
 }
 
-export function AuditTree({ audit, explain }: { audit: AuditGroup; explain?: Explain }) {
+/** One card in the audit's stack.
+ *
+ *  A degree, a second programme, a minor, and the courses nothing claimed are
+ *  four things the transcript is being read against, not four parts of one
+ *  thing — so each stands on its own card rather than all of them running
+ *  together down a single sheet. Adding a programme adds a card. */
+export function AuditCard({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"section">) {
+  return (
+    <section
+      className={cn(
+        "flex flex-col gap-10 overflow-x-auto rounded-md border border-gray-40 bg-card p-6 shadow-xs",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </section>
+  )
+}
+
+/** A row worth landing on. An answer forty rows down a tree is an answer you
+ *  have to go looking for, so the thing that changed says where it is — and
+ *  wears a ring for a moment when it arrives. */
+export type Landmark = { id: string; ring?: boolean }
+
+export function AuditTree({
+  audit,
+  explain,
+  landmark,
+}: {
+  audit: AuditGroup
+  explain?: Explain
+  landmark?: Landmark
+}) {
   const [folded, setFolded] = useState(() => initialFold(audit))
 
   const toggle = (id: string) =>
@@ -689,6 +739,7 @@ export function AuditTree({ audit, explain }: { audit: AuditGroup; explain?: Exp
           folded={folded}
           onToggle={toggle}
           explain={explain}
+          landmark={landmark}
         />
       ))}
     </div>

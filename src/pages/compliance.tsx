@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import { AppShell } from "@/components/layout/app-shell"
-import { AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
+import { AuditCard, AuditTree, UnmatchedSection } from "@/components/stellic/audit-tree"
 import { ComplianceTree } from "@/components/stellic/compliance-tree"
 import { cameFrom } from "@/components/stellic/plan-header"
 import { ExplainPanel } from "@/components/stellic/explain-panel"
@@ -115,30 +115,39 @@ export function Compliance() {
           />
 
           {tab === "progress" ? (
-            <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
-              <AuditTree audit={AUDIT} />
-              <UnmatchedSection
-                count={unmatched.length}
-                blurb={UNMATCHED_BLURB}
-                courses={unmatched}
-              />
-            </section>
+            <>
+              <AuditCard>
+                <AuditTree audit={AUDIT} />
+              </AuditCard>
+              <AuditCard>
+                <UnmatchedSection
+                  count={unmatched.length}
+                  blurb={UNMATCHED_BLURB}
+                  courses={unmatched}
+                />
+              </AuditCard>
+            </>
           ) : (
-            <section className="flex flex-col gap-10 overflow-x-auto rounded-md bg-card p-6 shadow-card">
-              <ComplianceTree
-                ruleset={planned ? PLANNED_RULESET : RULESET}
-                onExplain={setExplaining}
-              />
+            <>
+              <AuditCard>
+                <ComplianceTree
+                  ruleset={planned ? PLANNED_RULESET : RULESET}
+                  onExplain={setExplaining}
+                />
+              </AuditCard>
               {/* A second ruleset, under the first rather than instead of it:
                   two clocks on one transcript, and neither can see the other.
                   Its checks explain themselves the same way — an aid standard
                   is coded out of the same constraints a degree is, which is
-                  the argument for it being on this screen at all. */}
-              <ComplianceTree
-                ruleset={planned ? PLANNED_AID : AID}
-                onExplain={setExplaining}
-              />
-            </section>
+                  the argument for it being on this screen at all. Its own card,
+                  because it is its own reading. */}
+              <AuditCard>
+                <ComplianceTree
+                  ruleset={planned ? PLANNED_AID : AID}
+                  onExplain={setExplaining}
+                />
+              </AuditCard>
+            </>
           )}
         </div>
       </main>
