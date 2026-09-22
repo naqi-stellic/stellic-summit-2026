@@ -16,7 +16,14 @@
 
 /* ============================================================ Tabs */
 
-export type TabKey = "notes" | "appts" | "audits" | "exceptions" | "grad" | "transfer"
+export type TabKey =
+  | "notes"
+  | "appts"
+  | "audits"
+  | "exceptions"
+  | "grad"
+  | "reviews"
+  | "transfer"
 
 /** Display order, which is priority order rather than the alphabetical order
  *  Customize Home uses: a person's own record-keeping first, then the requests
@@ -27,6 +34,7 @@ export const ALL_TABS: TabKey[] = [
   "audits",
   "exceptions",
   "grad",
+  "reviews",
   "transfer",
 ]
 
@@ -36,13 +44,14 @@ export const TAB_LABELS: Record<TabKey, string> = {
   audits: "Audits",
   exceptions: "Exceptions",
   grad: "Graduation Clearance",
+  reviews: "Plan Reviews",
   transfer: "Transfer",
 }
 
 export type PersonaKey = "mark" | "jessica"
 
 /** A workflow category whose steps can route to a person. */
-export type WorkflowKey = "grad" | "transfer" | "exc"
+export type WorkflowKey = "grad" | "reviews" | "transfer" | "exc"
 
 export type Perms = {
   /** May approve a publish request, which is what puts the Audits tab on Home. */
@@ -94,7 +103,7 @@ export const PERSONAS: Persona[] = [
          has to touch again. Insights is work nobody sent you, and this is
          some of it. */
       articulations: true,
-      wf: ["grad", "exc"],
+      wf: ["grad", "reviews", "exc"],
     },
   },
   {
@@ -133,6 +142,7 @@ export type JobKey =
   | "audits"
   | "exc"
   | "grad"
+  | "reviews"
   | "transfer"
 
 export type Job = {
@@ -204,6 +214,14 @@ export const JOBS: Job[] = [
     insights: false,
   },
   {
+    key: "reviews",
+    name: "Plan Reviews",
+    detail:
+      "Plan reviews students have sent you, with the terms they are asking about and the plan as it stood when they asked.",
+    tab: "reviews",
+    insights: false,
+  },
+  {
     key: "transfer",
     name: "Transfer",
     detail:
@@ -221,6 +239,7 @@ export const JOB_OF_TAB: Record<TabKey, JobKey> = {
   audits: "audits",
   exceptions: "exc",
   grad: "grad",
+  reviews: "reviews",
   transfer: "transfer",
 }
 

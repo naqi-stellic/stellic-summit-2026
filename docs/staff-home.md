@@ -65,7 +65,7 @@ graduation clearance steps route to him.
 | | |
 | --- | --- |
 | Permissions | `auditPublish`, `auditEdit`, `makeException`, the `grad` and `exc` workflows |
-| Tabs | Audits, Exceptions, Graduation Clearance |
+| Tabs | Audits, Exceptions, Graduation Clearance, Plan Reviews |
 | Insight tabs | Exceptions, Audits, Transfers |
 
 He is named once, in `src/main-staff-home.tsx`, and passed to `StaffHome` as
@@ -108,9 +108,44 @@ Rows behave differently on purpose:
 - **Exceptions** splits on whether there is a workflow behind the request. A
   direct one is decided here in one press. One with a workflow opens onto the
   rail instead and offers Open.
-- **Workflows** open onto the rail. Marcus has one category, Graduation
-  Clearance. Transfer is the other, and it is Jessica's — credit reviews only,
-  since an articulation is not waiting on anybody and so belongs in Insights.
+- **Workflows** open onto the rail. Marcus has two categories, Graduation
+  Clearance and Plan Reviews. Transfer is the third, and it is Jessica's —
+  credit reviews only, since an articulation is not waiting on anybody and so
+  belongs in Insights.
+
+### Plan Reviews
+
+Figma: [`1406:63125`](https://www.figma.com/design/8BFP4evDj7E5coGDemDrnF/New-Planner---Plan-Review?node-id=1406-63125).
+
+The other end of the planner's **Request review**. A student presses it, names
+the terms and the plan they want looked at, and the request lands here — which
+is why the first node on the rail is called **Request to Review** rather than
+"Request submitted": the student's own screen calls it that, and one request
+should not have two names depending on which side of the desk you read it from.
+The request types are the planner's own `REVIEW_TYPES`, so the row is headed
+with the same words the student chose from — plus one the student never sees:
+**Freshman Plan Review [2026 Freshmen]** is scoped to a different student set,
+which is why it is not in the list Scott is offered and is in the list a
+reviewer reads. Its row is Ryo Nakamura, whose record already says Freshman and
+carries Business undeclared, which is most of why a first-year plan gets read at
+all.
+
+The three students are the roster's own, rather than the names on the mock-up.
+Every photograph in this suite belongs to somebody already, and two names
+wearing one face is worse than a name that does not match a design file. Where a
+student has no photograph at all, `Face` draws one — the same `StudentAvatar`
+the roster has used since it had eight rows — and initials stay for the staff,
+who are named rather than pictured.
+
+Three nodes, and the middle one is the work: the reviewer marks their decisions
+on the plan itself, and **Complete** is what sends it back and releases the
+terms from pending. So the primary action reads Complete rather than Start —
+the review is not a step to begin, it is one to finish.
+
+Two links the others do not have, because they are what a reviewer reaches for
+before deciding: the reference plan the request names, and how much of it has
+moved since the request went out. A request nothing has changed under says so
+rather than offering a list of nothing.
 
 ### The step rail
 

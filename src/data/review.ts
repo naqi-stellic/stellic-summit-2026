@@ -29,6 +29,15 @@ export const REVIEW_TYPES: ReviewType[] = [
   },
 ]
 
+/** A type scoped to a different student set, so it is not in the list Scott is
+ *  offered — he is a sophomore, and the set is first years. Staff Home meets it
+ *  from the other side, where a reviewer sees every set at once. */
+export const FRESHMAN_REVIEW: ReviewType = {
+  id: "freshman",
+  label: "Freshman Plan Review [2026 Freshmen]",
+  blurb: "Use this request in your first year, to have the whole first-year plan looked at",
+}
+
 /** Who reads the request. One advisor, named on every review. */
 export const ADVISOR = { name: "Mark Stehlik" }
 

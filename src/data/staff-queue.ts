@@ -1,5 +1,6 @@
 import type { PersonaKey } from "@/data/staff-home"
 import { DEGREE } from "@/data/plan"
+import { FRESHMAN_REVIEW, REVIEW_TYPES } from "@/data/review"
 
 /* Open Items: the work that is waiting on a decision from you.
  *
@@ -92,6 +93,8 @@ const FACES: Record<string, string> = {
   "Diego Ramos": "/faces/dramos.jpg",
   "Priya Chandran": "/faces/pchandran.jpg",
   "Ingrid Castellanos": "/faces/icastellanos.jpg",
+  "Nadia Haddad": "/faces/nhaddad.jpg",
+  "Ryo Nakamura": "/faces/rnakamura.jpg",
   "Alexander Mitchell": "/faces/amitchell.jpg",
   "Tomas Reyes": "/faces/treyes.jpg",
   "Aaron Scott": "/faces/ascott.jpg",
@@ -332,10 +335,19 @@ export type WorkflowRow = {
   openedAs?: string
   fields?: [string, string][]
   steps?: Step[]
+  /** Their username, which is what a drawn face is seeded from — the same
+   *  person is the same face wherever they turn up. */
+  username?: string
+  /** How much of the plan has moved since the request went out. A reviewer
+   *  reads a plan review against what changed under it, so the number is part
+   *  of the request rather than something to go and count. */
+  changes?: number
 }
 
-export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: WorkflowRow[] }> =
-  {
+export const WORKFLOWS: Record<
+  "grad" | "reviews" | "transfer",
+  { label: string; rows: WorkflowRow[] }
+> = {
     grad: {
       label: "Graduation Clearance",
       rows: [
@@ -437,6 +449,141 @@ export const WORKFLOWS: Record<"grad" | "transfer", { label: string; rows: Workf
               when: "Aug 2",
             },
             { state: "cur", label: "Registrar review", who: "You", when: "now", since: "Aug 2" },
+          ],
+        },
+      ],
+    },
+    /* The other end of the planner's Request review.
+     *
+     * A student presses it, names the terms and the plan they want looked at,
+     * and the request lands here. Which is why the first rail node is called
+     * Request to Review rather than "Request submitted": the student's own
+     * screen calls it that, and one request should not have two names
+     * depending on which side of the desk you read it from.
+     *
+     * Three steps, and the middle one is the work: everything the reviewer
+     * decides is marked on the plan itself, and Complete is what sends it
+     * back. */
+    reviews: {
+      label: "Plan Reviews",
+      rows: [
+        {
+          id: "r1",
+          /* The student the rest of the suite follows, asking about the term
+             he is arranging in the planner. */
+          name: REVIEW_TYPES[0].label,
+          student: "Scott Abott",
+          initials: "SA",
+          color: "#087443",
+          program: `${DEGREE.program} (${DEGREE.concentration})`,
+          date: "Dec 1",
+          iso: "2026-12-01",
+          vis: ["mark"],
+          status: "In Review",
+          openedAs: "Request to Review",
+          changes: 12,
+          fields: [
+            ["Reference Plan", "Primary Plan"],
+            ["Terms", "Spring 2027"],
+            ["Student note", "Kept the spring lighter — I work 20 hours a week through the year."],
+          ],
+          steps: [
+            {
+              state: "cur",
+              label: "Review",
+              who: "You",
+              when: "now",
+              since: "Dec 1",
+              fields: [["Instructions", "Mark all decisions on plan prior to completing"]],
+            },
+            {
+              state: "todo",
+              label: "Complete",
+              when: "Sends the plan back and releases the terms from pending",
+            },
+          ],
+        },
+        {
+          id: "r2",
+          /* From the roster rather than from the design's own demo data: every
+             photograph in this suite belongs to somebody already, and two names
+             wearing one face is worse than a name that does not match a
+             mock-up. */
+          name: REVIEW_TYPES[0].label,
+          student: "Nadia Haddad",
+          username: "nhaddad",
+          initials: "NH",
+          color: "#b54708",
+          program: "Political Science, B.A.",
+          date: "Nov 28",
+          iso: "2026-11-28",
+          vis: ["mark"],
+          status: "In Review",
+          openedAs: "Request to Review",
+          changes: 4,
+          fields: [
+            ["Reference Plan", "Secondary Plan"],
+            ["Terms", "Fall 2027"],
+          ],
+          steps: [
+            {
+              state: "cur",
+              label: "Review",
+              who: "You",
+              when: "now",
+              since: "Nov 28",
+              fields: [["Instructions", "Mark all decisions on plan prior to completing"]],
+            },
+            {
+              state: "todo",
+              label: "Complete",
+              when: "Sends the plan back and releases the terms from pending",
+            },
+          ],
+        },
+        {
+          id: "r3",
+          /* The roster's own first year — standing already says Freshman, and
+             Business is on his record undeclared, which is most of why a
+             first-year plan gets read at all. Not Diego Ramos, who is
+             graduating in the Graduation Clearance tab two tabs over: one
+             cast, one set of facts about each of them. */
+          name: FRESHMAN_REVIEW.label,
+          student: "Ryo Nakamura",
+          username: "rnakamura",
+          initials: "RN",
+          color: "#175cd3",
+          program: "Computer Science, B.S.",
+          date: "Nov 24",
+          iso: "2026-11-24",
+          vis: ["mark"],
+          status: "In Review",
+          openedAs: "Request to Review",
+          changes: 0,
+          fields: [
+            ["Reference Plan", "Primary Plan"],
+            ["Terms", "Spring 2027, Fall 2027"],
+          ],
+          steps: [
+            {
+              state: "done",
+              label: "Advisor read",
+              who: "Ozzy Blackwell · passed to the registrar",
+              when: "Nov 26",
+            },
+            {
+              state: "cur",
+              label: "Review",
+              who: "You",
+              when: "now",
+              since: "Nov 26",
+              fields: [["Instructions", "Mark all decisions on plan prior to completing"]],
+            },
+            {
+              state: "todo",
+              label: "Complete",
+              when: "Sends the plan back and releases the terms from pending",
+            },
           ],
         },
       ],

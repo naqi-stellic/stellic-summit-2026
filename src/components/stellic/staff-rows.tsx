@@ -83,7 +83,7 @@ export function RowSubject({
   sub,
   subStrong,
 }: {
-  face?: { initials: string; color: string; photo?: string }
+  face?: { initials: string; color: string; photo?: string; seed?: string }
   title: ReactNode
   sub?: ReactNode
   /** A version or a term is a fact, not a caption — it keeps full contrast. */
@@ -96,6 +96,7 @@ export function RowSubject({
           initials={face.initials}
           color={face.color}
           photo={face.photo}
+          seed={face.seed}
           size={32}
           className="mt-px"
         />

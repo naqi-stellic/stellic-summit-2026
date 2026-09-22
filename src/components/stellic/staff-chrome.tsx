@@ -2,6 +2,7 @@ import { cn } from "cn"
 import { useId, useState, type ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
+import { StudentAvatar } from "@/components/stellic/student-avatar"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -362,13 +363,19 @@ export function Face({
   initials,
   color,
   photo,
+  seed,
   size = 32,
   className,
 }: {
   initials: string
   color: string
-  /** Where there is one. Initials are what you draw when there is not. */
+  /** Where there is one. */
   photo?: string
+  /** A student with no photograph gets a drawn one rather than two letters:
+   *  see `StudentAvatar`, which the roster has used for the same reason since
+   *  it had eight rows. Initials stay for the staff, who are named rather than
+   *  pictured, and for a photograph that fails to load. */
+  seed?: string
   size?: number
   className?: string
 }) {
@@ -384,6 +391,10 @@ export function Face({
         className={cn("shrink-0 rounded-full object-cover", className)}
       />
     )
+  }
+
+  if (seed && !photo) {
+    return <StudentAvatar seed={seed} size={size} className={cn("rounded-full", className)} />
   }
 
   return (

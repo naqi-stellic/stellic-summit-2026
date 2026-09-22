@@ -82,6 +82,7 @@ const PLACEHOLDER: Record<TabKey, string> = {
   audits: "Program name, keyword",
   exceptions: "Student name, keyword",
   grad: "Student or workflow",
+  reviews: "Student or workflow",
   transfer: "Student or workflow",
 }
 
@@ -143,6 +144,7 @@ export function OpenItems({
       exceptions:
         perms.makeException || perms.wf.includes("exc") ? routedTo(exceptions, persona.key) : [],
       grad: perms.wf.includes("grad") ? routedTo(WORKFLOWS.grad.rows, persona.key) : [],
+      reviews: perms.wf.includes("reviews") ? routedTo(WORKFLOWS.reviews.rows, persona.key) : [],
       transfer: perms.wf.includes("transfer") ? routedTo(WORKFLOWS.transfer.rows, persona.key) : [],
       notes: perms.notes ? NOTES : [],
       appts: perms.appts ? APPTS : [],
@@ -158,7 +160,7 @@ export function OpenItems({
     if (key === "appts") return mine.appts.filter((appt) => appt.attended === null).length
     if (key === "audits") return mine.publishes.length
     if (key === "exceptions") return mine.exceptions.length
-    return mine[key as "grad" | "transfer"].length
+    return mine[key as "grad" | "reviews" | "transfer"].length
   }
 
   /* Switching a job off can take the tab you were standing on away, so where
@@ -179,7 +181,8 @@ export function OpenItems({
     const item = { id: key, label: TAB_LABELS[key], count }
     /* A workflow category between cycles has nothing in it and should not cost
        the bar a slot — unless you are standing in it. */
-    if (["grad", "transfer"].includes(key) && count === 0 && here !== key) more.push(item)
+    if (["grad", "reviews", "transfer"].includes(key) && count === 0 && here !== key)
+      more.push(item)
     else shown.push(item)
   }
 
@@ -317,7 +320,7 @@ export function OpenItems({
             />
           )}
 
-          {(here === "grad" || here === "transfer") && (
+          {(here === "grad" || here === "reviews" || here === "transfer") && (
             <Workflows
               category={here}
               rows={arrange(mine[here], sort, query)}
@@ -547,7 +550,12 @@ function Exceptions({
             }
           >
             <RowSubject
-              face={{ initials: row.initials, color: row.color, photo: faceOf(row.student) }}
+              face={{
+                initials: row.initials,
+                color: row.color,
+                photo: faceOf(row.student),
+                seed: row.username,
+              }}
               title={row.student}
               sub={row.username}
             />
@@ -603,7 +611,7 @@ function Workflows({
   onToggle,
   elsewhere,
 }: {
-  category: "grad" | "transfer"
+  category: "grad" | "reviews" | "transfer"
   rows: WorkflowRow[]
   all: number
   query: string
@@ -622,7 +630,8 @@ function Workflows({
     )
 
   /* Where the row leads if you would rather read than decide. Transfer keeps
-     its own page for that; everything else is answered by the audit. */
+     its own page for that, a plan review is answered by the plan, and
+     everything else by the audit. */
   const view = (row: WorkflowRow) =>
     category === "transfer" ? (
       <Button
@@ -633,6 +642,13 @@ function Workflows({
         }
       >
         View in transfers
+      </Button>
+    ) : category === "reviews" ? (
+      /* The only thing on the row, so it is a button rather than a ghost: a
+         review is not opened and decided from a queue — it is decided on the
+         plan, and this is the way to it. */
+      <Button size="sm" onClick={() => elsewhere(`Opens ${row.student.split(" ")[0]}'s plan.`)}>
+        View plan
       </Button>
     ) : (
       <Button variant="ghost" size="sm" onClick={() => elsewhere(`Opens ${row.student}'s audit.`)}>
@@ -665,30 +681,82 @@ function Workflows({
                   <Button size="sm" onClick={() => elsewhere(`Opens a message to ${row.student}.`)}>
                     Contact {row.student.split(" ")[0]}
                   </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => elsewhere(`Starts the “${yourStep(row.steps)?.label}” step.`)}
-                  >
-                    Start
-                  </Button>
+                  {/* A review is not started, it is finished: the decisions
+                      are marked on the plan itself, and this is what sends it
+                      back. The step the button belongs to says so — Review,
+                      with Complete waiting under it. */}
+                  {category === "reviews" ? (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() =>
+                        elsewhere(`Completes the review and sends ${row.student}'s plan back.`)
+                      }
+                    >
+                      Complete
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => elsewhere(`Starts the “${yourStep(row.steps)?.label}” step.`)}
+                    >
+                      Start
+                    </Button>
+                  )}
                 </>
               }
               footer={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => elsewhere(`Opens ${row.student}'s profile, Requests tab.`)}
-                >
-                  Open student profile
-                  <Icon name="open-in-new" size={12} />
-                </Button>
+                <>
+                  {/* What a reviewer reaches for before deciding: the plan the
+                      request names, and how much of it has moved since. A
+                      request nothing has changed under says so rather than
+                      offering a list of nothing. */}
+                  {category === "reviews" && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          elsewhere(`Opens ${row.student.split(" ")[0]}'s reference plan.`)
+                        }
+                      >
+                        View reference plan
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={!row.changes}
+                        onClick={() =>
+                          elsewhere(`Lists what moved in the plan since the request went out.`)
+                        }
+                      >
+                        {row.changes
+                          ? `${row.changes} change${row.changes === 1 ? "" : "s"} during review request`
+                          : "No changes during review request"}
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => elsewhere(`Opens ${row.student}'s profile, Requests tab.`)}
+                  >
+                    Open student profile
+                    <Icon name="open-in-new" size={12} />
+                  </Button>
+                </>
               }
             />
           }
         >
           <RowSubject
-            face={{ initials: row.initials, color: row.color, photo: faceOf(row.student) }}
+            face={{
+              initials: row.initials,
+              color: row.color,
+              photo: faceOf(row.student),
+              seed: row.username ?? row.student,
+            }}
             title={row.student}
             sub={row.program}
           />
@@ -699,9 +767,15 @@ function Workflows({
             <Quiet>{row.date}</Quiet>
           </RowBody>
           <RowActions>
-            <Button variant="primary" size="sm" onClick={() => elsewhere("Opens this request.")}>
-              Open
-            </Button>
+            {/* Everything else in the queue is a decision you can take from the
+                row, so it leads with Open. A plan review is not: the decisions
+                are marked on the plan itself, and the rail underneath already
+                carries Complete. */}
+            {category !== "reviews" && (
+              <Button variant="primary" size="sm" onClick={() => elsewhere("Opens this request.")}>
+                Open
+              </Button>
+            )}
             {view(row)}
           </RowActions>
         </Row>
@@ -738,7 +812,12 @@ function Notes({
       {rows.map((note) => (
         <Row key={note.id}>
           <RowSubject
-            face={{ initials: note.initials, color: note.color, photo: faceOf(note.student) }}
+            face={{
+              initials: note.initials,
+              color: note.color,
+              photo: faceOf(note.student),
+              seed: note.student,
+            }}
             title={note.student}
             sub={note.program}
           />
