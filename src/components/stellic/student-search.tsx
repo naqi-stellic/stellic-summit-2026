@@ -60,7 +60,10 @@ function Filters({
 }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3">
-      <p className="text-caption-md font-medium text-gray-100">Filters</p>
+      <p className="flex items-center gap-1.5 text-caption-md font-medium text-gray-100">
+        <Icon name="filter-alt" size={14} />
+        Filters
+      </p>
       <div className="flex flex-wrap gap-2">
         {/* First, and set apart by the rule after it: the way in when you
             cannot name the filter you want, rather than one of the twenty

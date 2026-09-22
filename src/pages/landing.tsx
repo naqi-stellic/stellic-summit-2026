@@ -19,6 +19,7 @@ const SECTIONS = [
     prototypes: [
       { href: "/planner.html", name: "New Planner" },
       { href: "/generator.html", name: "Plan Generator" },
+      { href: "/program-instruction.html", name: "Program Instruction" },
     ],
   },
   {

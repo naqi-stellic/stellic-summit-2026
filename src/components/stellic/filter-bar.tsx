@@ -278,11 +278,68 @@ function FilterButton({
   )
 }
 
+/** Everything chosen, in one line, whichever button it came from. Its own
+ *  component because it does not always belong under the buttons: the programs
+ *  list keeps it in a band of its own, below the rule that ends the controls,
+ *  where the product puts it. */
+export function FilterChips({
+  groups,
+  filters,
+  onChange,
+}: {
+  groups: FilterGroup[]
+  filters: FilterState
+  onChange: (next: FilterState) => void
+}) {
+  const active = activeFields(groups, filters)
+
+  if (!active.length) return null
+
+  return (
+    <div className="flex w-full flex-wrap items-center gap-2">
+      {active.flatMap(({ field, values }) =>
+        values.map((value) => (
+          <span
+            key={`${field.id}-${value}`}
+            className="flex h-8 items-center gap-2 rounded-full bg-primary-0 px-3 text-body-md text-primary-50"
+          >
+            {field.label}: {value}
+            <button
+              type="button"
+              aria-label={`Remove ${field.label} ${value}`}
+              onClick={() =>
+                onChange({
+                  ...filters,
+                  [field.id]: (filters[field.id] ?? []).filter((v) => v !== value),
+                })
+              }
+              className="cursor-pointer"
+            >
+              <Icon name="close" size={12} />
+            </button>
+          </span>
+        ))
+      )}
+      <button
+        type="button"
+        onClick={() => onChange({})}
+        className={cn(
+          "flex h-8 cursor-pointer items-center rounded-full bg-gray-5 px-3",
+          "text-body-md text-gray-80 transition-colors hover:bg-gray-40"
+        )}
+      >
+        Reset all filters
+      </button>
+    </div>
+  )
+}
+
 export function FilterBar({
   groups,
   filters,
   onChange,
   trailing,
+  chips = true,
 }: {
   groups: FilterGroup[]
   filters: FilterState
@@ -290,9 +347,10 @@ export function FilterBar({
   /** Anything that belongs beside the buttons rather than under them — the
    *  planner puts its Group by there. */
   trailing?: React.ReactNode
+  /** Whether what is chosen is drawn under the buttons. Off where the page
+   *  draws it somewhere else itself. */
+  chips?: boolean
 }) {
-  const active = activeFields(groups, filters)
-
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex w-full flex-wrap items-center gap-2">
@@ -302,44 +360,7 @@ export function FilterBar({
         {trailing && <span className="ml-auto shrink-0">{trailing}</span>}
       </div>
 
-      {/* Everything chosen, in one line, whichever button it came from. */}
-      {active.length > 0 && (
-        <div className="flex w-full flex-wrap items-center gap-2">
-          {active.flatMap(({ field, values }) =>
-            values.map((value) => (
-              <span
-                key={`${field.id}-${value}`}
-                className="flex h-8 items-center gap-2 rounded-full bg-primary-0 px-3 text-body-md text-primary-50"
-              >
-                {field.label}: {value}
-                <button
-                  type="button"
-                  aria-label={`Remove ${field.label} ${value}`}
-                  onClick={() =>
-                    onChange({
-                      ...filters,
-                      [field.id]: (filters[field.id] ?? []).filter((v) => v !== value),
-                    })
-                  }
-                  className="cursor-pointer"
-                >
-                  <Icon name="close" size={12} />
-                </button>
-              </span>
-            ))
-          )}
-          <button
-            type="button"
-            onClick={() => onChange({})}
-            className={cn(
-              "flex h-8 cursor-pointer items-center rounded-full bg-gray-5 px-3",
-              "text-body-md text-gray-80 transition-colors hover:bg-gray-40"
-            )}
-          >
-            Reset all filters
-          </button>
-        </div>
-      )}
+      {chips && <FilterChips groups={groups} filters={filters} onChange={onChange} />}
     </div>
   )
 }

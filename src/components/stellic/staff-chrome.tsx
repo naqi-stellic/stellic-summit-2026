@@ -2,6 +2,7 @@ import { cn } from "cn"
 import { useId, useState, type ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +76,85 @@ export function Panel({ children, className }: { children: ReactNode; className?
   )
 }
 
+/* ============================================================ RecordTabs
+   The wide strip above a record: fixed-width tabs, centred, with the active
+   one's indicator sitting in the strip's own rule. The student profile carries
+   it above the audit tree and the program page above the entry — two record
+   pages, one strip, so a staff member learns it once. */
+
+export function RecordTabs({
+  tabs,
+  active,
+  live,
+  onSelect,
+}: {
+  tabs: Tab[]
+  active: string
+  /** The tabs that lead somewhere. The rest are drawn — they are part of the
+   *  record and leaving them out would misrepresent it — but they do not
+   *  pretend to open. Omitted, every tab leads somewhere. */
+  live?: string[]
+  onSelect?: (id: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-center border-b border-gray-40">
+      {tabs.map((tab) => {
+        const on = tab.id === active
+        const opens = !live || live.includes(tab.id)
+
+        const inside = (
+          <>
+            <span
+              className={cn(
+                "flex flex-1 items-center gap-3.5 text-caption-lg font-semibold",
+                on ? "text-primary-50" : "text-gray-100"
+              )}
+            >
+              {tab.label}
+              {tab.count !== undefined && <Badge variant="danger">{tab.count}</Badge>}
+            </span>
+            {/* The indicator sits in the strip's own 1px rule, so a tab that is
+                not the one you are on reserves it rather than shifting when it
+                lights up. */}
+            <span
+              className={cn("h-0.5 w-full", on ? "bg-primary-50" : "bg-transparent")}
+              aria-hidden="true"
+            />
+          </>
+        )
+
+        const shape = cn(
+          "flex h-[38px] flex-col items-center justify-between",
+          tab.count === undefined ? "w-[150px]" : "px-4"
+        )
+
+        /* A tab with nothing behind it is still a tab. It simply does not take
+           a press, so it is not a button at all rather than a button drawn to
+           look unavailable. */
+        if (!opens) {
+          return (
+            <span key={tab.id} className={shape}>
+              {inside}
+            </span>
+          )
+        }
+
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onSelect?.(tab.id)}
+            aria-current={on ? "page" : undefined}
+            className={cn(shape, "cursor-pointer")}
+          >
+            {inside}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 /* ============================================================ TabBar
    The underline tab bar at the head of a panel. Both panels carry one, with
    the same topics in the same order.
@@ -92,11 +172,15 @@ export function TabBar({
   active,
   onSelect,
   live,
+  className,
 }: {
   tabs: Tab[]
   more?: Tab[]
   active: string
   onSelect: (id: string) => void
+  /** For the one bar that is not at the head of a panel: the program page
+   *  centres its three tabs over the page they belong to. */
+  className?: string
   /** The tabs that lead somewhere. The rest are drawn exactly as they would be
    *  otherwise — they are part of the record and leaving them out would
    *  misrepresent it — but they do not pretend to open, because there is
@@ -104,7 +188,7 @@ export function TabBar({
   live?: string[]
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-1 border-b border-gray-40 px-4">
+    <div className={cn("flex flex-wrap items-center gap-x-1 border-b border-gray-40 px-4", className)}>
       {tabs.map((tab) => {
         const on = tab.id === active
         const opens = !live || live.includes(tab.id)

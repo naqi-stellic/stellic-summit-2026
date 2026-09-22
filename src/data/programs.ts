@@ -1168,7 +1168,10 @@ export function matchPrograms(filters: FilterState, within: Program[] = PROGRAMS
 /** What to call a list of programmes. All one kind and it says which kind,
  *  because that is the question that was asked — "10 programs" is the right
  *  count and the wrong word when every one of them is a major. */
-export function programNoun(programs: Program[], count = programs.length): string {
+export function programNoun(
+  programs: { kind: ProgramKind }[],
+  count = programs.length
+): string {
   const kinds = new Set(programs.map((program) => program.kind))
   const noun = kinds.size === 1 ? [...kinds][0].toLowerCase() : "program"
   return count === 1 ? noun : `${noun}s`

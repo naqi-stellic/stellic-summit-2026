@@ -56,7 +56,7 @@ const EXPLORE: NavItem[] = [
 const STAFF: NavItem[] = [
   { label: "Home", strong: true, chip: "Beta", href: "/staff-home.html" },
   { label: "Students", strong: true, href: "/students.html" },
-  { label: "Programs", strong: true },
+  { label: "Programs", strong: true, href: "/program-instruction.html" },
   { label: "Courses", strong: true },
   { label: "Pathways", strong: true },
   { label: "Appointments", strong: true },

@@ -26,6 +26,7 @@ they open in their own tab.
 | --- | --- | --- | --- | --- |
 | Plan Generator | `/generator.html` | [`209:35392`](https://www.figma.com/design/6BmYq3FqAnCpTZwzZ5DFcH/Plan-Generator?node-id=209-35392) | `src/pages/plan-your-path.tsx` | [docs](docs/plan-generator.md) |
 | Planner | `/planner.html` | same frames, minus the generators | `src/pages/planner.tsx` | [docs](docs/planner.md) |
+| Program Instruction | `/program-instruction.html` | from a screenshot of the product | `src/pages/program-instruction.tsx` | [docs](docs/program-instruction.md) |
 
 **Team Progress**
 
@@ -45,8 +46,10 @@ they open in their own tab.
 | Transfer Insights | `/transfer-insights.html` | Staff Home with a different `who` | `src/pages/transfer-insights.tsx` | [docs](docs/transfer-insights.md) |
 
 The products share the shell, the tokens and the icon set and nothing else.
-Team Plan's two prototypes share their data and their components; three of Team
-Progress' four share the student, the profile cards and the audit tree.
+Team Plan's two student planners share their data and their components, and its
+third — Program Instruction — stands on the staff side of the same product;
+three of Team Progress' four share the student, the profile cards and the audit
+tree.
 Compliance is that page with one more tab on it; Explain Progress is the same
 tab with one more question. Staff Home is the exception: it is the other side
 of the desk, so it shares the shell and the design system and brings its own
@@ -74,6 +77,13 @@ space, and 110ms more after a colon or a comma. A fixed interval reads as a
 teleprinter; what makes it look like somebody at a keyboard is that the rhythm
 never repeats and that punctuation is a place to pause. Between one field
 finishing and the next starting, a beat of ~460ms.
+
+**Type what a person types — unless a person would not have typed it.** The one
+exception is a field that takes something written somewhere else: Program
+Instruction's planning instructions are three paragraphs of course advice a
+registrar has kept for months, and nobody composes that into a form. It arrives
+whole, the instant the box is clicked into, because what that simulates is a
+paste. The test is what the person did, not how much text there is.
 
 **Type what a person types, not what the field ends up holding.** Nobody types
 a requirement's whole name into a typeahead — they type the part they remember,

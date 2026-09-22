@@ -3,8 +3,7 @@ import { useState, type ReactNode } from "react"
 
 import { Icon, type IconName } from "@/components/icon"
 import { useIsStaff } from "@/components/layout/section"
-import { Face } from "@/components/stellic/staff-chrome"
-import { Badge } from "@/components/ui/badge"
+import { Face, RecordTabs } from "@/components/stellic/staff-chrome"
 import { Button } from "@/components/ui/button"
 import {
   AUDIT_STUDENT,
@@ -418,62 +417,7 @@ export function AuditControls({
 }) {
   return (
     <section className="flex flex-col gap-6 rounded-md border border-gray-40 bg-card py-6 shadow-xs">
-      <div className="flex flex-wrap items-end justify-center border-b border-gray-40">
-        {tabs.map((tab) => {
-          const on = tab.id === active
-          const open = live.includes(tab.id)
-
-          const inside = (
-            <>
-              <span
-                className={cn(
-                  "flex flex-1 items-center gap-3.5 text-caption-lg font-semibold",
-                  on ? "text-primary-50" : "text-gray-100"
-                )}
-              >
-                {tab.label}
-                {tab.count !== undefined && <Badge variant="danger">{tab.count}</Badge>}
-              </span>
-              {/* The indicator sits in the strip's own 1px rule, so a tab that
-                  is not the one you are on reserves it rather than shifting
-                  when it lights up. */}
-              <span
-                className={cn("h-0.5 w-full", on ? "bg-primary-50" : "bg-transparent")}
-                aria-hidden="true"
-              />
-            </>
-          )
-
-          const shape = cn(
-            "flex h-[38px] flex-col items-center justify-between",
-            tab.count === undefined ? "w-[150px]" : "px-4"
-          )
-
-          /* A tab with nothing behind it is still a tab — it reads the same as
-             the rest, because it is part of the record either way. It simply
-             does not take a press, so it is not a button at all rather than a
-             button drawn to look unavailable. */
-          if (!open) {
-            return (
-              <span key={tab.id} className={shape}>
-                {inside}
-              </span>
-            )
-          }
-
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onSelectTab?.(tab.id)}
-              aria-current={on ? "page" : undefined}
-              className={cn(shape, "cursor-pointer")}
-            >
-              {inside}
-            </button>
-          )
-        })}
-      </div>
+      <RecordTabs tabs={tabs} active={active} live={live} onSelect={onSelectTab} />
 
       <div className="flex flex-wrap items-start justify-between gap-4 px-6">
         <div className="flex">
