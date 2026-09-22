@@ -141,6 +141,27 @@ with their tick off and fixed, saying which of those three it is. Untick one
 and the title counts down with it — "Register 3 Courses" becomes two — and
 Confirm sends exactly what is ticked.
 
+The toolbar that holds at the top is two groups: which years are in view, and
+what can be done to the plan. It gives things up in order rather than wrapping,
+because a second row of buttons pushes the plan further down the page every
+time the bar holds.
+
+First the actions lose their words: each keeps the glyph that names it and
+drops the label. Narrower still, and the years go too — all but two. Whichever
+year is open stays, because it is the one you are standing in, and the overview
+stays, because it is the way back out; on the canvas, where the overview is
+what is open, the year kept beside it is the one the plan starts in. The rest
+are still in the nav, and a year tab opens onto its terms from there.
+
+The measure is the toolbar's own width rather than the window's, because the
+pane is resizable and the panel beside it opens and closes. Where each step
+happens depends on how many actions the row is carrying: two of them are 377px
+of buttons and three are 560px — a term view adds Generate Schedule, the
+longest label any of them has — against 541px of years. So the labels go below
+1130px of toolbar where there are three and 960px where there are two, and the
+years fold below 780px and 740px. All four are measured off the rendered rows,
+and the first of them was 30px short: at 1117px a term view still wrapped.
+
 In a term view the registration banner holds at the top with the toolbar
 rather than scrolling away under it: everything on that page is something you
 might register, and the button that does it should not be a scroll away. It

@@ -218,17 +218,52 @@ export function PlanHeader({
     return () => pane.removeEventListener("scroll", read)
   }, [])
 
+  /* Narrow, the actions lose their words rather than their line.
+   *
+   * The toolbar is two groups — which years are in view, and what can be done
+   * to the plan — and a second row of buttons pushes the plan itself further
+   * down the page every time it holds at the top. The years cannot shorten:
+   * "2027-2028" is the whole of what that button says. The actions can, because
+   * each already carries the glyph that names it.
+   *
+   * Against the toolbar's own width rather than the window's: the planner's
+   * pane is resizable and the panel beside it opens and closes, so the window
+   * is not what decides how much room this row has.
+   *
+   * Where each step happens depends on how many actions there are: two of them
+   * are 377px of buttons, three are 560px — a term view carries Generate
+   * Schedule, which is the longest label any of them has — and the years are
+   * 541px beside them. All four widths are measured off the rendered rows
+   * rather than guessed, and written out in full because Tailwind reads the
+   * source for class names and cannot see one assembled at runtime. */
+  const crowded = actions.length > 2
+
+  /* Step one: the actions keep their glyphs and lose their words. */
+  const labelsGo = crowded ? "@max-[1130px]/toolbar:hidden" : "@max-[960px]/toolbar:hidden"
+  const iconOnly = crowded ? "@max-[1130px]/toolbar:size-9" : "@max-[960px]/toolbar:size-9"
+  /* Which year tabs survive the narrowest toolbar: the overview, always, and
+     the year that is open — or, where the overview is what is open, the first
+     year, so the row is never just one button. */
+  const keeping = new Set<number>([0])
+  const openYear = tabs.findIndex((tab, i) => i > 0 && tab.selected)
+  keeping.add(openYear > 0 ? openYear : 1)
+
+  /* Step two: even as glyphs the two groups no longer fit, so the years fold
+     down to the two that are worth keeping. */
+  const yearsGo = crowded ? "@max-[780px]/toolbar:hidden" : "@max-[740px]/toolbar:hidden"
+
   const actionButtons = (
         <div className="flex flex-wrap items-center gap-2">
           {actions.map((action) => {
             const button = (
               <Button
                 aria-pressed={action.toggles ? pressed : undefined}
+                aria-label={action.label}
                 onClick={() => onAction?.(action)}
-                className="data-[state=open]:bg-gray-5"
+                className={cn("data-[state=open]:bg-gray-5", iconOnly)}
               >
                 <Icon name={action.icon} size={16} />
-                {action.label}
+                <span className={labelsGo}>{action.label}</span>
               </Button>
             )
 
@@ -332,9 +367,9 @@ export function PlanHeader({
         rest the toolbar sits on the page like everything else, and only once
         it is holding at the top does it need a band to hold the plan off it. A
         banner below it is its own strip either way. */}
-    <div
+      <div
       className={cn(
-        "flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b p-6",
+        "@container/toolbar flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b p-6",
         "transition-colors",
         /* The edge belongs to the bottom of the block, not to this row: where
            a banner is held under it, the banner carries it. */
@@ -343,7 +378,15 @@ export function PlanHeader({
       )}
     >
       <div className="flex flex-wrap items-center gap-2">
-        {tabs.map((tab) => {
+        {tabs.map((tab, i) => {
+          /* Narrower still, and the years go too — all but two of them.
+             Whichever year is open stays, because it is the one you are
+             standing in; the overview stays, because it is the way back out.
+             On the canvas, where the overview is what is open, the year kept
+             beside it is the one the plan starts in. The rest are a menu press
+             away in the nav, and a second row of buttons is not. */
+          const gone = !keeping.has(i) && yearsGo
+
           const button = (
             <Button
               size="sm"
@@ -351,7 +394,7 @@ export function PlanHeader({
               onClick={tab.onSelect}
               /* Open reads as hovered, which is how the design marks the tab
                  whose menu is showing. */
-              className="data-[state=open]:bg-gray-5"
+              className={cn("data-[state=open]:bg-gray-5", gone)}
             >
               {tab.icon && <Icon name={tab.icon} size={16} className={tab.tone} />}
               {tab.label}
@@ -359,7 +402,13 @@ export function PlanHeader({
           )
 
           if (!tab.terms || tab.terms.length === 0) {
-            return <span key={tab.label}>{button}</span>
+            /* The wrapper goes with it: a flex item with nothing in it still
+               takes the gap on either side of it. */
+            return (
+              <span key={tab.label} className={cn(gone)}>
+                {button}
+              </span>
+            )
           }
 
           return (
