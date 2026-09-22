@@ -254,7 +254,11 @@ export function ExplainPanel({
                   <div key={mapping.course.id} className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
                       <AuditMarkIcon mark={mapping.course.mark} size={16} />
-                      <span className="w-[72px] shrink-0 text-body-md font-semibold">
+                      {/* Wide enough for the longest code on the record —
+                          MATH 100A, the developmental one — and fixed, so the
+                          names still line up down the list. A code that wrapped
+                          onto two lines took the row with it. */}
+                      <span className="w-[86px] shrink-0 text-body-md font-semibold whitespace-nowrap">
                         {mapping.course.code}
                       </span>
                       <span className="min-w-0 flex-1 truncate text-body-md">
