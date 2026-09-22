@@ -387,17 +387,31 @@ export function PlanHeader({
              away in the nav, and a second row of buttons is not. */
           const gone = !keeping.has(i) && yearsGo
 
+          /* Step three, and the last thing there is to give: the overview keeps
+             its glyph and loses its word. Only it can — a grid means the whole
+             plan, where "2026-2027" as a symbol means nothing. */
+          const overview = i === 0
+
           const button = (
             <Button
               size="sm"
               selected={tab.selected}
               onClick={tab.onSelect}
+              aria-label={overview ? tab.label : undefined}
               /* Open reads as hovered, which is how the design marks the tab
                  whose menu is showing. */
-              className={cn("data-[state=open]:bg-gray-5", gone)}
+              className={cn(
+                "data-[state=open]:bg-gray-5",
+                gone,
+                overview && "@max-[470px]/toolbar:size-8"
+              )}
             >
               {tab.icon && <Icon name={tab.icon} size={16} className={tab.tone} />}
-              {tab.label}
+              {overview ? (
+                <span className="@max-[470px]/toolbar:hidden">{tab.label}</span>
+              ) : (
+                tab.label
+              )}
             </Button>
           )
 

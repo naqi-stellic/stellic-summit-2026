@@ -160,7 +160,15 @@ of buttons and three are 560px — a term view adds Generate Schedule, the
 longest label any of them has — against 541px of years. So the labels go below
 1130px of toolbar where there are three and 960px where there are two, and the
 years fold below 780px and 740px. All four are measured off the rendered rows,
-and the first of them was 30px short: at 1117px a term view still wrapped.
+and the first of them was 30px short to begin with: at 1117px a term view still
+wrapped.
+
+There is a third step, for the narrowest toolbar there is — a small window with
+the requirements panel open beside it. The overview keeps its glyph and loses
+its word, which only it can do: a grid means the whole plan, where "2026-2027"
+as a symbol means nothing. Below about 390px of toolbar the row wraps anyway,
+and that is where it is left: the pane is narrower than the panel beside it by
+then, and the panel is the thing to drag.
 
 In a term view the registration banner holds at the top with the toolbar
 rather than scrolling away under it: everything on that page is something you
